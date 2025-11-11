@@ -75,3 +75,66 @@ export interface Minorista {
   balance: number
   user: User
 }
+
+// Giro Types
+export enum GiroStatus {
+  PENDIENTE = 'PENDIENTE',
+  ASIGNADO = 'ASIGNADO',
+  PROCESANDO = 'PROCESANDO',
+  COMPLETADO = 'COMPLETADO',
+  CANCELADO = 'CANCELADO',
+}
+
+export enum ExecutionType {
+  TRANSFERENCIA = 'TRANSFERENCIA',
+  PAGO_MOVIL = 'PAGO_MOVIL',
+  EFECTIVO = 'EFECTIVO',
+  ZELLE = 'ZELLE',
+  OTROS = 'OTROS',
+}
+
+export enum Currency {
+  VES = 'VES',
+  COP = 'COP',
+  USD = 'USD',
+}
+
+export interface ExchangeRate {
+  id: string
+  buyRate: number
+  sellRate: number
+  usd: number
+  bcv: number
+  createdAt: string
+}
+
+export interface Giro {
+  id: string
+  beneficiaryName: string
+  beneficiaryId: string
+  bankName: string
+  accountNumber: string
+  phone: string
+  amountInput: number
+  currencyInput: Currency
+  amountBs: number
+  bcvValueApplied: number
+  systemProfit: number
+  minoristaProfit: number
+  status: GiroStatus
+  proofUrl?: string
+  executionType?: ExecutionType
+  createdAt: string
+  updatedAt: string
+  minorista?: {
+    id: string
+    user: User
+  }
+  transferencista?: {
+    id: string
+    user: User
+  }
+  rateApplied: ExchangeRate
+  createdBy: User
+  bankAccountUsed?: BankAccount
+}

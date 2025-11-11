@@ -1,6 +1,6 @@
 import { ReactNode } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Home, FileText, Users, Settings, LogOut } from 'lucide-react'
+import { Home, FileText, Users, DollarSign, Settings, LogOut } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -16,6 +16,7 @@ const navItems: NavItem[] = [
   { icon: Home, label: 'Inicio', href: '/dashboard' },
   { icon: FileText, label: 'Giros', href: '/giros' },
   { icon: Users, label: 'Usuarios', href: '/usuarios' },
+  { icon: DollarSign, label: 'Tasas', href: '/tasas' },
   { icon: Settings, label: 'Config', href: '/configuracion' },
 ]
 
@@ -93,7 +94,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
 
         {/* Mobile Bottom Navigation */}
         <nav className="fixed bottom-0 left-0 right-0 bg-card border-t z-50 md:hidden">
-          <div className="grid grid-cols-5 h-16">
+          <div className="grid grid-cols-6 h-16">
             {navItems.map((item) => {
               const Icon = item.icon
               const isActive = location.pathname === item.href

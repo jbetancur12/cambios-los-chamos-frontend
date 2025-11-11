@@ -6,6 +6,8 @@ import { DashboardLayout } from '@/components/DashboardLayout'
 import { LoginPage } from '@/pages/LoginPage'
 import { DashboardPage } from '@/pages/DashboardPage'
 import { UsersPage } from '@/pages/UsersPage'
+import { GirosPage } from '@/pages/GirosPage'
+import { ExchangeRatePage } from '@/pages/ExchangeRatePage'
 
 function App() {
   return (
@@ -27,16 +29,13 @@ function App() {
             }
           />
 
-          {/* Placeholder routes for navigation */}
+          {/* Giros */}
           <Route
             path="/giros"
             element={
               <ProtectedRoute>
                 <DashboardLayout>
-                  <div className="p-6">
-                    <h1 className="text-2xl font-bold">Giros</h1>
-                    <p className="text-muted-foreground">Próximamente...</p>
-                  </div>
+                  <GirosPage />
                 </DashboardLayout>
               </ProtectedRoute>
             }
@@ -48,6 +47,17 @@ function App() {
               <ProtectedRoute>
                 <DashboardLayout>
                   <UsersPage />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/tasas"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <ExchangeRatePage />
                 </DashboardLayout>
               </ProtectedRoute>
             }
