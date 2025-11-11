@@ -5,6 +5,7 @@ import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { DashboardLayout } from '@/components/DashboardLayout'
 import { LoginPage } from '@/pages/LoginPage'
 import { DashboardPage } from '@/pages/DashboardPage'
+import { UsersPage } from '@/pages/UsersPage'
 
 function App() {
   return (
@@ -46,10 +47,7 @@ function App() {
             element={
               <ProtectedRoute>
                 <DashboardLayout>
-                  <div className="p-6">
-                    <h1 className="text-2xl font-bold">Usuarios</h1>
-                    <p className="text-muted-foreground">Próximamente...</p>
-                  </div>
+                  <UsersPage />
                 </DashboardLayout>
               </ProtectedRoute>
             }
