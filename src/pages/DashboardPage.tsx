@@ -1,11 +1,13 @@
 import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { FileText, Users, TrendingUp, DollarSign, Wallet, Coins } from 'lucide-react'
+import { FileText, Users, TrendingUp, DollarSign, Wallet, Coins, Clock, ArrowRight } from 'lucide-react'
 import { useDashboardStats } from '@/hooks/useDashboardStats'
+import { useRecentGiros } from '@/hooks/useRecentGiros'
 
 export function DashboardPage() {
   const { user } = useAuth()
   const { stats, loading, error } = useDashboardStats()
+  const { giros, loading: girosLoading } = useRecentGiros(5)
 
   const isSuperAdmin = user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN'
   const isTransferencista = user?.role === 'TRANSFERENCISTA'
@@ -18,6 +20,29 @@ export function DashboardPage() {
       currency,
       minimumFractionDigits: 2,
     }).format(amount)
+  }
+
+  const formatDate = (date: string) => {
+    const d = new Date(date)
+    const now = new Date()
+    const diff = now.getTime() - d.getTime()
+    const hours = Math.floor(diff / (1000 * 60 * 60))
+    const minutes = Math.floor(diff / (1000 * 60))
+
+    if (minutes < 60) return `Hace ${minutes} min`
+    if (hours < 24) return `Hace ${hours}h`
+    return d.toLocaleDateString('es-VE', { day: '2-digit', month: 'short' })
+  }
+
+  const getStatusBadge = (status: string) => {
+    const statusMap: Record<string, { label: string; className: string }> = {
+      PENDIENTE: { label: 'Pendiente', className: 'bg-yellow-100 text-yellow-800' },
+      ASIGNADO: { label: 'Asignado', className: 'bg-blue-100 text-blue-800' },
+      PROCESANDO: { label: 'Procesando', className: 'bg-purple-100 text-purple-800' },
+      COMPLETADO: { label: 'Completado', className: 'bg-green-100 text-green-800' },
+      CANCELADO: { label: 'Cancelado', className: 'bg-red-100 text-red-800' },
+    }
+    return statusMap[status] || { label: status, className: 'bg-gray-100 text-gray-800' }
   }
 
   if (loading) {
@@ -201,15 +226,91 @@ export function DashboardPage() {
 
       {/* Recent Activity */}
       <Card>
-        <CardHeader>
-          <CardTitle>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg md:text-xl">
             {isTransferencista ? 'Mis Giros Recientes' : isMinorista ? 'Mis Giros Recientes' : 'Actividad Reciente'}
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground text-center py-8">
-            No hay actividad reciente
-          </p>
+        <CardContent className="px-2 md:px-6">
+          {girosLoading ? (
+            <div className="text-center py-8">
+              <p className="text-sm text-muted-foreground">Cargando...</p>
+            </div>
+          ) : giros.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-sm text-muted-foreground">No hay giros recientes</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {giros.map((giro) => {
+                const statusBadge = getStatusBadge(giro.status)
+                return (
+                  <div
+                    key={giro.id}
+                    className="flex items-center justify-between p-3 md:p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors active:scale-[0.98] cursor-pointer"
+                  >
+                    {/* Left side - Main info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <p className="font-medium text-sm md:text-base truncate">
+                          {giro.beneficiaryName}
+                        </p>
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusBadge.className}`}
+                        >
+                          {statusBadge.label}
+                        </span>
+                      </div>
+
+                      {/* Amount & Currency */}
+                      <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
+                        <span className="font-semibold text-foreground">
+                          {giro.amountInput && giro.currencyInput
+                            ? `${formatCurrency(giro.amountInput, giro.currencyInput as 'COP' | 'USD')}`
+                            : formatCurrency(giro.amountBs, 'VES')}
+                        </span>
+                        {giro.amountInput && giro.currencyInput && (
+                          <span>→ {formatCurrency(giro.amountBs, 'VES')}</span>
+                        )}
+                      </div>
+
+                      {/* Additional info based on role */}
+                      <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                        <Clock className="h-3 w-3" />
+                        <span>{formatDate(giro.createdAt)}</span>
+                        {isSuperAdmin && giro.minoristaName && (
+                          <>
+                            <span>•</span>
+                            <span>{giro.minoristaName}</span>
+                          </>
+                        )}
+                        {(isTransferencista || isMinorista) && giro.bankName && (
+                          <>
+                            <span>•</span>
+                            <span>{giro.bankName}</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Right side - Earnings or Arrow */}
+                    <div className="flex items-center ml-2">
+                      {isMinorista && giro.earnings !== undefined ? (
+                        <div className="text-right">
+                          <p className="text-xs text-muted-foreground">Ganancia</p>
+                          <p className="font-semibold text-sm text-green-600">
+                            {formatCurrency(giro.earnings, 'COP')}
+                          </p>
+                        </div>
+                      ) : (
+                        <ArrowRight className="h-5 w-5 text-muted-foreground" />
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
