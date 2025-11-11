@@ -11,16 +11,26 @@ interface CreateUserSheetProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onUserCreated: () => void
+  role: UserRole
 }
 
-export function CreateUserSheet({ open, onOpenChange, onUserCreated }: CreateUserSheetProps) {
+export function CreateUserSheet({ open, onOpenChange, onUserCreated, role }: CreateUserSheetProps) {
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     password: '',
-    role: 'ADMIN' as UserRole,
   })
+
+  const getRoleLabel = (role: UserRole) => {
+    const roleMap: Record<UserRole, string> = {
+      SUPER_ADMIN: 'Super Admin',
+      ADMIN: 'Admin',
+      TRANSFERENCISTA: 'Transferencista',
+      MINORISTA: 'Minorista',
+    }
+    return roleMap[role]
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -32,14 +42,13 @@ export function CreateUserSheet({ open, onOpenChange, onUserCreated }: CreateUse
 
     try {
       setLoading(true)
-      await api.post('/api/user/register', formData)
+      await api.post('/api/user/register', { ...formData, role })
 
       // Reset form
       setFormData({
         fullName: '',
         email: '',
         password: '',
-        role: 'ADMIN',
       })
 
       onUserCreated()
@@ -54,7 +63,7 @@ export function CreateUserSheet({ open, onOpenChange, onUserCreated }: CreateUse
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent>
         <SheetHeader onClose={() => onOpenChange(false)}>
-          <SheetTitle>Crear Nuevo Usuario</SheetTitle>
+          <SheetTitle>Crear {getRoleLabel(role)}</SheetTitle>
         </SheetHeader>
 
         <SheetBody>
@@ -99,19 +108,11 @@ export function CreateUserSheet({ open, onOpenChange, onUserCreated }: CreateUse
               />
             </div>
 
-            {/* Role */}
-            <div className="space-y-2">
-              <Label htmlFor="role">Rol</Label>
-              <select
-                id="role"
-                value={formData.role}
-                onChange={(e) => setFormData({ ...formData, role: e.target.value as UserRole })}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              >
-                <option value="ADMIN">Admin</option>
-                <option value="TRANSFERENCISTA">Transferencista</option>
-                <option value="MINORISTA">Minorista</option>
-              </select>
+            {/* Role Info */}
+            <div className="rounded-md bg-muted p-3">
+              <p className="text-sm text-muted-foreground">
+                Este usuario será creado con el rol de <span className="font-semibold text-foreground">{getRoleLabel(role)}</span>
+              </p>
             </div>
 
             {/* Buttons */}

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Plus, Users as UsersIcon, Mail, Shield } from 'lucide-react'
+import { Plus, Users as UsersIcon, Mail, ShieldCheck, User, Briefcase } from 'lucide-react'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
 import { CreateUserSheet } from '@/components/CreateUserSheet'
@@ -22,6 +22,8 @@ export function UsersPage() {
   const [loading, setLoading] = useState(true)
   const [sheetOpen, setSheetOpen] = useState(false)
   const [selectedRole, setSelectedRole] = useState<UserRole | 'ALL'>('ALL')
+  const [createUserRole, setCreateUserRole] = useState<UserRole>('ADMIN')
+  const [menuOpen, setMenuOpen] = useState(false)
 
   const isSuperAdmin = currentUser?.role === 'SUPER_ADMIN'
 
@@ -56,8 +58,15 @@ export function UsersPage() {
 
   const handleUserCreated = () => {
     setSheetOpen(false)
+    setMenuOpen(false)
     fetchUsers(selectedRole === 'ALL' ? undefined : selectedRole)
     toast.success('Usuario creado exitosamente')
+  }
+
+  const handleCreateUser = (role: UserRole) => {
+    setCreateUserRole(role)
+    setSheetOpen(true)
+    setMenuOpen(false)
   }
 
   if (!isSuperAdmin) {
@@ -171,16 +180,62 @@ export function UsersPage() {
         </div>
       )}
 
-      {/* FAB - Create User */}
-      <button
-        onClick={() => setSheetOpen(true)}
-        className="fixed bottom-20 md:bottom-8 right-4 md:right-8 bg-primary text-primary-foreground rounded-full p-4 shadow-lg hover:shadow-xl transition-shadow active:scale-95"
-      >
-        <Plus className="h-6 w-6" />
-      </button>
+      {/* FAB - Create User Menu */}
+      <div className="fixed bottom-20 md:bottom-8 right-4 md:right-8 z-50">
+        {/* Menu Options */}
+        {menuOpen && (
+          <div className="absolute bottom-16 right-0 bg-card border rounded-lg shadow-lg p-2 space-y-1 min-w-[200px] mb-2 z-50">
+            <button
+              onClick={() => handleCreateUser('ADMIN')}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-md hover:bg-accent transition-colors text-left"
+            >
+              <ShieldCheck className="h-5 w-5 text-blue-600" />
+              <span className="font-medium">Crear Admin</span>
+            </button>
+            <button
+              onClick={() => handleCreateUser('TRANSFERENCISTA')}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-md hover:bg-accent transition-colors text-left"
+            >
+              <Briefcase className="h-5 w-5 text-green-600" />
+              <span className="font-medium">Crear Transferencista</span>
+            </button>
+            <button
+              onClick={() => handleCreateUser('MINORISTA')}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-md hover:bg-accent transition-colors text-left"
+            >
+              <User className="h-5 w-5 text-orange-600" />
+              <span className="font-medium">Crear Minorista</span>
+            </button>
+          </div>
+        )}
+
+        {/* FAB Button */}
+        <button
+          onClick={() => setMenuOpen(!menuOpen)}
+          className={`bg-primary text-primary-foreground rounded-full p-4 shadow-lg hover:shadow-xl transition-all active:scale-95 ${
+            menuOpen ? 'rotate-45' : ''
+          }`}
+        >
+          <Plus className="h-6 w-6" />
+        </button>
+      </div>
+
+      {/* Backdrop */}
+      {menuOpen && (
+        <div
+          onClick={() => setMenuOpen(false)}
+          className="fixed inset-0 bg-black/20 z-40"
+          style={{ bottom: 0 }}
+        />
+      )}
 
       {/* Create User Sheet */}
-      <CreateUserSheet open={sheetOpen} onOpenChange={setSheetOpen} onUserCreated={handleUserCreated} />
+      <CreateUserSheet
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+        onUserCreated={handleUserCreated}
+        role={createUserRole}
+      />
     </div>
   )
 }
