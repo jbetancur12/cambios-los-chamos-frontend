@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetBody } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Plus, Building2, CreditCard, Wallet } from 'lucide-react'
+import { Plus, Building2, CreditCard, Wallet, ArrowUpCircle } from 'lucide-react'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
 import { CreateBankAccountSheet } from '@/components/CreateBankAccountSheet'
+import { RechargeBalanceSheet } from '@/components/RechargeBalanceSheet'
 import type { BankAccount } from '@/types/api'
 
 interface TransferencistaAccountsSheetProps {
@@ -24,6 +25,8 @@ export function TransferencistaAccountsSheet({
   const [accounts, setAccounts] = useState<BankAccount[]>([])
   const [loading, setLoading] = useState(false)
   const [createSheetOpen, setCreateSheetOpen] = useState(false)
+  const [rechargeSheetOpen, setRechargeSheetOpen] = useState(false)
+  const [selectedAccount, setSelectedAccount] = useState<BankAccount | null>(null)
 
   const fetchAccounts = async () => {
     if (!transferencistaId) return
@@ -52,6 +55,17 @@ export function TransferencistaAccountsSheet({
     setCreateSheetOpen(false)
     fetchAccounts()
     toast.success('Cuenta bancaria creada exitosamente')
+  }
+
+  const handleRecharge = (account: BankAccount) => {
+    setSelectedAccount(account)
+    setRechargeSheetOpen(true)
+  }
+
+  const handleBalanceUpdated = () => {
+    setRechargeSheetOpen(false)
+    setSelectedAccount(null)
+    fetchAccounts()
   }
 
   const formatCurrency = (amount: number) => {
@@ -120,10 +134,21 @@ export function TransferencistaAccountsSheet({
                           </div>
 
                           {/* Balance */}
-                          <div className="flex items-center gap-2 mt-3 pt-3 border-t">
-                            <Wallet className="h-4 w-4 text-green-600" />
-                            <span className="text-muted-foreground">Saldo:</span>
-                            <span className="font-bold text-lg text-green-600">{formatCurrency(account.balance)}</span>
+                          <div className="flex items-center justify-between mt-3 pt-3 border-t">
+                            <div className="flex items-center gap-2">
+                              <Wallet className="h-4 w-4 text-green-600" />
+                              <span className="text-muted-foreground">Saldo:</span>
+                              <span className="font-bold text-lg text-green-600">{formatCurrency(account.balance)}</span>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleRecharge(account)}
+                              className="gap-2"
+                            >
+                              <ArrowUpCircle className="h-4 w-4" />
+                              Recargar
+                            </Button>
                           </div>
                         </div>
                       </CardContent>
@@ -154,6 +179,14 @@ export function TransferencistaAccountsSheet({
           onAccountCreated={handleAccountCreated}
         />
       )}
+
+      {/* Recharge Balance Sheet */}
+      <RechargeBalanceSheet
+        open={rechargeSheetOpen}
+        onOpenChange={setRechargeSheetOpen}
+        account={selectedAccount}
+        onBalanceUpdated={handleBalanceUpdated}
+      />
     </>
   )
 }
