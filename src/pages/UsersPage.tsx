@@ -9,6 +9,7 @@ import { CreateUserSheet } from '@/components/CreateUserSheet'
 import { TransferencistaAccountsSheet } from '@/components/TransferencistaAccountsSheet'
 import { RechargeMinoristaBalanceSheet } from '@/components/RechargeMinoristaBalanceSheet'
 import type { UserRole, Minorista } from '@/types/api'
+import { Switch } from '@/components/ui/switch'
 
 interface UserData {
   id: string
@@ -16,6 +17,7 @@ interface UserData {
   email: string
   role: UserRole
   isActive: boolean
+  available?: boolean
   transferencistaId?: string  // ID del transferencista si el usuario es TRANSFERENCISTA
   minoristaId?: string  // ID del minorista si el usuario es MINORISTA
   balance?: number  // Saldo del minorista si el usuario es MINORISTA
@@ -48,18 +50,25 @@ export function UsersPage() {
         const response = await api.get<{ users: any[] }>(`/api/user/by-role/${role}`)
         usersData = response.users
 
-        // Si es TRANSFERENCISTA, obtener los IDs de transferencista
+        // Si es TRANSFERENCISTA, obtener los IDs de transferencista y disponibilidad
         if (role === 'TRANSFERENCISTA') {
           const transferencistaResponse = await api.get<{
-            transferencistas: { id: string; user: { id: string } }[]
+            transferencistas: { id: string; available: boolean; user: { id: string } }[]
           }>('/api/transferencista/list')
           const transferencistaMap = new Map(
-            transferencistaResponse.transferencistas.map((t: any) => [t.user.id, t.id])
+            transferencistaResponse.transferencistas.map((t: any) => [
+              t.user.id,
+              { id: t.id, available: t.available },
+            ])
           )
-          usersData = usersData.map((user) => ({
-            ...user,
-            transferencistaId: transferencistaMap.get(user.id),
-          }))
+          usersData = usersData.map((user) => {
+            const transferencistaData = transferencistaMap.get(user.id)
+            return {
+              ...user,
+              available: transferencistaData?.available,
+              transferencistaId: transferencistaData?.id,
+            }
+          })
         }
 
         // Si es MINORISTA, obtener los IDs de minorista y saldo
@@ -74,7 +83,7 @@ export function UsersPage() {
             const minoristaData = minoristaMap.get(user.id)
             return {
               ...user,
-              minoristaId: minoristaData?.id,
+              minoristaId: minoristaData?.id,              
               balance: minoristaData?.balance,
             }
           })
@@ -86,21 +95,30 @@ export function UsersPage() {
             api.get<{ users: any[] }>('/api/user/by-role/ADMIN'),
             api.get<{ users: any[] }>('/api/user/by-role/TRANSFERENCISTA'),
             api.get<{ users: any[] }>('/api/user/by-role/MINORISTA'),
-            api.get<{ transferencistas: { id: string; user: { id: string } }[] }>('/api/transferencista/list'),
+            api.get<{ transferencistas: { id: string; available: boolean; user: { id: string } }[] }>(
+              '/api/transferencista/list'
+            ),
             api.get<{ minoristas: { id: string; balance: number; user: { id: string } }[] }>(
               '/api/minorista/list'
             ),
           ])
 
-        // Map transferencista IDs
+        // Map transferencista IDs and availability
         const transferencistaMap = new Map(
-          transferencistasList.transferencistas.map((t: any) => [t.user.id, t.id])
+          transferencistasList.transferencistas.map((t: any) => [
+            t.user.id,
+            { id: t.id, available: t.available },
+          ])
         )
 
-        const transferencistaData = transferencistasUsers.users.map((user) => ({
-          ...user,
-          transferencistaId: transferencistaMap.get(user.id),
-        }))
+        const transferencistaData = transferencistasUsers.users.map((user) => {
+          const transferencista = transferencistaMap.get(user.id)
+          return {
+            ...user,
+            available: transferencista?.available,
+            transferencistaId: transferencista?.id,
+          }
+        })
 
         // Map minorista IDs and balances
         const minoristaMap = new Map(
@@ -171,6 +189,46 @@ export function UsersPage() {
     setRechargeMinoristaSheetOpen(false)
     setSelectedMinorista(null)
     fetchUsers(selectedRole === 'ALL' ? undefined : selectedRole)
+  }
+
+  const handleToggleActive = async (userId: string, newValue: boolean) => {
+    try {
+      await api.put(`/api/user/${userId}/toggle-active`, { isActive: newValue })
+      setUsers((prev) =>
+        prev.map((u) => (u.id === userId ? { ...u, isActive: newValue } : u))
+      )
+      toast.success(newValue ? 'Usuario activado' : 'Usuario desactivado')
+    } catch (error) {
+      toast.error('Error al cambiar estado del usuario')
+      console.error(error)
+    }
+  }
+
+  const handleToggleAvailable = async (transferencistaId: string, newValue: boolean) => {
+    try {
+      const response = await api.put<{
+        data: {
+          success: boolean
+          available: boolean
+          girosRedistributed?: number
+          redistributionErrors?: number
+        }
+        message: string
+      }>(`/api/transferencista/${transferencistaId}/toggle-availability`, {
+        isAvailable: newValue,
+      })
+
+      // Actualizar estado local
+      setUsers((prev) =>
+        prev.map((u) => (u.transferencistaId === transferencistaId ? { ...u, available: newValue } : u))
+      )
+
+      // Mostrar mensaje de éxito
+      toast.success(response.message || (newValue ? 'Transferencista disponible' : 'Transferencista no disponible'))
+    } catch (error: any) {
+      toast.error(error.message || 'Error al cambiar disponibilidad')
+      console.error(error)
+    }
   }
 
   if (!isSuperAdmin) {
@@ -277,6 +335,32 @@ export function UsersPage() {
                       )}
                     </div>
                   </div>
+                  <div className="flex items-center gap-6 mt-3 flex-wrap">
+                    {/* Switch activar/desactivar */}
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={user.isActive}
+                        onCheckedChange={(checked) => handleToggleActive(user.id, checked)}
+                      />
+                      <span className="text-sm text-muted-foreground">
+                        {user.isActive ? 'Activo' : 'Desactivado'}
+                      </span>
+                    </div>
+                    {/* Switch disponibilidad transferencista */}
+                    {user.role === 'TRANSFERENCISTA' && user.transferencistaId && (
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          checked={user.available ?? true}
+                          onCheckedChange={(checked) =>
+                            handleToggleAvailable(user.transferencistaId!, checked)
+                          }
+                        />
+                        <span className="text-sm text-muted-foreground">
+                          {user.available ? 'Disponible' : 'No disponible'}
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </CardHeader>
                 {user.role === 'TRANSFERENCISTA' && user.transferencistaId && (
                   <CardContent className="pt-0">
@@ -366,9 +450,8 @@ export function UsersPage() {
         {/* FAB Button */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className={`bg-primary text-primary-foreground rounded-full p-4 shadow-lg hover:shadow-xl transition-all active:scale-95 ${
-            menuOpen ? 'rotate-45' : ''
-          }`}
+          className={`bg-primary text-primary-foreground rounded-full p-4 shadow-lg hover:shadow-xl transition-all active:scale-95 ${menuOpen ? 'rotate-45' : ''
+            }`}
         >
           <Plus className="h-6 w-6" />
         </button>
