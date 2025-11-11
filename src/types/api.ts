@@ -34,3 +34,37 @@ export interface LoginResponse {
   message: string
   user: User
 }
+
+// Bank Types
+export interface Bank {
+  id: string
+  name: string
+  code?: string
+}
+
+// Bank Account Types
+export type AccountType = 'AHORROS' | 'CORRIENTE'
+
+export interface BankAccount {
+  id: string
+  accountNumber: string
+  accountHolder: string
+  accountType: AccountType
+  balance: number
+  bank: Bank
+  transferencista?: {
+    id: string
+    user: {
+      fullName: string
+      email: string
+    }
+  }
+}
+
+// Transferencista Types
+export interface Transferencista {
+  id: string
+  available: boolean
+  user: User
+  bankAccounts?: BankAccount[]
+}

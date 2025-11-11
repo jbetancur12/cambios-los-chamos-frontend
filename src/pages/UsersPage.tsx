@@ -2,46 +2,83 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Plus, Users as UsersIcon, Mail, ShieldCheck, User, Briefcase } from 'lucide-react'
+import { Plus, Users as UsersIcon, Mail, ShieldCheck, User, Briefcase, Building2 } from 'lucide-react'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
 import { CreateUserSheet } from '@/components/CreateUserSheet'
+import { TransferencistaAccountsSheet } from '@/components/TransferencistaAccountsSheet'
 import type { UserRole } from '@/types/api'
 
-interface User {
+interface UserData {
   id: string
   fullName: string
   email: string
   role: UserRole
   isActive: boolean
+  transferencistaId?: string  // ID del transferencista si el usuario es TRANSFERENCISTA
 }
 
 export function UsersPage() {
   const { user: currentUser } = useAuth()
-  const [users, setUsers] = useState<User[]>([])
+  const [users, setUsers] = useState<UserData[]>([])
   const [loading, setLoading] = useState(true)
   const [sheetOpen, setSheetOpen] = useState(false)
   const [selectedRole, setSelectedRole] = useState<UserRole | 'ALL'>('ALL')
   const [createUserRole, setCreateUserRole] = useState<UserRole>('ADMIN')
   const [menuOpen, setMenuOpen] = useState(false)
+  const [accountsSheetOpen, setAccountsSheetOpen] = useState(false)
+  const [selectedTransferencista, setSelectedTransferencista] = useState<{
+    id: string
+    name: string
+  } | null>(null)
 
   const isSuperAdmin = currentUser?.role === 'SUPER_ADMIN'
 
   const fetchUsers = async (role?: UserRole) => {
     try {
       setLoading(true)
+      let usersData: UserData[] = []
+
       if (role && role !== 'ALL') {
-        const response = await api.get<{ users: User[] }>(`/api/user/by-role/${role}`)
-        setUsers(response.users)
+        const response = await api.get<{ users: any[] }>(`/api/user/by-role/${role}`)
+        usersData = response.users
+
+        // Si es TRANSFERENCISTA, obtener los IDs de transferencista
+        if (role === 'TRANSFERENCISTA') {
+          const transferencistaResponse = await api.get<{
+            data: { id: string; user: { id: string } }[]
+          }>('/api/transferencista/list')
+          const transferencistaMap = new Map(
+            transferencistaResponse.data.map((t: any) => [t.user.id, t.id])
+          )
+          usersData = usersData.map((user) => ({
+            ...user,
+            transferencistaId: transferencistaMap.get(user.id),
+          }))
+        }
       } else {
         // Fetch all roles
-        const [admins, transferencistas, minoristas] = await Promise.all([
-          api.get<{ users: User[] }>('/api/user/by-role/ADMIN'),
-          api.get<{ users: User[] }>('/api/user/by-role/TRANSFERENCISTA'),
-          api.get<{ users: User[] }>('/api/user/by-role/MINORISTA'),
+        const [admins, transferencistasUsers, minoristas, transferencistasList] = await Promise.all([
+          api.get<{ users: any[] }>('/api/user/by-role/ADMIN'),
+          api.get<{ users: any[] }>('/api/user/by-role/TRANSFERENCISTA'),
+          api.get<{ users: any[] }>('/api/user/by-role/MINORISTA'),
+          api.get<{ data: { id: string; user: { id: string } }[] }>('/api/transferencista/list'),
         ])
-        setUsers([...admins.users, ...transferencistas.users, ...minoristas.users])
+
+        // Map transferencista IDs
+        const transferencistaMap = new Map(
+          transferencistasList.data.map((t: any) => [t.user.id, t.id])
+        )
+
+        const transferencistaData = transferencistasUsers.users.map((user) => ({
+          ...user,
+          transferencistaId: transferencistaMap.get(user.id),
+        }))
+
+        usersData = [...admins.users, ...transferencistaData, ...minoristas.users]
       }
+
+      setUsers(usersData)
     } catch (error) {
       toast.error('Error al cargar usuarios')
       console.error(error)
@@ -67,6 +104,11 @@ export function UsersPage() {
     setCreateUserRole(role)
     setSheetOpen(true)
     setMenuOpen(false)
+  }
+
+  const handleViewAccounts = (transferencistaId: string, name: string) => {
+    setSelectedTransferencista({ id: transferencistaId, name })
+    setAccountsSheetOpen(true)
   }
 
   if (!isSuperAdmin) {
@@ -174,6 +216,19 @@ export function UsersPage() {
                     </div>
                   </div>
                 </CardHeader>
+                {user.role === 'TRANSFERENCISTA' && user.transferencistaId && (
+                  <CardContent className="pt-0">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      onClick={() => handleViewAccounts(user.transferencistaId!, user.fullName)}
+                    >
+                      <Building2 className="h-4 w-4 mr-2" />
+                      Ver Cuentas Bancarias
+                    </Button>
+                  </CardContent>
+                )}
               </Card>
             )
           })}
@@ -235,6 +290,14 @@ export function UsersPage() {
         onOpenChange={setSheetOpen}
         onUserCreated={handleUserCreated}
         role={createUserRole}
+      />
+
+      {/* Transferencista Bank Accounts Sheet */}
+      <TransferencistaAccountsSheet
+        open={accountsSheetOpen}
+        onOpenChange={setAccountsSheetOpen}
+        transferencistaId={selectedTransferencista?.id || null}
+        transferencistaName={selectedTransferencista?.name || ''}
       />
     </div>
   )
