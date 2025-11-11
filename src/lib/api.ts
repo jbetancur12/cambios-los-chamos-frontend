@@ -17,11 +17,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
   const data: ApiResponse<T> = await response.json()
 
   if (!data.success || !response.ok) {
-    throw new ApiError(
-      data.error?.message || 'Error en la petición',
-      data.error?.code,
-      data.error?.details
-    )
+    throw new ApiError(data.error?.message || 'Error en la petición', data.error?.code, data.error?.details)
   }
 
   return data.data as T

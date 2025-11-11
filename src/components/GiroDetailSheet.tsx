@@ -11,8 +11,6 @@ interface GiroDetailSheetProps {
 }
 
 export function GiroDetailSheet({ giro, open, onOpenChange, userRole }: GiroDetailSheetProps) {
-  if (!giro) return null
-
   const formatCurrency = (amount: number, currency: 'VES' | 'COP' | 'USD' = 'VES') => {
     const locale = currency === 'COP' ? 'es-CO' : currency === 'USD' ? 'en-US' : 'es-VE'
     return new Intl.NumberFormat(locale, {
@@ -57,6 +55,8 @@ export function GiroDetailSheet({ giro, open, onOpenChange, userRole }: GiroDeta
   const isSuperAdmin = userRole === 'SUPER_ADMIN' || userRole === 'ADMIN'
   const isMinorista = userRole === 'MINORISTA'
 
+  if (!giro) return null
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent>
@@ -74,9 +74,7 @@ export function GiroDetailSheet({ giro, open, onOpenChange, userRole }: GiroDeta
 
           {/* Beneficiary Info */}
           <div className="space-y-4 mb-6">
-            <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-              Beneficiario
-            </h3>
+            <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Beneficiario</h3>
             <div className="flex items-start gap-3">
               <User className="h-5 w-5 text-muted-foreground mt-0.5" />
               <div>
@@ -89,9 +87,7 @@ export function GiroDetailSheet({ giro, open, onOpenChange, userRole }: GiroDeta
 
           {/* Amount Info */}
           <div className="space-y-4 mb-6">
-            <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-              Montos
-            </h3>
+            <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Montos</h3>
 
             {giro.amountInput && giro.currencyInput ? (
               <div className="space-y-3">
@@ -106,17 +102,13 @@ export function GiroDetailSheet({ giro, open, onOpenChange, userRole }: GiroDeta
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Monto en Bolívares:</span>
-                  <span className="font-semibold text-lg text-green-600">
-                    {formatCurrency(giro.amountBs, 'VES')}
-                  </span>
+                  <span className="font-semibold text-lg text-green-600">{formatCurrency(giro.amountBs, 'VES')}</span>
                 </div>
               </div>
             ) : (
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Monto:</span>
-                <span className="font-semibold text-lg">
-                  {formatCurrency(giro.amountBs, 'VES')}
-                </span>
+                <span className="font-semibold text-lg">{formatCurrency(giro.amountBs, 'VES')}</span>
               </div>
             )}
 
@@ -128,9 +120,7 @@ export function GiroDetailSheet({ giro, open, onOpenChange, userRole }: GiroDeta
                     <DollarSign className="h-5 w-5 text-green-600" />
                     <span className="font-medium text-green-900">Tu Ganancia:</span>
                   </div>
-                  <span className="font-bold text-lg text-green-600">
-                    {formatCurrency(giro.earnings, 'COP')}
-                  </span>
+                  <span className="font-bold text-lg text-green-600">{formatCurrency(giro.earnings, 'COP')}</span>
                 </div>
               </>
             )}
@@ -142,9 +132,7 @@ export function GiroDetailSheet({ giro, open, onOpenChange, userRole }: GiroDeta
           {giro.bankName && (
             <>
               <div className="space-y-4 mb-6">
-                <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-                  Banco
-                </h3>
+                <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Banco</h3>
                 <div className="flex items-center gap-3">
                   <Building2 className="h-5 w-5 text-muted-foreground" />
                   <p className="font-medium">{giro.bankName}</p>
@@ -156,9 +144,7 @@ export function GiroDetailSheet({ giro, open, onOpenChange, userRole }: GiroDeta
 
           {/* Additional Info */}
           <div className="space-y-4 mb-6">
-            <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-              Información Adicional
-            </h3>
+            <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Información Adicional</h3>
 
             <div className="flex items-center gap-3">
               <Hash className="h-5 w-5 text-muted-foreground" />

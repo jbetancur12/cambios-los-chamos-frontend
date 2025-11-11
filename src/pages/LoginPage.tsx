@@ -67,9 +67,7 @@ export function LoginPage() {
                 {...register('email')}
                 aria-invalid={!!errors.email}
               />
-              {errors.email && (
-                <p className="text-sm text-destructive">{errors.email.message}</p>
-              )}
+              {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
             </div>
 
             <div className="space-y-2">
@@ -81,9 +79,7 @@ export function LoginPage() {
                 {...register('password')}
                 aria-invalid={!!errors.password}
               />
-              {errors.password && (
-                <p className="text-sm text-destructive">{errors.password.message}</p>
-              )}
+              {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
             </div>
 
             <Button type="submit" className="w-full" disabled={isSubmitting}>

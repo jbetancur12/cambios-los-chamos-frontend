@@ -73,11 +73,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
               <p className="text-sm font-medium text-foreground">{user?.fullName}</p>
               <p className="text-xs text-muted-foreground">{user?.email}</p>
             </div>
-            <Button
-              variant="outline"
-              className="w-full justify-start gap-2"
-              onClick={handleLogout}
-            >
+            <Button variant="outline" className="w-full justify-start gap-2" onClick={handleLogout}>
               <LogOut className="w-4 h-4" />
               Cerrar Sesión
             </Button>
@@ -93,9 +89,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 pb-20 md:pb-6">
-          {children}
-        </main>
+        <main className="flex-1 pb-20 md:pb-6">{children}</main>
 
         {/* Mobile Bottom Navigation */}
         <nav className="fixed bottom-0 left-0 right-0 bg-card border-t z-50 md:hidden">
@@ -109,9 +103,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
                   to={item.href}
                   className={cn(
                     'flex flex-col items-center justify-center gap-1 transition-colors',
-                    isActive
-                      ? 'text-primary'
-                      : 'text-muted-foreground'
+                    isActive ? 'text-primary' : 'text-muted-foreground'
                   )}
                 >
                   <Icon className="w-5 h-5" />

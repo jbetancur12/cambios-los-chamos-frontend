@@ -49,11 +49,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await fetchUser()
   }
 
-  return (
-    <AuthContext.Provider value={{ user, loading, login, logout, refetch }}>
-      {children}
-    </AuthContext.Provider>
-  )
+  return <AuthContext.Provider value={{ user, loading, login, logout, refetch }}>{children}</AuthContext.Provider>
 }
 
 export function useAuth() {
