@@ -1,7 +1,7 @@
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetBody } from '@/components/ui/sheet'
-import { RecentGiro } from '@/hooks/useRecentGiros'
+import type { RecentGiro } from '@/hooks/useRecentGiros'
 import { Clock, User, Building2, Hash, TrendingUp, DollarSign } from 'lucide-react'
-import { UserRole } from '@/types/api'
+import type { UserRole } from '@/types/api'
 
 interface GiroDetailSheetProps {
   giro: RecentGiro | null
