@@ -2,16 +2,25 @@ import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { FileText, Users, TrendingUp, DollarSign, Wallet, Coins, Clock, ArrowRight } from 'lucide-react'
 import { useDashboardStats } from '@/hooks/useDashboardStats'
-import { useRecentGiros } from '@/hooks/useRecentGiros'
+import { useRecentGiros, RecentGiro } from '@/hooks/useRecentGiros'
+import { GiroDetailSheet } from '@/components/GiroDetailSheet'
+import { useState } from 'react'
 
 export function DashboardPage() {
   const { user } = useAuth()
   const { stats, loading, error } = useDashboardStats()
   const { giros, loading: girosLoading } = useRecentGiros(5)
+  const [selectedGiro, setSelectedGiro] = useState<RecentGiro | null>(null)
+  const [sheetOpen, setSheetOpen] = useState(false)
 
   const isSuperAdmin = user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN'
   const isTransferencista = user?.role === 'TRANSFERENCISTA'
   const isMinorista = user?.role === 'MINORISTA'
+
+  const handleGiroClick = (giro: RecentGiro) => {
+    setSelectedGiro(giro)
+    setSheetOpen(true)
+  }
 
   const formatCurrency = (amount: number, currency: 'VES' | 'COP' | 'USD' = 'VES') => {
     const locale = currency === 'COP' ? 'es-CO' : currency === 'USD' ? 'en-US' : 'es-VE'
@@ -247,6 +256,7 @@ export function DashboardPage() {
                 return (
                   <div
                     key={giro.id}
+                    onClick={() => handleGiroClick(giro)}
                     className="flex items-center justify-between p-3 md:p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors active:scale-[0.98] cursor-pointer"
                   >
                     {/* Left side - Main info */}
@@ -313,6 +323,14 @@ export function DashboardPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Giro Detail Sheet */}
+      <GiroDetailSheet
+        giro={selectedGiro}
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+        userRole={user?.role || 'MINORISTA'}
+      />
     </div>
   )
 }
