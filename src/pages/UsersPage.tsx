@@ -46,10 +46,10 @@ export function UsersPage() {
         // Si es TRANSFERENCISTA, obtener los IDs de transferencista
         if (role === 'TRANSFERENCISTA') {
           const transferencistaResponse = await api.get<{
-            data: { id: string; user: { id: string } }[]
+            transferencistas: { id: string; user: { id: string } }[]
           }>('/api/transferencista/list')
           const transferencistaMap = new Map(
-            transferencistaResponse.data.map((t: any) => [t.user.id, t.id])
+            transferencistaResponse.transferencistas.map((t: any) => [t.user.id, t.id])
           )
           usersData = usersData.map((user) => ({
             ...user,
@@ -62,12 +62,12 @@ export function UsersPage() {
           api.get<{ users: any[] }>('/api/user/by-role/ADMIN'),
           api.get<{ users: any[] }>('/api/user/by-role/TRANSFERENCISTA'),
           api.get<{ users: any[] }>('/api/user/by-role/MINORISTA'),
-          api.get<{ data: { id: string; user: { id: string } }[] }>('/api/transferencista/list'),
+          api.get<{ transferencistas: { id: string; user: { id: string } }[] }>('/api/transferencista/list'),
         ])
 
         // Map transferencista IDs
         const transferencistaMap = new Map(
-          transferencistasList.data.map((t: any) => [t.user.id, t.id])
+          transferencistasList.transferencistas.map((t: any) => [t.user.id, t.id])
         )
 
         const transferencistaData = transferencistasUsers.users.map((user) => ({
