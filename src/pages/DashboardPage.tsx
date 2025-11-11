@@ -1,6 +1,6 @@
 import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { FileText, Users, TrendingUp, DollarSign } from 'lucide-react'
+import { FileText, Users, TrendingUp, DollarSign, Wallet, Coins } from 'lucide-react'
 import { useDashboardStats } from '@/hooks/useDashboardStats'
 
 export function DashboardPage() {
@@ -11,10 +11,11 @@ export function DashboardPage() {
   const isTransferencista = user?.role === 'TRANSFERENCISTA'
   const isMinorista = user?.role === 'MINORISTA'
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('es-VE', {
+  const formatCurrency = (amount: number, currency: 'VES' | 'COP' | 'USD' = 'VES') => {
+    const locale = currency === 'COP' ? 'es-CO' : currency === 'USD' ? 'en-US' : 'es-VE'
+    return new Intl.NumberFormat(locale, {
       style: 'currency',
-      currency: 'VES',
+      currency,
       minimumFractionDigits: 2,
     }).format(amount)
   }
@@ -54,7 +55,7 @@ export function DashboardPage() {
       </div>
 
       {/* Stats Grid - Different for each role */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
         {/* Giros - Shown to all roles */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 md:p-6">
@@ -89,17 +90,17 @@ export function DashboardPage() {
           </Card>
         )}
 
-        {/* Volume - Only Super Admin */}
-        {isSuperAdmin && stats?.volume !== undefined && (
+        {/* Volume Bs - Only Super Admin */}
+        {isSuperAdmin && stats?.volumeBs !== undefined && (
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 md:p-6">
               <CardTitle className="text-xs md:text-sm font-medium">
-                Volumen
+                Volumen Bs
               </CardTitle>
-              <TrendingUp className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
+              <Wallet className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
             </CardHeader>
             <CardContent className="p-4 pt-0 md:p-6 md:pt-0">
-              <div className="text-xl md:text-2xl font-bold">{formatCurrency(stats.volume)}</div>
+              <div className="text-xl md:text-2xl font-bold">{formatCurrency(stats.volumeBs, 'VES')}</div>
               <p className="text-xs text-muted-foreground">
                 Este mes
               </p>
@@ -107,17 +108,89 @@ export function DashboardPage() {
           </Card>
         )}
 
-        {/* Earnings/Income - Super Admin and Minorista only */}
-        {(isSuperAdmin || isMinorista) && stats?.earnings !== undefined && (
+        {/* Volume COP - Only Super Admin */}
+        {isSuperAdmin && stats?.volumeCOP !== undefined && (
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 md:p-6">
               <CardTitle className="text-xs md:text-sm font-medium">
-                {isMinorista ? 'Mis Ganancias' : 'Ingresos'}
+                Volumen COP
+              </CardTitle>
+              <Coins className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
+            </CardHeader>
+            <CardContent className="p-4 pt-0 md:p-6 md:pt-0">
+              <div className="text-xl md:text-2xl font-bold">{formatCurrency(stats.volumeCOP, 'COP')}</div>
+              <p className="text-xs text-muted-foreground">
+                Este mes
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Volume USD - Only Super Admin */}
+        {isSuperAdmin && stats?.volumeUSD !== undefined && (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 md:p-6">
+              <CardTitle className="text-xs md:text-sm font-medium">
+                Volumen USD
+              </CardTitle>
+              <TrendingUp className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
+            </CardHeader>
+            <CardContent className="p-4 pt-0 md:p-6 md:pt-0">
+              <div className="text-xl md:text-2xl font-bold">{formatCurrency(stats.volumeUSD, 'USD')}</div>
+              <p className="text-xs text-muted-foreground">
+                Este mes
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* System Earnings - Only Super Admin */}
+        {isSuperAdmin && stats?.systemEarnings !== undefined && (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 md:p-6">
+              <CardTitle className="text-xs md:text-sm font-medium">
+                Ganancias Sistema
               </CardTitle>
               <DollarSign className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
             </CardHeader>
             <CardContent className="p-4 pt-0 md:p-6 md:pt-0">
-              <div className="text-xl md:text-2xl font-bold">{formatCurrency(stats.earnings)}</div>
+              <div className="text-xl md:text-2xl font-bold">{formatCurrency(stats.systemEarnings, 'COP')}</div>
+              <p className="text-xs text-muted-foreground">
+                Este mes
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Minorista Earnings - Only Super Admin */}
+        {isSuperAdmin && stats?.minoristaEarnings !== undefined && (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 md:p-6">
+              <CardTitle className="text-xs md:text-sm font-medium">
+                Ganancias Minoristas
+              </CardTitle>
+              <DollarSign className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
+            </CardHeader>
+            <CardContent className="p-4 pt-0 md:p-6 md:pt-0">
+              <div className="text-xl md:text-2xl font-bold">{formatCurrency(stats.minoristaEarnings, 'COP')}</div>
+              <p className="text-xs text-muted-foreground">
+                Este mes
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Earnings - Minorista only */}
+        {isMinorista && stats?.earnings !== undefined && (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 md:p-6">
+              <CardTitle className="text-xs md:text-sm font-medium">
+                Mis Ganancias
+              </CardTitle>
+              <DollarSign className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
+            </CardHeader>
+            <CardContent className="p-4 pt-0 md:p-6 md:pt-0">
+              <div className="text-xl md:text-2xl font-bold">{formatCurrency(stats.earnings, 'VES')}</div>
               <p className="text-xs text-muted-foreground">
                 Este mes
               </p>

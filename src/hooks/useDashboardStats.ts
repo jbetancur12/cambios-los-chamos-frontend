@@ -5,8 +5,12 @@ interface DashboardStats {
   girosCount: number
   girosLabel: string
   usersCount?: number
-  volume?: number
-  earnings?: number
+  volumeBs?: number
+  volumeCOP?: number
+  volumeUSD?: number
+  systemEarnings?: number
+  minoristaEarnings?: number
+  earnings?: number // Para minoristas (solo su parte)
 }
 
 export function useDashboardStats() {
