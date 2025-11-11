@@ -190,7 +190,7 @@ export function DashboardPage() {
               <DollarSign className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
             </CardHeader>
             <CardContent className="p-4 pt-0 md:p-6 md:pt-0">
-              <div className="text-xl md:text-2xl font-bold">{formatCurrency(stats.earnings, 'VES')}</div>
+              <div className="text-xl md:text-2xl font-bold">{formatCurrency(stats.earnings, 'COP')}</div>
               <p className="text-xs text-muted-foreground">
                 Este mes
               </p>
