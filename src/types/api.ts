@@ -68,3 +68,10 @@ export interface Transferencista {
   user: User
   bankAccounts?: BankAccount[]
 }
+
+// Minorista Types
+export interface Minorista {
+  id: string
+  balance: number
+  user: User
+}

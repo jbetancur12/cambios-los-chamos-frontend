@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Plus, Users as UsersIcon, Mail, ShieldCheck, User, Briefcase, Building2 } from 'lucide-react'
+import { Plus, Users as UsersIcon, Mail, ShieldCheck, User, Briefcase, Building2, Wallet } from 'lucide-react'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
 import { CreateUserSheet } from '@/components/CreateUserSheet'
 import { TransferencistaAccountsSheet } from '@/components/TransferencistaAccountsSheet'
-import type { UserRole } from '@/types/api'
+import { RechargeMinoristaBalanceSheet } from '@/components/RechargeMinoristaBalanceSheet'
+import type { UserRole, Minorista } from '@/types/api'
 
 interface UserData {
   id: string
@@ -16,6 +17,8 @@ interface UserData {
   role: UserRole
   isActive: boolean
   transferencistaId?: string  // ID del transferencista si el usuario es TRANSFERENCISTA
+  minoristaId?: string  // ID del minorista si el usuario es MINORISTA
+  balance?: number  // Saldo del minorista si el usuario es MINORISTA
 }
 
 export function UsersPage() {
@@ -31,6 +34,8 @@ export function UsersPage() {
     id: string
     name: string
   } | null>(null)
+  const [rechargeMinoristaSheetOpen, setRechargeMinoristaSheetOpen] = useState(false)
+  const [selectedMinorista, setSelectedMinorista] = useState<Minorista | null>(null)
 
   const isSuperAdmin = currentUser?.role === 'SUPER_ADMIN'
 
@@ -56,14 +61,36 @@ export function UsersPage() {
             transferencistaId: transferencistaMap.get(user.id),
           }))
         }
+
+        // Si es MINORISTA, obtener los IDs de minorista y saldo
+        if (role === 'MINORISTA') {
+          const minoristaResponse = await api.get<{
+            minoristas: { id: string; balance: number; user: { id: string } }[]
+          }>('/api/minorista/list')
+          const minoristaMap = new Map(
+            minoristaResponse.minoristas.map((m: any) => [m.user.id, { id: m.id, balance: m.balance }])
+          )
+          usersData = usersData.map((user) => {
+            const minoristaData = minoristaMap.get(user.id)
+            return {
+              ...user,
+              minoristaId: minoristaData?.id,
+              balance: minoristaData?.balance,
+            }
+          })
+        }
       } else {
         // Fetch all roles
-        const [admins, transferencistasUsers, minoristas, transferencistasList] = await Promise.all([
-          api.get<{ users: any[] }>('/api/user/by-role/ADMIN'),
-          api.get<{ users: any[] }>('/api/user/by-role/TRANSFERENCISTA'),
-          api.get<{ users: any[] }>('/api/user/by-role/MINORISTA'),
-          api.get<{ transferencistas: { id: string; user: { id: string } }[] }>('/api/transferencista/list'),
-        ])
+        const [admins, transferencistasUsers, minoristasUsers, transferencistasList, minoristasList] =
+          await Promise.all([
+            api.get<{ users: any[] }>('/api/user/by-role/ADMIN'),
+            api.get<{ users: any[] }>('/api/user/by-role/TRANSFERENCISTA'),
+            api.get<{ users: any[] }>('/api/user/by-role/MINORISTA'),
+            api.get<{ transferencistas: { id: string; user: { id: string } }[] }>('/api/transferencista/list'),
+            api.get<{ minoristas: { id: string; balance: number; user: { id: string } }[] }>(
+              '/api/minorista/list'
+            ),
+          ])
 
         // Map transferencista IDs
         const transferencistaMap = new Map(
@@ -75,7 +102,21 @@ export function UsersPage() {
           transferencistaId: transferencistaMap.get(user.id),
         }))
 
-        usersData = [...admins.users, ...transferencistaData, ...minoristas.users]
+        // Map minorista IDs and balances
+        const minoristaMap = new Map(
+          minoristasList.minoristas.map((m: any) => [m.user.id, { id: m.id, balance: m.balance }])
+        )
+
+        const minoristaData = minoristasUsers.users.map((user) => {
+          const minorista = minoristaMap.get(user.id)
+          return {
+            ...user,
+            minoristaId: minorista?.id,
+            balance: minorista?.balance,
+          }
+        })
+
+        usersData = [...admins.users, ...transferencistaData, ...minoristaData]
       }
 
       setUsers(usersData)
@@ -109,6 +150,27 @@ export function UsersPage() {
   const handleViewAccounts = (transferencistaId: string, name: string) => {
     setSelectedTransferencista({ id: transferencistaId, name })
     setAccountsSheetOpen(true)
+  }
+
+  const handleRechargeMinorista = (minoristaId: string, fullName: string, email: string, balance: number) => {
+    setSelectedMinorista({
+      id: minoristaId,
+      balance,
+      user: {
+        id: minoristaId, // Este no se usa, pero lo pongo por completitud
+        fullName,
+        email,
+        role: 'MINORISTA',
+        isActive: true,
+      },
+    })
+    setRechargeMinoristaSheetOpen(true)
+  }
+
+  const handleMinoristaBalanceUpdated = () => {
+    setRechargeMinoristaSheetOpen(false)
+    setSelectedMinorista(null)
+    fetchUsers(selectedRole === 'ALL' ? undefined : selectedRole)
   }
 
   if (!isSuperAdmin) {
@@ -229,6 +291,43 @@ export function UsersPage() {
                     </Button>
                   </CardContent>
                 )}
+                {user.role === 'MINORISTA' && user.minoristaId && (
+                  <CardContent className="pt-0">
+                    <div className="space-y-2">
+                      {/* Balance Display */}
+                      <div className="flex items-center justify-between p-3 rounded-md bg-muted">
+                        <div className="flex items-center gap-2">
+                          <Wallet className="h-4 w-4 text-green-600" />
+                          <span className="text-sm text-muted-foreground">Saldo:</span>
+                        </div>
+                        <span className="font-bold text-green-600">
+                          {new Intl.NumberFormat('es-CO', {
+                            style: 'currency',
+                            currency: 'COP',
+                            minimumFractionDigits: 0,
+                          }).format(user.balance || 0)}
+                        </span>
+                      </div>
+                      {/* Recharge Button */}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                        onClick={() =>
+                          handleRechargeMinorista(
+                            user.minoristaId!,
+                            user.fullName,
+                            user.email,
+                            user.balance || 0
+                          )
+                        }
+                      >
+                        <Wallet className="h-4 w-4 mr-2" />
+                        Recargar Saldo
+                      </Button>
+                    </div>
+                  </CardContent>
+                )}
               </Card>
             )
           })}
@@ -298,6 +397,14 @@ export function UsersPage() {
         onOpenChange={setAccountsSheetOpen}
         transferencistaId={selectedTransferencista?.id || null}
         transferencistaName={selectedTransferencista?.name || ''}
+      />
+
+      {/* Minorista Balance Recharge Sheet */}
+      <RechargeMinoristaBalanceSheet
+        open={rechargeMinoristaSheetOpen}
+        onOpenChange={setRechargeMinoristaSheetOpen}
+        minorista={selectedMinorista}
+        onBalanceUpdated={handleMinoristaBalanceUpdated}
       />
     </div>
   )
