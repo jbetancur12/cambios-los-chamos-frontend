@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { api } from '@/lib/api'
 
 export interface RecentGiro {
@@ -20,7 +20,7 @@ export function useRecentGiros(limit = 5) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const fetchGiros = async () => {
+  const fetchGiros = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -31,11 +31,11 @@ export function useRecentGiros(limit = 5) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [limit])
 
   useEffect(() => {
     fetchGiros()
-  }, [limit])
+  }, [fetchGiros])
 
   return { giros, loading, error, refetch: fetchGiros }
 }
