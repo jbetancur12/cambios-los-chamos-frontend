@@ -26,16 +26,11 @@ export function BankTransactionsPage() {
 
   const fetchBankAccount = async () => {
     try {
-      const response = await api.get<{ bankAccounts: BankAccount[] }>('/api/bank-account/my-accounts')
-      const account = response.bankAccounts.find((acc) => acc.id === bankAccountId)
-      if (account) {
-        setBankAccount(account)
-      } else {
-        toast.error('Cuenta bancaria no encontrada')
-        navigate('/')
-      }
+      const response = await api.get<{ bankAccount: BankAccount }>(`/api/bank-account/${bankAccountId}`)
+      setBankAccount(response.bankAccount)
     } catch (error: any) {
       toast.error(error.message || 'Error al cargar cuenta bancaria')
+      navigate('/')
     }
   }
 
