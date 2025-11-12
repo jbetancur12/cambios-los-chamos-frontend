@@ -18,7 +18,12 @@ const navItems: NavItem[] = [
   { icon: FileText, label: 'Giros', href: '/giros', roles: ['SUPER_ADMIN', 'ADMIN', 'TRANSFERENCISTA', 'MINORISTA'] },
   { icon: Users, label: 'Usuarios', href: '/usuarios', roles: ['SUPER_ADMIN', 'ADMIN'] },
   { icon: DollarSign, label: 'Tasas', href: '/tasas', roles: ['SUPER_ADMIN'] },
-  { icon: Calculator, label: 'Calculadora', href: '/calculadora', roles: ['SUPER_ADMIN', 'ADMIN', 'TRANSFERENCISTA', 'MINORISTA'] },
+  {
+    icon: Calculator,
+    label: 'Calculadora',
+    href: '/calculadora',
+    roles: ['SUPER_ADMIN', 'ADMIN', 'TRANSFERENCISTA', 'MINORISTA'],
+  },
   { icon: Settings, label: 'Config', href: '/configuracion', roles: ['SUPER_ADMIN', 'ADMIN'] },
 ]
 
@@ -43,11 +48,10 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
     }
   }
 
-  const visibleItems = navItems.filter(
-    (item) => {
-      if (!role) return false // evita el undefined
-      return item.roles?.includes(role)
-    })
+  const visibleItems = navItems.filter((item) => {
+    if (!role) return false // evita el undefined
+    return item.roles?.includes(role)
+  })
 
   return (
     <div className="min-h-screen bg-background">
@@ -137,9 +141,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
           </div>
           <div className="pointer-events-none absolute right-0 top-0 h-full w-12 bg-gradient-to-l from-card/95 via-card/60 to-transparent" />
           <div className="pointer-events-none absolute left-0 top-0 h-full w-12 bg-gradient-to-r from-card/95 via-card/60 to-transparent" />
-
         </nav>
-
       </div>
     </div>
   )

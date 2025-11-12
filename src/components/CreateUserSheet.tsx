@@ -111,7 +111,8 @@ export function CreateUserSheet({ open, onOpenChange, onUserCreated, role }: Cre
             {/* Role Info */}
             <div className="rounded-md bg-muted p-3">
               <p className="text-sm text-muted-foreground">
-                Este usuario será creado con el rol de <span className="font-semibold text-foreground">{getRoleLabel(role)}</span>
+                Este usuario será creado con el rol de{' '}
+                <span className="font-semibold text-foreground">{getRoleLabel(role)}</span>
               </p>
             </div>
 

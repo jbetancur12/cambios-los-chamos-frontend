@@ -10,12 +10,7 @@ interface SwitchProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'
 export const Switch = forwardRef<HTMLInputElement, SwitchProps>(
   ({ checked = false, onCheckedChange, className, ...props }, ref) => {
     return (
-      <label
-        className={cn(
-          'relative inline-flex items-center cursor-pointer select-none',
-          className
-        )}
-      >
+      <label className={cn('relative inline-flex items-center cursor-pointer select-none', className)}>
         {/* Input oculto */}
         <input
           ref={ref}

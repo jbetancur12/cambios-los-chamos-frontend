@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 import { api } from '@/lib/api'
-import { BankAccount, BankAccountTransaction, BankAccountTransactionType } from '@/types/api'
+import type { BankAccount, BankAccountTransaction, BankAccountTransactionType } from '@/types/api'
 
 export function BankTransactionsPage() {
   const { bankAccountId } = useParams<{ bankAccountId: string }>()
@@ -78,11 +78,11 @@ export function BankTransactionsPage() {
 
   const getTransactionTypeLabel = (type: BankAccountTransactionType) => {
     switch (type) {
-      case BankAccountTransactionType.DEPOSIT:
+      case 'DEPOSIT':
         return 'Depósito'
-      case BankAccountTransactionType.WITHDRAWAL:
+      case 'WITHDRAWAL':
         return 'Retiro'
-      case BankAccountTransactionType.ADJUSTMENT:
+      case 'ADJUSTMENT':
         return 'Ajuste'
       default:
         return type
@@ -91,11 +91,11 @@ export function BankTransactionsPage() {
 
   const getTransactionTypeColor = (type: BankAccountTransactionType) => {
     switch (type) {
-      case BankAccountTransactionType.DEPOSIT:
+      case 'DEPOSIT':
         return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-      case BankAccountTransactionType.WITHDRAWAL:
+      case 'WITHDRAWAL':
         return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-      case BankAccountTransactionType.ADJUSTMENT:
+      case 'ADJUSTMENT':
         return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
@@ -103,7 +103,7 @@ export function BankTransactionsPage() {
   }
 
   const isPositiveTransaction = (type: BankAccountTransactionType) => {
-    return type === BankAccountTransactionType.DEPOSIT
+    return type === 'DEPOSIT'
   }
 
   return (

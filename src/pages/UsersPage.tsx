@@ -18,9 +18,9 @@ interface UserData {
   role: UserRole
   isActive: boolean
   available?: boolean
-  transferencistaId?: string  // ID del transferencista si el usuario es TRANSFERENCISTA
-  minoristaId?: string  // ID del minorista si el usuario es MINORISTA
-  balance?: number  // Saldo del minorista si el usuario es MINORISTA
+  transferencistaId?: string // ID del transferencista si el usuario es TRANSFERENCISTA
+  minoristaId?: string // ID del minorista si el usuario es MINORISTA
+  balance?: number // Saldo del minorista si el usuario es MINORISTA
 }
 
 export function UsersPage() {
@@ -56,10 +56,7 @@ export function UsersPage() {
             transferencistas: { id: string; available: boolean; user: { id: string } }[]
           }>('/api/transferencista/list')
           const transferencistaMap = new Map(
-            transferencistaResponse.transferencistas.map((t: any) => [
-              t.user.id,
-              { id: t.id, available: t.available },
-            ])
+            transferencistaResponse.transferencistas.map((t: any) => [t.user.id, { id: t.id, available: t.available }])
           )
           usersData = usersData.map((user) => {
             const transferencistaData = transferencistaMap.get(user.id)
@@ -83,7 +80,7 @@ export function UsersPage() {
             const minoristaData = minoristaMap.get(user.id)
             return {
               ...user,
-              minoristaId: minoristaData?.id,              
+              minoristaId: minoristaData?.id,
               balance: minoristaData?.balance,
             }
           })
@@ -98,17 +95,12 @@ export function UsersPage() {
             api.get<{ transferencistas: { id: string; available: boolean; user: { id: string } }[] }>(
               '/api/transferencista/list'
             ),
-            api.get<{ minoristas: { id: string; balance: number; user: { id: string } }[] }>(
-              '/api/minorista/list'
-            ),
+            api.get<{ minoristas: { id: string; balance: number; user: { id: string } }[] }>('/api/minorista/list'),
           ])
 
         // Map transferencista IDs and availability
         const transferencistaMap = new Map(
-          transferencistasList.transferencistas.map((t: any) => [
-            t.user.id,
-            { id: t.id, available: t.available },
-          ])
+          transferencistasList.transferencistas.map((t: any) => [t.user.id, { id: t.id, available: t.available }])
         )
 
         const transferencistaData = transferencistasUsers.users.map((user) => {
@@ -194,9 +186,7 @@ export function UsersPage() {
   const handleToggleActive = async (userId: string, newValue: boolean) => {
     try {
       await api.put(`/api/user/${userId}/toggle-active`, { isActive: newValue })
-      setUsers((prev) =>
-        prev.map((u) => (u.id === userId ? { ...u, isActive: newValue } : u))
-      )
+      setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, isActive: newValue } : u)))
       toast.success(newValue ? 'Usuario activado' : 'Usuario desactivado')
     } catch (error) {
       toast.error('Error al cambiar estado del usuario')
@@ -342,18 +332,14 @@ export function UsersPage() {
                         checked={user.isActive}
                         onCheckedChange={(checked) => handleToggleActive(user.id, checked)}
                       />
-                      <span className="text-sm text-muted-foreground">
-                        {user.isActive ? 'Activo' : 'Desactivado'}
-                      </span>
+                      <span className="text-sm text-muted-foreground">{user.isActive ? 'Activo' : 'Desactivado'}</span>
                     </div>
                     {/* Switch disponibilidad transferencista */}
                     {user.role === 'TRANSFERENCISTA' && user.transferencistaId && (
                       <div className="flex items-center gap-2">
                         <Switch
                           checked={user.available ?? true}
-                          onCheckedChange={(checked) =>
-                            handleToggleAvailable(user.transferencistaId!, checked)
-                          }
+                          onCheckedChange={(checked) => handleToggleAvailable(user.transferencistaId!, checked)}
                         />
                         <span className="text-sm text-muted-foreground">
                           {user.available ? 'Disponible' : 'No disponible'}
@@ -398,12 +384,7 @@ export function UsersPage() {
                         size="sm"
                         className="w-full"
                         onClick={() =>
-                          handleRechargeMinorista(
-                            user.minoristaId!,
-                            user.fullName,
-                            user.email,
-                            user.balance || 0
-                          )
+                          handleRechargeMinorista(user.minoristaId!, user.fullName, user.email, user.balance || 0)
                         }
                       >
                         <Wallet className="h-4 w-4 mr-2" />
@@ -450,8 +431,9 @@ export function UsersPage() {
         {/* FAB Button */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className={`bg-primary text-primary-foreground rounded-full p-4 shadow-lg hover:shadow-xl transition-all active:scale-95 ${menuOpen ? 'rotate-45' : ''
-            }`}
+          className={`bg-primary text-primary-foreground rounded-full p-4 shadow-lg hover:shadow-xl transition-all active:scale-95 ${
+            menuOpen ? 'rotate-45' : ''
+          }`}
         >
           <Plus className="h-6 w-6" />
         </button>
@@ -459,11 +441,7 @@ export function UsersPage() {
 
       {/* Backdrop */}
       {menuOpen && (
-        <div
-          onClick={() => setMenuOpen(false)}
-          className="fixed inset-0 bg-black/20 z-40"
-          style={{ bottom: 0 }}
-        />
+        <div onClick={() => setMenuOpen(false)} className="fixed inset-0 bg-black/20 z-40" style={{ bottom: 0 }} />
       )}
 
       {/* Create User Sheet */}

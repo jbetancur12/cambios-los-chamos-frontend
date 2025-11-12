@@ -150,7 +150,8 @@ export function CreateBankAccountSheet({
             {/* Info */}
             <div className="rounded-md bg-muted p-3">
               <p className="text-sm text-muted-foreground">
-                Esta cuenta será asignada al transferencista <span className="font-semibold">{transferencistaName}</span>
+                Esta cuenta será asignada al transferencista{' '}
+                <span className="font-semibold">{transferencistaName}</span>
               </p>
             </div>
 

@@ -65,7 +65,7 @@ function App() {
             }
           />
 
-               {/* Calculadora*/}
+          {/* Calculadora*/}
           <Route
             path="/calculadora"
             element={

@@ -18,8 +18,7 @@ export function GirosPage() {
   const [detailSheetOpen, setDetailSheetOpen] = useState(false)
   const [selectedGiroId, setSelectedGiroId] = useState<string | null>(null)
 
-  const canCreateGiro =
-    user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN' || user?.role === 'MINORISTA'
+  const canCreateGiro = user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN' || user?.role === 'MINORISTA'
 
   useEffect(() => {
     fetchGiros()
@@ -170,7 +169,9 @@ export function GirosPage() {
                       <p className="text-xs text-muted-foreground mt-1">{formatDate(giro.createdAt)}</p>
                     </div>
                     <div className="flex flex-col items-end gap-2">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusBadge.className} flex items-center gap-1`}>
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${statusBadge.className} flex items-center gap-1`}
+                      >
                         <StatusIcon className="h-3 w-3" />
                         {statusBadge.label}
                       </span>
@@ -250,11 +251,7 @@ export function GirosPage() {
       )}
 
       {/* Create Giro Sheet */}
-      <CreateGiroSheet
-        open={createSheetOpen}
-        onOpenChange={setCreateSheetOpen}
-        onSuccess={fetchGiros}
-      />
+      <CreateGiroSheet open={createSheetOpen} onOpenChange={setCreateSheetOpen} onSuccess={fetchGiros} />
 
       {/* Giro Detail Sheet */}
       <GiroDetailSheet

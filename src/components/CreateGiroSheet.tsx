@@ -164,11 +164,14 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
     const amount = parseFloat(amountInput)
     if (isNaN(amount)) return 0
 
-    const rate = useCustomRate && isSuperAdmin ? {
-      buyRate: parseFloat(customBuyRate) || currentRate.buyRate,
-      sellRate: parseFloat(customSellRate) || currentRate.sellRate,
-      bcv: parseFloat(customBcv) || currentRate.bcv,
-    } : currentRate
+    const rate =
+      useCustomRate && isSuperAdmin
+        ? {
+            buyRate: parseFloat(customBuyRate) || currentRate.buyRate,
+            sellRate: parseFloat(customSellRate) || currentRate.sellRate,
+            bcv: parseFloat(customBcv) || currentRate.bcv,
+          }
+        : currentRate
 
     if (currencyInput === 'USD') {
       return amount * rate.bcv
@@ -459,11 +462,7 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="flex-1">
                 Cancelar
               </Button>
-              <Button
-                type="submit"
-                disabled={loading || hasInsufficientBalance()}
-                className="flex-1"
-              >
+              <Button type="submit" disabled={loading || hasInsufficientBalance()} className="flex-1">
                 {loading ? 'Creando...' : 'Crear Giro'}
               </Button>
             </div>

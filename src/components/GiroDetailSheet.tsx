@@ -179,9 +179,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
             <div className="space-y-4">
               {/* Status Badge */}
               {statusBadge && StatusIcon && (
-                <div
-                  className={`flex items-center justify-center gap-2 py-2 px-4 rounded-lg ${statusBadge.className}`}
-                >
+                <div className={`flex items-center justify-center gap-2 py-2 px-4 rounded-lg ${statusBadge.className}`}>
                   <StatusIcon className="h-5 w-5" />
                   <span className="font-semibold">{statusBadge.label}</span>
                 </div>
@@ -199,7 +197,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                     <p className="font-medium">{giro.beneficiaryName}</p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground">Cédula</p>
+                    <p className="text-muted-foreground">Cï¿½dula</p>
                     <p className="font-medium">{giro.beneficiaryId}</p>
                   </div>
                   <div className="flex items-center gap-2">
@@ -326,7 +324,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="executionType">Tipo de Ejecución</Label>
+                    <Label htmlFor="executionType">Tipo de Ejecuciï¿½n</Label>
                     <select
                       id="executionType"
                       value={executionType}
@@ -335,7 +333,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                       required
                     >
                       <option value="TRANSFERENCIA">Transferencia</option>
-                      <option value="PAGO_MOVIL">Pago Móvil</option>
+                      <option value="PAGO_MOVIL">Pago Mï¿½vil</option>
                       <option value="EFECTIVO">Efectivo</option>
                       <option value="ZELLE">Zelle</option>
                       <option value="OTROS">Otros</option>
@@ -353,7 +351,11 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                     />
                   </div>
 
-                  <Button onClick={handleExecuteGiro} disabled={processing || !selectedBankAccountId} className="w-full">
+                  <Button
+                    onClick={handleExecuteGiro}
+                    disabled={processing || !selectedBankAccountId}
+                    className="w-full"
+                  >
                     {processing ? 'Ejecutando...' : 'Ejecutar Giro'}
                   </Button>
                 </div>

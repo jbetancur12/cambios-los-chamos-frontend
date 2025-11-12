@@ -77,27 +77,11 @@ export interface Minorista {
 }
 
 // Giro Types
-export enum GiroStatus {
-  PENDIENTE = 'PENDIENTE',
-  ASIGNADO = 'ASIGNADO',
-  PROCESANDO = 'PROCESANDO',
-  COMPLETADO = 'COMPLETADO',
-  CANCELADO = 'CANCELADO',
-}
+export type GiroStatus = 'PENDIENTE' | 'ASIGNADO' | 'PROCESANDO' | 'COMPLETADO' | 'CANCELADO'
 
-export enum ExecutionType {
-  TRANSFERENCIA = 'TRANSFERENCIA',
-  PAGO_MOVIL = 'PAGO_MOVIL',
-  EFECTIVO = 'EFECTIVO',
-  ZELLE = 'ZELLE',
-  OTROS = 'OTROS',
-}
+export type ExecutionType = 'TRANSFERENCIA' | 'PAGO_MOVIL' | 'EFECTIVO' | 'ZELLE' | 'OTROS'
 
-export enum Currency {
-  VES = 'VES',
-  COP = 'COP',
-  USD = 'USD',
-}
+export type Currency = 'VES' | 'COP' | 'USD'
 
 export interface ExchangeRate {
   id: string
@@ -140,11 +124,7 @@ export interface Giro {
 }
 
 // Bank Account Transaction Types
-export enum BankAccountTransactionType {
-  DEPOSIT = 'DEPOSIT',
-  WITHDRAWAL = 'WITHDRAWAL',
-  ADJUSTMENT = 'ADJUSTMENT',
-}
+export type BankAccountTransactionType = 'DEPOSIT' | 'WITHDRAWAL' | 'ADJUSTMENT'
 
 export interface BankAccountTransaction {
   id: string

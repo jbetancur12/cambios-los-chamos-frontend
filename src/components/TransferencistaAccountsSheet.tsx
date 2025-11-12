@@ -138,7 +138,9 @@ export function TransferencistaAccountsSheet({
                             <div className="flex items-center gap-2">
                               <Wallet className="h-4 w-4 text-green-600" />
                               <span className="text-muted-foreground">Saldo:</span>
-                              <span className="font-bold text-lg text-green-600">{formatCurrency(account.balance)}</span>
+                              <span className="font-bold text-lg text-green-600">
+                                {formatCurrency(account.balance)}
+                              </span>
                             </div>
                             <Button
                               size="sm"

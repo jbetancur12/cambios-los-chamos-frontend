@@ -6,12 +6,14 @@ import { useRecentGiros } from '@/hooks/useRecentGiros'
 import type { RecentGiro } from '@/hooks/useRecentGiros'
 import { GiroDetailSheet } from '@/components/GiroDetailSheet'
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
 import type { Minorista, BankAccount } from '@/types/api'
 
 export function DashboardPage() {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const { stats, loading, error } = useDashboardStats()
   const { giros, loading: girosLoading } = useRecentGiros(5)
   const [selectedGiro, setSelectedGiro] = useState<RecentGiro | null>(null)

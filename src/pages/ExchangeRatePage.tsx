@@ -115,9 +115,7 @@ export function ExchangeRatePage() {
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl md:text-3xl font-bold text-foreground">Tasas de Cambio</h1>
-        <p className="text-sm md:text-base text-muted-foreground mt-1">
-          Gestiona las tasas de cambio del sistema
-        </p>
+        <p className="text-sm md:text-base text-muted-foreground mt-1">Gestiona las tasas de cambio del sistema</p>
       </div>
 
       {/* Current Rate Card */}
@@ -252,9 +250,7 @@ export function ExchangeRatePage() {
                   placeholder="Ej: 1.05"
                   required
                 />
-                <p className="text-xs text-muted-foreground">
-                  Cuántos bolívares se dan por cada peso colombiano
-                </p>
+                <p className="text-xs text-muted-foreground">Cuántos bolívares se dan por cada peso colombiano</p>
               </div>
 
               <div className="space-y-2">
@@ -268,9 +264,7 @@ export function ExchangeRatePage() {
                   placeholder="Ej: 0.95"
                   required
                 />
-                <p className="text-xs text-muted-foreground">
-                  Cuántos pesos colombianos se dan por cada bolívar
-                </p>
+                <p className="text-xs text-muted-foreground">Cuántos pesos colombianos se dan por cada bolívar</p>
               </div>
 
               <div className="space-y-2">
@@ -306,12 +300,8 @@ export function ExchangeRatePage() {
                 <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-lg space-y-2">
                   <p className="text-sm font-medium">Vista Previa</p>
                   <div className="space-y-1 text-xs">
-                    <p>
-                      1.000 COP = {(1000 / parseFloat(sellRate || '1')).toFixed(2)} VES
-                    </p>
-                    <p>
-                      1.000 VES = {(1000 * parseFloat(buyRate || '1')).toFixed(2)} COP
-                    </p>
+                    <p>1.000 COP = {(1000 / parseFloat(sellRate || '1')).toFixed(2)} VES</p>
+                    <p>1.000 VES = {(1000 * parseFloat(buyRate || '1')).toFixed(2)} COP</p>
                   </div>
                 </div>
               )}
