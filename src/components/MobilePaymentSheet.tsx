@@ -17,16 +17,16 @@ import {
 } from '@/components/ui/select'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
+import type { ExchangeRate, Minorista } from '@/types/api'
+import { BalanceInfo } from './BalanceInfo'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface Bank {
   id: string
   name: string
 }
 
-interface ExchangeRate {
-  id: string
-  bcv: number
-}
+
 
 interface MobilePaymentSheetProps {
   open: boolean
@@ -34,6 +34,7 @@ interface MobilePaymentSheetProps {
 }
 
 export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetProps) {
+  const { user } = useAuth()
   const [cedula, setCedula] = useState('')
   const [selectedBank, setSelectedBank] = useState('')
   const [phone, setPhone] = useState('')
@@ -42,11 +43,18 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
   const [banks, setBanks] = useState<Bank[]>([])
   const [exchangeRate, setExchangeRate] = useState<ExchangeRate | null>(null)
   const [loading, setLoading] = useState(false)
+  const [minoristaBalance, setMinoristaBalance] = useState<number | null>(null)
+  const [loadingBalance, setLoadingBalance] = useState(false)
+
+  const isMinorista = user?.role === 'MINORISTA'
 
   useEffect(() => {
     if (open) {
       loadBanks()
       loadExchangeRate()
+      if (isMinorista) {
+        fetchMinoristaBalance()
+      }
     }
   }, [open])
 
@@ -62,17 +70,31 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
 
   const loadExchangeRate = async () => {
     try {
-      const data = await api.get<ExchangeRate[]>('/api/exchange-rate/current')
-      if (Array.isArray(data) && data.length > 0) {
-        setExchangeRate(data[0])
-      }
+      const response = await api.get<{ rate: ExchangeRate }>('/api/exchange-rate/current')
+
+
+      setExchangeRate(response.rate)
+
     } catch (error) {
       console.error('Error loading exchange rate:', error)
       toast.error('Error al cargar la tasa BCV')
     }
   }
 
-  const amountBs = exchangeRate && amountCop ? (Number(amountCop) * Number(exchangeRate.bcv)).toFixed(2) : '0.00'
+  const fetchMinoristaBalance = async () => {
+    try {
+      setLoadingBalance(true)
+      const response = await api.get<{ minorista: Minorista }>('/api/minorista/me')
+      setMinoristaBalance(response.minorista.balance)
+    } catch (error: any) {
+      toast.error(error.message || 'Error al cargar balance')
+    } finally {
+      setLoadingBalance(false)
+    }
+  }
+
+  const amountBs = exchangeRate && amountCop ? (Number(amountCop) / Number(exchangeRate.sellRate)).toFixed(2) : '0.00'
+  const amountBCV = exchangeRate && (Number(amountBs) / exchangeRate.usd).toFixed(2)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -101,6 +123,27 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
     setPhone('')
     setSenderName('')
     setAmountCop('')
+  }
+
+  const getRemainingBalance = () => {
+    if (minoristaBalance === null) return null
+    return minoristaBalance - parseFloat(amountCop) + getEarnedProfit()!
+  }
+
+  const getEarnedProfit = () => {
+    if (!exchangeRate || minoristaBalance === null || !amountCop) return null
+
+    const amount = parseFloat(amountCop)
+    if (isNaN(amount)) return null
+
+    return amount * 0.05 // Suponiendo que la ganancia total es el 5% del monto
+
+  }
+
+  const hasInsufficientBalance = () => {
+    if (!isMinorista || minoristaBalance === null) return false
+    const remaining = getRemainingBalance()
+    return remaining !== null && remaining < 0
   }
 
   return (
@@ -168,12 +211,35 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
             />
           </div>
 
+          {isMinorista && !loadingBalance && minoristaBalance !== null && (
+            <BalanceInfo
+              minoristaBalance={minoristaBalance}
+              amountInput={amountCop}
+              getEarnedProfit={getEarnedProfit}
+              getRemainingBalance={getRemainingBalance}
+              hasInsufficientBalance={hasInsufficientBalance}
+            />
+          )}
+
           <div className="bg-gray-50 p-3 rounded border">
-            <div className="text-sm font-medium mb-2">Conversión a Bolívares</div>
-            <div className="text-2xl font-bold text-green-600">{amountBs} Bs</div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <div className="text-sm font-medium">Conversión a Bolívares</div>
+                <div className="text-2xl font-bold text-green-600">{amountBs} Bs</div>
+              </div>
+              <div>
+                <div className="text-sm font-medium">Conversión a BCV</div>
+                <div className="text-2xl font-bold text-green-600">{amountBCV} USD</div>
+              </div>
+            </div>
             {exchangeRate && (
-              <div className="text-xs text-gray-500 mt-2">
-                Tasa BCV: {exchangeRate.bcv}
+              <div className="flex justify-left mt-4">
+                <div className="text-xs text-gray-500 mr-10">
+                  Tasa: {exchangeRate.sellRate}
+                </div>
+                <div className="text-xs text-gray-500">
+                  Tasa BCV: {exchangeRate.bcv}
+                </div>
               </div>
             )}
           </div>

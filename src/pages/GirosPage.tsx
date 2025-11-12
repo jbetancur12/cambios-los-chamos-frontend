@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Plus, ArrowRight, Clock, CheckCircle, XCircle, Search, X as XIcon } from 'lucide-react'
+import { Plus, ArrowRight, Clock, CheckCircle, XCircle, Search, X as XIcon, Banknote, Wallet, Signal } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
@@ -204,114 +204,144 @@ export function GirosPage() {
             </div>
           )}
           <div className="grid gap-4">
-          {filteredGiros.map((giro) => {
-            const statusBadge = getStatusBadge(giro.status)
-            const StatusIcon = statusBadge.icon
+            {filteredGiros.map((giro) => {
+              const statusBadge = getStatusBadge(giro.status)
+              const StatusIcon = statusBadge.icon
 
-            return (
-              <Card
-                key={giro.id}
-                className="cursor-pointer hover:shadow-md transition-shadow"
-                onClick={() => handleGiroClick(giro.id)}
-              >
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="text-lg">{giro.beneficiaryName}</CardTitle>
-                      <p className="text-sm text-muted-foreground mt-1">ID: {giro.beneficiaryId}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{formatDate(giro.createdAt)}</p>
-                    </div>
-                    <div className="flex flex-col items-end gap-2">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${statusBadge.className} flex items-center gap-1`}
-                      >
-                        <StatusIcon className="h-3 w-3" />
-                        {statusBadge.label}
-                      </span>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {/* Amount */}
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div>
-                      <p className="text-muted-foreground">Monto Enviado</p>
-                      <p className="font-semibold">{formatCurrency(giro.amountInput, giro.currencyInput)}</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Monto en Bs</p>
-                      <p className="font-semibold">{formatCurrency(giro.amountBs, 'VES')}</p>
-                    </div>
-                  </div>
-
-                  {/* Bank Info */}
-                  <div className="text-sm">
-                    <p className="text-muted-foreground">Banco Destino</p>
-                    <p className="font-medium">{giro.bankName}</p>
-                    <p className="text-xs text-muted-foreground">Cuenta: {giro.accountNumber}</p>
-                  </div>
-
-                  {/* Transferencista Info */}
-                  {giro.transferencista && (
-                    <div className="text-sm">
-                      <p className="text-muted-foreground">Transferencista Asignado</p>
-                      <p className="font-medium">{giro.transferencista.user.fullName}</p>
-                    </div>
-                  )}
-
-                  {/* Profit for Admin/SuperAdmin */}
-                  {(user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN') && (
-                    <div className="pt-2 border-t">
-                      <div className="grid grid-cols-2 gap-2 text-sm">
-                        <div>
-                          <p className="text-muted-foreground">Ganancia Sistema</p>
-                          <p className="font-semibold text-green-600">{formatCurrency(giro.systemProfit, 'COP')}</p>
-                        </div>
-                        {giro.minoristaProfit > 0 && (
-                          <div>
-                            <p className="text-muted-foreground">Ganancia Minorista</p>
-                            <p className="font-semibold text-blue-600">{formatCurrency(giro.minoristaProfit, 'COP')}</p>
-                          </div>
-                        )}
+              return (
+                <Card
+                  key={giro.id}
+                  className="cursor-pointer hover:shadow-md transition-shadow"
+                  onClick={() => handleGiroClick(giro.id)}
+                >
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <CardTitle className="text-lg">{giro.beneficiaryName}</CardTitle>
+                        <p className="text-sm text-muted-foreground mt-1">ID: {giro.beneficiaryId}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{formatDate(giro.createdAt)}</p>
+                      </div>
+                      <div className="flex flex-col items-end gap-2">
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-medium ${statusBadge.className} flex items-center gap-1`}
+                        >
+                          <StatusIcon className="h-3 w-3" />
+                          {statusBadge.label}
+                        </span>
                       </div>
                     </div>
-                  )}
-
-                  {/* Minorista Profit */}
-                  {user?.role === 'MINORISTA' && giro.minoristaProfit > 0 && (
-                    <div className="pt-2 border-t text-sm">
-                      <p className="text-muted-foreground">Tu Ganancia</p>
-                      <p className="font-semibold text-green-600">{formatCurrency(giro.minoristaProfit, 'COP')}</p>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {/* Amount */}
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div>
+                        <p className="text-muted-foreground">Monto Enviado</p>
+                        <p className="font-semibold">{formatCurrency(giro.amountInput, giro.currencyInput)}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Monto en Bs</p>
+                        <p className="font-semibold">{formatCurrency(giro.amountBs, 'VES')}</p>
+                      </div>
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-            )
-          })}
-        </div>
+
+                    {/* Bank Info */}
+                    <div className="text-sm">
+                      <p className="text-muted-foreground">Banco Destino</p>
+                      <p className="font-medium">{giro.bankName}</p>
+                      <p className="text-xs text-muted-foreground">Cuenta: {giro.accountNumber}</p>
+                    </div>
+
+                    {/* Transferencista Info */}
+                    {giro.transferencista && (
+                      <div className="text-sm">
+                        <p className="text-muted-foreground">Transferencista Asignado</p>
+                        <p className="font-medium">{giro.transferencista.user.fullName}</p>
+                      </div>
+                    )}
+
+                    {/* Profit for Admin/SuperAdmin */}
+                    {(user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN') && (
+                      <div className="pt-2 border-t">
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          <div>
+                            <p className="text-muted-foreground">Ganancia Sistema</p>
+                            <p className="font-semibold text-green-600">{formatCurrency(giro.systemProfit, 'COP')}</p>
+                          </div>
+                          {giro.minoristaProfit > 0 && (
+                            <div>
+                              <p className="text-muted-foreground">Ganancia Minorista</p>
+                              <p className="font-semibold text-blue-600">{formatCurrency(giro.minoristaProfit, 'COP')}</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Minorista Profit */}
+                    {user?.role === 'MINORISTA' && giro.minoristaProfit > 0 && (
+                      <div className="pt-2 border-t text-sm">
+                        <p className="text-muted-foreground">Tu Ganancia</p>
+                        <p className="font-semibold text-green-600">{formatCurrency(giro.minoristaProfit, 'COP')}</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </div>
         </>
       )}
+      <div className="fixed bottom-20 md:bottom-8 right-4 md:right-8 z-50">
 
-      {/* FAB - Create Giro */}
-      {canCreateGiro && (
-        <div className="fixed bottom-20 md:bottom-8 right-4 md:right-8 z-50">
-          <button
-            onClick={() => setGiroTypeMenuOpen(true)}
-            className="bg-primary text-primary-foreground rounded-full p-4 shadow-lg hover:shadow-xl transition-all active:scale-95"
-          >
-            <Plus className="h-6 w-6" />
-          </button>
-        </div>
-      )}
+        {/* Menu Options */}
+        {giroTypeMenuOpen && (
+          <div className="absolute bottom-16 right-0 bg-card border rounded-lg shadow-lg p-2 space-y-1 min-w-[200px] mb-2 z-50">
+            <button
+              onClick={() => setCreateSheetOpen(true)}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-md hover:bg-accent transition-colors text-left"
+            >
+              <Banknote className="h-5 w-5 text-blue-600" />
+              <span className="font-medium">Transferencia</span>
+            </button>
+            <button
+              onClick={()=>setMobilePaymentOpen(true)}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-md hover:bg-accent transition-colors text-left"
+            >
+              <Wallet className="h-5 w-5 text-green-600" />
+              <span className="font-medium">Pago Movil</span>
+            </button>
+            <button
+              onClick={()=>setRechargeOpen(true)}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-md hover:bg-accent transition-colors text-left"
+            >
+              <Signal className="h-5 w-5 text-orange-600" />
+              <span className="font-medium">Recarga</span>
+            </button>
+          </div>
+        )}
+
+        {/* FAB - Create Giro */}
+        {canCreateGiro && (
+          <div className="fixed bottom-20 md:bottom-8 right-4 md:right-8 z-50">
+            <button
+              onClick={() => setGiroTypeMenuOpen(!giroTypeMenuOpen)}
+              className={`bg-primary text-primary-foreground rounded-full p-4 shadow-lg hover:shadow-xl transition-all active:scale-95 ${giroTypeMenuOpen ? 'rotate-45' : ''
+                }`}          >
+              <Plus className="h-6 w-6" />
+            </button>
+          </div>
+        )}
+
+      </div>
 
       {/* Giro Type Menu */}
-      <GiroTypeMenu
+      {/* <GiroTypeMenu
         open={giroTypeMenuOpen}
         onOpenChange={setGiroTypeMenuOpen}
         onTransferencia={() => setCreateSheetOpen(true)}
         onPagoMovil={() => setMobilePaymentOpen(true)}
         onRecarga={() => setRechargeOpen(true)}
-      />
+      /> */}
 
       {/* Create Giro Sheet */}
       <CreateGiroSheet open={createSheetOpen} onOpenChange={setCreateSheetOpen} onSuccess={fetchGiros} />

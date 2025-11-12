@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 import { useAuth } from '@/contexts/AuthContext'
 import { AlertCircle, Wallet } from 'lucide-react'
 import type { Bank, ExchangeRate, Currency, Minorista } from '@/types/api'
+import { BalanceInfo } from './BalanceInfo'
 
 interface CreateGiroSheetProps {
   open: boolean
@@ -311,7 +312,7 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
             </div>
 
             {/* Minorista Balance Info */}
-            {isMinorista && !loadingBalance && minoristaBalance !== null && (
+            {/* {isMinorista && !loadingBalance && minoristaBalance !== null && (
               <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-lg space-y-2">
                 <div className="flex items-center gap-2 mb-2">
                   <Wallet className="h-4 w-4 text-blue-600" />
@@ -369,7 +370,17 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
                   </div>
                 )}
               </div>
-            )}
+            )} */}
+
+            {isMinorista && !loadingBalance && minoristaBalance !== null && (
+  <BalanceInfo
+    minoristaBalance={minoristaBalance}
+    amountInput={amountInput}
+    getEarnedProfit={getEarnedProfit}
+    getRemainingBalance={getRemainingBalance}
+    hasInsufficientBalance={hasInsufficientBalance}
+  />
+)}
 
             {/* Exchange Rate Info */}
             {!loadingRate && currentRate && (
