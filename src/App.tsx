@@ -10,6 +10,7 @@ import { GirosPage } from '@/pages/GirosPage'
 import { CalculadoraPage } from '@/pages/CalculadoraPage'
 import { ExchangeRatePage } from '@/pages/ExchangeRatePage'
 import { BankTransactionsPage } from '@/pages/BankTransactionsPage'
+import { BankAccountsPage } from '@/pages/BankAccountsPage'
 
 function App() {
   return (
@@ -72,6 +73,18 @@ function App() {
               <ProtectedRoute>
                 <DashboardLayout>
                   <CalculadoraPage />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Bank Accounts */}
+          <Route
+            path="/cuentas-bancarias"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <BankAccountsPage />
                 </DashboardLayout>
               </ProtectedRoute>
             }
