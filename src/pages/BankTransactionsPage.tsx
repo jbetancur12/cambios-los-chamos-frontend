@@ -158,9 +158,9 @@ export function BankTransactionsPage() {
                         <th className="pb-3 font-medium">Fecha</th>
                         <th className="pb-3 font-medium">Tipo</th>
                         <th className="pb-3 font-medium text-right">Monto</th>
-                        <th className="pb-3 font-medium text-right">D&eacute;</th>
-                        <th className="pb-3 font-medium text-right">Ahora</th>
-                        <th className="pb-3 font-medium">Creado por</th>
+                        <th className="pb-3 font-medium text-right pr-6">Dé</th>
+                        <th className="pb-3 font-medium text-right pr-6">Ahora</th>
+                        <th className="pb-3 font-medium pl-4">Creado por</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -170,27 +170,27 @@ export function BankTransactionsPage() {
 
                         return (
                           <tr key={transaction.id} className="border-b last:border-0 hover:bg-muted/50">
-                            <td className="py-3 text-sm">{formatDate(transaction.createdAt)}</td>
+                            <td className="py-3 text-sm whitespace-nowrap">{formatDate(transaction.createdAt)}</td>
                             <td className="py-3">
                               <Badge variant="outline" className={getTransactionTypeColor(transaction.type)}>
                                 {getTransactionTypeLabel(transaction.type)}
                               </Badge>
                             </td>
                             <td
-                              className={`py-3 text-right font-semibold ${
+                              className={`py-3 text-right font-semibold whitespace-nowrap ${
                                 isPositive ? 'text-green-600' : 'text-red-600'
                               }`}
                             >
                               {isPositive && '+'}
                               {formatCurrency(displayAmount)}
                             </td>
-                            <td className="py-3 text-right text-sm text-muted-foreground">
+                            <td className="py-3 text-right text-sm text-muted-foreground pr-6 whitespace-nowrap">
                               {formatCurrency(transaction.previousBalance)}
                             </td>
-                            <td className="py-3 text-right font-semibold">
+                            <td className="py-3 text-right font-semibold pr-6 whitespace-nowrap">
                               {formatCurrency(transaction.currentBalance)}
                             </td>
-                            <td className="py-3 text-sm">{transaction.createdBy.fullName}</td>
+                            <td className="py-3 text-sm pl-4">{transaction.createdBy.fullName}</td>
                           </tr>
                         )
                       })}

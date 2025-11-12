@@ -114,7 +114,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         {/* Mobile Bottom Navigation */}
         <nav id="mobileNav" className="fixed bottom-0 left-0 right-0 bg-card border-t z-50 md:hidden overflow-x-auto">
           <div className="flex h-16 items-center space-x-4 px-4 w-max">
-            {navItems.map((item) => {
+            {visibleItems.map((item) => {
               const Icon = item.icon
               const isActive = location.pathname === item.href
               return (
