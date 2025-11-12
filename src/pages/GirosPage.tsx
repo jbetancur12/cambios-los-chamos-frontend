@@ -6,6 +6,7 @@ import { Plus, ArrowRight, Clock, CheckCircle, XCircle } from 'lucide-react'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
 import { CreateGiroSheet } from '@/components/CreateGiroSheet'
+import { GiroDetailSheet } from '@/components/GiroDetailSheet'
 import type { Giro, GiroStatus, Currency } from '@/types/api'
 
 export function GirosPage() {
@@ -14,6 +15,8 @@ export function GirosPage() {
   const [loading, setLoading] = useState(true)
   const [filterStatus, setFilterStatus] = useState<GiroStatus | 'ALL'>('ALL')
   const [createSheetOpen, setCreateSheetOpen] = useState(false)
+  const [detailSheetOpen, setDetailSheetOpen] = useState(false)
+  const [selectedGiroId, setSelectedGiroId] = useState<string | null>(null)
 
   const canCreateGiro =
     user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN' || user?.role === 'MINORISTA'
@@ -84,6 +87,11 @@ export function GirosPage() {
     }).format(date)
   }
 
+  const handleGiroClick = (giroId: string) => {
+    setSelectedGiroId(giroId)
+    setDetailSheetOpen(true)
+  }
+
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
       {/* Header */}
@@ -149,7 +157,11 @@ export function GirosPage() {
             const StatusIcon = statusBadge.icon
 
             return (
-              <Card key={giro.id}>
+              <Card
+                key={giro.id}
+                className="cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => handleGiroClick(giro.id)}
+              >
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -242,6 +254,14 @@ export function GirosPage() {
         open={createSheetOpen}
         onOpenChange={setCreateSheetOpen}
         onSuccess={fetchGiros}
+      />
+
+      {/* Giro Detail Sheet */}
+      <GiroDetailSheet
+        open={detailSheetOpen}
+        onOpenChange={setDetailSheetOpen}
+        giroId={selectedGiroId}
+        onUpdate={fetchGiros}
       />
     </div>
   )
