@@ -138,3 +138,25 @@ export interface Giro {
   createdBy: User
   bankAccountUsed?: BankAccount
 }
+
+// Bank Account Transaction Types
+export enum BankAccountTransactionType {
+  DEPOSIT = 'DEPOSIT',
+  WITHDRAWAL = 'WITHDRAWAL',
+  ADJUSTMENT = 'ADJUSTMENT',
+}
+
+export interface BankAccountTransaction {
+  id: string
+  amount: number
+  type: BankAccountTransactionType
+  reference?: string
+  previousBalance: number
+  currentBalance: number
+  createdBy: {
+    id: string
+    fullName: string
+    email: string
+  }
+  createdAt: string
+}

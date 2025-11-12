@@ -298,7 +298,8 @@ export function DashboardPage() {
                 {bankAccounts.map((account) => (
                   <div
                     key={account.id}
-                    className="p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                    className="p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors cursor-pointer"
+                    onClick={() => navigate(`/bank-account/${account.id}/transactions`)}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">

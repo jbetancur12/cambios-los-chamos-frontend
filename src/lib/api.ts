@@ -14,13 +14,14 @@ const getApiBaseUrl = () => {
 const API_BASE_URL = getApiBaseUrl()
 
 export class ApiError extends Error {
-  constructor(
-    message: string,
-    public code?: string,
-    public details?: unknown
-  ) {
+  public code?: string
+  public details?: unknown
+
+  constructor(message: string, code?: string, details?: unknown) {
     super(message)
     this.name = 'ApiError'
+    this.code = code
+    this.details = details
   }
 }
 

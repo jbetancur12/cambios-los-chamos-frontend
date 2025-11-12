@@ -9,6 +9,7 @@ import { UsersPage } from '@/pages/UsersPage'
 import { GirosPage } from '@/pages/GirosPage'
 import { CalculadoraPage } from '@/pages/CalculadoraPage'
 import { ExchangeRatePage } from '@/pages/ExchangeRatePage'
+import { BankTransactionsPage } from '@/pages/BankTransactionsPage'
 
 function App() {
   return (
@@ -71,6 +72,18 @@ function App() {
               <ProtectedRoute>
                 <DashboardLayout>
                   <CalculadoraPage />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Bank Transactions */}
+          <Route
+            path="/bank-account/:bankAccountId/transactions"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <BankTransactionsPage />
                 </DashboardLayout>
               </ProtectedRoute>
             }
