@@ -41,7 +41,7 @@ export function UsersPage() {
 
   const isSuperAdmin = currentUser?.role === 'SUPER_ADMIN'
 
-  const fetchUsers = async (role?: UserRole) => {
+  const fetchUsers = async (role?: UserRole | 'ALL') => {
     try {
       setLoading(true)
       let usersData: UserData[] = []
