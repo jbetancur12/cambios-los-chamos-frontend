@@ -70,6 +70,9 @@ export function RechargeSheet({ open, onOpenChange }: RechargeSheetProps) {
     try {
       const data = await api.get<RechargeOperator[]>('/api/recharge-operators')
       setOperators(data)
+      if (data.length > 0 && !selectedOperator) {
+        setSelectedOperator(data[0].id)
+      }
     } catch (error) {
       console.error('Error loading operators:', error)
       toast.error('Error al cargar los operadores')

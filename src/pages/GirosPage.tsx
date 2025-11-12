@@ -2,16 +2,15 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Plus, ArrowRight, Clock, CheckCircle, XCircle, Search, X as XIcon, Banknote, Wallet, Signal } from 'lucide-react'
+import { Plus, ArrowRight, Clock, CheckCircle, XCircle, Search, X as XIcon, Banknote, Wallet, Signal, CreditCard } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
 import { CreateGiroSheet } from '@/components/CreateGiroSheet'
 import { GiroDetailSheet } from '@/components/GiroDetailSheet'
-import { GiroTypeMenu } from '@/components/GiroTypeMenu'
 import { MobilePaymentSheet } from '@/components/MobilePaymentSheet'
 import { RechargeSheet } from '@/components/RechargeSheet'
-import type { Giro, GiroStatus, Currency } from '@/types/api'
+import type { Giro, GiroStatus, Currency, ExecutionType } from '@/types/api'
 
 export function GirosPage() {
   const { user } = useAuth()
@@ -63,6 +62,18 @@ export function GirosPage() {
       CANCELADO: { label: 'Cancelado', className: 'bg-red-100 text-red-800', icon: XCircle },
     }
     return statusMap[status] || { label: status, className: 'bg-gray-100 text-gray-800', icon: Clock }
+  }
+
+  const getExecutionTypeBadge = (executionType?: ExecutionType) => {
+    const typeMap: Record<ExecutionType, { label: string; className: string; icon: any }> = {
+      TRANSFERENCIA: { label: 'Transferencia', className: 'bg-blue-50 text-blue-700 border border-blue-200', icon: Banknote },
+      PAGO_MOVIL: { label: 'Pago Móvil', className: 'bg-green-50 text-green-700 border border-green-200', icon: Wallet },
+      RECARGA: { label: 'Recarga Celular', className: 'bg-orange-50 text-orange-700 border border-orange-200', icon: Signal },
+      EFECTIVO: { label: 'Efectivo', className: 'bg-emerald-50 text-emerald-700 border border-emerald-200', icon: CreditCard },
+      ZELLE: { label: 'Zelle', className: 'bg-purple-50 text-purple-700 border border-purple-200', icon: CreditCard },
+      OTROS: { label: 'Otros', className: 'bg-gray-50 text-gray-700 border border-gray-200', icon: ArrowRight },
+    }
+    return executionType && typeMap[executionType] ? typeMap[executionType] : { label: 'Desconocido', className: 'bg-gray-50 text-gray-700 border border-gray-200', icon: ArrowRight }
   }
 
   const formatCurrency = (amount: number, currency: Currency) => {
@@ -207,6 +218,9 @@ export function GirosPage() {
             {filteredGiros.map((giro) => {
               const statusBadge = getStatusBadge(giro.status)
               const StatusIcon = statusBadge.icon
+              const executionTypeBadge = getExecutionTypeBadge(giro.executionType)
+              const ExecutionIcon = executionTypeBadge.icon
+              const isRecharge = giro.executionType === 'RECARGA'
 
               return (
                 <Card
@@ -228,6 +242,12 @@ export function GirosPage() {
                           <StatusIcon className="h-3 w-3" />
                           {statusBadge.label}
                         </span>
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-medium ${executionTypeBadge.className} flex items-center gap-1`}
+                        >
+                          <ExecutionIcon className="h-3 w-3" />
+                          {executionTypeBadge.label}
+                        </span>
                       </div>
                     </div>
                   </CardHeader>
@@ -244,11 +264,11 @@ export function GirosPage() {
                       </div>
                     </div>
 
-                    {/* Bank Info */}
+                    {/* Bank/Operator Info */}
                     <div className="text-sm">
-                      <p className="text-muted-foreground">Banco Destino</p>
+                      <p className="text-muted-foreground">{isRecharge ? 'Operador' : 'Banco Destino'}</p>
                       <p className="font-medium">{giro.bankName}</p>
-                      <p className="text-xs text-muted-foreground">Cuenta: {giro.accountNumber}</p>
+                      <p className="text-xs text-muted-foreground">{isRecharge ? 'Teléfono' : 'Cuenta'}: {giro.accountNumber}</p>
                     </div>
 
                     {/* Transferencista Info */}
@@ -334,14 +354,6 @@ export function GirosPage() {
 
       </div>
 
-      {/* Giro Type Menu */}
-      <GiroTypeMenu
-        open={giroTypeMenuOpen}
-        onOpenChange={setGiroTypeMenuOpen}
-        onTransferencia={() => setCreateSheetOpen(true)}
-        onPagoMovil={() => setMobilePaymentOpen(true)}
-        onRecarga={() => setRechargeOpen(true)}
-      />
 
       {/* Create Giro Sheet */}
       <CreateGiroSheet open={createSheetOpen} onOpenChange={setCreateSheetOpen} onSuccess={fetchGiros} />

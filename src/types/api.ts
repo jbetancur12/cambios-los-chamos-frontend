@@ -79,7 +79,7 @@ export interface Minorista {
 // Giro Types
 export type GiroStatus = 'PENDIENTE' | 'ASIGNADO' | 'PROCESANDO' | 'COMPLETADO' | 'CANCELADO'
 
-export type ExecutionType = 'TRANSFERENCIA' | 'PAGO_MOVIL' | 'EFECTIVO' | 'ZELLE' | 'OTROS'
+export type ExecutionType = 'TRANSFERENCIA' | 'PAGO_MOVIL' | 'EFECTIVO' | 'ZELLE' | 'OTROS' | 'RECARGA'
 
 export type Currency = 'VES' | 'COP' | 'USD'
 
