@@ -1,11 +1,14 @@
 import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { FileText, Users, TrendingUp, DollarSign, Wallet, Coins, Clock, ArrowRight } from 'lucide-react'
+import { FileText, Users, TrendingUp, DollarSign, Wallet, Coins, Clock, ArrowRight, Building } from 'lucide-react'
 import { useDashboardStats } from '@/hooks/useDashboardStats'
 import { useRecentGiros } from '@/hooks/useRecentGiros'
 import type { RecentGiro } from '@/hooks/useRecentGiros'
 import { GiroDetailSheet } from '@/components/GiroDetailSheet'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { api } from '@/lib/api'
+import { toast } from 'sonner'
+import type { Minorista, BankAccount } from '@/types/api'
 
 export function DashboardPage() {
   const { user } = useAuth()
@@ -14,9 +17,50 @@ export function DashboardPage() {
   const [selectedGiro, setSelectedGiro] = useState<RecentGiro | null>(null)
   const [sheetOpen, setSheetOpen] = useState(false)
 
+  // Minorista balance
+  const [minoristaBalance, setMinoristaBalance] = useState<number | null>(null)
+  const [loadingBalance, setLoadingBalance] = useState(false)
+
+  // Transferencista bank accounts
+  const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([])
+  const [loadingAccounts, setLoadingAccounts] = useState(false)
+
   const isSuperAdmin = user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN'
   const isTransferencista = user?.role === 'TRANSFERENCISTA'
   const isMinorista = user?.role === 'MINORISTA'
+
+  useEffect(() => {
+    if (isMinorista) {
+      fetchMinoristaBalance()
+    }
+    if (isTransferencista) {
+      fetchBankAccounts()
+    }
+  }, [isMinorista, isTransferencista])
+
+  const fetchMinoristaBalance = async () => {
+    try {
+      setLoadingBalance(true)
+      const response = await api.get<{ minorista: Minorista }>('/api/minorista/me')
+      setMinoristaBalance(response.minorista.balance)
+    } catch (error: any) {
+      toast.error(error.message || 'Error al cargar balance')
+    } finally {
+      setLoadingBalance(false)
+    }
+  }
+
+  const fetchBankAccounts = async () => {
+    try {
+      setLoadingAccounts(true)
+      const response = await api.get<{ bankAccounts: BankAccount[] }>('/api/bank-account/my-accounts')
+      setBankAccounts(response.bankAccounts)
+    } catch (error: any) {
+      toast.error(error.message || 'Error al cargar cuentas bancarias')
+    } finally {
+      setLoadingAccounts(false)
+    }
+  }
 
   const handleGiroClick = (giro: RecentGiro) => {
     setSelectedGiro(giro)
@@ -197,6 +241,97 @@ export function DashboardPage() {
           </Card>
         )}
       </div>
+
+      {/* Minorista Balance Card */}
+      {isMinorista && (
+        <Card className="mb-6 border-blue-200 dark:border-blue-800">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg md:text-xl flex items-center gap-2">
+                <Wallet className="h-5 w-5 text-blue-600" />
+                Saldo Disponible
+              </CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {loadingBalance ? (
+              <div className="text-center py-4">
+                <p className="text-sm text-muted-foreground">Cargando balance...</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <div className="text-3xl md:text-4xl font-bold text-blue-600">
+                  {minoristaBalance !== null ? formatCurrency(minoristaBalance, 'VES') : 'Bs 0,00'}
+                </div>
+                <p className="text-sm text-muted-foreground">Disponible para crear giros</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Transferencista Bank Accounts Card */}
+      {isTransferencista && (
+        <Card className="mb-6">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg md:text-xl flex items-center gap-2">
+              <Building className="h-5 w-5" />
+              Mis Cuentas Bancarias
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loadingAccounts ? (
+              <div className="text-center py-4">
+                <p className="text-sm text-muted-foreground">Cargando cuentas...</p>
+              </div>
+            ) : bankAccounts.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-sm text-muted-foreground">No tienes cuentas bancarias registradas</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {bankAccounts.map((account) => (
+                  <div
+                    key={account.id}
+                    className="p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Building className="h-4 w-4 text-muted-foreground" />
+                          <p className="font-semibold text-sm md:text-base">{account.bank.name}</p>
+                        </div>
+                        <p className="text-xs md:text-sm text-muted-foreground">{account.accountNumber}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{account.accountHolder}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs text-muted-foreground">Saldo</p>
+                        <p className="text-lg md:text-xl font-bold text-green-600">
+                          {formatCurrency(account.balance, 'VES')}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {/* Total Balance */}
+                {bankAccounts.length > 1 && (
+                  <div className="pt-3 border-t">
+                    <div className="flex items-center justify-between">
+                      <p className="font-semibold">Total</p>
+                      <p className="text-xl md:text-2xl font-bold text-blue-600">
+                        {formatCurrency(
+                          bankAccounts.reduce((sum, account) => sum + account.balance, 0),
+                          'VES'
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Recent Activity */}
       <Card>
