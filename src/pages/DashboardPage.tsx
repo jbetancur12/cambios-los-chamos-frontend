@@ -67,6 +67,11 @@ export function DashboardPage() {
     setSheetOpen(true)
   }
 
+  const handleDetailClose = () => {
+    setSheetOpen(false)
+    // Recargar giros recientes si es necesario
+  }
+
   const formatCurrency = (amount: number, currency: 'VES' | 'COP' | 'USD' = 'VES') => {
     const locale = currency === 'COP' ? 'es-CO' : currency === 'USD' ? 'en-US' : 'es-VE'
     return new Intl.NumberFormat(locale, {
@@ -420,10 +425,12 @@ export function DashboardPage() {
 
       {/* Giro Detail Sheet */}
       <GiroDetailSheet
-        giro={selectedGiro}
+        giroId={selectedGiro?.id || null}
         open={sheetOpen}
-        onOpenChange={setSheetOpen}
-        userRole={user?.role || 'MINORISTA'}
+        onOpenChange={handleDetailClose}
+        onUpdate={() => {
+          // Recargar estadísticas si es necesario
+        }}
       />
     </div>
   )
