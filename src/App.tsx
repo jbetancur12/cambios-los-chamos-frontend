@@ -12,6 +12,8 @@ import { ExchangeRatePage } from '@/pages/ExchangeRatePage'
 import { BankTransactionsPage } from '@/pages/BankTransactionsPage'
 import { BankAccountsPage } from '@/pages/BankAccountsPage'
 import { ReportsPage } from '@/pages/ReportsPage'
+import { RechargeAmountsManager } from '@/components/RechargeAmountsManager'
+import { RechargeOperatorsManager } from '@/components/RechargeOperatorsManager'
 
 function App() {
   return (
@@ -118,11 +120,21 @@ function App() {
           <Route
             path="/configuracion"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredRole="SUPER_ADMIN">
                 <DashboardLayout>
                   <div className="p-6">
-                    <h1 className="text-2xl font-bold">Configuración</h1>
-                    <p className="text-muted-foreground">Próximamente...</p>
+                    <h1 className="text-3xl font-bold mb-8">Configuración</h1>
+                    <div className="grid gap-6">
+                      {/* Recharge Amounts Manager */}
+                      <div>
+                        <RechargeAmountsManager />
+                      </div>
+
+                      {/* Recharge Operators Manager */}
+                      <div>
+                        <RechargeOperatorsManager />
+                      </div>
+                    </div>
                   </div>
                 </DashboardLayout>
               </ProtectedRoute>

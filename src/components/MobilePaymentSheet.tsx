@@ -52,7 +52,7 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
 
   const loadBanks = async () => {
     try {
-      const data = await api.get<{ banks: Bank[] }>('/api/bank')
+      const data = await api.get<{ banks: Bank[] }>('/api/bank/all')
       setBanks(data.banks || [])
     } catch (error) {
       console.error('Error loading banks:', error)
@@ -62,7 +62,7 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
 
   const loadExchangeRate = async () => {
     try {
-      const data = await api.get<ExchangeRate[]>('/api/exchange-rate')
+      const data = await api.get<ExchangeRate[]>('/api/exchange-rate/current')
       if (Array.isArray(data) && data.length > 0) {
         setExchangeRate(data[0])
       }
