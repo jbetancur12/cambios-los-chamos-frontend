@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Plus, Users as UsersIcon, Mail, ShieldCheck, User, Briefcase, Building2, Wallet } from 'lucide-react'
+import { Plus, Users as UsersIcon, Mail, ShieldCheck, User, Briefcase, Building2, Wallet, Search, X } from 'lucide-react'
+import { Input } from '@/components/ui/input'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
 import { CreateUserSheet } from '@/components/CreateUserSheet'
@@ -38,6 +39,7 @@ export function UsersPage() {
   } | null>(null)
   const [rechargeMinoristaSheetOpen, setRechargeMinoristaSheetOpen] = useState(false)
   const [selectedMinorista, setSelectedMinorista] = useState<Minorista | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
 
   const isSuperAdmin = currentUser?.role === 'SUPER_ADMIN'
 
@@ -243,12 +245,39 @@ export function UsersPage() {
     return roleMap[role] || { label: role, className: 'bg-gray-100 text-gray-800' }
   }
 
+  // Filter users based on search query
+  const filteredUsers = users.filter((user) => {
+    const searchLower = searchQuery.toLowerCase()
+    return (
+      user.fullName.toLowerCase().includes(searchLower) || user.email.toLowerCase().includes(searchLower)
+    )
+  })
+
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl md:text-3xl font-bold text-foreground">Usuarios</h1>
         <p className="text-sm md:text-base text-muted-foreground mt-1">Gestiona transferencistas y minoristas</p>
+      </div>
+
+      {/* Search Bar */}
+      <div className="relative mb-6">
+        <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Buscar por nombre o email..."
+          className="pl-10 pr-10"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery('')}
+            className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
       </div>
 
       {/* Filters */}
@@ -300,8 +329,14 @@ export function UsersPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4">
-          {users.map((user) => {
+        <>
+          {searchQuery && (
+            <div className="mb-4 text-sm text-muted-foreground">
+              Se encontraron {filteredUsers.length} resultado(s) para "{searchQuery}"
+            </div>
+          )}
+          <div className="grid gap-4">
+          {filteredUsers.map((user) => {
             const roleBadge = getRoleBadge(user.role)
             return (
               <Card key={user.id}>
@@ -397,6 +432,7 @@ export function UsersPage() {
             )
           })}
         </div>
+        </>
       )}
 
       {/* FAB - Create User Menu */}

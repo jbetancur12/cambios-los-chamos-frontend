@@ -41,6 +41,9 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
   const [proofUrl, setProofUrl] = useState('')
 
   const isTransferencista = user?.role === 'TRANSFERENCISTA'
+  const isSuperAdmin = user?.role === 'SUPER_ADMIN'
+  const isAdmin = user?.role === 'ADMIN'
+  const isMinorista = user?.role === 'MINORISTA'
 
   useEffect(() => {
     if (open && giroId) {
@@ -244,29 +247,42 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
               </div>
 
               {/* Exchange Rate Applied */}
+                       {/* Exchange Rate Applied */}
               <div className="space-y-3 p-4 bg-muted rounded-lg">
                 <h3 className="font-semibold flex items-center gap-2">
                   <TrendingUp className="h-4 w-4" />
                   Tasa Aplicada
                 </h3>
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div>
-                    <p className="text-muted-foreground">Compra</p>
-                    <p className="font-medium">{giro.rateApplied.buyRate.toFixed(2)}</p>
+                
+                {isTransferencista || isMinorista ? (
+                  // Solo tasa de venta para transferencista y minorista
+                  <div className="grid grid-cols-1 gap-2 text-xs">
+                    <div>
+                      <p className="text-muted-foreground">Venta</p>
+                      <p className="font-medium text-lg">{giro.rateApplied.sellRate.toFixed(2)}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-muted-foreground">Venta</p>
-                    <p className="font-medium">{giro.rateApplied.sellRate.toFixed(2)}</p>
+                ) : (
+                  // Todas las tasas para admin y super_admin
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <p className="text-muted-foreground">Compra</p>
+                      <p className="font-medium">{giro.rateApplied.buyRate.toFixed(2)}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Venta</p>
+                      <p className="font-medium">{giro.rateApplied.sellRate.toFixed(2)}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">USD</p>
+                      <p className="font-medium">{giro.rateApplied.usd.toFixed(2)}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">BCV</p>
+                      <p className="font-medium">{giro.rateApplied.bcv.toFixed(2)}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-muted-foreground">USD</p>
-                    <p className="font-medium">{giro.rateApplied.usd.toFixed(2)}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">BCV</p>
-                    <p className="font-medium">{giro.rateApplied.bcv.toFixed(2)}</p>
-                  </div>
-                </div>
+                )}
               </div>
 
               {/* Transferencista Info */}

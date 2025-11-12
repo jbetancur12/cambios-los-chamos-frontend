@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Plus, ArrowRight, Clock, CheckCircle, XCircle } from 'lucide-react'
+import { Plus, ArrowRight, Clock, CheckCircle, XCircle, Search, X as XIcon } from 'lucide-react'
+import { Input } from '@/components/ui/input'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
 import { CreateGiroSheet } from '@/components/CreateGiroSheet'
@@ -17,6 +18,7 @@ export function GirosPage() {
   const [createSheetOpen, setCreateSheetOpen] = useState(false)
   const [detailSheetOpen, setDetailSheetOpen] = useState(false)
   const [selectedGiroId, setSelectedGiroId] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
 
   const canCreateGiro = user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN' || user?.role === 'MINORISTA'
 
@@ -91,12 +93,43 @@ export function GirosPage() {
     setDetailSheetOpen(true)
   }
 
+  // Filter giros based on search query
+  const filteredGiros = giros.filter((giro) => {
+    const searchLower = searchQuery.toLowerCase()
+    return (
+      giro.beneficiaryName.toLowerCase().includes(searchLower) ||
+      giro.beneficiaryId.toLowerCase().includes(searchLower) ||
+      giro.bankName.toLowerCase().includes(searchLower) ||
+      giro.accountNumber.includes(searchLower) ||
+      (giro.transferencista?.user.fullName.toLowerCase().includes(searchLower) ?? false)
+    )
+  })
+
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl md:text-3xl font-bold text-foreground">Giros</h1>
         <p className="text-sm md:text-base text-muted-foreground mt-1">Gestiona tus giros y transferencias</p>
+      </div>
+
+      {/* Search Bar */}
+      <div className="relative mb-6">
+        <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Buscar por nombre, beneficiario, banco, transferencista..."
+          className="pl-10 pr-10"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery('')}
+            className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+          >
+            <XIcon className="h-4 w-4" />
+          </button>
+        )}
       </div>
 
       {/* Filters */}
@@ -149,9 +182,23 @@ export function GirosPage() {
             )}
           </CardContent>
         </Card>
+      ) : filteredGiros.length === 0 ? (
+        <Card>
+          <CardContent className="p-12 text-center">
+            <Search className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+            <p className="text-muted-foreground mb-2">No se encontraron giros</p>
+            <p className="text-xs text-muted-foreground">Intenta con otros términos de búsqueda</p>
+          </CardContent>
+        </Card>
       ) : (
-        <div className="grid gap-4">
-          {giros.map((giro) => {
+        <>
+          {searchQuery && (
+            <div className="mb-4 text-sm text-muted-foreground">
+              Se encontraron {filteredGiros.length} resultado(s) para "{searchQuery}"
+            </div>
+          )}
+          <div className="grid gap-4">
+          {filteredGiros.map((giro) => {
             const statusBadge = getStatusBadge(giro.status)
             const StatusIcon = statusBadge.icon
 
@@ -236,6 +283,7 @@ export function GirosPage() {
             )
           })}
         </div>
+        </>
       )}
 
       {/* FAB - Create Giro */}

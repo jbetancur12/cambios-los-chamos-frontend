@@ -11,6 +11,7 @@ import { CalculadoraPage } from '@/pages/CalculadoraPage'
 import { ExchangeRatePage } from '@/pages/ExchangeRatePage'
 import { BankTransactionsPage } from '@/pages/BankTransactionsPage'
 import { BankAccountsPage } from '@/pages/BankAccountsPage'
+import { ReportsPage } from '@/pages/ReportsPage'
 
 function App() {
   return (
@@ -97,6 +98,18 @@ function App() {
               <ProtectedRoute>
                 <DashboardLayout>
                   <BankTransactionsPage />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Reports */}
+          <Route
+            path="/reportes"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <ReportsPage />
                 </DashboardLayout>
               </ProtectedRoute>
             }

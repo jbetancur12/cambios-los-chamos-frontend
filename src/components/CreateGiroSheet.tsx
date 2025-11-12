@@ -167,10 +167,10 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
     const rate =
       useCustomRate && isSuperAdmin
         ? {
-            buyRate: parseFloat(customBuyRate) || currentRate.buyRate,
-            sellRate: parseFloat(customSellRate) || currentRate.sellRate,
-            bcv: parseFloat(customBcv) || currentRate.bcv,
-          }
+          buyRate: parseFloat(customBuyRate) || currentRate.buyRate,
+          sellRate: parseFloat(customSellRate) || currentRate.sellRate,
+          bcv: parseFloat(customBcv) || currentRate.bcv,
+        }
         : currentRate
 
     if (currencyInput === 'USD') {
@@ -183,9 +183,20 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
   }
 
   const getRemainingBalance = () => {
-    if (minoristaBalance === null) return null
-    const amountBs = calculateAmountBs()
-    return minoristaBalance - amountBs
+    if (minoristaBalance === null) return null    
+    return minoristaBalance - parseFloat(amountInput) + getEarnedProfit()!
+  }
+
+  const getEarnedProfit = () => {
+    if (!currentRate || minoristaBalance === null || !amountInput) return null
+
+    const amount = parseFloat(amountInput)
+    if (isNaN(amount)) return null
+
+
+
+    return  amount *0.05 // Suponiendo que la ganancia total es el 5% del monto
+  
   }
 
   const hasInsufficientBalance = () => {
@@ -306,34 +317,47 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
                   <Wallet className="h-4 w-4 text-blue-600" />
                   <p className="text-sm font-medium text-blue-900 dark:text-blue-100">Tu Balance</p>
                 </div>
-                <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="grid grid-cols-3 gap-3 text-sm">
                   <div>
                     <p className="text-xs text-muted-foreground">Balance Actual</p>
                     <p className="text-lg font-semibold text-blue-700 dark:text-blue-300">
-                      {new Intl.NumberFormat('es-VE', {
+                      {new Intl.NumberFormat('es-CO', {
                         style: 'currency',
-                        currency: 'VES',
+                        currency: 'COP',
                         minimumFractionDigits: 2,
                       }).format(minoristaBalance)}
                     </p>
                   </div>
                   {amountInput && (
-                    <div>
-                      <p className="text-xs text-muted-foreground">Balance Después</p>
-                      <p
-                        className={`text-lg font-semibold ${
-                          hasInsufficientBalance()
+                    <>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Ganancia</p>
+                        <p
+                          className={`text-lg font-semibold text-green-600 dark:text-green-400`}
+                        >
+                          {new Intl.NumberFormat('es-CO', {
+                            style: 'currency',
+                            currency: 'COP',
+                            minimumFractionDigits: 2,
+                          }).format(getEarnedProfit() || 0)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Balance Después</p>
+                        <p
+                          className={`text-lg font-semibold ${hasInsufficientBalance()
                             ? 'text-red-600 dark:text-red-400'
                             : 'text-green-600 dark:text-green-400'
-                        }`}
-                      >
-                        {new Intl.NumberFormat('es-VE', {
-                          style: 'currency',
-                          currency: 'VES',
-                          minimumFractionDigits: 2,
-                        }).format(getRemainingBalance() || 0)}
-                      </p>
-                    </div>
+                            }`}
+                        >
+                          {new Intl.NumberFormat('es-CO', {
+                            style: 'currency',
+                            currency: 'COP',
+                            minimumFractionDigits: 2,
+                          }).format(getRemainingBalance() || 0)}
+                        </p>
+                      </div>
+                    </>
                   )}
                 </div>
                 {hasInsufficientBalance() && (
@@ -350,25 +374,41 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
             {/* Exchange Rate Info */}
             {!loadingRate && currentRate && (
               <div className="p-3 bg-muted rounded-lg space-y-2">
-                <p className="text-sm font-medium">Tasa de Cambio Actual</p>
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div>
-                    <span className="text-muted-foreground">Compra: </span>
-                    <span className="font-semibold">{currentRate.buyRate.toFixed(2)}</span>
+                <p className="text-sm font-medium">                {!loadingRate && currentRate && (
+                  <div className="p-3 bg-muted rounded-lg space-y-2">
+                    <p className="text-sm font-medium">Tasa de Cambio Actual</p>
+
+                    {isMinorista ? (
+                      // Mostrar solo tasa de venta para minoristas
+                      <div className="grid grid-cols-1 gap-2 text-xs">
+                        <div>
+                          <span className="text-muted-foreground">Tasa de Venta: </span>
+                          <span className="font-semibold text-lg">{currentRate.sellRate.toFixed(2)}</span>
+                        </div>
+                      </div>
+                    ) : (
+                      // Mostrar todas las tasas para SUPER_ADMIN y ADMIN
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div>
+                          <span className="text-muted-foreground">Compra: </span>
+                          <span className="font-semibold">{currentRate.buyRate.toFixed(2)}</span>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Venta: </span>
+                          <span className="font-semibold">{currentRate.sellRate.toFixed(2)}</span>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">USD: </span>
+                          <span className="font-semibold">{currentRate.usd.toFixed(2)}</span>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">BCV: </span>
+                          <span className="font-semibold">{currentRate.bcv.toFixed(2)}</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <div>
-                    <span className="text-muted-foreground">Venta: </span>
-                    <span className="font-semibold">{currentRate.sellRate.toFixed(2)}</span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">USD: </span>
-                    <span className="font-semibold">{currentRate.usd.toFixed(2)}</span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">BCV: </span>
-                    <span className="font-semibold">{currentRate.bcv.toFixed(2)}</span>
-                  </div>
-                </div>
+                )}</p>
               </div>
             )}
 
