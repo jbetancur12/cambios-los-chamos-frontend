@@ -106,7 +106,13 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
 
     setLoading(true)
     try {
-      // TODO: Create API endpoint for mobile payment
+      await api.post('/api/giro/mobile-payment/create', {
+        cedula,
+        bankId: selectedBank,
+        phone,
+        contactoEnvia: senderName,
+        amountCop: Number(amountCop),
+      })
       toast.success('Pago móvil registrado exitosamente')
       onOpenChange(false)
       resetForm()
