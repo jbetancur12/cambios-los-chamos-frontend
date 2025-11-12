@@ -41,8 +41,6 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
   const [proofUrl, setProofUrl] = useState('')
 
   const isTransferencista = user?.role === 'TRANSFERENCISTA'
-  const isSuperAdmin = user?.role === 'SUPER_ADMIN'
-  const isAdmin = user?.role === 'ADMIN'
   const isMinorista = user?.role === 'MINORISTA'
 
   useEffect(() => {

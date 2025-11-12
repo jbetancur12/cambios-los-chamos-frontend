@@ -8,6 +8,9 @@ import { api } from '@/lib/api'
 import { toast } from 'sonner'
 import { CreateGiroSheet } from '@/components/CreateGiroSheet'
 import { GiroDetailSheet } from '@/components/GiroDetailSheet'
+import { GiroTypeMenu } from '@/components/GiroTypeMenu'
+import { MobilePaymentSheet } from '@/components/MobilePaymentSheet'
+import { RechargeSheet } from '@/components/RechargeSheet'
 import type { Giro, GiroStatus, Currency } from '@/types/api'
 
 export function GirosPage() {
@@ -15,7 +18,10 @@ export function GirosPage() {
   const [giros, setGiros] = useState<Giro[]>([])
   const [loading, setLoading] = useState(true)
   const [filterStatus, setFilterStatus] = useState<GiroStatus | 'ALL'>('ALL')
+  const [giroTypeMenuOpen, setGiroTypeMenuOpen] = useState(false)
   const [createSheetOpen, setCreateSheetOpen] = useState(false)
+  const [mobilePaymentOpen, setMobilePaymentOpen] = useState(false)
+  const [rechargeOpen, setRechargeOpen] = useState(false)
   const [detailSheetOpen, setDetailSheetOpen] = useState(false)
   const [selectedGiroId, setSelectedGiroId] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
@@ -175,7 +181,7 @@ export function GirosPage() {
             <ArrowRight className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
             <p className="text-muted-foreground mb-4">No hay giros registrados</p>
             {canCreateGiro && (
-              <Button onClick={() => setCreateSheetOpen(true)}>
+              <Button onClick={() => setGiroTypeMenuOpen(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 Crear primer giro
               </Button>
@@ -290,7 +296,7 @@ export function GirosPage() {
       {canCreateGiro && (
         <div className="fixed bottom-20 md:bottom-8 right-4 md:right-8 z-50">
           <button
-            onClick={() => setCreateSheetOpen(true)}
+            onClick={() => setGiroTypeMenuOpen(true)}
             className="bg-primary text-primary-foreground rounded-full p-4 shadow-lg hover:shadow-xl transition-all active:scale-95"
           >
             <Plus className="h-6 w-6" />
@@ -298,8 +304,23 @@ export function GirosPage() {
         </div>
       )}
 
+      {/* Giro Type Menu */}
+      <GiroTypeMenu
+        open={giroTypeMenuOpen}
+        onOpenChange={setGiroTypeMenuOpen}
+        onTransferencia={() => setCreateSheetOpen(true)}
+        onPagoMovil={() => setMobilePaymentOpen(true)}
+        onRecarga={() => setRechargeOpen(true)}
+      />
+
       {/* Create Giro Sheet */}
       <CreateGiroSheet open={createSheetOpen} onOpenChange={setCreateSheetOpen} onSuccess={fetchGiros} />
+
+      {/* Mobile Payment Sheet */}
+      <MobilePaymentSheet open={mobilePaymentOpen} onOpenChange={setMobilePaymentOpen} />
+
+      {/* Recharge Sheet */}
+      <RechargeSheet open={rechargeOpen} onOpenChange={setRechargeOpen} />
 
       {/* Giro Detail Sheet */}
       <GiroDetailSheet
