@@ -7,6 +7,7 @@ import { LoginPage } from '@/pages/LoginPage'
 import { DashboardPage } from '@/pages/DashboardPage'
 import { UsersPage } from '@/pages/UsersPage'
 import { GirosPage } from '@/pages/GirosPage'
+import { CalculadoraPage } from '@/pages/CalculadoraPage'
 import { ExchangeRatePage } from '@/pages/ExchangeRatePage'
 
 function App() {
@@ -58,6 +59,18 @@ function App() {
               <ProtectedRoute>
                 <DashboardLayout>
                   <ExchangeRatePage />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+
+               {/* Calculadora*/}
+          <Route
+            path="/calculadora"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <CalculadoraPage />
                 </DashboardLayout>
               </ProtectedRoute>
             }

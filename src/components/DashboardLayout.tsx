@@ -1,6 +1,6 @@
-import { ReactNode } from 'react'
+import { useEffect, type ReactNode } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Home, FileText, Users, DollarSign, Settings, LogOut } from 'lucide-react'
+import { Home, FileText, Users, DollarSign, Settings, LogOut, Calculator } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -10,20 +10,28 @@ interface NavItem {
   icon: typeof Home
   label: string
   href: string
+  roles?: ('SUPER_ADMIN' | 'ADMIN' | 'TRANSFERENCISTA' | 'MINORISTA')[]
 }
 
 const navItems: NavItem[] = [
-  { icon: Home, label: 'Inicio', href: '/dashboard' },
-  { icon: FileText, label: 'Giros', href: '/giros' },
-  { icon: Users, label: 'Usuarios', href: '/usuarios' },
-  { icon: DollarSign, label: 'Tasas', href: '/tasas' },
-  { icon: Settings, label: 'Config', href: '/configuracion' },
+  { icon: Home, label: 'Inicio', href: '/dashboard', roles: ['SUPER_ADMIN', 'ADMIN', 'TRANSFERENCISTA', 'MINORISTA'] },
+  { icon: FileText, label: 'Giros', href: '/giros', roles: ['SUPER_ADMIN', 'ADMIN', 'TRANSFERENCISTA', 'MINORISTA'] },
+  { icon: Users, label: 'Usuarios', href: '/usuarios', roles: ['SUPER_ADMIN', 'ADMIN'] },
+  { icon: DollarSign, label: 'Tasas', href: '/tasas', roles: ['SUPER_ADMIN'] },
+  { icon: Calculator, label: 'Calculadora', href: '/calculadora', roles: ['SUPER_ADMIN', 'ADMIN', 'TRANSFERENCISTA', 'MINORISTA'] },
+  { icon: Settings, label: 'Config', href: '/configuracion', roles: ['SUPER_ADMIN', 'ADMIN'] },
 ]
 
 export function DashboardLayout({ children }: { children: ReactNode }) {
   const { user, logout } = useAuth()
+  const role = user?.role
   const location = useLocation()
   const navigate = useNavigate()
+
+  useEffect(() => {
+    const nav = document.querySelector('#mobileNav')
+    nav?.scrollTo({ left: 40, behavior: 'smooth' })
+  }, [])
 
   const handleLogout = async () => {
     try {
@@ -34,6 +42,12 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
       toast.error('Error al cerrar sesión')
     }
   }
+
+  const visibleItems = navItems.filter(
+    (item) => {
+      if (!role) return false // evita el undefined
+      return item.roles?.includes(role)
+    })
 
   return (
     <div className="min-h-screen bg-background">
@@ -47,7 +61,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
 
           {/* Navigation */}
           <nav className="flex-1 px-3 py-4 space-y-1">
-            {navItems.map((item) => {
+            {visibleItems.map((item) => {
               const Icon = item.icon
               const isActive = location.pathname === item.href
               return (
@@ -93,8 +107,8 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         <main className="flex-1 pb-20 md:pb-6">{children}</main>
 
         {/* Mobile Bottom Navigation */}
-        <nav className="fixed bottom-0 left-0 right-0 bg-card border-t z-50 md:hidden">
-          <div className="grid grid-cols-6 h-16">
+        <nav id="mobileNav" className="fixed bottom-0 left-0 right-0 bg-card border-t z-50 md:hidden overflow-x-auto">
+          <div className="flex h-16 items-center space-x-4 px-4 w-max">
             {navItems.map((item) => {
               const Icon = item.icon
               const isActive = location.pathname === item.href
@@ -103,7 +117,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
                   key={item.href}
                   to={item.href}
                   className={cn(
-                    'flex flex-col items-center justify-center gap-1 transition-colors',
+                    'flex flex-col items-center justify-center gap-1 transition-colors min-w-[80px] shrink-0',
                     isActive ? 'text-primary' : 'text-muted-foreground'
                   )}
                 >
@@ -112,15 +126,20 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
                 </Link>
               )
             })}
+
             <button
               onClick={handleLogout}
-              className="flex flex-col items-center justify-center gap-1 text-muted-foreground"
+              className="flex flex-col items-center justify-center gap-1 text-muted-foreground min-w-[80px] shrink-0"
             >
               <LogOut className="w-5 h-5" />
               <span className="text-xs">Salir</span>
             </button>
           </div>
+          <div className="pointer-events-none absolute right-0 top-0 h-full w-12 bg-gradient-to-l from-card/95 via-card/60 to-transparent" />
+          <div className="pointer-events-none absolute left-0 top-0 h-full w-12 bg-gradient-to-r from-card/95 via-card/60 to-transparent" />
+
         </nav>
+
       </div>
     </div>
   )
