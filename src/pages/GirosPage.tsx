@@ -335,13 +335,13 @@ export function GirosPage() {
       </div>
 
       {/* Giro Type Menu */}
-      {/* <GiroTypeMenu
+      <GiroTypeMenu
         open={giroTypeMenuOpen}
         onOpenChange={setGiroTypeMenuOpen}
         onTransferencia={() => setCreateSheetOpen(true)}
         onPagoMovil={() => setMobilePaymentOpen(true)}
         onRecarga={() => setRechargeOpen(true)}
-      /> */}
+      />
 
       {/* Create Giro Sheet */}
       <CreateGiroSheet open={createSheetOpen} onOpenChange={setCreateSheetOpen} onSuccess={fetchGiros} />

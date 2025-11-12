@@ -6,7 +6,6 @@ import { Label } from '@/components/ui/label'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
 import { useAuth } from '@/contexts/AuthContext'
-import { AlertCircle, Wallet } from 'lucide-react'
 import type { Bank, ExchangeRate, Currency, Minorista } from '@/types/api'
 import { BalanceInfo } from './BalanceInfo'
 

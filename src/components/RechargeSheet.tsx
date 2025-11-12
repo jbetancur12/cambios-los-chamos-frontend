@@ -149,7 +149,12 @@ export function RechargeSheet({ open, onOpenChange }: RechargeSheetProps) {
 
     setLoading(true)
     try {
-      // TODO: Create API endpoint for recharge
+      await api.post('/api/giro/recharge/create', {
+        operatorId: selectedOperator,
+        amountBsId: selectedAmount,
+        phone,
+        contactoEnvia: senderName,
+      })
       toast.success('Recarga registrada exitosamente')
       onOpenChange(false)
       resetForm()
