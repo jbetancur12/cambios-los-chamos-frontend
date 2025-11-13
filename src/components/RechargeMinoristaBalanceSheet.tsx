@@ -130,13 +130,10 @@ export function RechargeMinoristaBalanceSheet({
     }
   }
 
-  console.log('🚀 ~ RechargeMinoristaBalanceSheet ~ localMinorista:', localMinorista)
   if (!localMinorista) return null
 
   const hasDebt = localMinorista.availableCredit < 0
-  const lastTransaction = transactions.length > 0 ? transactions[transactions.length - 1] : null
-
-  const debtAmount = lastTransaction ? lastTransaction.accumulatedDebt : 0
+  const debtAmount = localMinorista.creditLimit - localMinorista.availableCredit
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -265,16 +262,30 @@ export function RechargeMinoristaBalanceSheet({
                   <form onSubmit={handlePayDebt} className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="pay-amount">Monto a Pagar (COP)</Label>
-                      <Input
-                        id="pay-amount"
-                        type="number"
-                        step="1"
-                        min="1"
-                        placeholder="0"
-                        value={payAmount}
-                        onChange={(e) => setPayAmount(e.target.value)}
-                        required
-                      />
+                      <div className="flex gap-2">
+                                               {' '}
+                        <Input
+                          id="pay-amount"
+                          type="number"
+                          step="1"
+                          min="1"
+                          placeholder="0"
+                          value={payAmount}
+                          onChange={(e) => setPayAmount(e.target.value)}
+                          required
+                        />
+                                               {' '}
+                        <Button
+                          type="button" // Importante para que no envíe el formulario
+                          onClick={() => setPayAmount(debtAmount.toString())} // Establece la deuda total
+                          variant="outline"
+                          className="flex-shrink-0"
+                          disabled={loading || debtAmount <= 0} // Deshabilitar si está cargando o no hay deuda
+                        >
+                                                    Pagar Todo                        {' '}
+                        </Button>
+                                             {' '}
+                      </div>
                       <p className="text-xs text-muted-foreground">
                         Deuda actual: {formatCurrency(debtAmount as number)}
                       </p>
