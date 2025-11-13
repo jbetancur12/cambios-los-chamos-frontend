@@ -102,6 +102,7 @@ export function DashboardPage() {
       PROCESANDO: { label: 'Procesando', className: 'bg-purple-100 text-purple-800' },
       COMPLETADO: { label: 'Completado', className: 'bg-green-100 text-green-800' },
       CANCELADO: { label: 'Cancelado', className: 'bg-red-100 text-red-800' },
+      DEVUELTO: { label: 'Devuelto', className: 'bg-orange-100 text-orange-800' }, // Nuevo estado
     }
     return statusMap[status] || { label: status, className: 'bg-gray-100 text-gray-800' }
   }

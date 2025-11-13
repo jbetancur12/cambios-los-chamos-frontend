@@ -79,7 +79,7 @@ export interface Minorista {
 }
 
 // Giro Types
-export type GiroStatus = 'PENDIENTE' | 'ASIGNADO' | 'PROCESANDO' | 'COMPLETADO' | 'CANCELADO'
+export type GiroStatus = 'PENDIENTE' | 'ASIGNADO' | 'PROCESANDO' | 'COMPLETADO' | 'CANCELADO' | 'DEVUELTO'
 
 export type ExecutionType = 'TRANSFERENCIA' | 'PAGO_MOVIL' | 'EFECTIVO' | 'ZELLE' | 'OTROS' | 'RECARGA'
 
@@ -110,6 +110,7 @@ export interface Giro {
   status: GiroStatus
   proofUrl?: string
   executionType?: ExecutionType
+  returnReason?: string
   createdAt: string
   updatedAt: string
   minorista?: {

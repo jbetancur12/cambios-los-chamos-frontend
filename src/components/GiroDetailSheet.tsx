@@ -18,6 +18,7 @@ import {
   Calendar,
   TrendingUp,
   ArrowRight,
+  CornerDownLeft, // Nuevo ícono para devolver
 } from 'lucide-react'
 import type { Giro, BankAccount, ExecutionType, GiroStatus } from '@/types/api'
 
@@ -27,6 +28,13 @@ interface GiroDetailSheetProps {
   giroId: string | null
   onUpdate: () => void
 }
+
+const RETURN_REASON_OPTIONS = [
+  'Número de cuenta incorrecto',
+  'Número de teléfono incorrecto',
+  'Banco incorrecto',
+  'Otro motivo',
+]
 
 export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDetailSheetProps) {
   const { user } = useAuth()
@@ -41,11 +49,21 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
   const [proofUrl, setProofUrl] = useState('')
   const [fee, setFee] = useState(0)
 
+  // NUEVOS ESTADOS PARA DEVOLUCIÓN
+  const [showReturnForm, setShowReturnForm] = useState(false)
+  const [returnReason, setReturnReason] = useState('')
+
   const isTransferencista = user?.role === 'TRANSFERENCISTA'
   const isMinorista = user?.role === 'MINORISTA'
 
   useEffect(() => {
     if (open && giroId) {
+      // Resetear estados al abrir
+      setShowReturnForm(false)
+      setReturnReason('')
+      setFee(0)
+      setProofUrl('')
+
       fetchGiroDetails()
       if (isTransferencista) {
         fetchBankAccounts()
@@ -119,6 +137,35 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
     }
   }
 
+  // NUEVA FUNCIÓN PARA DEVOLVER EL GIRO
+  const handleReturnGiro = async () => {
+    if (!giro || !returnReason.trim()) {
+      toast.error('Debes especificar un motivo para la devolución.')
+      return
+    }
+
+    try {
+      setProcessing(true)
+      // Endpoint para la devolución del giro (el backend manejará el cambio de estado)
+      await api.post(`/api/giro/${giro.id}/return`, {
+        reason: returnReason,
+      })
+
+      toast.success('Giro devuelto exitosamente.')
+
+      // Resetear estados locales y refrescar datos
+      setReturnReason('')
+      setShowReturnForm(false)
+      fetchGiroDetails()
+      onUpdate()
+      onOpenChange(false)
+    } catch (error: any) {
+      toast.error(error.message || 'Error al devolver el giro')
+    } finally {
+      setProcessing(false)
+    }
+  }
+
   const getStatusBadge = (status: GiroStatus) => {
     const statusMap = {
       PENDIENTE: { label: 'Pendiente', className: 'bg-yellow-100 text-yellow-800', icon: Clock },
@@ -126,6 +173,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
       PROCESANDO: { label: 'Procesando', className: 'bg-purple-100 text-purple-800', icon: Clock },
       COMPLETADO: { label: 'Completado', className: 'bg-green-100 text-green-800', icon: CheckCircle },
       CANCELADO: { label: 'Cancelado', className: 'bg-red-100 text-red-800', icon: XCircle },
+      DEVUELTO: { label: 'Devuelto', className: 'bg-orange-100 text-orange-800', icon: CornerDownLeft }, // Nuevo estado
     }
     return statusMap[status] || { label: status, className: 'bg-gray-100 text-gray-800', icon: Clock }
   }
@@ -188,6 +236,17 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                 </div>
               )}
 
+              {giro.status === 'DEVUELTO' && giro.returnReason && (
+                <div className="p-4 rounded-lg bg-orange-50 border border-orange-300">
+                  <p className="font-semibold text-orange-800 flex items-center gap-2 mb-1">
+                    <CornerDownLeft className="h-4 w-4" />
+                    Motivo de Devolución:
+                  </p>
+                  {/* Mostramos el motivo */}
+                  <p className="mt-1 text-sm text-orange-900 font-medium">{giro.returnReason}</p>
+                </div>
+              )}
+
               {/* Beneficiary Info */}
               <div className="space-y-3 p-4 bg-muted rounded-lg">
                 <h3 className="font-semibold flex items-center gap-2">
@@ -200,7 +259,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                     <p className="font-medium">{giro.beneficiaryName}</p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground">C�dula</p>
+                    <p className="text-muted-foreground">Cédula</p>
                     <p className="font-medium">{giro.beneficiaryId}</p>
                   </div>
                   <div className="flex items-center gap-2">
@@ -246,7 +305,6 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                 </div>
               </div>
 
-              {/* Exchange Rate Applied */}
               {/* Exchange Rate Applied */}
               <div className="space-y-3 p-4 bg-muted rounded-lg">
                 <h3 className="font-semibold flex items-center gap-2">
@@ -316,75 +374,138 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                 </div>
               )}
 
-              {/* Execute Form for Transferencista */}
+              {/* Execute/Return Form for Transferencista */}
               {isTransferencista && giro.status === 'PROCESANDO' && (
                 <div className="space-y-4 pt-4 border-t">
-                  <h3 className="font-semibold">Ejecutar Giro</h3>
+                  <h3 className="font-semibold">Acciones de Procesamiento</h3>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="bankAccount">Cuenta Bancaria</Label>
-                    <select
-                      id="bankAccount"
-                      value={selectedBankAccountId}
-                      onChange={(e) => setSelectedBankAccountId(e.target.value)}
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                      required
+                  {/* Botones para alternar entre Ejecutar y Devolver */}
+                  <div className="flex gap-2 mb-4">
+                    <Button
+                      type="button"
+                      variant={!showReturnForm ? 'default' : 'outline'}
+                      className="flex-1"
+                      onClick={() => setShowReturnForm(false)}
                     >
-                      <option value="">Selecciona una cuenta</option>
-                      {bankAccounts.map((account) => (
-                        <option key={account.id} value={account.id}>
-                          {account.bank.name} - {account.accountNumber} ({formatCurrency(account.balance, 'VES')})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="executionType">Tipo de Ejecuci�n</Label>
-                    <select
-                      id="executionType"
-                      value={executionType}
-                      onChange={(e) => setExecutionType(e.target.value as ExecutionType)}
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                      required
+                      Ejecutar
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={showReturnForm ? 'default' : 'outline'}
+                      className="flex-1"
+                      onClick={() => setShowReturnForm(true)}
                     >
-                      <option value="TRANSFERENCIA">Transferencia</option>
-                      <option value="PAGO_MOVIL">Pago M�vil</option>
-                      <option value="EFECTIVO">Efectivo</option>
-                      <option value="ZELLE">Zelle</option>
-                      <option value="OTROS">Otros</option>
-                    </select>
+                      Devolver
+                    </Button>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="proofUrl">Comisión</Label>
-                    <Input
-                      id="fee"
-                      type="number"
-                      value={fee}
-                      onChange={(e) => setFee(Number(e.target.value))}
-                      placeholder="Comisión"
-                    />
-                  </div>
+                  {/* Formulario de Ejecución */}
+                  {!showReturnForm ? (
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="bankAccount">Cuenta Bancaria</Label>
+                        <select
+                          id="bankAccount"
+                          value={selectedBankAccountId}
+                          onChange={(e) => setSelectedBankAccountId(e.target.value)}
+                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                          required
+                        >
+                          <option value="">Selecciona una cuenta</option>
+                          {bankAccounts.map((account) => (
+                            <option key={account.id} value={account.id}>
+                              {account.bank.name} - {account.accountNumber} ({formatCurrency(account.balance, 'VES')})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="proofUrl">URL del Comprobante (Opcional)</Label>
-                    <Input
-                      id="proofUrl"
-                      type="url"
-                      value={proofUrl}
-                      onChange={(e) => setProofUrl(e.target.value)}
-                      placeholder="https://ejemplo.com/comprobante.jpg"
-                    />
-                  </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="executionType">Tipo de Ejecución</Label>
+                        <select
+                          id="executionType"
+                          value={executionType}
+                          onChange={(e) => setExecutionType(e.target.value as ExecutionType)}
+                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                          required
+                        >
+                          <option value="TRANSFERENCIA">Transferencia</option>
+                          <option value="PAGO_MOVIL">Pago Móvil</option>
+                          <option value="EFECTIVO">Efectivo</option>
+                          <option value="ZELLE">Zelle</option>
+                          <option value="OTROS">Otros</option>
+                        </select>
+                      </div>
 
-                  <Button
-                    onClick={handleExecuteGiro}
-                    disabled={processing || !selectedBankAccountId}
-                    className="w-full"
-                  >
-                    {processing ? 'Ejecutando...' : 'Ejecutar Giro'}
-                  </Button>
+                      <div className="space-y-2">
+                        <Label htmlFor="fee">Comisión</Label>
+                        <Input
+                          id="fee"
+                          type="number"
+                          value={fee}
+                          onChange={(e) => setFee(Number(e.target.value))}
+                          placeholder="Comisión"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="proofUrl">URL del Comprobante (Opcional)</Label>
+                        <Input
+                          id="proofUrl"
+                          type="url"
+                          value={proofUrl}
+                          onChange={(e) => setProofUrl(e.target.value)}
+                          placeholder="https://ejemplo.com/comprobante.jpg"
+                        />
+                      </div>
+
+                      <Button
+                        onClick={handleExecuteGiro}
+                        disabled={processing || !selectedBankAccountId}
+                        className="w-full"
+                      >
+                        {processing ? 'Ejecutando...' : 'Ejecutar Giro'}
+                      </Button>
+                    </div>
+                  ) : (
+                    /* NUEVO Formulario de Devolución */
+                    <div className="space-y-4 pt-2">
+                      <h4 className="font-semibold text-red-600">Motivo de Devolución</h4>
+                      <div className="space-y-2">
+                        <Label htmlFor="returnReason">Motivo</Label>
+                        {/* INICIO DE CAMBIO: SELECT EN LUGAR DE TEXTAREA */}
+                        <select
+                          id="returnReason"
+                          value={returnReason}
+                          onChange={(e) => setReturnReason(e.target.value)}
+                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                          required
+                        >
+                          <option value="" disabled>
+                            Selecciona un motivo
+                          </option>
+                          {RETURN_REASON_OPTIONS.map((reason) => (
+                            <option key={reason} value={reason}>
+                              {reason}
+                            </option>
+                          ))}
+                        </select>
+                        {/* FIN DE CAMBIO */}
+                        <p className="text-xs text-muted-foreground text-red-600">
+                          Al confirmar, el giro volverá a estado "Asignado" para el transferencista y "Devuelto" para el
+                          minorista.
+                        </p>
+                      </div>
+
+                      <Button
+                        onClick={handleReturnGiro}
+                        disabled={processing || !returnReason.trim()}
+                        className="w-full bg-red-600 hover:bg-red-700"
+                      >
+                        {processing ? 'Devolviendo...' : 'Confirmar Devolución'}
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
