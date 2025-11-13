@@ -131,6 +131,7 @@ export type BankAccountTransactionType = 'DEPOSIT' | 'WITHDRAWAL' | 'ADJUSTMENT'
 export interface BankAccountTransaction {
   id: string
   amount: number
+  fee: number
   type: BankAccountTransactionType
   reference?: string
   previousBalance: number

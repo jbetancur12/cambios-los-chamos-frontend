@@ -158,6 +158,7 @@ export function BankTransactionsPage() {
                         <th className="pb-3 font-medium">Fecha</th>
                         <th className="pb-3 font-medium">Tipo</th>
                         <th className="pb-3 font-medium text-right">Monto</th>
+                        <th className="pb-3 font-medium text-right">Comisión</th>
                         <th className="pb-3 font-medium text-right pr-6">Dé</th>
                         <th className="pb-3 font-medium text-right pr-6">Ahora</th>
                         <th className="pb-3 font-medium pl-4">Creado por</th>
@@ -183,6 +184,9 @@ export function BankTransactionsPage() {
                             >
                               {isPositive && '+'}
                               {formatCurrency(displayAmount)}
+                            </td>
+                            <td className="py-3 text-right text-sm text-muted-foreground pr-6 whitespace-nowrap">
+                              {formatCurrency(transaction.fee)}
                             </td>
                             <td className="py-3 text-right text-sm text-muted-foreground pr-6 whitespace-nowrap">
                               {formatCurrency(transaction.previousBalance)}

@@ -39,6 +39,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
   const [selectedBankAccountId, setSelectedBankAccountId] = useState('')
   const [executionType, setExecutionType] = useState<ExecutionType>('TRANSFERENCIA')
   const [proofUrl, setProofUrl] = useState('')
+  const [fee, setFee] = useState(0)
 
   const isTransferencista = user?.role === 'TRANSFERENCISTA'
   const isMinorista = user?.role === 'MINORISTA'
@@ -105,6 +106,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
       await api.post(`/api/giro/${giro.id}/execute`, {
         bankAccountId: selectedBankAccountId,
         executionType,
+        fee,
         proofUrl: proofUrl || undefined,
       })
       toast.success('Giro ejecutado exitosamente')
@@ -352,6 +354,17 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                       <option value="ZELLE">Zelle</option>
                       <option value="OTROS">Otros</option>
                     </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="proofUrl">Comisión</Label>
+                    <Input
+                      id="fee"
+                      type="number"
+                      value={fee}
+                      onChange={(e) => setFee(Number(e.target.value))}
+                      placeholder="Comisión"
+                    />
                   </div>
 
                   <div className="space-y-2">
