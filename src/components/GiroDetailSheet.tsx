@@ -20,7 +20,7 @@ import {
   ArrowRight,
   CornerDownLeft, // Nuevo ícono para devolver
 } from 'lucide-react'
-import type { Giro, BankAccount, ExecutionType, GiroStatus } from '@/types/api'
+import type { Giro, BankAccount, ExecutionType, GiroStatus, Bank } from '@/types/api'
 
 interface GiroDetailSheetProps {
   open: boolean
@@ -36,6 +36,8 @@ const RETURN_REASON_OPTIONS = [
   'Otro motivo',
 ]
 
+const BANK_OPTIONS = ['Banco Nacional', 'Banco Provincial', 'Banesco', 'Mercantil', 'Banco de Venezuela']
+
 export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDetailSheetProps) {
   const { user } = useAuth()
   const [giro, setGiro] = useState<Giro | null>(null)
@@ -43,11 +45,20 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
   const [processing, setProcessing] = useState(false)
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([])
 
+  const [isEditing, setIsEditing] = useState(false)
+  const [editableBeneficiaryName, setEditableBeneficiaryName] = useState('')
+  const [editableBeneficiaryId, setEditableBeneficiaryId] = useState('')
+  const [editablePhone, setEditablePhone] = useState('')
+  const [editableBankName, setEditableBankName] = useState('')
+  const [editableBankId, setEditableBankId] = useState('')
+  const [editableAccountNumber, setEditableAccountNumber] = useState('')
+
   // Execute form fields
   const [selectedBankAccountId, setSelectedBankAccountId] = useState('')
   const [executionType, setExecutionType] = useState<ExecutionType>('TRANSFERENCIA')
   const [proofUrl, setProofUrl] = useState('')
   const [fee, setFee] = useState(0)
+  const [banks, setBanks] = useState<Bank[]>([])
 
   // NUEVOS ESTADOS PARA DEVOLUCIÓN
   const [showReturnForm, setShowReturnForm] = useState(false)
@@ -55,6 +66,10 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
 
   const isTransferencista = user?.role === 'TRANSFERENCISTA'
   const isMinorista = user?.role === 'MINORISTA'
+
+  const isNotEditableStatus =
+    giro?.status === 'PROCESANDO' || giro?.status === 'COMPLETADO' || giro?.status === 'CANCELADO'
+  const canEdit = isMinorista && giro && !isNotEditableStatus //
 
   useEffect(() => {
     if (open && giroId) {
@@ -78,6 +93,14 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
       setLoading(true)
       const response = await api.get<{ giro: Giro }>(`/api/giro/${giroId}`)
       setGiro(response.giro)
+
+      if (response.giro) {
+        setEditableBeneficiaryName(response.giro.beneficiaryName)
+        setEditableBeneficiaryId(response.giro.beneficiaryId)
+        setEditablePhone(response.giro.phone)
+        setEditableBankName(response.giro.bankName)
+        setEditableAccountNumber(response.giro.accountNumber)
+      }
     } catch (error: any) {
       toast.error(error.message || 'Error al cargar detalles del giro')
     } finally {
@@ -97,6 +120,15 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
     }
   }
 
+  const fetchBanks = async () => {
+    try {
+      const response = await api.get<{ banks: Bank[] }>('/api/bank/all')
+      setBanks(response.banks)
+    } catch (error: any) {
+      toast.error(error.message || 'Error al cargar bancos')
+    }
+  }
+
   const handleMarkAsProcessing = async () => {
     if (!giro) return
 
@@ -108,6 +140,51 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
       onUpdate()
     } catch (error: any) {
       toast.error(error.message || 'Error al marcar giro como procesando')
+    } finally {
+      setProcessing(false)
+    }
+  }
+
+  const handleStartEdit = () => {
+    // Solo cargamos los bancos si la lista está vacía
+    if (banks.length === 0) {
+      fetchBanks()
+    }
+    setIsEditing(true)
+  }
+
+  const handleSaveEdit = async () => {
+    if (!giro) return
+
+    // Validación básica de campos
+    if (
+      !editableBeneficiaryName ||
+      !editableBeneficiaryId ||
+      !editablePhone ||
+      !editableBankId ||
+      !editableAccountNumber
+    ) {
+      toast.error('Todos los campos del beneficiario son obligatorios.')
+      return
+    }
+
+    try {
+      setProcessing(true)
+      // Endpoint que debe crearse en el backend para editar los datos
+      await api.patch(`/api/giro/${giro.id}`, {
+        beneficiaryName: editableBeneficiaryName,
+        beneficiaryId: editableBeneficiaryId,
+        phone: editablePhone,
+        bankId: editableBankId,
+        accountNumber: editableAccountNumber,
+      })
+
+      toast.success('Giro actualizado exitosamente.')
+      setIsEditing(false) // Sale del modo edición
+      fetchGiroDetails() // Refresca los datos
+      onUpdate()
+    } catch (error: any) {
+      toast.error(error.message || 'Error al actualizar el giro.')
     } finally {
       setProcessing(false)
     }
@@ -254,18 +331,51 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                   Beneficiario
                 </h3>
                 <div className="space-y-2 text-sm">
-                  <div>
-                    <p className="text-muted-foreground">Nombre</p>
-                    <p className="font-medium">{giro.beneficiaryName}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Cédula</p>
-                    <p className="font-medium">{giro.beneficiaryId}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Phone className="h-3 w-3 text-muted-foreground" />
-                    <p className="font-medium">{giro.phone}</p>
-                  </div>
+                  {isEditing ? (
+                    // Formulario de edición
+                    <div className="space-y-3">
+                      <div className="space-y-1">
+                        <Label htmlFor="editName">Nombre</Label>
+                        <Input
+                          id="editName"
+                          value={editableBeneficiaryName}
+                          onChange={(e) => setEditableBeneficiaryName(e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="editId">Cédula</Label>
+                        <Input
+                          id="editId"
+                          value={editableBeneficiaryId}
+                          onChange={(e) => setEditableBeneficiaryId(e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="editPhone">Teléfono</Label>
+                        <Input
+                          id="editPhone"
+                          value={editablePhone}
+                          onChange={(e) => setEditablePhone(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    // Vista estática
+                    <div className="space-y-2">
+                      <div>
+                        <p className="text-muted-foreground">Nombre</p>
+                        <p className="font-medium">{giro.beneficiaryName}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Cédula</p>
+                        <p className="font-medium">{giro.beneficiaryId}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Phone className="h-3 w-3 text-muted-foreground" />
+                        <p className="font-medium">{giro.phone}</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -276,14 +386,50 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                   Banco Destino
                 </h3>
                 <div className="space-y-2 text-sm">
-                  <div>
-                    <p className="text-muted-foreground">Banco</p>
-                    <p className="font-medium">{giro.bankName}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CreditCard className="h-3 w-3 text-muted-foreground" />
-                    <p className="font-medium">{giro.accountNumber}</p>
-                  </div>
+                  {isEditing ? (
+                    // Formulario de edición
+                    <div className="space-y-3">
+                      <div className="space-y-1">
+                        <Label htmlFor="editBankName">Banco</Label>
+                        <select
+                          id="editBankName"
+                          value={editableBankName}
+                          onChange={(e) => setEditableBankId(e.target.value)}
+                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                          required
+                        >
+                          <option value="" disabled>
+                            Selecciona un banco
+                          </option>
+                          {banks.map((bank) => (
+                            <option key={bank.id} value={bank.id}>
+                              {bank.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="editAccountNumber">Número de Cuenta</Label>
+                        <Input
+                          id="editAccountNumber"
+                          value={editableAccountNumber}
+                          onChange={(e) => setEditableAccountNumber(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    // Vista estática
+                    <div className="space-y-2">
+                      <div>
+                        <p className="text-muted-foreground">Banco</p>
+                        <p className="font-medium">{giro.bankName}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CreditCard className="h-3 w-3 text-muted-foreground" />
+                        <p className="font-medium">{giro.accountNumber}</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -342,6 +488,30 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                   </div>
                 )}
               </div>
+
+              {canEdit && (
+                <div className="pt-2 flex gap-3">
+                  {!isEditing ? (
+                    <Button onClick={handleStartEdit} disabled={processing} variant="outline" className="w-full">
+                      Editar Giro
+                    </Button>
+                  ) : (
+                    <>
+                      <Button onClick={handleSaveEdit} disabled={processing} className="flex-1">
+                        {processing ? 'Guardando...' : 'Guardar Cambios'}
+                      </Button>
+                      <Button
+                        onClick={() => setIsEditing(false)}
+                        disabled={processing}
+                        variant="outline"
+                        className="flex-1"
+                      >
+                        Cancelar Edición
+                      </Button>
+                    </>
+                  )}
+                </div>
+              )}
 
               {/* Transferencista Info */}
               {giro.transferencista && (

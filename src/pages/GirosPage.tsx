@@ -72,6 +72,7 @@ export function GirosPage() {
       PROCESANDO: { label: 'Procesando', className: 'bg-purple-100 text-purple-800', icon: Clock },
       COMPLETADO: { label: 'Completado', className: 'bg-green-100 text-green-800', icon: CheckCircle },
       CANCELADO: { label: 'Cancelado', className: 'bg-red-100 text-red-800', icon: XCircle },
+      DEVUELTO: { label: 'Devuelto', className: 'bg-orange-100 text-orange-800', icon: ArrowRight },
     }
     return statusMap[status] || { label: status, className: 'bg-gray-100 text-gray-800', icon: Clock }
   }
