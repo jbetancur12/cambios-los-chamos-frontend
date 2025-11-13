@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetBody } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
 import type { BankAccount } from '@/types/api'
-import { Wallet } from 'lucide-react'
+import { Wallet, MinusCircle, PlusCircle } from 'lucide-react' // Importamos MinusCircle y PlusCircle
 
 interface RechargeBalanceSheetProps {
   open: boolean
@@ -27,29 +27,46 @@ export function RechargeBalanceSheet({ open, onOpenChange, account, onBalanceUpd
     }).format(value)
   }
 
+  // Lógica para determinar el monto numérico y el tipo de operación
+  const numericAmount = useMemo(() => {
+    const val = parseFloat(amount)
+    return isNaN(val) ? 0 : val
+  }, [amount])
+
+  const isRecharge = numericAmount > 0
+  const isAdjustment = numericAmount < 0
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    const numericAmount = parseFloat(amount)
-    if (isNaN(numericAmount) || numericAmount <= 0) {
-      toast.error('Ingresa un monto válido')
+    // Validación: El monto debe ser diferente de cero
+    if (numericAmount === 0) {
+      toast.error('Ingresa un monto diferente de cero para recargar o ajustar.')
       return
     }
 
     if (!account) return
 
+    // **NOTA IMPORTANTE:** El endpoint /api/bank-account/update debe estar configurado
+    // en el backend para manejar montos negativos y restarlos al saldo.
     try {
       setLoading(true)
       await api.patch('/api/bank-account/update', {
         bankAccountId: account.id,
-        amount: numericAmount,
+        amount: numericAmount, // Se envía el monto con el signo (+ o -)
       })
 
       setAmount('')
       onBalanceUpdated()
-      toast.success('Saldo recargado exitosamente')
+
+      // Mensaje dinámico basado en la operación
+      if (isRecharge) {
+        toast.success('Saldo recargado exitosamente')
+      } else {
+        toast.success('Ajuste de saldo realizado exitosamente')
+      }
     } catch (error: any) {
-      toast.error(error.message || 'Error al recargar saldo')
+      toast.error(error.message || 'Error al modificar saldo')
     } finally {
       setLoading(false)
     }
@@ -61,7 +78,8 @@ export function RechargeBalanceSheet({ open, onOpenChange, account, onBalanceUpd
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent>
         <SheetHeader onClose={() => onOpenChange(false)}>
-          <SheetTitle>Recargar Saldo</SheetTitle>
+          {/* Título unificado para recarga y ajuste */}
+          <SheetTitle>Modificar Saldo (Recarga / Ajuste)</SheetTitle>
         </SheetHeader>
 
         <SheetBody>
@@ -80,29 +98,42 @@ export function RechargeBalanceSheet({ open, onOpenChange, account, onBalanceUpd
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Amount */}
             <div className="space-y-2">
-              <Label htmlFor="amount">Monto a Recargar (Bs)</Label>
+              <Label htmlFor="amount">Monto de Recarga o Ajuste (Bs)</Label>
               <Input
                 id="amount"
                 type="number"
                 step="0.01"
-                min="0.01"
-                placeholder="0.00"
+                // **IMPORTANTE: Se remueve el atributo min="0.01" para permitir números negativos**
+                placeholder="Ej: 15.00 (Recarga) o -5.00 (Ajuste de resta)"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 required
                 autoFocus
               />
               <p className="text-xs text-muted-foreground">
-                Ingresa el monto en bolívares que deseas agregar al saldo actual
+                Ingresa un valor positivo para recargar, o un valor negativo para ajustar (restar) saldo.
               </p>
             </div>
 
             {/* Preview */}
-            {amount && !isNaN(parseFloat(amount)) && parseFloat(amount) > 0 && (
-              <div className="rounded-lg bg-green-50 border border-green-200 p-4">
-                <p className="text-sm text-green-900 font-medium mb-2">Nuevo saldo:</p>
-                <p className="text-2xl font-bold text-green-600">
-                  {formatCurrency(account.balance + parseFloat(amount))}
+            {numericAmount !== 0 && (
+              <div
+                className={`rounded-lg p-4 border ${
+                  isRecharge ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+                }`}
+              >
+                <div className="flex items-center mb-2">
+                  {isRecharge ? (
+                    <PlusCircle className="h-4 w-4 text-green-600 mr-2" />
+                  ) : (
+                    <MinusCircle className="h-4 w-4 text-red-600 mr-2" />
+                  )}
+                  <p className={`text-sm font-medium ${isRecharge ? 'text-green-900' : 'text-red-900'}`}>
+                    {isRecharge ? 'Nuevo saldo estimado:' : 'Saldo tras ajuste:'}
+                  </p>
+                </div>
+                <p className={`text-2xl font-bold ${isRecharge ? 'text-green-600' : 'text-red-600'}`}>
+                  {formatCurrency(account.balance + numericAmount)}
                 </p>
               </div>
             )}
@@ -118,8 +149,8 @@ export function RechargeBalanceSheet({ open, onOpenChange, account, onBalanceUpd
               >
                 Cancelar
               </Button>
-              <Button type="submit" className="flex-1" disabled={loading}>
-                {loading ? 'Recargando...' : 'Recargar Saldo'}
+              <Button type="submit" className="flex-1" disabled={loading || numericAmount === 0}>
+                {loading ? 'Procesando...' : isAdjustment ? 'Realizar Ajuste' : 'Recargar Saldo'}
               </Button>
             </div>
           </form>
