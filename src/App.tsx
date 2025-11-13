@@ -14,6 +14,7 @@ import { BankAccountsPage } from '@/pages/BankAccountsPage'
 import { ReportsPage } from '@/pages/ReportsPage'
 import { RechargeAmountsManager } from '@/components/RechargeAmountsManager'
 import { RechargeOperatorsManager } from '@/components/RechargeOperatorsManager'
+import { MinoristaTransactionsPage } from './pages/MinoristaTransactionsPage'
 
 function App() {
   return (
@@ -64,6 +65,18 @@ function App() {
               <ProtectedRoute>
                 <DashboardLayout>
                   <ExchangeRatePage />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Transaciones Minorista*/}
+          <Route
+            path="/transacciones-minorista"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <MinoristaTransactionsPage />
                 </DashboardLayout>
               </ProtectedRoute>
             }

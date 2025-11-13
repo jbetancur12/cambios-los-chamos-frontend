@@ -1,6 +1,17 @@
 import { useEffect, type ReactNode } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Home, FileText, Users, DollarSign, Settings, LogOut, Calculator, Building, BarChart3 } from 'lucide-react'
+import {
+  Home,
+  FileText,
+  Users,
+  DollarSign,
+  Settings,
+  LogOut,
+  Calculator,
+  Building,
+  BarChart3,
+  Wallet,
+} from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -20,6 +31,7 @@ const navItems: NavItem[] = [
   { icon: Building, label: 'Cuentas', href: '/cuentas-bancarias', roles: ['SUPER_ADMIN', 'ADMIN'] },
   { icon: DollarSign, label: 'Tasas', href: '/tasas', roles: ['SUPER_ADMIN'] },
   { icon: BarChart3, label: 'Reportes', href: '/reportes', roles: ['SUPER_ADMIN'] },
+  { icon: Wallet, label: 'Transacciones', href: '/transacciones-minorista', roles: ['MINORISTA'] },
   {
     icon: Calculator,
     label: 'Calculadora',

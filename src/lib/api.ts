@@ -5,9 +5,17 @@ const getApiBaseUrl = () => {
   if (import.meta.env.VITE_API_URL) {
     return import.meta.env.VITE_API_URL
   }
+
+  const hostname = window.location.hostname
+  const protocol = window.location.protocol
+
+  // Si está en DevTunnel, usa el mismo dominio sin puerto
+  if (hostname.includes('devtunnels.ms')) {
+    return `${protocol}//${hostname}`
+  }
+
   // Si accedes desde localhost, usa localhost:3000
   // Si accedes desde una IP (ej: 192.168.40.15), usa esa IP:3000
-  const hostname = window.location.hostname
   return `http://${hostname}:3000`
 }
 

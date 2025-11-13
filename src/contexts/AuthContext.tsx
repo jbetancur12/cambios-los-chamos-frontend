@@ -20,9 +20,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const fetchUser = async () => {
     try {
       setLoading(true)
-      console.log('[AuthContext] Fetching user...')
       const response = await api.get<{ user: User }>('/api/user/me')
-      console.log('[AuthContext] User fetched successfully:', response.user)
       setUser(response.user)
     } catch (error) {
       console.error('[AuthContext] Error fetching user:', error)
