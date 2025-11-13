@@ -118,9 +118,7 @@ export function RechargeOperatorsManager() {
       <CardContent className="space-y-6">
         {/* Form */}
         <form onSubmit={handleAdd} className="space-y-4 p-4 bg-gray-50 rounded">
-          <h3 className="font-semibold text-sm">
-            {editingId ? 'Editar Operador' : 'Nuevo Operador'}
-          </h3>
+          <h3 className="font-semibold text-sm">{editingId ? 'Editar Operador' : 'Nuevo Operador'}</h3>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -129,11 +127,7 @@ export function RechargeOperatorsManager() {
                 id="operatorName"
                 placeholder="Ej: Movistar"
                 value={editingId ? editingName : newOperatorName}
-                onChange={(e) =>
-                  editingId
-                    ? setEditingName(e.target.value)
-                    : setNewOperatorName(e.target.value)
-                }
+                onChange={(e) => (editingId ? setEditingName(e.target.value) : setNewOperatorName(e.target.value))}
               />
             </div>
 
@@ -143,11 +137,7 @@ export function RechargeOperatorsManager() {
                 id="operatorType"
                 placeholder="Ej: MOVISTAR"
                 value={editingId ? editingType : newOperatorType}
-                onChange={(e) =>
-                  editingId
-                    ? setEditingType(e.target.value)
-                    : setNewOperatorType(e.target.value)
-                }
+                onChange={(e) => (editingId ? setEditingType(e.target.value) : setNewOperatorType(e.target.value))}
               />
             </div>
           </div>
@@ -155,12 +145,7 @@ export function RechargeOperatorsManager() {
           <div className="flex gap-2">
             {editingId ? (
               <>
-                <Button
-                  type="button"
-                  onClick={() => handleUpdate(editingId)}
-                  disabled={submitting}
-                  size="sm"
-                >
+                <Button type="button" onClick={() => handleUpdate(editingId)} disabled={submitting} size="sm">
                   Guardar Cambios
                 </Button>
                 <Button

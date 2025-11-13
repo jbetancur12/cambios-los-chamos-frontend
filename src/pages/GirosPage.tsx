@@ -2,7 +2,19 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Plus, ArrowRight, Clock, CheckCircle, XCircle, Search, X as XIcon, Banknote, Wallet, Signal, CreditCard } from 'lucide-react'
+import {
+  Plus,
+  ArrowRight,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Search,
+  X as XIcon,
+  Banknote,
+  Wallet,
+  Signal,
+  CreditCard,
+} from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
@@ -66,14 +78,32 @@ export function GirosPage() {
 
   const getExecutionTypeBadge = (executionType?: ExecutionType) => {
     const typeMap: Record<ExecutionType, { label: string; className: string; icon: any }> = {
-      TRANSFERENCIA: { label: 'Transferencia', className: 'bg-blue-50 text-blue-700 border border-blue-200', icon: Banknote },
-      PAGO_MOVIL: { label: 'Pago Móvil', className: 'bg-green-50 text-green-700 border border-green-200', icon: Wallet },
-      RECARGA: { label: 'Recarga Celular', className: 'bg-orange-50 text-orange-700 border border-orange-200', icon: Signal },
-      EFECTIVO: { label: 'Efectivo', className: 'bg-emerald-50 text-emerald-700 border border-emerald-200', icon: CreditCard },
+      TRANSFERENCIA: {
+        label: 'Transferencia',
+        className: 'bg-blue-50 text-blue-700 border border-blue-200',
+        icon: Banknote,
+      },
+      PAGO_MOVIL: {
+        label: 'Pago Móvil',
+        className: 'bg-green-50 text-green-700 border border-green-200',
+        icon: Wallet,
+      },
+      RECARGA: {
+        label: 'Recarga Celular',
+        className: 'bg-orange-50 text-orange-700 border border-orange-200',
+        icon: Signal,
+      },
+      EFECTIVO: {
+        label: 'Efectivo',
+        className: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
+        icon: CreditCard,
+      },
       ZELLE: { label: 'Zelle', className: 'bg-purple-50 text-purple-700 border border-purple-200', icon: CreditCard },
       OTROS: { label: 'Otros', className: 'bg-gray-50 text-gray-700 border border-gray-200', icon: ArrowRight },
     }
-    return executionType && typeMap[executionType] ? typeMap[executionType] : { label: 'Desconocido', className: 'bg-gray-50 text-gray-700 border border-gray-200', icon: ArrowRight }
+    return executionType && typeMap[executionType]
+      ? typeMap[executionType]
+      : { label: 'Desconocido', className: 'bg-gray-50 text-gray-700 border border-gray-200', icon: ArrowRight }
   }
 
   const formatCurrency = (amount: number, currency: Currency) => {
@@ -268,7 +298,9 @@ export function GirosPage() {
                     <div className="text-sm">
                       <p className="text-muted-foreground">{isRecharge ? 'Operador' : 'Banco Destino'}</p>
                       <p className="font-medium">{giro.bankName}</p>
-                      <p className="text-xs text-muted-foreground">{isRecharge ? 'Teléfono' : 'Cuenta'}: {giro.accountNumber}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {isRecharge ? 'Teléfono' : 'Cuenta'}: {giro.accountNumber}
+                      </p>
                     </div>
 
                     {/* Transferencista Info */}
@@ -290,7 +322,9 @@ export function GirosPage() {
                           {giro.minoristaProfit > 0 && (
                             <div>
                               <p className="text-muted-foreground">Ganancia Minorista</p>
-                              <p className="font-semibold text-blue-600">{formatCurrency(giro.minoristaProfit, 'COP')}</p>
+                              <p className="font-semibold text-blue-600">
+                                {formatCurrency(giro.minoristaProfit, 'COP')}
+                              </p>
                             </div>
                           )}
                         </div>
@@ -312,7 +346,6 @@ export function GirosPage() {
         </>
       )}
       <div className="fixed bottom-20 md:bottom-8 right-4 md:right-8 z-50">
-
         {/* Menu Options */}
         {giroTypeMenuOpen && (
           <div className="absolute bottom-16 right-0 bg-card border rounded-lg shadow-lg p-2 space-y-1 min-w-[200px] mb-2 z-50">
@@ -324,14 +357,14 @@ export function GirosPage() {
               <span className="font-medium">Transferencia</span>
             </button>
             <button
-              onClick={()=>setMobilePaymentOpen(true)}
+              onClick={() => setMobilePaymentOpen(true)}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-md hover:bg-accent transition-colors text-left"
             >
               <Wallet className="h-5 w-5 text-green-600" />
               <span className="font-medium">Pago Movil</span>
             </button>
             <button
-              onClick={()=>setRechargeOpen(true)}
+              onClick={() => setRechargeOpen(true)}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-md hover:bg-accent transition-colors text-left"
             >
               <Signal className="h-5 w-5 text-orange-600" />
@@ -345,15 +378,15 @@ export function GirosPage() {
           <div className="fixed bottom-20 md:bottom-8 right-4 md:right-8 z-50">
             <button
               onClick={() => setGiroTypeMenuOpen(!giroTypeMenuOpen)}
-              className={`bg-primary text-primary-foreground rounded-full p-4 shadow-lg hover:shadow-xl transition-all active:scale-95 ${giroTypeMenuOpen ? 'rotate-45' : ''
-                }`}          >
+              className={`bg-primary text-primary-foreground rounded-full p-4 shadow-lg hover:shadow-xl transition-all active:scale-95 ${
+                giroTypeMenuOpen ? 'rotate-45' : ''
+              }`}
+            >
               <Plus className="h-6 w-6" />
             </button>
           </div>
         )}
-
       </div>
-
 
       {/* Create Giro Sheet */}
       <CreateGiroSheet open={createSheetOpen} onOpenChange={setCreateSheetOpen} onSuccess={fetchGiros} />

@@ -1,20 +1,9 @@
 import { useState, useEffect } from 'react'
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
 import type { ExchangeRate } from '@/types/api'
@@ -29,7 +18,6 @@ interface RechargeAmount {
   id: string
   amountBs: number
 }
-
 
 interface RechargeSheetProps {
   open: boolean
@@ -53,8 +41,6 @@ export function RechargeSheet({ open, onOpenChange }: RechargeSheetProps) {
       loadExchangeRate()
     }
   }, [open])
-
-
 
   const loadOperators = async () => {
     try {
@@ -92,17 +78,11 @@ export function RechargeSheet({ open, onOpenChange }: RechargeSheetProps) {
     }
   }
 
-
   const selectedAmountBs = amounts.find((a) => a.id === selectedAmount)?.amountBs || 0
 
-  const amountCop = exchangeRate
-    ? (selectedAmountBs * Number(exchangeRate.sellRate)).toFixed(2)
-    : '0.00'
+  const amountCop = exchangeRate ? (selectedAmountBs * Number(exchangeRate.sellRate)).toFixed(2) : '0.00'
 
-  const amountUsd = exchangeRate
-    ? (selectedAmountBs / Number(exchangeRate.bcv)).toFixed(2)
-    : '0.00'
-
+  const amountUsd = exchangeRate ? (selectedAmountBs / Number(exchangeRate.bcv)).toFixed(2) : '0.00'
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -179,12 +159,7 @@ export function RechargeSheet({ open, onOpenChange }: RechargeSheetProps) {
 
           <div>
             <Label htmlFor="phone">Teléfono</Label>
-            <Input
-              id="phone"
-              placeholder="04141234567"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-            />
+            <Input id="phone" placeholder="04141234567" value={phone} onChange={(e) => setPhone(e.target.value)} />
           </div>
 
           <div>
@@ -196,7 +171,6 @@ export function RechargeSheet({ open, onOpenChange }: RechargeSheetProps) {
               onChange={(e) => setSenderName(e.target.value)}
             />
           </div>
-
 
           <div className="bg-gray-50 p-3 rounded border space-y-2">
             <div className="text-sm font-medium">Conversiones</div>
@@ -211,11 +185,7 @@ export function RechargeSheet({ open, onOpenChange }: RechargeSheetProps) {
           </div>
 
           <div className="mt-6 pb-6">
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full"
-            >
+            <Button type="submit" disabled={loading} className="w-full">
               {loading ? 'Procesando...' : 'Registrar Recarga'}
             </Button>
           </div>

@@ -1,11 +1,11 @@
-import { AlertCircle, Wallet } from 'lucide-react';
+import { AlertCircle, Wallet } from 'lucide-react'
 
 interface BalanceInfoProps {
-  minoristaBalance: number | null;
-  amountInput: string;
-  getEarnedProfit: () => number | null;
-  getRemainingBalance: () => number | null;
-  hasInsufficientBalance: () => boolean;
+  minoristaBalance: number | null
+  amountInput: string
+  getEarnedProfit: () => number | null
+  getRemainingBalance: () => number | null
+  hasInsufficientBalance: () => boolean
 }
 
 export function BalanceInfo({
@@ -70,5 +70,5 @@ export function BalanceInfo({
         </div>
       )}
     </div>
-  );
+  )
 }

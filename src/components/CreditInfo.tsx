@@ -49,9 +49,7 @@ export function CreditInfo({ creditLimit, availableCredit, amountToDeduct = 0 }:
             style={{ width: `${Math.min(creditPercentage, 100)}%` }}
           />
         </div>
-        <p className="text-xs text-muted-foreground">
-          Utilizando {creditPercentage.toFixed(1)}% de tu cupo
-        </p>
+        <p className="text-xs text-muted-foreground">Utilizando {creditPercentage.toFixed(1)}% de tu cupo</p>
       </div>
 
       {amountToDeduct > 0 && (

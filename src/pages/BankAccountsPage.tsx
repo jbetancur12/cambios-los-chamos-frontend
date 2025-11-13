@@ -102,7 +102,9 @@ export function BankAccountsPage() {
               <div className="text-center py-8">
                 <Building className="h-12 w-12 mx-auto text-muted-foreground mb-2" />
                 <p className="text-muted-foreground">
-                  {searchTerm ? 'No se encontraron cuentas con ese criterio de búsqueda' : 'No hay cuentas bancarias registradas'}
+                  {searchTerm
+                    ? 'No se encontraron cuentas con ese criterio de búsqueda'
+                    : 'No hay cuentas bancarias registradas'}
                 </p>
               </div>
             ) : (
@@ -132,7 +134,9 @@ export function BankAccountsPage() {
                           <td className="py-4 text-sm">{account.accountNumber}</td>
                           <td className="py-4 text-sm">{account.accountHolder}</td>
                           <td className="py-4 text-sm">{account.transferencista?.user.fullName}</td>
-                          <td className="py-4 text-right font-semibold text-green-600">{formatCurrency(account.balance)}</td>
+                          <td className="py-4 text-right font-semibold text-green-600">
+                            {formatCurrency(account.balance)}
+                          </td>
                           <td className="py-4 text-right">
                             <Button
                               variant="ghost"

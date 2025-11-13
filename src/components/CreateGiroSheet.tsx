@@ -167,10 +167,10 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
     const rate =
       useCustomRate && isSuperAdmin
         ? {
-          buyRate: parseFloat(customBuyRate) || currentRate.buyRate,
-          sellRate: parseFloat(customSellRate) || currentRate.sellRate,
-          bcv: parseFloat(customBcv) || currentRate.bcv,
-        }
+            buyRate: parseFloat(customBuyRate) || currentRate.buyRate,
+            sellRate: parseFloat(customSellRate) || currentRate.sellRate,
+            bcv: parseFloat(customBcv) || currentRate.bcv,
+          }
         : currentRate
 
     if (currencyInput === 'USD') {
@@ -183,7 +183,7 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
   }
 
   const getRemainingBalance = () => {
-    if (minoristaBalance === null) return null    
+    if (minoristaBalance === null) return null
     return minoristaBalance - parseFloat(amountInput) + getEarnedProfit()!
   }
 
@@ -193,10 +193,7 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
     const amount = parseFloat(amountInput)
     if (isNaN(amount)) return null
 
-
-
-    return  amount *0.05 // Suponiendo que la ganancia total es el 5% del monto
-  
+    return amount * 0.05 // Suponiendo que la ganancia total es el 5% del monto
   }
 
   const hasInsufficientBalance = () => {
@@ -372,53 +369,56 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
             )} */}
 
             {isMinorista && !loadingBalance && minoristaBalance !== null && (
-  <BalanceInfo
-    minoristaBalance={minoristaBalance}
-    amountInput={amountInput}
-    getEarnedProfit={getEarnedProfit}
-    getRemainingBalance={getRemainingBalance}
-    hasInsufficientBalance={hasInsufficientBalance}
-  />
-)}
+              <BalanceInfo
+                minoristaBalance={minoristaBalance}
+                amountInput={amountInput}
+                getEarnedProfit={getEarnedProfit}
+                getRemainingBalance={getRemainingBalance}
+                hasInsufficientBalance={hasInsufficientBalance}
+              />
+            )}
 
             {/* Exchange Rate Info */}
             {!loadingRate && currentRate && (
               <div className="p-3 bg-muted rounded-lg space-y-2">
-                <p className="text-sm font-medium">                {!loadingRate && currentRate && (
-                  <div className="p-3 bg-muted rounded-lg space-y-2">
-                    <p className="text-sm font-medium">Tasa de Cambio Actual</p>
+                <p className="text-sm font-medium">
+                  {' '}
+                  {!loadingRate && currentRate && (
+                    <div className="p-3 bg-muted rounded-lg space-y-2">
+                      <p className="text-sm font-medium">Tasa de Cambio Actual</p>
 
-                    {isMinorista ? (
-                      // Mostrar solo tasa de venta para minoristas
-                      <div className="grid grid-cols-1 gap-2 text-xs">
-                        <div>
-                          <span className="text-muted-foreground">Tasa de Venta: </span>
-                          <span className="font-semibold text-lg">{currentRate.sellRate.toFixed(2)}</span>
+                      {isMinorista ? (
+                        // Mostrar solo tasa de venta para minoristas
+                        <div className="grid grid-cols-1 gap-2 text-xs">
+                          <div>
+                            <span className="text-muted-foreground">Tasa de Venta: </span>
+                            <span className="font-semibold text-lg">{currentRate.sellRate.toFixed(2)}</span>
+                          </div>
                         </div>
-                      </div>
-                    ) : (
-                      // Mostrar todas las tasas para SUPER_ADMIN y ADMIN
-                      <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div>
-                          <span className="text-muted-foreground">Compra: </span>
-                          <span className="font-semibold">{currentRate.buyRate.toFixed(2)}</span>
+                      ) : (
+                        // Mostrar todas las tasas para SUPER_ADMIN y ADMIN
+                        <div className="grid grid-cols-2 gap-2 text-xs">
+                          <div>
+                            <span className="text-muted-foreground">Compra: </span>
+                            <span className="font-semibold">{currentRate.buyRate.toFixed(2)}</span>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Venta: </span>
+                            <span className="font-semibold">{currentRate.sellRate.toFixed(2)}</span>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">USD: </span>
+                            <span className="font-semibold">{currentRate.usd.toFixed(2)}</span>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">BCV: </span>
+                            <span className="font-semibold">{currentRate.bcv.toFixed(2)}</span>
+                          </div>
                         </div>
-                        <div>
-                          <span className="text-muted-foreground">Venta: </span>
-                          <span className="font-semibold">{currentRate.sellRate.toFixed(2)}</span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">USD: </span>
-                          <span className="font-semibold">{currentRate.usd.toFixed(2)}</span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">BCV: </span>
-                          <span className="font-semibold">{currentRate.bcv.toFixed(2)}</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}</p>
+                      )}
+                    </div>
+                  )}
+                </p>
               </div>
             )}
 

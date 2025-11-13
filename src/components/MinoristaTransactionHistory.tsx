@@ -4,19 +4,10 @@ import type { MinoristaTransaction } from '@/types/api'
 
 interface MinoristaTransactionHistoryProps {
   transactions: MinoristaTransaction[]
-  totalConsumption: number
-  totalProfits: number
-  currentDebt: number
   creditLimit: number
 }
 
-export function MinoristaTransactionHistory({
-  transactions,
-  totalConsumption,
-  totalProfits,
-  creditLimit,
-}: MinoristaTransactionHistoryProps) {
-
+export function MinoristaTransactionHistory({ transactions, creditLimit }: MinoristaTransactionHistoryProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
   const formatCurrency = (value: number) => {
@@ -81,13 +72,11 @@ export function MinoristaTransactionHistory({
         return type
     }
   }
-const lastTransaction = transactions.length > 0 ? transactions[0] : null;
+  const lastTransaction = transactions.length > 0 ? transactions[0] : null
 
-const tc = lastTransaction ? lastTransaction.accumulatedDebt : 0;
-const tp = lastTransaction ? lastTransaction.accumulatedProfit : 0;
-const ac = lastTransaction ? lastTransaction.availableCredit : 0;
-
-
+  const tc = lastTransaction ? lastTransaction.accumulatedDebt : 0
+  const tp = lastTransaction ? lastTransaction.accumulatedProfit : 0
+  const ac = lastTransaction ? lastTransaction.availableCredit : 0
 
   return (
     <div className="space-y-6">
@@ -103,17 +92,13 @@ const ac = lastTransaction ? lastTransaction.availableCredit : 0;
               {creditLimit > 0 ? formatCurrency(creditLimit) : 'Sin asignar'}
             </p>
             <p className="text-xs text-muted-foreground mt-2 mb-4">Cupo total asignado</p>
-
-
           </div>
-
 
           {/* Consumo Total */}
           <div className="p-4 rounded-lg border border-red-200 bg-red-50 dark:bg-red-950">
             <p className="text-xs text-muted-foreground mb-1">
-  Consumo Total{' '}
-  <span className="text-[10px]">(Descuento Giros + Ganancias)</span>
-</p>
+              Consumo Total <span className="text-[10px]">(Descuento Giros + Ganancias)</span>
+            </p>
             <p className="text-2xl font-bold text-red-600">{formatCurrency(tc as number)}</p>
             <p className="text-xs text-muted-foreground mt-2">Por todos los giros</p>
           </div>
@@ -127,12 +112,9 @@ const ac = lastTransaction ? lastTransaction.availableCredit : 0;
 
           <div className="p-4 rounded-lg border border-yellow-200 bg-orange-50 dark:bg-yellow-950">
             <p className="text-xs text-muted-foreground mb-1">Cupo Disponible</p>
-            <p className="text-2xl font-bold text-green-600">
-              {creditLimit > 0 ? formatCurrency(ac) : 'Sin asignar'}
-            </p>
+            <p className="text-2xl font-bold text-green-600">{creditLimit > 0 ? formatCurrency(ac) : 'Sin asignar'}</p>
             <p className="text-xs text-muted-foreground mt-2">Crédito restante</p>
           </div>
-
         </div>
 
         {/* Deuda Neta */}
@@ -142,7 +124,8 @@ const ac = lastTransaction ? lastTransaction.availableCredit : 0;
             <p className="text-3xl font-bold text-amber-600">{formatCurrency(tc as number)}</p>
           </div>
           <p className="text-xs text-muted-foreground">
-            Cálculo: {formatCurrency((tc as number) + (tp as number))  } - {formatCurrency(tp as number)} = {formatCurrency((tc as number ))}
+            Cálculo: {formatCurrency((tc as number) + (tp as number))} - {formatCurrency(tp as number)} ={' '}
+            {formatCurrency(tc as number)}
           </p>
         </div>
       </div>
@@ -152,9 +135,7 @@ const ac = lastTransaction ? lastTransaction.availableCredit : 0;
         <h3 className="text-lg font-semibold">Historial Detallado de Transacciones</h3>
 
         {transactions.length === 0 ? (
-          <p className="text-center text-muted-foreground py-6">
-            No hay transacciones registradas aún
-          </p>
+          <p className="text-center text-muted-foreground py-6">No hay transacciones registradas aún</p>
         ) : (
           <div className="space-y-2">
             {transactions.map((transaction) => (
@@ -163,9 +144,7 @@ const ac = lastTransaction ? lastTransaction.availableCredit : 0;
                 className={`rounded-lg border overflow-hidden transition-colors ${getTransactionColor(transaction.type)}`}
               >
                 <button
-                  onClick={() =>
-                    setExpandedId(expandedId === transaction.id ? null : transaction.id)
-                  }
+                  onClick={() => setExpandedId(expandedId === transaction.id ? null : transaction.id)}
                   className="w-full px-4 py-3 flex items-center justify-between hover:opacity-80 transition-opacity"
                 >
                   <div className="flex items-center gap-3 flex-1 text-left">
@@ -180,19 +159,19 @@ const ac = lastTransaction ? lastTransaction.availableCredit : 0;
 
                   <div className="flex items-center gap-4">
                     <div className="text-right">
-                      <p className={`font-bold text-sm ${transaction.type === 'DISCOUNT' || transaction.type === 'ADJUSTMENT'
-                        ? 'text-red-600'
-                        : 'text-green-600'
-                        }`}>
-                        {transaction.type === 'DISCOUNT' || transaction.type === 'ADJUSTMENT'
-                          ? '-'
-                          : '+'}
+                      <p
+                        className={`font-bold text-sm ${
+                          transaction.type === 'DISCOUNT' || transaction.type === 'ADJUSTMENT'
+                            ? 'text-red-600'
+                            : 'text-green-600'
+                        }`}
+                      >
+                        {transaction.type === 'DISCOUNT' || transaction.type === 'ADJUSTMENT' ? '-' : '+'}
                         {formatCurrency(Math.abs(transaction.amount))}
                       </p>
                     </div>
                     <ChevronDown
-                      className={`h-4 w-4 transition-transform ${expandedId === transaction.id ? 'rotate-180' : ''
-                        }`}
+                      className={`h-4 w-4 transition-transform ${expandedId === transaction.id ? 'rotate-180' : ''}`}
                     />
                   </div>
                 </button>
@@ -205,22 +184,16 @@ const ac = lastTransaction ? lastTransaction.availableCredit : 0;
                       <div className="grid grid-cols-2 gap-2">
                         <div>
                           <p className="text-xs text-muted-foreground">Cupo Consumido</p>
-                          <p className="font-semibold">
-                            {formatCurrency(transaction.creditConsumed)}
-                          </p>
+                          <p className="font-semibold">{formatCurrency(transaction.creditConsumed)}</p>
                         </div>
                         {transaction.profitEarned !== undefined && transaction.profitEarned > 0 && (
                           <div>
                             <p className="text-xs text-muted-foreground">Ganancia (5%)</p>
-                            <p className="font-semibold text-green-600">
-                              +{formatCurrency(transaction.profitEarned)}
-                            </p>
+                            <p className="font-semibold text-green-600">+{formatCurrency(transaction.profitEarned)}</p>
                           </div>
                         )}
                       </div>
                     )}
-
-
 
                     {/* Cambio de Balance */}
                     <div className="grid grid-cols-2 gap-2 pt-2  text-xs">

@@ -72,9 +72,7 @@ export function RechargeAmountsManager() {
       const updated = await api.put<RechargeAmount>(`/api/recharge-amounts/${id}`, {
         amountBs: Number(editingAmount),
       })
-      setAmounts(
-        amounts.map((amt) => (amt.id === id ? updated : amt)).sort((a, b) => a.amountBs - b.amountBs)
-      )
+      setAmounts(amounts.map((amt) => (amt.id === id ? updated : amt)).sort((a, b) => a.amountBs - b.amountBs))
       setEditingId(null)
       setEditingAmount('')
       toast.success('Monto actualizado exitosamente')
@@ -112,9 +110,7 @@ export function RechargeAmountsManager() {
       <CardContent className="space-y-6">
         {/* Form */}
         <form onSubmit={handleAdd} className="space-y-4 p-4 bg-gray-50 rounded">
-          <h3 className="font-semibold text-sm">
-            {editingId ? 'Editar Monto' : 'Nuevo Monto en Bolívares'}
-          </h3>
+          <h3 className="font-semibold text-sm">{editingId ? 'Editar Monto' : 'Nuevo Monto en Bolívares'}</h3>
 
           <div>
             <Label htmlFor="amountBs">Monto (Bs)</Label>
@@ -124,21 +120,14 @@ export function RechargeAmountsManager() {
               placeholder="Ej: 50000"
               step="1"
               value={editingId ? editingAmount : newAmount}
-              onChange={(e) =>
-                editingId ? setEditingAmount(e.target.value) : setNewAmount(e.target.value)
-              }
+              onChange={(e) => (editingId ? setEditingAmount(e.target.value) : setNewAmount(e.target.value))}
             />
           </div>
 
           <div className="flex gap-2">
             {editingId ? (
               <>
-                <Button
-                  type="button"
-                  onClick={() => handleUpdate(editingId)}
-                  disabled={submitting}
-                  size="sm"
-                >
+                <Button type="button" onClick={() => handleUpdate(editingId)} disabled={submitting} size="sm">
                   Guardar Cambios
                 </Button>
                 <Button
@@ -177,9 +166,7 @@ export function RechargeAmountsManager() {
                 }`}
               >
                 <div>
-                  <p className="font-bold text-lg">
-                    {amount.amountBs.toLocaleString('es-VE')} Bs
-                  </p>
+                  <p className="font-bold text-lg">{amount.amountBs.toLocaleString('es-VE')} Bs</p>
                 </div>
                 <div className="flex gap-2">
                   <button

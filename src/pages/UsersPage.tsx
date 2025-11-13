@@ -2,7 +2,18 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Plus, Users as UsersIcon, Mail, ShieldCheck, User, Briefcase, Building2, Wallet, Search, X } from 'lucide-react'
+import {
+  Plus,
+  Users as UsersIcon,
+  Mail,
+  ShieldCheck,
+  User,
+  Briefcase,
+  Building2,
+  Wallet,
+  Search,
+  X,
+} from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
@@ -250,9 +261,7 @@ export function UsersPage() {
   // Filter users based on search query
   const filteredUsers = users.filter((user) => {
     const searchLower = searchQuery.toLowerCase()
-    return (
-      user.fullName.toLowerCase().includes(searchLower) || user.email.toLowerCase().includes(searchLower)
-    )
+    return user.fullName.toLowerCase().includes(searchLower) || user.email.toLowerCase().includes(searchLower)
   })
 
   return (
@@ -338,102 +347,104 @@ export function UsersPage() {
             </div>
           )}
           <div className="grid gap-4">
-          {filteredUsers.map((user) => {
-            const roleBadge = getRoleBadge(user.role)
-            return (
-              <Card key={user.id}>
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="text-lg">{user.fullName}</CardTitle>
-                      <div className="flex items-center gap-2 mt-2">
-                        <Mail className="h-4 w-4 text-muted-foreground" />
-                        <p className="text-sm text-muted-foreground">{user.email}</p>
+            {filteredUsers.map((user) => {
+              const roleBadge = getRoleBadge(user.role)
+              return (
+                <Card key={user.id}>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <CardTitle className="text-lg">{user.fullName}</CardTitle>
+                        <div className="flex items-center gap-2 mt-2">
+                          <Mail className="h-4 w-4 text-muted-foreground" />
+                          <p className="text-sm text-muted-foreground">{user.email}</p>
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end gap-2">
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${roleBadge.className}`}>
+                          {roleBadge.label}
+                        </span>
+                        {!user.isActive && (
+                          <span className="px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                            Inactivo
+                          </span>
+                        )}
                       </div>
                     </div>
-                    <div className="flex flex-col items-end gap-2">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${roleBadge.className}`}>
-                        {roleBadge.label}
-                      </span>
-                      {!user.isActive && (
-                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                          Inactivo
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-6 mt-3 flex-wrap">
-                    {/* Switch activar/desactivar */}
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        checked={user.isActive}
-                        onCheckedChange={(checked) => handleToggleActive(user.id, checked)}
-                      />
-                      <span className="text-sm text-muted-foreground">{user.isActive ? 'Activo' : 'Desactivado'}</span>
-                    </div>
-                    {/* Switch disponibilidad transferencista */}
-                    {user.role === 'TRANSFERENCISTA' && user.transferencistaId && (
+                    <div className="flex items-center gap-6 mt-3 flex-wrap">
+                      {/* Switch activar/desactivar */}
                       <div className="flex items-center gap-2">
                         <Switch
-                          checked={user.available ?? true}
-                          onCheckedChange={(checked) => handleToggleAvailable(user.transferencistaId!, checked)}
+                          checked={user.isActive}
+                          onCheckedChange={(checked) => handleToggleActive(user.id, checked)}
                         />
                         <span className="text-sm text-muted-foreground">
-                          {user.available ? 'Disponible' : 'No disponible'}
+                          {user.isActive ? 'Activo' : 'Desactivado'}
                         </span>
                       </div>
-                    )}
-                  </div>
-                </CardHeader>
-                {user.role === 'TRANSFERENCISTA' && user.transferencistaId && (
-                  <CardContent className="pt-0">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full"
-                      onClick={() => handleViewAccounts(user.transferencistaId!, user.fullName)}
-                    >
-                      <Building2 className="h-4 w-4 mr-2" />
-                      Ver Cuentas Bancarias
-                    </Button>
-                  </CardContent>
-                )}
-                {user.role === 'MINORISTA' && user.minoristaId && (
-                  <CardContent className="pt-0">
-                    <div className="space-y-2">
-                      {/* Balance Display */}
-                      <div className="flex items-center justify-between p-3 rounded-md bg-muted">
+                      {/* Switch disponibilidad transferencista */}
+                      {user.role === 'TRANSFERENCISTA' && user.transferencistaId && (
                         <div className="flex items-center gap-2">
-                          <Wallet className="h-4 w-4 text-green-600" />
-                          <span className="text-sm text-muted-foreground">Saldo:</span>
+                          <Switch
+                            checked={user.available ?? true}
+                            onCheckedChange={(checked) => handleToggleAvailable(user.transferencistaId!, checked)}
+                          />
+                          <span className="text-sm text-muted-foreground">
+                            {user.available ? 'Disponible' : 'No disponible'}
+                          </span>
                         </div>
-                        <span className="font-bold text-green-600">
-                          {new Intl.NumberFormat('es-CO', {
-                            style: 'currency',
-                            currency: 'COP',
-                            minimumFractionDigits: 0,
-                          }).format(user.balance || 0)}
-                        </span>
-                      </div>
-                      {/* Recharge Button */}
+                      )}
+                    </div>
+                  </CardHeader>
+                  {user.role === 'TRANSFERENCISTA' && user.transferencistaId && (
+                    <CardContent className="pt-0">
                       <Button
                         variant="outline"
                         size="sm"
                         className="w-full"
-                        onClick={() =>
-                          handleRechargeMinorista(user.minoristaId!, user.fullName, user.email, user.balance || 0)
-                        }
+                        onClick={() => handleViewAccounts(user.transferencistaId!, user.fullName)}
                       >
-                        <Wallet className="h-4 w-4 mr-2" />
-                        Recargar Saldo
+                        <Building2 className="h-4 w-4 mr-2" />
+                        Ver Cuentas Bancarias
                       </Button>
-                    </div>
-                  </CardContent>
-                )}
-              </Card>
-            )
-          })}
-        </div>
+                    </CardContent>
+                  )}
+                  {user.role === 'MINORISTA' && user.minoristaId && (
+                    <CardContent className="pt-0">
+                      <div className="space-y-2">
+                        {/* Balance Display */}
+                        <div className="flex items-center justify-between p-3 rounded-md bg-muted">
+                          <div className="flex items-center gap-2">
+                            <Wallet className="h-4 w-4 text-green-600" />
+                            <span className="text-sm text-muted-foreground">Saldo:</span>
+                          </div>
+                          <span className="font-bold text-green-600">
+                            {new Intl.NumberFormat('es-CO', {
+                              style: 'currency',
+                              currency: 'COP',
+                              minimumFractionDigits: 0,
+                            }).format(user.balance || 0)}
+                          </span>
+                        </div>
+                        {/* Recharge Button */}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full"
+                          onClick={() =>
+                            handleRechargeMinorista(user.minoristaId!, user.fullName, user.email, user.balance || 0)
+                          }
+                        >
+                          <Wallet className="h-4 w-4 mr-2" />
+                          Recargar Saldo
+                        </Button>
+                      </div>
+                    </CardContent>
+                  )}
+                </Card>
+              )
+            })}
+          </div>
         </>
       )}
 

@@ -130,17 +130,13 @@ export function RechargeMinoristaBalanceSheet({
     }
   }
 
- 
-  
-  console.log("🚀 ~ RechargeMinoristaBalanceSheet ~ localMinorista:", localMinorista)
+  console.log('🚀 ~ RechargeMinoristaBalanceSheet ~ localMinorista:', localMinorista)
   if (!localMinorista) return null
 
   const hasDebt = localMinorista.availableCredit < 0
-  const lastTransaction = transactions.length > 0 ? transactions[transactions.length - 1] : null;
+  const lastTransaction = transactions.length > 0 ? transactions[transactions.length - 1] : null
 
-
-  const debtAmount = lastTransaction ? lastTransaction.accumulatedDebt : 0;
-
+  const debtAmount = lastTransaction ? lastTransaction.accumulatedDebt : 0
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -154,20 +150,22 @@ export function RechargeMinoristaBalanceSheet({
           <div className="flex gap-2 border-b">
             <button
               onClick={() => setActiveTab('view')}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'view'
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === 'view'
                   ? 'border-blue-500 text-blue-600'
                   : 'border-transparent text-muted-foreground hover:text-foreground'
-                }`}
+              }`}
             >
               <Eye className="h-4 w-4 inline mr-2" />
               Ver
             </button>
             <button
               onClick={() => setActiveTab('manage')}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'manage'
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === 'manage'
                   ? 'border-blue-500 text-blue-600'
                   : 'border-transparent text-muted-foreground hover:text-foreground'
-                }`}
+              }`}
             >
               <DollarSign className="h-4 w-4 inline mr-2" />
               Asignar y Pagar
@@ -200,17 +198,7 @@ export function RechargeMinoristaBalanceSheet({
                     <p className="text-sm text-muted-foreground">Cargando historial...</p>
                   </div>
                 ) : (
-                  <MinoristaTransactionHistory
-                    transactions={transactions}
-                    totalConsumption={transactions.reduce((sum, t) => {
-                      if (t.type === 'DISCOUNT') return sum + t.amount
-                      if (t.type === 'RECHARGE') return sum - t.amount
-                      return sum
-                    }, 0)}
-                    totalProfits={0}
-                    currentDebt={hasDebt ? debtAmount : 0}
-                    creditLimit={localMinorista.creditLimit}
-                  />
+                  <MinoristaTransactionHistory transactions={transactions} creditLimit={localMinorista.creditLimit} />
                 )}
               </div>
             </div>
@@ -222,8 +210,12 @@ export function RechargeMinoristaBalanceSheet({
               {/* SECCIÓN 1: ASIGNAR CUPO */}
               <div className="space-y-4">
                 <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 space-y-2">
-                  <p className="text-sm font-medium text-blue-900 dark:text-blue-100">1. Asignar o Modificar Cupo de Crédito</p>
-                  <p className="text-xs text-muted-foreground">El cupo se puede modificar en cualquier momento después de su asignación inicial.</p>
+                  <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                    1. Asignar o Modificar Cupo de Crédito
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    El cupo se puede modificar en cualquier momento después de su asignación inicial.
+                  </p>
                 </div>
 
                 <form onSubmit={handleSetCreditLimit} className="space-y-4">
@@ -248,7 +240,9 @@ export function RechargeMinoristaBalanceSheet({
                   {creditLimitAmount && !isNaN(parseFloat(creditLimitAmount)) && (
                     <div className="rounded-lg bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 p-4">
                       <p className="text-sm text-blue-900 dark:text-blue-100 font-medium mb-2">Nuevo cupo:</p>
-                      <p className="text-2xl font-bold text-blue-600">{formatCurrency(parseFloat(creditLimitAmount))}</p>
+                      <p className="text-2xl font-bold text-blue-600">
+                        {formatCurrency(parseFloat(creditLimitAmount))}
+                      </p>
                     </div>
                   )}
 
@@ -263,7 +257,9 @@ export function RechargeMinoristaBalanceSheet({
                 <div className="space-y-4 pt-4 border-t">
                   <div className="p-4 rounded-lg bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 space-y-2">
                     <p className="text-sm font-medium text-red-900 dark:text-red-100">2. Pagar Deuda y Liberar Cupo</p>
-                    <p className="text-xs text-muted-foreground">Paga la deuda acumulada para liberar cupo disponible. Las ganancias acumuladas se reiniciarán.</p>
+                    <p className="text-xs text-muted-foreground">
+                      Paga la deuda acumulada para liberar cupo disponible. Las ganancias acumuladas se reiniciarán.
+                    </p>
                   </div>
 
                   <form onSubmit={handlePayDebt} className="space-y-4">
@@ -280,15 +276,17 @@ export function RechargeMinoristaBalanceSheet({
                         required
                       />
                       <p className="text-xs text-muted-foreground">
-                        Deuda actual: {formatCurrency(debtAmount)}
+                        Deuda actual: {formatCurrency(debtAmount as number)}
                       </p>
                     </div>
 
                     {payAmount && !isNaN(parseFloat(payAmount)) && parseFloat(payAmount) > 0 && (
                       <div className="rounded-lg bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 p-4">
-                        <p className="text-sm text-green-900 dark:text-green-100 font-medium mb-2">Deuda después del pago:</p>
+                        <p className="text-sm text-green-900 dark:text-green-100 font-medium mb-2">
+                          Deuda después del pago:
+                        </p>
                         <p className="text-2xl font-bold text-green-600">
-                          {formatCurrency(Math.max(0, debtAmount - parseFloat(payAmount)))}
+                          {formatCurrency(Math.max(0, (debtAmount as number) - parseFloat(payAmount)))}
                         </p>
                       </div>
                     )}

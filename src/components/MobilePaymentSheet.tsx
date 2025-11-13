@@ -1,20 +1,9 @@
 import { useState, useEffect } from 'react'
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
 import type { ExchangeRate } from '@/types/api'
@@ -23,8 +12,6 @@ interface Bank {
   id: string
   name: string
 }
-
-
 
 interface MobilePaymentSheetProps {
   open: boolean
@@ -107,7 +94,6 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
     setAmountCop('')
   }
 
-
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent>
@@ -118,12 +104,7 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
         <form onSubmit={handleSubmit} className="space-y-4 mt-6 px-6">
           <div>
             <Label htmlFor="cedula">Cédula del Beneficiario</Label>
-            <Input
-              id="cedula"
-              placeholder="V-12345678"
-              value={cedula}
-              onChange={(e) => setCedula(e.target.value)}
-            />
+            <Input id="cedula" placeholder="V-12345678" value={cedula} onChange={(e) => setCedula(e.target.value)} />
           </div>
 
           <div>
@@ -144,12 +125,7 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
 
           <div>
             <Label htmlFor="phone">Teléfono</Label>
-            <Input
-              id="phone"
-              placeholder="04141234567"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-            />
+            <Input id="phone" placeholder="04141234567" value={phone} onChange={(e) => setPhone(e.target.value)} />
           </div>
 
           <div>
@@ -173,7 +149,6 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
             />
           </div>
 
-
           <div className="bg-gray-50 p-3 rounded border">
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -187,22 +162,14 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
             </div>
             {exchangeRate && (
               <div className="flex justify-left mt-4">
-                <div className="text-xs text-gray-500 mr-10">
-                  Tasa: {exchangeRate.sellRate}
-                </div>
-                <div className="text-xs text-gray-500">
-                  Tasa BCV: {exchangeRate.bcv}
-                </div>
+                <div className="text-xs text-gray-500 mr-10">Tasa: {exchangeRate.sellRate}</div>
+                <div className="text-xs text-gray-500">Tasa BCV: {exchangeRate.bcv}</div>
               </div>
             )}
           </div>
 
           <div className="mt-6 pb-6">
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full"
-            >
+            <Button type="submit" disabled={loading} className="w-full">
               {loading ? 'Procesando...' : 'Registrar Pago Móvil'}
             </Button>
           </div>

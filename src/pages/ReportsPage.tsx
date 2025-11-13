@@ -128,8 +128,7 @@ export function ReportsPage() {
   const [systemTrendReport, setSystemTrendReport] = useState<SystemProfitTrendReport | null>(null)
   const [minoristaReport, setMinoristaReport] = useState<TopMinoristaReport | null>(null)
   const [bankReport, setBankReport] = useState<BankTransactionReport | null>(null)
-  const [minoristaTransactionReport, setMinoristaTransactionReport] =
-    useState<MinoristaTransactionReport | null>(null)
+  const [minoristaTransactionReport, setMinoristaTransactionReport] = useState<MinoristaTransactionReport | null>(null)
   const handleQuickDateRange = (range: 'today' | 'yesterday' | 'week' | 'month' | 'year') => {
     const dates = getDateRange(range)
     setDateFrom(dates.from)
@@ -204,39 +203,19 @@ export function ReportsPage() {
           <CardContent className="space-y-4">
             {/* Quick Date Range Buttons */}
             <div className="flex gap-2 flex-wrap">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleQuickDateRange('today')}
-              >
+              <Button variant="outline" size="sm" onClick={() => handleQuickDateRange('today')}>
                 Hoy
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleQuickDateRange('yesterday')}
-              >
+              <Button variant="outline" size="sm" onClick={() => handleQuickDateRange('yesterday')}>
                 Ayer
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleQuickDateRange('week')}
-              >
+              <Button variant="outline" size="sm" onClick={() => handleQuickDateRange('week')}>
                 Esta Semana
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleQuickDateRange('month')}
-              >
+              <Button variant="outline" size="sm" onClick={() => handleQuickDateRange('month')}>
                 Este Mes
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleQuickDateRange('year')}
-              >
+              <Button variant="outline" size="sm" onClick={() => handleQuickDateRange('year')}>
                 Este Año
               </Button>
             </div>
@@ -245,27 +224,13 @@ export function ReportsPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
               <div>
                 <label className="block text-sm font-medium mb-2">Desde</label>
-                <Input
-                  type="date"
-                  value={dateFrom}
-                  onChange={(e) => setDateFrom(e.target.value)}
-                  className="w-full"
-                />
+                <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="w-full" />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-2">Hasta</label>
-                <Input
-                  type="date"
-                  value={dateTo}
-                  onChange={(e) => setDateTo(e.target.value)}
-                  className="w-full"
-                />
+                <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-full" />
               </div>
-              <Button
-                onClick={handleLoadReports}
-                disabled={loading}
-                className="w-full"
-              >
+              <Button onClick={handleLoadReports} disabled={loading} className="w-full">
                 {loading ? 'Cargando...' : 'Cargar Reporte'}
               </Button>
             </div>
@@ -277,9 +242,7 @@ export function ReportsPage() {
           <button
             onClick={() => handleTabChange('system')}
             className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${
-              activeTab === 'system'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-700 hover:bg-gray-100'
+              activeTab === 'system' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
             }`}
           >
             Ganancias del Sistema
@@ -287,9 +250,7 @@ export function ReportsPage() {
           <button
             onClick={() => handleTabChange('minoristas')}
             className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${
-              activeTab === 'minoristas'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-700 hover:bg-gray-100'
+              activeTab === 'minoristas' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
             }`}
           >
             Top Minoristas
@@ -297,9 +258,7 @@ export function ReportsPage() {
           <button
             onClick={() => handleTabChange('bank')}
             className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${
-              activeTab === 'bank'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-700 hover:bg-gray-100'
+              activeTab === 'bank' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
             }`}
           >
             Transacciones Bancarias
@@ -324,16 +283,8 @@ export function ReportsPage() {
               value={`$${systemReport.totalProfit.toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
               color="bg-green-100"
             />
-            <StatCard
-              label="Giros Totales"
-              value={systemReport.totalGiros.toString()}
-              color="bg-blue-100"
-            />
-            <StatCard
-              label="Giros Completados"
-              value={systemReport.completedGiros.toString()}
-              color="bg-purple-100"
-            />
+            <StatCard label="Giros Totales" value={systemReport.totalGiros.toString()} color="bg-blue-100" />
+            <StatCard label="Giros Completados" value={systemReport.completedGiros.toString()} color="bg-purple-100" />
             <StatCard
               label="Ganancia Promedio"
               value={`$${systemReport.averageProfitPerGiro.toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
@@ -603,7 +554,10 @@ export function ReportsPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <StatRow label="Total de Transacciones" value={minoristaTransactionReport.totalTransactions.toString()} />
+                  <StatRow
+                    label="Total de Transacciones"
+                    value={minoristaTransactionReport.totalTransactions.toString()}
+                  />
                   <StatRow label="Recargas" value={minoristaTransactionReport.recharges.toString()} />
                   <StatRow label="Descuentos" value={minoristaTransactionReport.discounts.toString()} />
                   <StatRow label="Ajustes" value={minoristaTransactionReport.adjustments.toString()} />

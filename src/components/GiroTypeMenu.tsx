@@ -1,9 +1,4 @@
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 
 interface GiroTypeMenuProps {
@@ -14,13 +9,7 @@ interface GiroTypeMenuProps {
   onRecarga: () => void
 }
 
-export function GiroTypeMenu({
-  open,
-  onOpenChange,
-  onTransferencia,
-  onPagoMovil,
-  onRecarga,
-}: GiroTypeMenuProps) {
+export function GiroTypeMenu({ open, onOpenChange, onTransferencia, onPagoMovil, onRecarga }: GiroTypeMenuProps) {
   const handleOptionClick = (callback: () => void) => {
     callback()
     onOpenChange(false)
