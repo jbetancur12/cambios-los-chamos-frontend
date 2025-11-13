@@ -73,6 +73,8 @@ export interface Transferencista {
 export interface Minorista {
   id: string
   balance: number
+  creditLimit: number
+  availableCredit: number
   user: User
 }
 
@@ -138,5 +140,23 @@ export interface BankAccountTransaction {
     fullName: string
     email: string
   }
+  createdAt: string
+}
+
+// Minorista Transaction Types
+export type MinoristaTransactionType = 'RECHARGE' | 'DISCOUNT' | 'ADJUSTMENT' | 'PROFIT'
+
+export interface MinoristaTransaction {
+  id: string
+  amount: number
+  type: MinoristaTransactionType
+  previousAvailableCredit: number
+  availableCredit: number
+  currentBalance: number
+  creditConsumed?: number
+  profitEarned?: number
+  accumulatedDebt?: number
+  accumulatedProfit?: number
+  description?: string
   createdAt: string
 }

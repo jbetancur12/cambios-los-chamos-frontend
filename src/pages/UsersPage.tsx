@@ -168,8 +168,10 @@ export function UsersPage() {
     setSelectedMinorista({
       id: minoristaId,
       balance,
+      creditLimit: 0,
+      availableCredit: 0,
       user: {
-        id: minoristaId, // Este no se usa, pero lo pongo por completitud
+        id: minoristaId,
         fullName,
         email,
         role: 'MINORISTA',

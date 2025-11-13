@@ -17,9 +17,7 @@ import {
 } from '@/components/ui/select'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
-import type { ExchangeRate, Minorista } from '@/types/api'
-import { BalanceInfo } from './BalanceInfo'
-import { useAuth } from '@/contexts/AuthContext'
+import type { ExchangeRate } from '@/types/api'
 
 interface Bank {
   id: string
@@ -34,7 +32,6 @@ interface MobilePaymentSheetProps {
 }
 
 export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetProps) {
-  const { user } = useAuth()
   const [cedula, setCedula] = useState('')
   const [selectedBank, setSelectedBank] = useState('')
   const [phone, setPhone] = useState('')
@@ -43,18 +40,11 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
   const [banks, setBanks] = useState<Bank[]>([])
   const [exchangeRate, setExchangeRate] = useState<ExchangeRate | null>(null)
   const [loading, setLoading] = useState(false)
-  const [minoristaBalance, setMinoristaBalance] = useState<number | null>(null)
-  const [loadingBalance, setLoadingBalance] = useState(false)
-
-  const isMinorista = user?.role === 'MINORISTA'
 
   useEffect(() => {
     if (open) {
       loadBanks()
       loadExchangeRate()
-      if (isMinorista) {
-        fetchMinoristaBalance()
-      }
     }
   }, [open])
 
@@ -71,25 +61,10 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
   const loadExchangeRate = async () => {
     try {
       const response = await api.get<{ rate: ExchangeRate }>('/api/exchange-rate/current')
-
-
       setExchangeRate(response.rate)
-
     } catch (error) {
       console.error('Error loading exchange rate:', error)
       toast.error('Error al cargar la tasa BCV')
-    }
-  }
-
-  const fetchMinoristaBalance = async () => {
-    try {
-      setLoadingBalance(true)
-      const response = await api.get<{ minorista: Minorista }>('/api/minorista/me')
-      setMinoristaBalance(response.minorista.balance)
-    } catch (error: any) {
-      toast.error(error.message || 'Error al cargar balance')
-    } finally {
-      setLoadingBalance(false)
     }
   }
 
@@ -132,26 +107,6 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
     setAmountCop('')
   }
 
-  const getRemainingBalance = () => {
-    if (minoristaBalance === null) return null
-    return minoristaBalance - parseFloat(amountCop) + getEarnedProfit()!
-  }
-
-  const getEarnedProfit = () => {
-    if (!exchangeRate || minoristaBalance === null || !amountCop) return null
-
-    const amount = parseFloat(amountCop)
-    if (isNaN(amount)) return null
-
-    return amount * 0.05 // Suponiendo que la ganancia total es el 5% del monto
-
-  }
-
-  const hasInsufficientBalance = () => {
-    if (!isMinorista || minoristaBalance === null) return false
-    const remaining = getRemainingBalance()
-    return remaining !== null && remaining < 0
-  }
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -218,15 +173,6 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
             />
           </div>
 
-          {isMinorista && !loadingBalance && minoristaBalance !== null && (
-            <BalanceInfo
-              minoristaBalance={minoristaBalance}
-              amountInput={amountCop}
-              getEarnedProfit={getEarnedProfit}
-              getRemainingBalance={getRemainingBalance}
-              hasInsufficientBalance={hasInsufficientBalance}
-            />
-          )}
 
           <div className="bg-gray-50 p-3 rounded border">
             <div className="grid grid-cols-2 gap-4">

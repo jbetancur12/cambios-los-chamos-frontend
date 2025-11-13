@@ -17,9 +17,7 @@ import {
 } from '@/components/ui/select'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
-import { useAuth } from '@/contexts/AuthContext'
-import { BalanceInfo } from './BalanceInfo'
-import type { ExchangeRate, Minorista } from '@/types/api'
+import type { ExchangeRate } from '@/types/api'
 
 interface RechargeOperator {
   id: string
@@ -39,7 +37,6 @@ interface RechargeSheetProps {
 }
 
 export function RechargeSheet({ open, onOpenChange }: RechargeSheetProps) {
-  const { user } = useAuth()
   const [selectedOperator, setSelectedOperator] = useState('')
   const [selectedAmount, setSelectedAmount] = useState('')
   const [phone, setPhone] = useState('')
@@ -48,19 +45,12 @@ export function RechargeSheet({ open, onOpenChange }: RechargeSheetProps) {
   const [amounts, setAmounts] = useState<RechargeAmount[]>([])
   const [exchangeRate, setExchangeRate] = useState<ExchangeRate | null>(null)
   const [loading, setLoading] = useState(false)
-  const [minoristaBalance, setMinoristaBalance] = useState<number | null>(null)
-  const [loadingBalance, setLoadingBalance] = useState(false)
-
-  const isMinorista = user?.role === 'MINORISTA'
 
   useEffect(() => {
     if (open) {
       loadOperators()
       loadAmounts()
       loadExchangeRate()
-      if (isMinorista) {
-        fetchMinoristaBalance()
-      }
     }
   }, [open])
 
@@ -95,25 +85,10 @@ export function RechargeSheet({ open, onOpenChange }: RechargeSheetProps) {
   const loadExchangeRate = async () => {
     try {
       const response = await api.get<{ rate: ExchangeRate }>('/api/exchange-rate/current')
-
-
       setExchangeRate(response.rate)
-
     } catch (error) {
       console.error('Error loading exchange rate:', error)
       toast.error('Error al cargar la tasa BCV')
-    }
-  }
-
-  const fetchMinoristaBalance = async () => {
-    try {
-      setLoadingBalance(true)
-      const response = await api.get<{ minorista: Minorista }>('/api/minorista/me')
-      setMinoristaBalance(response.minorista.balance)
-    } catch (error: any) {
-      toast.error(error.message || 'Error al cargar balance')
-    } finally {
-      setLoadingBalance(false)
     }
   }
 
@@ -128,19 +103,6 @@ export function RechargeSheet({ open, onOpenChange }: RechargeSheetProps) {
     ? (selectedAmountBs / Number(exchangeRate.bcv)).toFixed(2)
     : '0.00'
 
-  const getEarnedProfit = () => {
-    if (!exchangeRate || selectedAmount === '' || !selectedAmountBs) return null
-    return Number(amountCop) * 0.05
-  }
-
-  const getRemainingBalance = () => {
-    if (minoristaBalance === null) return null
-    return minoristaBalance - Number(amountCop) + (getEarnedProfit() || 0)
-  }
-
-  const hasInsufficientBalance = () => {
-    return false // En recarga no hay validación de balance insuficiente
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -174,8 +136,6 @@ export function RechargeSheet({ open, onOpenChange }: RechargeSheetProps) {
     setPhone('')
     setSenderName('')
   }
-
-  console.log(selectedAmount)
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -237,15 +197,6 @@ export function RechargeSheet({ open, onOpenChange }: RechargeSheetProps) {
             />
           </div>
 
-          {isMinorista && !loadingBalance && minoristaBalance !== null && (
-            <BalanceInfo
-              minoristaBalance={minoristaBalance}
-              amountInput={selectedAmountBs.toString()}
-              getEarnedProfit={getEarnedProfit}
-              getRemainingBalance={getRemainingBalance}
-              hasInsufficientBalance={hasInsufficientBalance}
-            />
-          )}
 
           <div className="bg-gray-50 p-3 rounded border space-y-2">
             <div className="text-sm font-medium">Conversiones</div>

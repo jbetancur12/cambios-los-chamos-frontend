@@ -83,7 +83,7 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
     try {
       setLoadingBalance(true)
       const response = await api.get<{ minorista: Minorista }>('/api/minorista/me')
-      setMinoristaBalance(response.minorista.balance)
+      setMinoristaBalance(response.minorista.availableCredit)
     } catch (error: any) {
       toast.error(error.message || 'Error al cargar balance')
     } finally {
