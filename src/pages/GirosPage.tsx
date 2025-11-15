@@ -22,10 +22,12 @@ import { CreateGiroSheet } from '@/components/CreateGiroSheet'
 import { GiroDetailSheet } from '@/components/GiroDetailSheet'
 import { MobilePaymentSheet } from '@/components/MobilePaymentSheet'
 import { RechargeSheet } from '@/components/RechargeSheet'
+import { useGiroWebSocket } from '@/hooks/useGiroWebSocket'
 import type { Giro, GiroStatus, Currency, ExecutionType } from '@/types/api'
 
 export function GirosPage() {
   const { user } = useAuth()
+  const { subscribe } = useGiroWebSocket()
   const [giros, setGiros] = useState<Giro[]>([])
   const [loading, setLoading] = useState(true)
   const [filterStatus, setFilterStatus] = useState<GiroStatus | 'ALL'>('ALL')
@@ -42,6 +44,60 @@ export function GirosPage() {
   useEffect(() => {
     fetchGiros()
   }, [filterStatus])
+
+  // WebSocket event listeners
+  useEffect(() => {
+    // Escuchar evento de giro creado
+    const unsubscribeCreated = subscribe('giro:created', (event) => {
+      console.log('[Page] Giro creado recibido:', event.giro.id)
+      setGiros((prev) => [event.giro as Giro, ...prev])
+      toast.success(`Giro creado: ${event.giro.beneficiaryName}`)
+    })
+
+    // Escuchar evento de giro actualizado
+    const unsubscribeUpdated = subscribe('giro:updated', (event) => {
+      console.log('[Page] Giro actualizado recibido:', event.giro.id, 'Tipo:', event.changeType)
+      setGiros((prev) =>
+        prev.map((g) => (g.id === event.giro.id ? (event.giro as Giro) : g))
+      )
+      toast.info(`Giro actualizado: ${event.changeType}`)
+    })
+
+    // Escuchar evento de giro procesando
+    const unsubscribeProcessing = subscribe('giro:processing', (event) => {
+      console.log('[Page] Giro procesando:', event.giro.id)
+      setGiros((prev) =>
+        prev.map((g) => (g.id === event.giro.id ? (event.giro as Giro) : g))
+      )
+      toast.info('Giro marcado como procesando')
+    })
+
+    // Escuchar evento de giro ejecutado
+    const unsubscribeExecuted = subscribe('giro:executed', (event) => {
+      console.log('[Page] Giro ejecutado:', event.giro.id)
+      setGiros((prev) =>
+        prev.map((g) => (g.id === event.giro.id ? (event.giro as Giro) : g))
+      )
+      toast.success('Giro ejecutado correctamente')
+    })
+
+    // Escuchar evento de giro devuelto
+    const unsubscribeReturned = subscribe('giro:returned', (event) => {
+      console.log('[Page] Giro devuelto:', event.giro.id, 'Razón:', event.reason)
+      setGiros((prev) =>
+        prev.map((g) => (g.id === event.giro.id ? (event.giro as Giro) : g))
+      )
+      toast.warning(`Giro devuelto: ${event.reason}`)
+    })
+
+    return () => {
+      unsubscribeCreated()
+      unsubscribeUpdated()
+      unsubscribeProcessing()
+      unsubscribeExecuted()
+      unsubscribeReturned()
+    }
+  }, [subscribe])
 
   const fetchGiros = async () => {
     try {

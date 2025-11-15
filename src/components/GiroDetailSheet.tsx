@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
 import { useAuth } from '@/contexts/AuthContext'
+import { useGiroWebSocket } from '@/hooks/useGiroWebSocket'
 import {
   Clock,
   CheckCircle,
@@ -38,6 +39,7 @@ const RETURN_REASON_OPTIONS = [
 
 export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDetailSheetProps) {
   const { user } = useAuth()
+  const { subscribe } = useGiroWebSocket()
   const [giro, setGiro] = useState<Giro | null>(null)
   const [loading, setLoading] = useState(false)
   const [processing, setProcessing] = useState(false)
@@ -93,6 +95,54 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
       }
     }
   }, [open, giroId, isTransferencista])
+
+  // WebSocket listener para actualizaciones en tiempo real
+  useEffect(() => {
+    if (!giroId) return
+
+    // Escuchar actualizaciones del giro específico
+    const unsubscribeUpdated = subscribe('giro:updated', (event) => {
+      if (event.giro.id === giroId) {
+        console.log('[DetailSheet] Giro actualizado:', event.giro.id, 'Tipo:', event.changeType)
+        setGiro(event.giro as Giro)
+        // Actualizar también los campos editables
+        setEditableRate({
+          buyRate: event.giro.rateApplied?.buyRate || 0,
+          sellRate: event.giro.rateApplied?.sellRate || 0,
+          usd: event.giro.rateApplied?.usd || 0,
+          bcv: event.giro.rateApplied?.bcv || 0,
+        })
+      }
+    })
+
+    const unsubscribeProcessing = subscribe('giro:processing', (event) => {
+      if (event.giro.id === giroId) {
+        console.log('[DetailSheet] Giro procesando:', event.giro.id)
+        setGiro(event.giro as Giro)
+      }
+    })
+
+    const unsubscribeExecuted = subscribe('giro:executed', (event) => {
+      if (event.giro.id === giroId) {
+        console.log('[DetailSheet] Giro ejecutado:', event.giro.id)
+        setGiro(event.giro as Giro)
+      }
+    })
+
+    const unsubscribeReturned = subscribe('giro:returned', (event) => {
+      if (event.giro.id === giroId) {
+        console.log('[DetailSheet] Giro devuelto:', event.giro.id)
+        setGiro(event.giro as Giro)
+      }
+    })
+
+    return () => {
+      unsubscribeUpdated()
+      unsubscribeProcessing()
+      unsubscribeExecuted()
+      unsubscribeReturned()
+    }
+  }, [giroId, subscribe])
 
   const fetchGiroDetails = async () => {
     if (!giroId) return
