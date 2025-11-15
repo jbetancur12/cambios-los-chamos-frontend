@@ -100,6 +100,20 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
   useEffect(() => {
     if (!giroId) return
 
+    // Escuchar cuando se crea un nuevo giro
+    const unsubscribeCreated = subscribe('giro:created', (event) => {
+      if (event.giro.id === giroId) {
+        console.log('[DetailSheet] Giro creado:', event.giro.id)
+        setGiro(event.giro as Giro)
+        setEditableRate({
+          buyRate: event.giro.rateApplied?.buyRate || 0,
+          sellRate: event.giro.rateApplied?.sellRate || 0,
+          usd: event.giro.rateApplied?.usd || 0,
+          bcv: event.giro.rateApplied?.bcv || 0,
+        })
+      }
+    })
+
     // Escuchar actualizaciones del giro específico
     const unsubscribeUpdated = subscribe('giro:updated', (event) => {
       if (event.giro.id === giroId) {
@@ -119,6 +133,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
       if (event.giro.id === giroId) {
         console.log('[DetailSheet] Giro procesando:', event.giro.id)
         setGiro(event.giro as Giro)
+        setProcessing(false)
       }
     })
 
@@ -126,6 +141,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
       if (event.giro.id === giroId) {
         console.log('[DetailSheet] Giro ejecutado:', event.giro.id)
         setGiro(event.giro as Giro)
+        setProcessing(false)
       }
     })
 
@@ -133,10 +149,12 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
       if (event.giro.id === giroId) {
         console.log('[DetailSheet] Giro devuelto:', event.giro.id)
         setGiro(event.giro as Giro)
+        setProcessing(false)
       }
     })
 
     return () => {
+      unsubscribeCreated()
       unsubscribeUpdated()
       unsubscribeProcessing()
       unsubscribeExecuted()
@@ -201,11 +219,11 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
       setProcessing(true)
       await api.post(`/api/giro/${giro.id}/mark-processing`)
       toast.success('Giro marcado como procesando')
-      fetchGiroDetails()
+      // El WebSocket emitirá giro:processing y actualizará el estado automáticamente
+      // No llamamos a fetchGiroDetails ni onUpdate porque el WebSocket lo hará
       onUpdate()
     } catch (error: any) {
       toast.error(error.message || 'Error al marcar giro como procesando')
-    } finally {
       setProcessing(false)
     }
   }
