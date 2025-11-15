@@ -3,7 +3,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { LogIn } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -45,44 +44,57 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1 text-center">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+      <Card className="w-full max-w-md shadow-xl">
+        <CardHeader className="space-y-1 text-center pb-2">
           <div className="flex justify-center mb-4">
-            <div className="h-12 w-12 rounded-full bg-primary flex items-center justify-center">
-              <LogIn className="h-6 w-6 text-primary-foreground" />
-            </div>
+            <img src="/icons/icon-192x192.png" alt="Cambios los Chamos" className="h-16 w-16 rounded-lg shadow-md" />
           </div>
-          <CardTitle className="text-2xl md:text-3xl">Cambios los Chamos</CardTitle>
-          <CardDescription>Ingresa tus credenciales para acceder</CardDescription>
+          <CardTitle className="text-2xl md:text-3xl font-bold text-gray-900">Cambios los Chamos</CardTitle>
+          <CardDescription className="text-gray-600">Ingresa tus credenciales para acceder</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="font-semibold">
+                Email
+              </Label>
               <Input
                 id="email"
                 type="email"
                 placeholder="tu@email.com"
                 {...register('email')}
                 aria-invalid={!!errors.email}
+                className="border-gray-300"
               />
               {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Contraseña</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password" className="font-semibold">
+                  Contraseña
+                </Label>
+                <button
+                  type="button"
+                  onClick={() => navigate('/forgot-password')}
+                  className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  ¿Olvidaste tu contraseña?
+                </button>
+              </div>
               <Input
                 id="password"
                 type="password"
                 placeholder="••••••••"
                 {...register('password')}
                 aria-invalid={!!errors.password}
+                className="border-gray-300"
               />
               {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
             </div>
 
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
+            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold" disabled={isSubmitting}>
               {isSubmitting ? 'Iniciando sesión...' : 'Iniciar Sesión'}
             </Button>
           </form>
