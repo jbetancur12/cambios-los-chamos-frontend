@@ -48,6 +48,25 @@ export interface GiroEvent {
 
 type GiroEventListener = (event: GiroEvent) => void
 
+// Obtener URL del backend usando la misma lógica que el cliente API
+const getBackendUrl = () => {
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL
+  }
+
+  const hostname = window.location.hostname
+  const protocol = window.location.protocol
+
+  // Si está en DevTunnel, usa el mismo dominio sin puerto
+  if (hostname.includes('devtunnels.ms')) {
+    return `${protocol}//${hostname}`
+  }
+
+  // Si accedes desde localhost, usa localhost:3000
+  // Si accedes desde una IP (ej: 192.168.40.15), usa esa IP:3000
+  return `http://${hostname}:3000`
+}
+
 export function useGiroWebSocket() {
   const socketRef = useRef<Socket | null>(null)
   const listenersRef = useRef<Map<string, Set<GiroEventListener>>>(new Map())
@@ -55,7 +74,9 @@ export function useGiroWebSocket() {
   // Inicializar la conexión al WebSocket
   useEffect(() => {
     try {
-      const socket = io(window.location.origin, {
+      const backendUrl = getBackendUrl()
+      console.log('[WS] Conectando a:', backendUrl)
+      const socket = io(backendUrl, {
         transports: ['websocket', 'polling'],
         reconnection: true,
         reconnectionDelay: 1000,
