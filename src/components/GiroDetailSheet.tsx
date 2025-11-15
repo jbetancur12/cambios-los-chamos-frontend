@@ -62,8 +62,18 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
   const [showReturnForm, setShowReturnForm] = useState(false)
   const [returnReason, setReturnReason] = useState('')
 
+  // NUEVOS ESTADOS PARA EDICIÓN DE TASA
+  const [isEditingRate, setIsEditingRate] = useState(false)
+  const [editableRate, setEditableRate] = useState({
+    buyRate: 0,
+    sellRate: 0,
+    usd: 0,
+    bcv: 0,
+  })
+
   const isTransferencista = user?.role === 'TRANSFERENCISTA'
   const isMinorista = user?.role === 'MINORISTA'
+  const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN'
 
   const isNotEditableStatus =
     giro?.status === 'PROCESANDO' || giro?.status === 'COMPLETADO' || giro?.status === 'CANCELADO'
@@ -98,6 +108,13 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
         setEditablePhone(response.giro.phone)
         setEditableBankName(response.giro.bankName)
         setEditableAccountNumber(response.giro.accountNumber)
+        // Inicializar tasa editable
+        setEditableRate({
+          buyRate: response.giro.rateApplied.buyRate,
+          sellRate: response.giro.rateApplied.sellRate,
+          usd: response.giro.rateApplied.usd,
+          bcv: response.giro.rateApplied.bcv,
+        })
       }
     } catch (error: any) {
       toast.error(error.message || 'Error al cargar detalles del giro')
@@ -236,6 +253,36 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
       onOpenChange(false)
     } catch (error: any) {
       toast.error(error.message || 'Error al devolver el giro')
+    } finally {
+      setProcessing(false)
+    }
+  }
+
+  // NUEVA FUNCIÓN PARA GUARDAR CAMBIOS DE TASA
+  const handleSaveRateEdit = async () => {
+    if (!giro) return
+
+    // Validación básica
+    if (!editableRate.buyRate || !editableRate.sellRate || !editableRate.usd || !editableRate.bcv) {
+      toast.error('Todos los campos de la tasa son obligatorios.')
+      return
+    }
+
+    try {
+      setProcessing(true)
+      await api.patch(`/api/giro/${giro.id}/rate`, {
+        buyRate: editableRate.buyRate,
+        sellRate: editableRate.sellRate,
+        usd: editableRate.usd,
+        bcv: editableRate.bcv,
+      })
+
+      toast.success('Tasa del giro actualizada exitosamente. Se recalcularon los montos y ganancias.')
+      setIsEditingRate(false)
+      fetchGiroDetails()
+      onUpdate()
+    } catch (error: any) {
+      toast.error(error.message || 'Error al actualizar la tasa del giro.')
     } finally {
       setProcessing(false)
     }
@@ -456,7 +503,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                   Tasa Aplicada
                 </h3>
 
-                {isTransferencista || isMinorista ? (
+                {!isAdmin ? (
                   // Solo tasa de venta para transferencista y minorista
                   <div className="grid grid-cols-1 gap-2 text-xs">
                     <div>
@@ -464,26 +511,111 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                       <p className="font-medium text-lg">{giro.rateApplied.sellRate.toFixed(2)}</p>
                     </div>
                   </div>
-                ) : (
-                  // Todas las tasas para admin y super_admin
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div>
-                      <p className="text-muted-foreground">Compra</p>
-                      <p className="font-medium">{giro.rateApplied.buyRate.toFixed(2)}</p>
+                ) : isEditingRate ? (
+                  // MODO EDICIÓN PARA ADMIN/SUPER_ADMIN
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-1">
+                        <Label htmlFor="editBuyRate" className="text-xs">
+                          Compra
+                        </Label>
+                        <Input
+                          id="editBuyRate"
+                          type="number"
+                          step="0.01"
+                          value={editableRate.buyRate}
+                          onChange={(e) =>
+                            setEditableRate({ ...editableRate, buyRate: parseFloat(e.target.value) || 0 })
+                          }
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="editSellRate" className="text-xs">
+                          Venta
+                        </Label>
+                        <Input
+                          id="editSellRate"
+                          type="number"
+                          step="0.01"
+                          value={editableRate.sellRate}
+                          onChange={(e) =>
+                            setEditableRate({ ...editableRate, sellRate: parseFloat(e.target.value) || 0 })
+                          }
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="editUsd" className="text-xs">
+                          USD
+                        </Label>
+                        <Input
+                          id="editUsd"
+                          type="number"
+                          step="0.01"
+                          value={editableRate.usd}
+                          onChange={(e) => setEditableRate({ ...editableRate, usd: parseFloat(e.target.value) || 0 })}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="editBcv" className="text-xs">
+                          BCV
+                        </Label>
+                        <Input
+                          id="editBcv"
+                          type="number"
+                          step="0.01"
+                          value={editableRate.bcv}
+                          onChange={(e) => setEditableRate({ ...editableRate, bcv: parseFloat(e.target.value) || 0 })}
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-muted-foreground">Venta</p>
-                      <p className="font-medium">{giro.rateApplied.sellRate.toFixed(2)}</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">USD</p>
-                      <p className="font-medium">{giro.rateApplied.usd.toFixed(2)}</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">BCV</p>
-                      <p className="font-medium">{giro.rateApplied.bcv.toFixed(2)}</p>
+                    <div className="flex gap-2 pt-2">
+                      <Button onClick={handleSaveRateEdit} disabled={processing} size="sm" className="flex-1">
+                        {processing ? 'Guardando...' : 'Guardar Tasa'}
+                      </Button>
+                      <Button
+                        onClick={() => setIsEditingRate(false)}
+                        disabled={processing}
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                      >
+                        Cancelar
+                      </Button>
                     </div>
                   </div>
+                ) : (
+                  // VISTA ESTÁTICA PARA ADMIN/SUPER_ADMIN
+                  <>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div>
+                        <p className="text-muted-foreground">Compra</p>
+                        <p className="font-medium">{giro.rateApplied.buyRate.toFixed(2)}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Venta</p>
+                        <p className="font-medium">{giro.rateApplied.sellRate.toFixed(2)}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">USD</p>
+                        <p className="font-medium">{giro.rateApplied.usd.toFixed(2)}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">BCV</p>
+                        <p className="font-medium">{giro.rateApplied.bcv.toFixed(2)}</p>
+                      </div>
+                    </div>
+                    {!isNotEditableStatus && (
+                      <Button
+                        onClick={() => setIsEditingRate(true)}
+                        disabled={processing}
+                        variant="outline"
+                        size="sm"
+                        className="w-full mt-2"
+                      >
+                        Editar Tasa
+                      </Button>
+                    )}
+                  </>
                 )}
               </div>
 
