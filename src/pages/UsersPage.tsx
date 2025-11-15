@@ -13,6 +13,8 @@ import {
   Wallet,
   Search,
   X,
+  CheckCircle2,
+  AlertCircle,
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { api } from '@/lib/api'
@@ -29,6 +31,7 @@ interface UserData {
   email: string
   role: UserRole
   isActive: boolean
+  emailVerified: boolean
   available?: boolean
   transferencistaId?: string // ID del transferencista si el usuario es TRANSFERENCISTA
   minoristaId?: string // ID del minorista si el usuario es MINORISTA
@@ -358,6 +361,13 @@ export function UsersPage() {
                         <div className="flex items-center gap-2 mt-2">
                           <Mail className="h-4 w-4 text-muted-foreground" />
                           <p className="text-sm text-muted-foreground">{user.email}</p>
+                          <span title={user.emailVerified ? 'Email verificado' : 'Email no verificado'}>
+                            {user.emailVerified ? (
+                              <CheckCircle2 className="h-4 w-4 text-green-600" />
+                            ) : (
+                              <AlertCircle className="h-4 w-4 text-amber-600" />
+                            )}
+                          </span>
                         </div>
                       </div>
                       <div className="flex flex-col items-end gap-2">
