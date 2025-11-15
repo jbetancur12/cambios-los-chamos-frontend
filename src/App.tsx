@@ -15,6 +15,8 @@ import { ReportsPage } from '@/pages/ReportsPage'
 import { RechargeAmountsManager } from '@/components/RechargeAmountsManager'
 import { RechargeOperatorsManager } from '@/components/RechargeOperatorsManager'
 import { MinoristaTransactionsPage } from './pages/MinoristaTransactionsPage'
+import { VerifyEmailPage } from '@/pages/VerifyEmailPage'
+import { ResetPasswordPage } from '@/pages/ResetPasswordPage'
 import { useEffect } from 'react'
 import { requestNotifyPermission } from './firebase/messaging'
 
@@ -39,6 +41,8 @@ function App() {
         <Routes>
           {/* Public Routes */}
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/verify-email" element={<VerifyEmailPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
 
           {/* Protected Routes */}
           <Route
