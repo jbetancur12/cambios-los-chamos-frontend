@@ -37,6 +37,10 @@ export interface GiroUpdate {
     bcv: number
     isCustom: boolean
   }
+  createdBy?: {
+    id: string
+    fullName: string
+  }
 }
 
 export interface GiroEvent {

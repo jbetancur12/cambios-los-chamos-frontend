@@ -104,7 +104,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
     const unsubscribeCreated = subscribe('giro:created', (event) => {
       if (event.giro.id === giroId) {
         console.log('[DetailSheet] Giro creado:', event.giro.id)
-        setGiro(event.giro as Giro)
+        setGiro(event.giro as unknown as Giro)
         setEditableRate({
           buyRate: event.giro.rateApplied?.buyRate || 0,
           sellRate: event.giro.rateApplied?.sellRate || 0,
@@ -118,7 +118,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
     const unsubscribeUpdated = subscribe('giro:updated', (event) => {
       if (event.giro.id === giroId) {
         console.log('[DetailSheet] Giro actualizado:', event.giro.id, 'Tipo:', event.changeType)
-        setGiro(event.giro as Giro)
+        setGiro(event.giro as unknown as Giro)
         // Actualizar también los campos editables
         setEditableRate({
           buyRate: event.giro.rateApplied?.buyRate || 0,
@@ -132,7 +132,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
     const unsubscribeProcessing = subscribe('giro:processing', (event) => {
       if (event.giro.id === giroId) {
         console.log('[DetailSheet] Giro procesando:', event.giro.id)
-        setGiro(event.giro as Giro)
+        setGiro(event.giro as unknown as Giro)
         setProcessing(false)
       }
     })
@@ -140,7 +140,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
     const unsubscribeExecuted = subscribe('giro:executed', (event) => {
       if (event.giro.id === giroId) {
         console.log('[DetailSheet] Giro ejecutado:', event.giro.id)
-        setGiro(event.giro as Giro)
+        setGiro(event.giro as unknown as Giro)
         setProcessing(false)
       }
     })
@@ -148,7 +148,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
     const unsubscribeReturned = subscribe('giro:returned', (event) => {
       if (event.giro.id === giroId) {
         console.log('[DetailSheet] Giro devuelto:', event.giro.id)
-        setGiro(event.giro as Giro)
+        setGiro(event.giro as unknown as Giro)
         setProcessing(false)
       }
     })
