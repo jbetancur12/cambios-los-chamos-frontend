@@ -13,7 +13,7 @@ createRoot(document.getElementById('root')!).render(
 const updateSW = registerSW({
   onNeedRefresh() {
     if (confirm('Hay una nueva versión disponible. ¿Actualizar ahora?')) {
-      updateSW(true)
+      updateSW(true) // <-- ahora sí existe updateSW
     }
   },
   onOfflineReady() {

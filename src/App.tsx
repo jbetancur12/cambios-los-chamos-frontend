@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'sonner'
-import { AuthProvider } from '@/contexts/AuthContext'
+import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { DashboardLayout } from '@/components/DashboardLayout'
 import { LoginPage } from '@/pages/LoginPage'
@@ -15,11 +15,27 @@ import { ReportsPage } from '@/pages/ReportsPage'
 import { RechargeAmountsManager } from '@/components/RechargeAmountsManager'
 import { RechargeOperatorsManager } from '@/components/RechargeOperatorsManager'
 import { MinoristaTransactionsPage } from './pages/MinoristaTransactionsPage'
+import { useEffect } from 'react'
+import { requestNotifyPermission } from './firebase/messaging'
+
+function PushInitializer() {
+  const { user } = useAuth()
+
+  useEffect(() => {
+    if (user) {
+      requestNotifyPermission(user.id)
+    }
+  }, [user])
+
+  return null
+}
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        {/* <PushInitializer /> */}
+        <PushInitializer />
         <Routes>
           {/* Public Routes */}
           <Route path="/login" element={<LoginPage />} />

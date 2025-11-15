@@ -1,0 +1,2 @@
+importScripts('/sw.js'); // SW de VitePWA (dev o build)
+importScripts('/custom-sw/firebase-messaging-sw.js'); // Tu SW real de Firebase

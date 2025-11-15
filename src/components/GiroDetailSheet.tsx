@@ -36,8 +36,6 @@ const RETURN_REASON_OPTIONS = [
   'Otro motivo',
 ]
 
-const BANK_OPTIONS = ['Banco Nacional', 'Banco Provincial', 'Banesco', 'Mercantil', 'Banco de Venezuela']
-
 export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDetailSheetProps) {
   const { user } = useAuth()
   const [giro, setGiro] = useState<Giro | null>(null)
