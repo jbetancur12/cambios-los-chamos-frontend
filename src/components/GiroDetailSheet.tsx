@@ -576,7 +576,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                   <div className="grid grid-cols-1 gap-2 text-xs">
                     <div>
                       <p className="text-muted-foreground">Venta</p>
-                      <p className="font-medium text-lg">{giro.rateApplied.sellRate.toFixed(2)}</p>
+                      <p className="font-medium text-lg">{giro.rateApplied?.sellRate?.toFixed(2) || '0.00'}</p>
                     </div>
                   </div>
                 ) : isEditingRate ? (
@@ -657,19 +657,19 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                     <div className="grid grid-cols-2 gap-2 text-xs">
                       <div>
                         <p className="text-muted-foreground">Compra</p>
-                        <p className="font-medium">{giro.rateApplied.buyRate.toFixed(2)}</p>
+                        <p className="font-medium">{giro.rateApplied?.buyRate?.toFixed(2) || '0.00'}</p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Venta</p>
-                        <p className="font-medium">{giro.rateApplied.sellRate.toFixed(2)}</p>
+                        <p className="font-medium">{giro.rateApplied?.sellRate?.toFixed(2) || '0.00'}</p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">USD</p>
-                        <p className="font-medium">{giro.rateApplied.usd.toFixed(2)}</p>
+                        <p className="font-medium">{giro.rateApplied?.usd?.toFixed(2) || '0.00'}</p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">BCV</p>
-                        <p className="font-medium">{giro.rateApplied.bcv.toFixed(2)}</p>
+                        <p className="font-medium">{giro.rateApplied?.bcv?.toFixed(2) || '0.00'}</p>
                       </div>
                     </div>
                     {!isNotEditableStatus && (
