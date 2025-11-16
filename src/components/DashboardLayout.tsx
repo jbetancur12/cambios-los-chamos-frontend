@@ -73,7 +73,8 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
       <aside className="hidden md:fixed md:inset-y-0 md:flex md:w-64 md:flex-col">
         <div className="flex flex-col flex-1 min-h-0 border-r bg-card">
           {/* Header */}
-          <div className="flex items-center h-16 px-6 border-b">
+          <div className="flex items-center gap-3 h-16 px-6 border-b">
+            <img src="/icons/icon-48x48.png" alt="Logo" className="h-10 w-10" />
             <h1 className="text-xl font-bold text-foreground">Cambios los Chamos</h1>
           </div>
 
