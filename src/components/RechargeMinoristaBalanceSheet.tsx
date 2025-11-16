@@ -157,15 +157,26 @@ export function RechargeMinoristaBalanceSheet({
               Ver
             </button>
             <button
-              onClick={() => setActiveTab('manage')}
+              onClick={() => setActiveTab('assign')}
               className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === 'manage'
+                activeTab === 'assign'
                   ? 'border-blue-500 text-blue-600'
                   : 'border-transparent text-muted-foreground hover:text-foreground'
               }`}
             >
               <DollarSign className="h-4 w-4 inline mr-2" />
-              Asignar y Pagar
+              Asignar Cupo
+            </button>
+            <button
+              onClick={() => setActiveTab('pay')}
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === 'pay'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <DollarSign className="h-4 w-4 inline mr-2" />
+              Pagar Deuda
             </button>
           </div>
 
@@ -183,7 +194,7 @@ export function RechargeMinoristaBalanceSheet({
                 <div className="flex items-start gap-2 p-3 bg-red-50 dark:bg-red-950 rounded border border-red-200 dark:border-red-800">
                   <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
                   <p className="text-xs text-red-700 dark:text-red-300">
-                    Este minorista tiene deuda. Usa la pestaña "Asignar y Pagar" para abonar fondos y reducir la deuda.
+                    Este minorista tiene deuda. Usa la pestaña "Pagar Deuda" para abonar fondos y reducir la deuda.
                   </p>
                 </div>
               )}
@@ -201,113 +212,107 @@ export function RechargeMinoristaBalanceSheet({
             </div>
           )}
 
-          {/* Gestionar Cupo y Pagar Deuda */}
-          {activeTab === 'manage' && (
-            <div className="space-y-6">
-              {/* SECCIÓN 1: ASIGNAR CUPO */}
-              <div className="space-y-4">
-                <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 space-y-2">
-                  <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                    1. Asignar o Modificar Cupo de Crédito
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    El cupo se puede modificar en cualquier momento después de su asignación inicial.
-                  </p>
-                </div>
-
-                <form onSubmit={handleSetCreditLimit} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="credit-limit">Nuevo Cupo de Crédito (COP)</Label>
-                    <Input
-                      id="credit-limit"
-                      type="number"
-                      step="1"
-                      min="0"
-                      placeholder="0"
-                      value={creditLimitAmount}
-                      onChange={(e) => setCreditLimitAmount(e.target.value)}
-                      required
-                      autoFocus
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Cupo actual: {formatCurrency(localMinorista.creditLimit)}
-                    </p>
-                  </div>
-
-                  {creditLimitAmount && !isNaN(parseFloat(creditLimitAmount)) && (
-                    <div className="rounded-lg bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 p-4">
-                      <p className="text-sm text-blue-900 dark:text-blue-100 font-medium mb-2">Nuevo cupo:</p>
-                      <p className="text-2xl font-bold text-blue-600">
-                        {formatCurrency(parseFloat(creditLimitAmount))}
-                      </p>
-                    </div>
-                  )}
-
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? 'Actualizando...' : 'Asignar Cupo'}
-                  </Button>
-                </form>
+          {/* Asignar Cupo */}
+          {activeTab === 'assign' && (
+            <div className="space-y-4">
+              <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 space-y-2">
+                <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                  Asignar o Modificar Cupo de Crédito
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  El cupo se puede modificar en cualquier momento después de su asignación inicial.
+                </p>
               </div>
 
-              {/* SECCIÓN 2: PAGAR DEUDA */}
-              {true && (
-                <div className="space-y-4 pt-4 border-t">
-                  <div className="p-4 rounded-lg bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 space-y-2">
-                    <p className="text-sm font-medium text-red-900 dark:text-red-100">2. Pagar Deuda y Liberar Cupo</p>
-                    <p className="text-xs text-muted-foreground">
-                      Paga la deuda acumulada para liberar cupo disponible. Las ganancias acumuladas se reiniciarán.
+              <form onSubmit={handleSetCreditLimit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="credit-limit">Nuevo Cupo de Crédito (COP)</Label>
+                  <Input
+                    id="credit-limit"
+                    type="number"
+                    step="1"
+                    min="0"
+                    placeholder="0"
+                    value={creditLimitAmount}
+                    onChange={(e) => setCreditLimitAmount(e.target.value)}
+                    required
+                    autoFocus
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Cupo actual: {formatCurrency(localMinorista.creditLimit)}
+                  </p>
+                </div>
+
+                {creditLimitAmount && !isNaN(parseFloat(creditLimitAmount)) && (
+                  <div className="rounded-lg bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 p-4">
+                    <p className="text-sm text-blue-900 dark:text-blue-100 font-medium mb-2">Nuevo cupo:</p>
+                    <p className="text-2xl font-bold text-blue-600">
+                      {formatCurrency(parseFloat(creditLimitAmount))}
                     </p>
                   </div>
+                )}
 
-                  <form onSubmit={handlePayDebt} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="pay-amount">Monto a Pagar (COP)</Label>
-                      <div className="flex gap-2">
-                                               {' '}
-                        <Input
-                          id="pay-amount"
-                          type="number"
-                          step="1"
-                          min="1"
-                          placeholder="0"
-                          value={payAmount}
-                          onChange={(e) => setPayAmount(e.target.value)}
-                          required
-                        />
-                                               {' '}
-                        <Button
-                          type="button" // Importante para que no envíe el formulario
-                          onClick={() => setPayAmount(debtAmount.toString())} // Establece la deuda total
-                          variant="outline"
-                          className="flex-shrink-0"
-                          disabled={loading || debtAmount <= 0} // Deshabilitar si está cargando o no hay deuda
-                        >
-                                                    Pagar Todo                        {' '}
-                        </Button>
-                                             {' '}
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Deuda actual: {formatCurrency(debtAmount as number)}
-                      </p>
-                    </div>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? 'Actualizando...' : 'Asignar Cupo'}
+                </Button>
+              </form>
+            </div>
+          )}
 
-                    {payAmount && !isNaN(parseFloat(payAmount)) && parseFloat(payAmount) > 0 && (
-                      <div className="rounded-lg bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 p-4">
-                        <p className="text-sm text-green-900 dark:text-green-100 font-medium mb-2">
-                          Deuda después del pago:
-                        </p>
-                        <p className="text-2xl font-bold text-green-600">
-                          {formatCurrency(Math.max(0, (debtAmount as number) - parseFloat(payAmount)))}
-                        </p>
-                      </div>
-                    )}
+          {/* Pagar Deuda */}
+          {activeTab === 'pay' && (
+            <div className="space-y-4">
+              <div className="p-4 rounded-lg bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 space-y-2">
+                <p className="text-sm font-medium text-red-900 dark:text-red-100">Pagar Deuda y Liberar Cupo</p>
+                <p className="text-xs text-muted-foreground">
+                  Paga la deuda acumulada para liberar cupo disponible. Las ganancias acumuladas se reiniciarán.
+                </p>
+              </div>
 
-                    <Button type="submit" className="w-full" disabled={loading} variant="destructive">
-                      {loading ? 'Procesando...' : 'Pagar Deuda'}
+              <form onSubmit={handlePayDebt} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="pay-amount">Monto a Pagar (COP)</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="pay-amount"
+                      type="number"
+                      step="1"
+                      min="1"
+                      placeholder="0"
+                      value={payAmount}
+                      onChange={(e) => setPayAmount(e.target.value)}
+                      required
+                    />
+                    <Button
+                      type="button"
+                      onClick={() => setPayAmount(debtAmount.toString())}
+                      variant="outline"
+                      className="flex-shrink-0"
+                      disabled={loading || debtAmount <= 0}
+                    >
+                      Pagar Todo
                     </Button>
-                  </form>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Deuda actual: {formatCurrency(debtAmount as number)}
+                  </p>
                 </div>
-              )}
+
+                {payAmount && !isNaN(parseFloat(payAmount)) && parseFloat(payAmount) > 0 && (
+                  <div className="rounded-lg bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 p-4">
+                    <p className="text-sm text-green-900 dark:text-green-100 font-medium mb-2">
+                      Deuda después del pago:
+                    </p>
+                    <p className="text-2xl font-bold text-green-600">
+                      {formatCurrency(Math.max(0, (debtAmount as number) - parseFloat(payAmount)))}
+                    </p>
+                  </div>
+                )}
+
+                <Button type="submit" className="w-full" disabled={loading} variant="destructive">
+                  {loading ? 'Procesando...' : 'Pagar Deuda'}
+                </Button>
+              </form>
             </div>
           )}
         </div>
