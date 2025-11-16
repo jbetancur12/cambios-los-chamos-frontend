@@ -152,7 +152,7 @@ export function ExchangeRatePage() {
                 <p className="text-xs text-muted-foreground">Dólar Oficial</p>
               </div>
             </div>
-            <div className="mt-4 flex items-center justify-between gap-2">
+            <div className="mt-4 space-y-2">
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Calendar className="h-3 w-3" />
                 <span>Actualizado: {formatDate(currentRate.createdAt)}</span>
@@ -164,7 +164,7 @@ export function ExchangeRatePage() {
                 }}
                 size="sm"
                 variant="outline"
-                className="gap-2"
+                className="w-full sm:w-auto gap-2"
               >
                 <Download className="h-4 w-4" />
                 Descargar
