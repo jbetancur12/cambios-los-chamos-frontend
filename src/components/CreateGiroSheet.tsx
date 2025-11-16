@@ -214,7 +214,6 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
     const amount = parseFloat(amountInput) || 0
     const balanceInFavor = minoristaBalanceInFavor
     const availableCredit = minoristaBalance
-    const limit = creditLimit
 
     // Apply processTransfer logic to calculate final balances
     const profit = amount * 0.05
@@ -268,11 +267,13 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
       }
     }
 
-    // Check: final debt cannot exceed credit limit AND total balance cannot be negative
-    const finalDebt = Math.max(0, externalDebt - profit)
+    // Check:
+    // 1. All external debt must be covered by profit (no unpaid debt)
+    // 2. Total balance cannot be negative
+    const unpaidDebt = Math.max(0, externalDebt - profit)
     const totalFinalBalance = finalBalance + finalCredit
 
-    return finalDebt > limit || totalFinalBalance < 0
+    return unpaidDebt > 0 || totalFinalBalance < 0
   }
 
   return (
