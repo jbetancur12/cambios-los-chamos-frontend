@@ -204,12 +204,16 @@ export function RechargeMinoristaBalanceSheet({
                 </div>
                 <div className="p-3 rounded-lg bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800">
                   <p className="text-xs text-muted-foreground mb-1">Crédito Disponible</p>
-                  <p className="text-lg font-semibold text-green-600">{formatCurrency(localMinorista.availableCredit)}</p>
+                  <p className="text-lg font-semibold text-green-600">
+                    {formatCurrency(localMinorista.availableCredit)}
+                  </p>
                 </div>
                 {localMinorista.creditBalance > 0 && (
                   <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800">
                     <p className="text-xs text-muted-foreground mb-1">Saldo a Favor</p>
-                    <p className="text-lg font-semibold text-blue-600">{formatCurrency(localMinorista.creditBalance)}</p>
+                    <p className="text-lg font-semibold text-blue-600">
+                      {formatCurrency(localMinorista.creditBalance)}
+                    </p>
                   </div>
                 )}
                 {debtAmount > 0 && (
@@ -257,12 +261,7 @@ export function RechargeMinoristaBalanceSheet({
                     {/* Pagination Controls */}
                     {totalPages > 1 && (
                       <div className="flex items-center justify-center gap-2 pt-4 border-t">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          disabled={page === 1}
-                          onClick={() => setPage(page - 1)}
-                        >
+                        <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(page - 1)}>
                           Anterior
                         </Button>
                         <span className="text-sm text-muted-foreground">
@@ -318,9 +317,7 @@ export function RechargeMinoristaBalanceSheet({
                 {creditLimitAmount && !isNaN(parseFloat(creditLimitAmount)) && (
                   <div className="rounded-lg bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 p-4">
                     <p className="text-sm text-blue-900 dark:text-blue-100 font-medium mb-2">Nuevo cupo:</p>
-                    <p className="text-2xl font-bold text-blue-600">
-                      {formatCurrency(parseFloat(creditLimitAmount))}
-                    </p>
+                    <p className="text-2xl font-bold text-blue-600">{formatCurrency(parseFloat(creditLimitAmount))}</p>
                   </div>
                 )}
 
@@ -365,9 +362,7 @@ export function RechargeMinoristaBalanceSheet({
                       Pagar Todo
                     </Button>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    Deuda actual: {formatCurrency(debtAmount)}
-                  </p>
+                  <p className="text-xs text-muted-foreground">Deuda actual: {formatCurrency(debtAmount)}</p>
                 </div>
 
                 {payAmount && !isNaN(parseFloat(payAmount)) && parseFloat(payAmount) > 0 && (
@@ -388,9 +383,7 @@ export function RechargeMinoristaBalanceSheet({
                         <p className="text-2xl font-bold text-blue-600">
                           {formatCurrency(parseFloat(payAmount) - debtAmount + localMinorista.creditBalance)}
                         </p>
-                        <p className="text-xs text-blue-700 dark:text-blue-300 mt-2">
-                          Exceso de pago + saldo anterior
-                        </p>
+                        <p className="text-xs text-blue-700 dark:text-blue-300 mt-2">Exceso de pago + saldo anterior</p>
                       </div>
                     )}
                   </div>

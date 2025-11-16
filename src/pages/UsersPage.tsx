@@ -362,7 +362,10 @@ export function UsersPage() {
                         <div className="flex items-center gap-2 mt-2 min-w-0">
                           <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                           <p className="text-sm text-muted-foreground truncate">{user.email}</p>
-                          <span title={user.emailVerified ? 'Email verificado' : 'Email no verificado'} className="flex-shrink-0">
+                          <span
+                            title={user.emailVerified ? 'Email verificado' : 'Email no verificado'}
+                            className="flex-shrink-0"
+                          >
                             {user.emailVerified ? (
                               <CheckCircle2 className="h-4 w-4 text-green-600" />
                             ) : (

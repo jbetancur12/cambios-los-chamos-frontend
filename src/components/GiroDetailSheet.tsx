@@ -7,6 +7,7 @@ import { api } from '@/lib/api'
 import { toast } from 'sonner'
 import { useAuth } from '@/contexts/AuthContext'
 import { useGiroWebSocket } from '@/hooks/useGiroWebSocket'
+import { PaymentProofUpload } from './PaymentProofUpload'
 import {
   Clock,
   CheckCircle,
@@ -73,6 +74,9 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
     bcv: 0,
   })
 
+  // ESTADO PARA PAYMENT PROOF
+  const [paymentProofUrl, setPaymentProofUrl] = useState<string | null>(null)
+
   const isTransferencista = user?.role === 'TRANSFERENCISTA'
   const isMinorista = user?.role === 'MINORISTA'
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN'
@@ -90,6 +94,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
       setProofUrl('')
 
       fetchGiroDetails()
+      fetchPaymentProof()
       if (isTransferencista) {
         fetchBankAccounts()
       }
@@ -200,6 +205,20 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
       }
     } catch (error: any) {
       toast.error(error.message || 'Error al cargar cuentas bancarias')
+    }
+  }
+
+  const fetchPaymentProof = async () => {
+    if (!giroId) return
+
+    try {
+      const response = await api.get<{ paymentProofUrl: string; filename: string }>(
+        `/api/giro/${giroId}/payment-proof/download`
+      )
+      setPaymentProofUrl(response.paymentProofUrl)
+    } catch (error: any) {
+      // Silently fail if no payment proof exists
+      setPaymentProofUrl(null)
     }
   }
 
@@ -741,6 +760,27 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                 </div>
               )}
 
+              {/* Payment Proof Display */}
+              {paymentProofUrl && (
+                <div className="p-4 rounded-lg border border-green-200 bg-green-50 dark:bg-green-950 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <p className="font-semibold text-green-900 dark:text-green-100">Comprobante de Pago</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => window.open(paymentProofUrl, '_blank')}
+                      className="flex-1 gap-2"
+                    >
+                      Descargar Comprobante
+                    </Button>
+                  </div>
+                </div>
+              )}
+
               {/* Dates */}
               <div className="space-y-2 text-xs text-muted-foreground">
                 <div className="flex items-center gap-2">
@@ -844,21 +884,20 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                         />
                       </div>
 
-                      <div className="space-y-2">
-                        <Label htmlFor="proofUrl">URL del Comprobante (Opcional)</Label>
-                        <Input
-                          id="proofUrl"
-                          type="url"
-                          value={proofUrl}
-                          onChange={(e) => setProofUrl(e.target.value)}
-                          placeholder="https://ejemplo.com/comprobante.jpg"
-                        />
-                      </div>
+                      <PaymentProofUpload
+                        giroId={giro.id}
+                        onProofUploaded={(url) => {
+                          setProofUrl(url)
+                          toast.success('Comprobante de pago actualizado')
+                        }}
+                        disabled={processing}
+                      />
 
                       <Button
                         onClick={handleExecuteGiro}
-                        disabled={processing || !selectedBankAccountId}
+                        disabled={processing || !selectedBankAccountId || !proofUrl}
                         className="w-full"
+                        title={!proofUrl ? 'Debes cargar un comprobante de pago antes de ejecutar' : ''}
                       >
                         {processing ? 'Ejecutando...' : 'Ejecutar Giro'}
                       </Button>
@@ -906,18 +945,15 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
               )}
 
               {/* Delete Button for Minorista - Only for PENDIENTE, ASIGNADO or DEVUELTO */}
-              {isMinorista && giro && (giro.status === 'PENDIENTE' || giro.status === 'ASIGNADO' || giro.status === 'DEVUELTO') && (
-                <div className="pt-4 border-t">
-                  <Button
-                    onClick={handleDeleteGiro}
-                    disabled={processing}
-                    variant="destructive"
-                    className="w-full"
-                  >
-                    {processing ? 'Eliminando...' : 'Eliminar Giro'}
-                  </Button>
-                </div>
-              )}
+              {isMinorista &&
+                giro &&
+                (giro.status === 'PENDIENTE' || giro.status === 'ASIGNADO' || giro.status === 'DEVUELTO') && (
+                  <div className="pt-4 border-t">
+                    <Button onClick={handleDeleteGiro} disabled={processing} variant="destructive" className="w-full">
+                      {processing ? 'Eliminando...' : 'Eliminar Giro'}
+                    </Button>
+                  </div>
+                )}
             </div>
           ) : null}
         </SheetBody>

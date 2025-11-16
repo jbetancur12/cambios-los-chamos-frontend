@@ -133,15 +133,8 @@ export function DateRangeFilter({ onDateRangeChange, onClear }: DateRangeFilterP
         {/* Mobile Collapse Toggle */}
         <div className="md:hidden flex items-center justify-between">
           <p className="text-sm font-medium text-foreground">Filtros</p>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="h-8 w-8 p-0"
-          >
-            <ChevronDown
-              className={`h-5 w-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-            />
+          <Button variant="ghost" size="sm" onClick={() => setIsExpanded(!isExpanded)} className="h-8 w-8 p-0">
+            <ChevronDown className={`h-5 w-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
           </Button>
         </div>
 
@@ -155,71 +148,71 @@ export function DateRangeFilter({ onDateRangeChange, onClear }: DateRangeFilterP
           <div>
             <p className="hidden md:block text-sm font-medium mb-3 text-foreground">Rango Rápido</p>
             <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
-            <Button
-              variant={activePredefined === 'today' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => handlePredefined('today')}
-              className="text-xs"
-            >
-              Hoy
-            </Button>
-            <Button
-              variant={activePredefined === 'yesterday' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => handlePredefined('yesterday')}
-              className="text-xs"
-            >
-              Ayer
-            </Button>
-            <Button
-              variant={activePredefined === 'thisWeek' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => handlePredefined('thisWeek')}
-              className="text-xs"
-            >
-              Esta Semana
-            </Button>
-            <Button
-              variant={activePredefined === 'lastWeek' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => handlePredefined('lastWeek')}
-              className="text-xs"
-            >
-              Sem. Pasada
-            </Button>
-            <Button
-              variant={activePredefined === 'thisMonth' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => handlePredefined('thisMonth')}
-              className="text-xs"
-            >
-              Este Mes
-            </Button>
-            <Button
-              variant={activePredefined === 'lastMonth' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => handlePredefined('lastMonth')}
-              className="text-xs"
-            >
-              Mes Pasado
-            </Button>
-            <Button
-              variant={activePredefined === 'thisYear' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => handlePredefined('thisYear')}
-              className="text-xs"
-            >
-              Este Año
-            </Button>
-            <Button
-              variant={showCustomRange ? 'default' : 'outline'}
-              size="sm"
-              onClick={handleCustomRange}
-              className="text-xs"
-            >
-              <Calendar className="h-3 w-3 mr-1" />
-              Personalizado
-            </Button>
+              <Button
+                variant={activePredefined === 'today' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => handlePredefined('today')}
+                className="text-xs"
+              >
+                Hoy
+              </Button>
+              <Button
+                variant={activePredefined === 'yesterday' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => handlePredefined('yesterday')}
+                className="text-xs"
+              >
+                Ayer
+              </Button>
+              <Button
+                variant={activePredefined === 'thisWeek' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => handlePredefined('thisWeek')}
+                className="text-xs"
+              >
+                Esta Semana
+              </Button>
+              <Button
+                variant={activePredefined === 'lastWeek' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => handlePredefined('lastWeek')}
+                className="text-xs"
+              >
+                Sem. Pasada
+              </Button>
+              <Button
+                variant={activePredefined === 'thisMonth' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => handlePredefined('thisMonth')}
+                className="text-xs"
+              >
+                Este Mes
+              </Button>
+              <Button
+                variant={activePredefined === 'lastMonth' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => handlePredefined('lastMonth')}
+                className="text-xs"
+              >
+                Mes Pasado
+              </Button>
+              <Button
+                variant={activePredefined === 'thisYear' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => handlePredefined('thisYear')}
+                className="text-xs"
+              >
+                Este Año
+              </Button>
+              <Button
+                variant={showCustomRange ? 'default' : 'outline'}
+                size="sm"
+                onClick={handleCustomRange}
+                className="text-xs"
+              >
+                <Calendar className="h-3 w-3 mr-1" />
+                Personalizado
+              </Button>
             </div>
           </div>
 

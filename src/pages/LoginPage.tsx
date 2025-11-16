@@ -94,7 +94,11 @@ export function LoginPage() {
               {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
             </div>
 
-            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+              disabled={isSubmitting}
+            >
               {isSubmitting ? 'Iniciando sesión...' : 'Iniciar Sesión'}
             </Button>
           </form>

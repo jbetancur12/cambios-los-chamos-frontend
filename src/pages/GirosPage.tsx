@@ -57,36 +57,28 @@ export function GirosPage() {
     // Escuchar evento de giro actualizado
     const unsubscribeUpdated = subscribe('giro:updated', (event) => {
       console.log('[Page] Giro actualizado recibido:', event.giro.id, 'Tipo:', event.changeType)
-      setGiros((prev) =>
-        prev.map((g) => (g.id === event.giro.id ? (event.giro as unknown as Giro) : g))
-      )
+      setGiros((prev) => prev.map((g) => (g.id === event.giro.id ? (event.giro as unknown as Giro) : g)))
       toast.info(`Giro actualizado: ${event.changeType}`)
     })
 
     // Escuchar evento de giro procesando
     const unsubscribeProcessing = subscribe('giro:processing', (event) => {
       console.log('[Page] Giro procesando:', event.giro.id)
-      setGiros((prev) =>
-        prev.map((g) => (g.id === event.giro.id ? (event.giro as unknown as Giro) : g))
-      )
+      setGiros((prev) => prev.map((g) => (g.id === event.giro.id ? (event.giro as unknown as Giro) : g)))
       toast.info('Giro marcado como procesando')
     })
 
     // Escuchar evento de giro ejecutado
     const unsubscribeExecuted = subscribe('giro:executed', (event) => {
       console.log('[Page] Giro ejecutado:', event.giro.id)
-      setGiros((prev) =>
-        prev.map((g) => (g.id === event.giro.id ? (event.giro as unknown as Giro) : g))
-      )
+      setGiros((prev) => prev.map((g) => (g.id === event.giro.id ? (event.giro as unknown as Giro) : g)))
       toast.success('Giro ejecutado correctamente')
     })
 
     // Escuchar evento de giro devuelto
     const unsubscribeReturned = subscribe('giro:returned', (event) => {
       console.log('[Page] Giro devuelto:', event.giro.id, 'Razón:', event.reason)
-      setGiros((prev) =>
-        prev.map((g) => (g.id === event.giro.id ? (event.giro as unknown as Giro) : g))
-      )
+      setGiros((prev) => prev.map((g) => (g.id === event.giro.id ? (event.giro as unknown as Giro) : g)))
       toast.warning(`Giro devuelto: ${event.reason}`)
     })
 

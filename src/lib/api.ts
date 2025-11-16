@@ -56,13 +56,14 @@ export const api = {
   },
 
   async post<T>(endpoint: string, body?: unknown): Promise<T> {
+    const isFormData = body instanceof FormData
+    const headers: Record<string, string> = isFormData ? {} : { 'Content-Type': 'application/json' }
+
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'POST',
       credentials: 'include', // Important for cookies
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: body ? JSON.stringify(body) : undefined,
+      headers,
+      body: isFormData ? body : body ? JSON.stringify(body) : undefined,
     })
     return handleResponse<T>(response)
   },

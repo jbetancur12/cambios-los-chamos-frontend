@@ -62,7 +62,9 @@ export function ForgotPasswordPage() {
             <img src="/icons/icon-192x192.png" alt="Cambios los Chamos" className="h-16 w-16 rounded-lg shadow-md" />
           </div>
           <CardTitle className="text-2xl md:text-3xl font-bold text-gray-900">Recuperar Contraseña</CardTitle>
-          <CardDescription className="text-gray-600">Ingresa tu email para recibir un enlace de recuperación</CardDescription>
+          <CardDescription className="text-gray-600">
+            Ingresa tu email para recibir un enlace de recuperación
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {!sent ? (
@@ -82,7 +84,11 @@ export function ForgotPasswordPage() {
                 />
               </div>
 
-              <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold" disabled={loading}>
+              <Button
+                type="submit"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+                disabled={loading}
+              >
                 {loading ? 'Enviando...' : 'Enviar Enlace de Recuperación'}
               </Button>
 
@@ -99,9 +105,7 @@ export function ForgotPasswordPage() {
             <div className="space-y-4 text-center">
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                 <p className="text-green-800 font-semibold mb-2">✅ Email Enviado</p>
-                <p className="text-sm text-gray-700">
-                  Hemos enviado un enlace de recuperación a:
-                </p>
+                <p className="text-sm text-gray-700">Hemos enviado un enlace de recuperación a:</p>
                 <p className="font-semibold text-gray-900 mt-2">{email}</p>
               </div>
 
@@ -109,9 +113,7 @@ export function ForgotPasswordPage() {
                 Revisa tu correo (incluyendo la carpeta de spam) para encontrar el enlace de recuperación.
               </p>
 
-              <div className="text-xs text-gray-500">
-                Redirigiendo a inicio de sesión en 3 segundos...
-              </div>
+              <div className="text-xs text-gray-500">Redirigiendo a inicio de sesión en 3 segundos...</div>
 
               <button
                 type="button"
