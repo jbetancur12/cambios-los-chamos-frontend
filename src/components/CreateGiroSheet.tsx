@@ -216,11 +216,9 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
     const availableCredit = minoristaBalance
     const limit = creditLimit
 
-    // Calculate if transaction would exceed credit limit
-    // Deduct from balance first, then credit, then check if remainder (external debt) exceeds limit
-    let remainingAmount = amount
-
+    // Calculate debt AFTER applying profit
     // Step 1: Deduct from balance
+    let remainingAmount = amount
     if (remainingAmount <= balanceInFavor) {
       remainingAmount = 0
     } else {
@@ -236,9 +234,14 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
       }
     }
 
-    // Step 3: Check if external debt exceeds credit limit
-    // externalDebt must NOT exceed creditLimit
-    const externalDebt = remainingAmount
+    // Step 3: Calculate external debt BEFORE profit
+    let externalDebt = remainingAmount
+
+    // Step 4: Apply profit (5% of amount) to pay external debt
+    const profit = amount * 0.05
+    externalDebt = Math.max(0, externalDebt - profit)
+
+    // Step 5: Check if remaining debt exceeds credit limit
     return externalDebt > limit
   }
 
