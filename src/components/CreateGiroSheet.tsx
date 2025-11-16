@@ -24,6 +24,7 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
   const [minoristaBalance, setMinoristaBalance] = useState<number | null>(null)
   const [minoristaBalanceInFavor, setMinoristaBalanceInFavor] = useState<number | null>(null)
   const [loadingBalance, setLoadingBalance] = useState(false)
+  const [creditLimit, setCreditLimit] = useState<number | null>(null)
 
   // Form fields
   const [beneficiaryName, setBeneficiaryName] = useState('')
@@ -86,6 +87,7 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
       const response = await api.get<{ minorista: Minorista }>('/api/minorista/me')
       setMinoristaBalance(response.minorista.availableCredit)
       setMinoristaBalanceInFavor(response.minorista.creditBalance || 0)
+      setCreditLimit(response.minorista.creditLimit)
     } catch (error: any) {
       toast.error(error.message || 'Error al cargar balance')
     } finally {
@@ -207,12 +209,37 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
   }
 
   const hasInsufficientBalance = () => {
-    if (!isMinorista || minoristaBalance === null || minoristaBalanceInFavor === null) return false
+    if (!isMinorista || minoristaBalance === null || minoristaBalanceInFavor === null || creditLimit === null) return false
 
     const amount = parseFloat(amountInput) || 0
-    const totalBalance = minoristaBalance + minoristaBalanceInFavor
+    const balanceInFavor = minoristaBalanceInFavor
+    const availableCredit = minoristaBalance
+    const limit = creditLimit
 
-    return amount > totalBalance
+    // Calculate if transaction would exceed credit limit
+    // Deduct from balance first, then credit, then check if remainder (external debt) exceeds limit
+    let remainingAmount = amount
+
+    // Step 1: Deduct from balance
+    if (remainingAmount <= balanceInFavor) {
+      remainingAmount = 0
+    } else {
+      remainingAmount -= balanceInFavor
+    }
+
+    // Step 2: Deduct from credit
+    if (remainingAmount > 0) {
+      if (remainingAmount <= availableCredit) {
+        remainingAmount = 0
+      } else {
+        remainingAmount -= availableCredit
+      }
+    }
+
+    // Step 3: Check if external debt exceeds credit limit
+    // externalDebt must NOT exceed creditLimit
+    const externalDebt = remainingAmount
+    return externalDebt > limit
   }
 
   return (
