@@ -139,7 +139,10 @@ export function RechargeMinoristaBalanceSheet({
   if (!localMinorista) return null
 
   const hasDebt = localMinorista.availableCredit < 0
-  const debtAmount = localMinorista.creditLimit - localMinorista.availableCredit
+  // Deuda real = Cupo - (Crédito Disponible + Saldo a Favor)
+  // El saldo a favor también es dinero disponible del minorista
+  const totalAvailable = localMinorista.availableCredit + (localMinorista.creditBalance || 0)
+  const debtAmount = Math.max(0, localMinorista.creditLimit - totalAvailable)
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>

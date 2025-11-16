@@ -21,6 +21,7 @@ export function DashboardPage() {
 
   // Minorista balance
   const [minoristaBalance, setMinoristaBalance] = useState<number | null>(null)
+  const [minoristaBalanceInFavor, setMinoristaBalanceInFavor] = useState<number | null>(null)
   const [loadingBalance, setLoadingBalance] = useState(false)
 
   // Transferencista bank accounts
@@ -45,6 +46,7 @@ export function DashboardPage() {
       setLoadingBalance(true)
       const response = await api.get<{ minorista: Minorista }>('/api/minorista/me')
       setMinoristaBalance(response.minorista.availableCredit)
+      setMinoristaBalanceInFavor(response.minorista.creditBalance || 0)
     } catch (error: any) {
       toast.error(error.message || 'Error al cargar balance')
     } finally {
@@ -267,11 +269,30 @@ export function DashboardPage() {
                 <p className="text-sm text-muted-foreground">Cargando balance...</p>
               </div>
             ) : (
-              <div className="space-y-2">
-                <div className="text-3xl md:text-4xl font-bold text-blue-600">
-                  {minoristaBalance !== null ? formatCurrency(minoristaBalance, 'COP') : '$ 0,00'}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Crédito Disponible */}
+                <div className="space-y-2">
+                  <p className="text-xs md:text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                    Crédito Disponible
+                  </p>
+                  <div className="text-2xl md:text-3xl font-bold text-blue-600">
+                    {minoristaBalance !== null ? formatCurrency(minoristaBalance, 'COP') : '$ 0,00'}
+                  </div>
+                  <p className="text-xs text-muted-foreground">Para crear giros</p>
                 </div>
-                <p className="text-sm text-muted-foreground">Disponible para crear giros</p>
+
+                {/* Saldo a Favor - Solo mostrar si existe */}
+                {minoristaBalanceInFavor !== null && minoristaBalanceInFavor > 0 && (
+                  <div className="space-y-2 bg-emerald-50 dark:bg-emerald-950 p-3 rounded-lg border border-emerald-200 dark:border-emerald-800">
+                    <p className="text-xs md:text-sm font-medium text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+                      Saldo a Favor
+                    </p>
+                    <div className="text-2xl md:text-3xl font-bold text-emerald-700 dark:text-emerald-300">
+                      {formatCurrency(minoristaBalanceInFavor, 'COP')}
+                    </div>
+                    <p className="text-xs text-emerald-600 dark:text-emerald-400">Balance acreditado</p>
+                  </div>
+                )}
               </div>
             )}
           </CardContent>

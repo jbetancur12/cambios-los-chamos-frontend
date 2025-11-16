@@ -22,6 +22,7 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
   const [currentRate, setCurrentRate] = useState<ExchangeRate | null>(null)
   const [loadingRate, setLoadingRate] = useState(true)
   const [minoristaBalance, setMinoristaBalance] = useState<number | null>(null)
+  const [minoristaBalanceInFavor, setMinoristaBalanceInFavor] = useState<number | null>(null)
   const [loadingBalance, setLoadingBalance] = useState(false)
 
   // Form fields
@@ -84,6 +85,7 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
       setLoadingBalance(true)
       const response = await api.get<{ minorista: Minorista }>('/api/minorista/me')
       setMinoristaBalance(response.minorista.availableCredit)
+      setMinoristaBalanceInFavor(response.minorista.creditBalance || 0)
     } catch (error: any) {
       toast.error(error.message || 'Error al cargar balance')
     } finally {
@@ -183,8 +185,16 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
   }
 
   const getRemainingBalance = () => {
-    if (minoristaBalance === null) return null
-    return minoristaBalance - parseFloat(amountInput) + getEarnedProfit()!
+    if (minoristaBalance === null || minoristaBalanceInFavor === null) return null
+
+    const amount = parseFloat(amountInput) || 0
+    const profit = getEarnedProfit() || 0
+
+    // Total balance = crédito + saldo a favor
+    const totalBalance = minoristaBalance + minoristaBalanceInFavor
+
+    // Balance after transaction = total balance - amount + profit
+    return totalBalance - amount + profit
   }
 
   const getEarnedProfit = () => {
@@ -197,9 +207,12 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
   }
 
   const hasInsufficientBalance = () => {
-    if (!isMinorista || minoristaBalance === null) return false
-    const remaining = getRemainingBalance()
-    return remaining !== null && remaining < 0
+    if (!isMinorista || minoristaBalance === null || minoristaBalanceInFavor === null) return false
+
+    const amount = parseFloat(amountInput) || 0
+    const totalBalance = minoristaBalance + minoristaBalanceInFavor
+
+    return amount > totalBalance
   }
 
   return (
@@ -371,6 +384,7 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
             {isMinorista && !loadingBalance && minoristaBalance !== null && (
               <BalanceInfo
                 minoristaBalance={minoristaBalance}
+                minoristaBalanceInFavor={minoristaBalanceInFavor}
                 amountInput={amountInput}
                 getEarnedProfit={getEarnedProfit}
                 getRemainingBalance={getRemainingBalance}

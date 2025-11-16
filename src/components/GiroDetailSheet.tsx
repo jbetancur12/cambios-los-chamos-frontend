@@ -22,7 +22,7 @@ import {
   ArrowRight,
   CornerDownLeft, // Nuevo ícono para devolver
 } from 'lucide-react'
-import type { Giro, BankAccount, ExecutionType, GiroStatus, Bank } from '@/types/api'
+import type { Giro, BankAccount, ExecutionType, GiroStatus, Bank, MinoristaTransaction } from '@/types/api'
 
 interface GiroDetailSheetProps {
   open: boolean
@@ -77,6 +77,9 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
   // ESTADO PARA PAYMENT PROOF
   const [paymentProofUrl, setPaymentProofUrl] = useState<string | null>(null)
 
+  // ESTADO PARA DETALLES DE TRANSACCIÓN DEL MINORISTA
+  const [minoristaTransaction, setMinoristaTransaction] = useState<MinoristaTransaction | null>(null)
+
   const isTransferencista = user?.role === 'TRANSFERENCISTA'
   const isMinorista = user?.role === 'MINORISTA'
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN'
@@ -98,8 +101,11 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
       if (isTransferencista) {
         fetchBankAccounts()
       }
+      if (isMinorista) {
+        fetchMinoristaTransactionDetails()
+      }
     }
-  }, [open, giroId, isTransferencista])
+  }, [open, giroId, isTransferencista, isMinorista])
 
   // WebSocket listener para actualizaciones en tiempo real
   useEffect(() => {
@@ -193,6 +199,18 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
       toast.error(error.message || 'Error al cargar detalles del giro')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchMinoristaTransactionDetails = async () => {
+    if (!giroId || !isMinorista) return
+
+    try {
+      const response = await api.get<{ transaction: MinoristaTransaction }>(`/api/giro/${giroId}/minorista-transaction`)
+      setMinoristaTransaction(response.transaction)
+    } catch (error: any) {
+      // Silently fail if no transaction details available
+      setMinoristaTransaction(null)
     }
   }
 
@@ -604,6 +622,48 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                   </div>
                 </div>
               </div>
+
+              {/* Consumption Breakdown for Minorista - Only shown when viewing their giro */}
+              {isMinorista && minoristaTransaction && (
+                <div className="space-y-3 p-4 bg-emerald-50 dark:bg-emerald-950 rounded-lg border border-emerald-200 dark:border-emerald-800">
+                  <h3 className="font-semibold flex items-center gap-2 text-emerald-700 dark:text-emerald-300">
+                    <CreditCard className="h-4 w-4" />
+                    Desglose del Consumo
+                  </h3>
+                  <p className="text-xs text-emerald-600 dark:text-emerald-400 mb-2">
+                    Cómo se descontó el cupo de este giro
+                  </p>
+                  <div className="space-y-2 text-sm">
+                    {minoristaTransaction.balanceInFavorUsed !== undefined && minoristaTransaction.balanceInFavorUsed > 0 && (
+                      <div className="p-3 bg-white dark:bg-slate-900 rounded border border-emerald-200 dark:border-emerald-700">
+                        <p className="text-xs text-muted-foreground mb-1">Saldo a Favor Utilizado</p>
+                        <p className="text-lg font-semibold text-emerald-700 dark:text-emerald-300">
+                          {formatCurrency(minoristaTransaction.balanceInFavorUsed, 'COP')}
+                        </p>
+                      </div>
+                    )}
+                    {minoristaTransaction.creditUsed !== undefined && minoristaTransaction.creditUsed > 0 && (
+                      <div className="p-3 bg-white dark:bg-slate-900 rounded border border-blue-200 dark:border-blue-700">
+                        <p className="text-xs text-muted-foreground mb-1">Crédito Disponible Utilizado</p>
+                        <p className="text-lg font-semibold text-blue-700 dark:text-blue-300">
+                          {formatCurrency(minoristaTransaction.creditUsed, 'COP')}
+                        </p>
+                      </div>
+                    )}
+                    {minoristaTransaction.remainingBalance !== undefined && minoristaTransaction.remainingBalance > 0 && (
+                      <div className="p-3 bg-white dark:bg-slate-900 rounded border border-emerald-200 dark:border-emerald-700">
+                        <p className="text-xs text-muted-foreground mb-1">Saldo a Favor Restante</p>
+                        <p className="text-lg font-semibold text-emerald-700 dark:text-emerald-300">
+                          {formatCurrency(minoristaTransaction.remainingBalance, 'COP')}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-xs text-emerald-600 dark:text-emerald-400 pt-2 border-t border-emerald-200 dark:border-emerald-700">
+                    <p>💡 El saldo a favor se consume primero antes de usar el crédito disponible</p>
+                  </div>
+                </div>
+              )}
 
               {/* Exchange Rate Applied */}
               <div className="space-y-3 p-4 bg-muted rounded-lg">
