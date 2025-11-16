@@ -216,33 +216,63 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
     const availableCredit = minoristaBalance
     const limit = creditLimit
 
-    // Calculate debt AFTER applying profit
-    // Step 1: Deduct from balance
+    // Apply processTransfer logic to calculate final balances
+    const profit = amount * 0.05
+
+    let userBalance = balanceInFavor
     let remainingAmount = amount
-    if (remainingAmount <= balanceInFavor) {
+    let externalDebt = 0
+
+    // Step 1: Deduct from balance
+    if (remainingAmount <= userBalance) {
+      userBalance -= remainingAmount
       remainingAmount = 0
     } else {
-      remainingAmount -= balanceInFavor
+      remainingAmount -= userBalance
+      userBalance = 0
     }
 
     // Step 2: Deduct from credit
+    let creditUsed = 0
     if (remainingAmount > 0) {
       if (remainingAmount <= availableCredit) {
+        creditUsed = remainingAmount
         remainingAmount = 0
       } else {
-        remainingAmount -= availableCredit
+        creditUsed = availableCredit
+        externalDebt = remainingAmount - availableCredit
+        remainingAmount = 0
       }
     }
 
-    // Step 3: Calculate external debt BEFORE profit
-    let externalDebt = remainingAmount
+    // Step 3: Apply profit
+    let finalBalance = userBalance
+    let finalCredit = availableCredit - creditUsed
 
-    // Step 4: Apply profit (5% of amount) to pay external debt
-    const profit = amount * 0.05
-    externalDebt = Math.max(0, externalDebt - profit)
+    if (creditUsed === 0 && externalDebt === 0) {
+      // Only balance was used → profit goes to balance
+      finalBalance += profit
+    } else {
+      // Profit first covers external debt
+      const paidExternalDebt = Math.min(profit, externalDebt)
+      let remainingProfit = profit - paidExternalDebt
 
-    // Step 5: Check if remaining debt exceeds credit limit
-    return externalDebt > limit
+      // Then restores used credit
+      const restoreCredit = Math.min(remainingProfit, creditUsed)
+      finalCredit += restoreCredit
+      remainingProfit -= restoreCredit
+
+      // Anything extra goes to balance
+      if (remainingProfit > 0) {
+        finalBalance += remainingProfit
+      }
+    }
+
+    // Check: final debt cannot exceed credit limit AND total balance cannot be negative
+    const finalDebt = Math.max(0, externalDebt - profit)
+    const totalFinalBalance = finalBalance + finalCredit
+
+    return finalDebt > limit || totalFinalBalance < 0
   }
 
   return (
