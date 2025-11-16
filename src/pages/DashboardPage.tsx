@@ -44,7 +44,7 @@ export function DashboardPage() {
     try {
       setLoadingBalance(true)
       const response = await api.get<{ minorista: Minorista }>('/api/minorista/me')
-      setMinoristaBalance(response.minorista.balance)
+      setMinoristaBalance(response.minorista.availableCredit)
     } catch (error: any) {
       toast.error(error.message || 'Error al cargar balance')
     } finally {
@@ -269,7 +269,7 @@ export function DashboardPage() {
             ) : (
               <div className="space-y-2">
                 <div className="text-3xl md:text-4xl font-bold text-blue-600">
-                  {minoristaBalance !== null ? formatCurrency(minoristaBalance, 'VES') : 'Bs 0,00'}
+                  {minoristaBalance !== null ? formatCurrency(minoristaBalance, 'COP') : '$ 0,00'}
                 </div>
                 <p className="text-sm text-muted-foreground">Disponible para crear giros</p>
               </div>
