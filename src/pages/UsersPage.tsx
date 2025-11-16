@@ -349,7 +349,7 @@ export function UsersPage() {
               Se encontraron {filteredUsers.length} resultado(s) para "{searchQuery}"
             </div>
           )}
-          <div className="grid gap-4">
+          <div className="grid gap-4 grid-cols-1">
             {filteredUsers.map((user) => {
               const roleBadge = getRoleBadge(user.role)
               return (
@@ -358,10 +358,10 @@ export function UsersPage() {
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <CardTitle className="text-lg">{user.fullName}</CardTitle>
-                        <div className="flex items-center gap-2 mt-2">
-                          <Mail className="h-4 w-4 text-muted-foreground" />
-                          <p className="text-sm text-muted-foreground">{user.email}</p>
-                          <span title={user.emailVerified ? 'Email verificado' : 'Email no verificado'}>
+                        <div className="flex items-center gap-2 mt-2 min-w-0">
+                          <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                          <p className="text-sm text-muted-foreground truncate">{user.email}</p>
+                          <span title={user.emailVerified ? 'Email verificado' : 'Email no verificado'} className="flex-shrink-0">
                             {user.emailVerified ? (
                               <CheckCircle2 className="h-4 w-4 text-green-600" />
                             ) : (
