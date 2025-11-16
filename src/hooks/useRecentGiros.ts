@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { api } from '@/lib/api'
+import { useGiroWebSocket } from './useGiroWebSocket'
 
 export interface RecentGiro {
   id: string
@@ -19,6 +20,7 @@ export function useRecentGiros(limit = 5) {
   const [giros, setGiros] = useState<RecentGiro[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { subscribe } = useGiroWebSocket()
 
   const fetchGiros = useCallback(async () => {
     try {
@@ -36,6 +38,44 @@ export function useRecentGiros(limit = 5) {
   useEffect(() => {
     fetchGiros()
   }, [fetchGiros])
+
+  // Subscribe to giro deleted events
+  useEffect(() => {
+    const unsubscribe = subscribe('giro:deleted', (event) => {
+      setGiros((prevGiros) => prevGiros.filter((giro) => giro.id !== event.giro.id))
+    })
+
+    return unsubscribe
+  }, [subscribe])
+
+  // Subscribe to giro created events
+  useEffect(() => {
+    const unsubscribe = subscribe('giro:created', () => {
+      // Refetch to get the complete list with the new giro
+      fetchGiros()
+    })
+
+    return unsubscribe
+  }, [subscribe, fetchGiros])
+
+  // Subscribe to giro updated events
+  useEffect(() => {
+    const unsubscribe = subscribe('giro:updated', (event) => {
+      setGiros((prevGiros) =>
+        prevGiros.map((giro) =>
+          giro.id === event.giro.id
+            ? {
+                ...giro,
+                status: event.giro.status,
+                amountBs: event.giro.amountBs,
+              }
+            : giro
+        )
+      )
+    })
+
+    return unsubscribe
+  }, [subscribe])
 
   return { giros, loading, error, refetch: fetchGiros }
 }
