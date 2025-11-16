@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetBody } from '@/components/ui/sheet'
-import { Plus, TrendingUp, Calendar } from 'lucide-react'
+import { Plus, TrendingUp, Calendar, Download } from 'lucide-react'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
+import { useSiaRateImage } from '@/hooks/useSiaRateImage'
 import type { ExchangeRate } from '@/types/api'
 
 export function ExchangeRatePage() {
@@ -25,6 +26,7 @@ export function ExchangeRatePage() {
   const [submitting, setSubmitting] = useState(false)
 
   const canCreateRate = user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN'
+  const { generateAndDownloadImage } = useSiaRateImage()
 
   useEffect(() => {
     fetchRates()
@@ -150,9 +152,23 @@ export function ExchangeRatePage() {
                 <p className="text-xs text-muted-foreground">Dólar Oficial</p>
               </div>
             </div>
-            <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
-              <Calendar className="h-3 w-3" />
-              <span>Actualizado: {formatDate(currentRate.createdAt)}</span>
+            <div className="mt-4 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Calendar className="h-3 w-3" />
+                <span>Actualizado: {formatDate(currentRate.createdAt)}</span>
+              </div>
+              <Button
+                onClick={() => {
+                  generateAndDownloadImage(currentRate)
+                  toast.success('Tasa descargada como imagen')
+                }}
+                size="sm"
+                variant="outline"
+                className="gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Descargar
+              </Button>
             </div>
           </CardContent>
         </Card>
