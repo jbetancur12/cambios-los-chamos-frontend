@@ -11,7 +11,6 @@ interface PaymentProofUploadProps {
   existingProof?: {
     key: string
     url: string
-    thumbnailUrl?: string
   }
   disabled?: boolean
 }
@@ -23,9 +22,7 @@ export function PaymentProofUpload({
   disabled = false,
 }: PaymentProofUploadProps) {
   const [uploading, setUploading] = useState(false)
-  const [proof, setProof] = useState<{ key: string; url: string; thumbnailUrl?: string } | null>(
-    existingProof || null
-  )
+  const [proof, setProof] = useState<{ key: string; url: string } | null>(existingProof || null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,14 +50,12 @@ export function PaymentProofUpload({
       const response = await api.post<{
         giro: any
         paymentProofUrl: string
-        thumbnailUrl?: string
         message: string
       }>(`/api/giro/${giroId}/payment-proof/upload`, formData)
 
       const newProof = {
         key: response.giro.paymentProofKey,
         url: response.paymentProofUrl,
-        thumbnailUrl: response.thumbnailUrl,
       }
 
       setProof(newProof)
@@ -109,26 +104,13 @@ export function PaymentProofUpload({
 
       {proof ? (
         <div className="p-4 rounded-lg border border-green-200 bg-green-50 dark:bg-green-950 space-y-3">
-          {proof.thumbnailUrl ? (
-            <div className="relative w-full h-48 rounded-md overflow-hidden bg-gray-100">
-              <img
-                src={proof.thumbnailUrl}
-                alt="Payment proof thumbnail"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent flex items-end p-2">
-                <p className="text-xs text-white font-medium truncate">{proof.key}</p>
-              </div>
+          <div className="flex items-center gap-2">
+            <FileIcon className="h-5 w-5 text-green-600" />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-green-900 dark:text-green-100">Comprobante cargado</p>
+              <p className="text-xs text-green-700 dark:text-green-300 truncate">{proof.key}</p>
             </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <FileIcon className="h-5 w-5 text-green-600" />
-              <div className="flex-1">
-                <p className="text-sm font-medium text-green-900 dark:text-green-100">Comprobante cargado</p>
-                <p className="text-xs text-green-700 dark:text-green-300 truncate">{proof.key}</p>
-              </div>
-            </div>
-          )}
+          </div>
 
           <div className="flex gap-2">
             <Button
