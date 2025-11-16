@@ -420,7 +420,7 @@ export function UsersPage() {
                     </CardContent>
                   )}
                   {user.role === 'MINORISTA' && user.minoristaId && (
-                    <CardContent className="pt-0">
+                    <CardContent className="pt-4">
                       <div className="space-y-2">
                         {/* Balance Display */}
                         <div className="flex items-center justify-between p-3 rounded-md bg-muted">
