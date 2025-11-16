@@ -219,15 +219,48 @@ export function MinoristaTransactionHistory({ transactions, creditLimit }: Minor
                       </div>
                     )}
 
-                    {/* Cambio de Balance */}
-                    <div className="grid grid-cols-2 gap-2 pt-2 text-xs">
-                      <div>
-                        <p className="text-muted-foreground">Balance Anterior</p>
-                        <p className="font-mono">{formatCurrency(transaction.previousAvailableCredit)}</p>
+                    {/* Cambio de Balance - Desglose Completo */}
+                    <div className="pt-2 border-t border-dashed space-y-2">
+                      <p className="text-xs font-semibold text-muted-foreground">Cambio de Balance Total:</p>
+
+                      {/* Balance Anterior */}
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div className="bg-gray-100 dark:bg-gray-800 rounded p-2">
+                          <p className="text-muted-foreground text-xs">Crédito Anterior</p>
+                          <p className="font-mono font-semibold">{formatCurrency(transaction.previousAvailableCredit)}</p>
+                        </div>
+                        <div className="bg-emerald-100 dark:bg-emerald-900/30 rounded p-2">
+                          <p className="text-muted-foreground text-xs">Saldo a Favor Anterior</p>
+                          <p className="font-mono font-semibold text-emerald-700 dark:text-emerald-300">{formatCurrency(transaction.previousBalanceInFavor)}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-muted-foreground">Balance Nuevo</p>
-                        <p className="font-mono">{formatCurrency(transaction.availableCredit)}</p>
+
+                      {/* Subtotal Anterior */}
+                      <div className="bg-blue-50 dark:bg-blue-900/20 rounded p-2">
+                        <p className="text-muted-foreground text-xs">Balance Total Anterior</p>
+                        <p className="font-mono font-semibold text-blue-700 dark:text-blue-300">
+                          {formatCurrency(transaction.previousAvailableCredit + transaction.previousBalanceInFavor)}
+                        </p>
+                      </div>
+
+                      {/* Balance Nuevo */}
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div className="bg-gray-100 dark:bg-gray-800 rounded p-2">
+                          <p className="text-muted-foreground text-xs">Crédito Nuevo</p>
+                          <p className="font-mono font-semibold">{formatCurrency(transaction.availableCredit)}</p>
+                        </div>
+                        <div className="bg-emerald-100 dark:bg-emerald-900/30 rounded p-2">
+                          <p className="text-muted-foreground text-xs">Saldo a Favor Nuevo</p>
+                          <p className="font-mono font-semibold text-emerald-700 dark:text-emerald-300">{formatCurrency(transaction.currentBalanceInFavor)}</p>
+                        </div>
+                      </div>
+
+                      {/* Subtotal Nuevo */}
+                      <div className="bg-green-50 dark:bg-green-900/20 rounded p-2">
+                        <p className="text-muted-foreground text-xs">Balance Total Nuevo</p>
+                        <p className="font-mono font-semibold text-green-700 dark:text-green-300">
+                          {formatCurrency(transaction.availableCredit + transaction.currentBalanceInFavor)}
+                        </p>
                       </div>
                     </div>
                   </div>
