@@ -134,22 +134,22 @@ export function ExchangeRatePage() {
               <div className="space-y-1">
                 <p className="text-xs text-muted-foreground">Tasa de Compra</p>
                 <p className="text-2xl font-bold text-green-600">{currentRate.buyRate.toFixed(2)}</p>
-                <p className="text-xs text-muted-foreground">COP → VES</p>
+      
               </div>
               <div className="space-y-1">
                 <p className="text-xs text-muted-foreground">Tasa de Venta</p>
                 <p className="text-2xl font-bold text-blue-600">{currentRate.sellRate.toFixed(2)}</p>
-                <p className="text-xs text-muted-foreground">VES → COP</p>
+         
               </div>
               <div className="space-y-1">
                 <p className="text-xs text-muted-foreground">USD</p>
                 <p className="text-2xl font-bold text-purple-600">{currentRate.usd.toFixed(2)}</p>
-                <p className="text-xs text-muted-foreground">Dólar Paralelo</p>
+           
               </div>
               <div className="space-y-1">
                 <p className="text-xs text-muted-foreground">BCV</p>
                 <p className="text-2xl font-bold text-orange-600">{currentRate.bcv.toFixed(2)}</p>
-                <p className="text-xs text-muted-foreground">Dólar Oficial</p>
+      
               </div>
             </div>
             <div className="mt-4 space-y-2">
@@ -256,7 +256,7 @@ export function ExchangeRatePage() {
           <SheetBody>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="buyRate">Tasa de Compra (COP → VES)</Label>
+                <Label htmlFor="buyRate">Tasa de Compra</Label>
                 <Input
                   id="buyRate"
                   type="number"
@@ -270,7 +270,7 @@ export function ExchangeRatePage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="sellRate">Tasa de Venta (VES → COP)</Label>
+                <Label htmlFor="sellRate">Tasa de Venta</Label>
                 <Input
                   id="sellRate"
                   type="number"

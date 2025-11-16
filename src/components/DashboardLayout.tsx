@@ -118,7 +118,8 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
       {/* Main Content */}
       <div className="md:pl-64 flex flex-col min-h-screen">
         {/* Mobile Header */}
-        <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b bg-card px-4 md:hidden">
+        <header className="sticky top-0 z-40 flex h-16 items-center gap-3 border-b bg-card px-4 md:hidden">
+          <img src="/icons/icon-48x48.png" alt="Logo" className="h-8 w-8" />
           <h1 className="text-lg font-semibold">Cambios los Chamos</h1>
         </header>
 
