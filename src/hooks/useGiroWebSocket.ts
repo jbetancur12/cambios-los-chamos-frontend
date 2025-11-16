@@ -137,6 +137,14 @@ export function useGiroWebSocket() {
         emitEvent('giro:returned', event)
       })
 
+      socket.on('giro:deleted', (data: { giroId: string; timestamp: string }) => {
+        console.log('[WS] Giro eliminado:', data.giroId)
+        emitEvent('giro:deleted', {
+          giro: { id: data.giroId } as GiroUpdate,
+          timestamp: data.timestamp,
+        })
+      })
+
       socketRef.current = socket
 
       return () => {

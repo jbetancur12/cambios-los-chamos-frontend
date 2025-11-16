@@ -326,6 +326,28 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
     }
   }
 
+  // NUEVA FUNCIÓN PARA ELIMINAR EL GIRO
+  const handleDeleteGiro = async () => {
+    if (!giro) return
+
+    if (!confirm('¿Estás seguro de que deseas eliminar este giro? Esta acción no se puede deshacer.')) {
+      return
+    }
+
+    try {
+      setProcessing(true)
+      await api.delete(`/api/giro/${giro.id}`)
+
+      toast.success('Giro eliminado exitosamente.')
+      onUpdate()
+      onOpenChange(false)
+    } catch (error: any) {
+      toast.error(error.message || 'Error al eliminar el giro')
+    } finally {
+      setProcessing(false)
+    }
+  }
+
   // NUEVA FUNCIÓN PARA GUARDAR CAMBIOS DE TASA
   const handleSaveRateEdit = async () => {
     if (!giro) return
@@ -874,6 +896,20 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                       </Button>
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* Delete Button for Minorista - Only for PENDIENTE or ASIGNADO */}
+              {isMinorista && giro && (giro.status === 'PENDIENTE' || giro.status === 'ASIGNADO') && (
+                <div className="pt-4 border-t">
+                  <Button
+                    onClick={handleDeleteGiro}
+                    disabled={processing}
+                    variant="destructive"
+                    className="w-full"
+                  >
+                    {processing ? 'Eliminando...' : 'Eliminar Giro'}
+                  </Button>
                 </div>
               )}
             </div>
