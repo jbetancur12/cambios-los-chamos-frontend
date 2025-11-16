@@ -53,7 +53,7 @@ interface MinoristaProfit {
   email: string
   totalProfit: number
   giroCount: number
-  balance: number
+  availableCredit: number
 }
 
 interface TopMinoristaReport {
@@ -398,7 +398,7 @@ export function ReportsPage() {
                         <th className="text-left py-2 px-4 font-semibold">Email</th>
                         <th className="text-right py-2 px-4 font-semibold">Giros</th>
                         <th className="text-right py-2 px-4 font-semibold">Ganancia</th>
-                        <th className="text-right py-2 px-4 font-semibold">Balance</th>
+                        <th className="text-right py-2 px-4 font-semibold">Crédito Disponible</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -411,7 +411,7 @@ export function ReportsPage() {
                             ${m.totalProfit.toLocaleString('es-CO', { maximumFractionDigits: 2 })}
                           </td>
                           <td className="text-right py-3 px-4">
-                            ${m.balance.toLocaleString('es-CO', { maximumFractionDigits: 2 })}
+                            ${m.availableCredit.toLocaleString('es-CO', { maximumFractionDigits: 2 })}
                           </td>
                         </tr>
                       ))}
