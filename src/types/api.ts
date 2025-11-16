@@ -113,6 +113,7 @@ export interface Giro {
   returnReason?: string
   createdAt: string
   updatedAt: string
+  completedAt?: string
   minorista?: {
     id: string
     user: User

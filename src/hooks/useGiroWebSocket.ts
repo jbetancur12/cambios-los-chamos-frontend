@@ -21,6 +21,7 @@ export interface GiroUpdate {
   proofUrl?: string
   createdAt: string
   updatedAt: string
+  completedAt?: string
   minorista?: { id: string }
   transferencista?: {
     id: string

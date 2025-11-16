@@ -753,6 +753,12 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                     <span>Actualizado: {formatDate(giro.updatedAt)}</span>
                   </div>
                 )}
+                {giro.completedAt && giro.status === 'COMPLETADO' && (
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-3 w-3" />
+                    <span>Completado: {formatDate(giro.completedAt)}</span>
+                  </div>
+                )}
               </div>
 
               {/* Actions for Transferencista */}
