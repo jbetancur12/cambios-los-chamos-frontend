@@ -194,8 +194,33 @@ export function MinoristaTransactionHistory({ transactions, creditLimit }: Minor
                       </div>
                     )}
 
+                    {/* Desglose de Saldo a Favor y Crédito (Solo para DISCOUNT) */}
+                    {transaction.type === 'DISCOUNT' && (transaction.balanceInFavorUsed !== undefined || transaction.creditUsed !== undefined) && (
+                      <div className="space-y-2 pt-2 border-t border-dashed">
+                        <p className="text-xs font-semibold text-muted-foreground">Desglose del Consumo:</p>
+                        {transaction.balanceInFavorUsed !== undefined && transaction.balanceInFavorUsed > 0 && (
+                          <div className="bg-emerald-100 dark:bg-emerald-900/30 rounded p-2">
+                            <p className="text-xs text-muted-foreground">Saldo a Favor Usado</p>
+                            <p className="font-semibold text-emerald-700 dark:text-emerald-300">{formatCurrency(transaction.balanceInFavorUsed)}</p>
+                          </div>
+                        )}
+                        {transaction.creditUsed !== undefined && transaction.creditUsed > 0 && (
+                          <div className="bg-blue-100 dark:bg-blue-900/30 rounded p-2">
+                            <p className="text-xs text-muted-foreground">Crédito Disponible Usado</p>
+                            <p className="font-semibold text-blue-700 dark:text-blue-300">{formatCurrency(transaction.creditUsed)}</p>
+                          </div>
+                        )}
+                        {transaction.remainingBalance !== undefined && transaction.remainingBalance > 0 && (
+                          <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded p-2">
+                            <p className="text-xs text-muted-foreground">Saldo a Favor Restante</p>
+                            <p className="font-semibold text-emerald-600 dark:text-emerald-400">{formatCurrency(transaction.remainingBalance)}</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     {/* Cambio de Balance */}
-                    <div className="grid grid-cols-2 gap-2 pt-2  text-xs">
+                    <div className="grid grid-cols-2 gap-2 pt-2 text-xs">
                       <div>
                         <p className="text-muted-foreground">Balance Anterior</p>
                         <p className="font-mono">{formatCurrency(transaction.previousAvailableCredit)}</p>

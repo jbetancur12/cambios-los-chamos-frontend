@@ -161,6 +161,9 @@ export interface MinoristaTransaction {
   profitEarned?: number
   accumulatedDebt?: number
   accumulatedProfit?: number
+  balanceInFavorUsed?: number
+  creditUsed?: number
+  remainingBalance?: number
   description?: string
   createdAt: string
 }

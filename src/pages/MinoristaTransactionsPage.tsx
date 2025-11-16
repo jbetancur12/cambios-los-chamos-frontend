@@ -153,13 +153,26 @@ export function MinoristaTransactionsPage() {
           </CardHeader>
 
           <CardContent className="p-6 space-y-6">
-            <div className="flex flex-col space-y-1">
-              <span className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                Disponible para Uso
-              </span>
-              <span className="text-4xl font-extrabold text-green-600 dark:text-green-400">
-                {formatCurrency(minorista.availableCredit)}
-              </span>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="flex flex-col space-y-1">
+                <span className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Crédito Disponible
+                </span>
+                <span className="text-4xl font-extrabold text-green-600 dark:text-green-400">
+                  {formatCurrency(minorista.availableCredit)}
+                </span>
+              </div>
+
+              {minorista.creditBalance > 0 && (
+                <div className="flex flex-col space-y-1 bg-emerald-50 dark:bg-emerald-950 p-4 rounded-lg border border-emerald-200 dark:border-emerald-800">
+                  <span className="text-sm font-medium text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+                    Saldo a Favor
+                  </span>
+                  <span className="text-4xl font-extrabold text-emerald-700 dark:text-emerald-300">
+                    {formatCurrency(minorista.creditBalance)}
+                  </span>
+                </div>
+              )}
             </div>
 
             <div className="space-y-3 pt-3 border-t border-dashed border-gray-200 dark:border-gray-800">
