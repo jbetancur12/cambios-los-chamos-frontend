@@ -74,15 +74,15 @@ export function MinoristaTransactionHistory({ transactions, creditLimit }: Minor
   }
   const lastTransaction = transactions.length > 0 ? transactions[0] : null
 
-  const tc = lastTransaction ? lastTransaction.accumulatedDebt : 0
-  const tp = lastTransaction ? lastTransaction.accumulatedProfit : 0
-  const ac = lastTransaction ? lastTransaction.availableCredit : 0
+  const tc = lastTransaction?.accumulatedDebt ?? 0
+  const tp = lastTransaction?.accumulatedProfit ?? 0
+  const ac = lastTransaction?.availableCredit ?? 0
 
   return (
     <div className="space-y-6">
       {/* Resumen de Tarjeta de Crédito */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold">Estado de Tarjeta de Crédito</h3>
+        <h3 className="text-lg font-semibold">Estado de Crédito</h3>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
           {/* Cupo */}
@@ -99,14 +99,14 @@ export function MinoristaTransactionHistory({ transactions, creditLimit }: Minor
             <p className="text-xs text-muted-foreground mb-1">
               Consumo Total <span className="text-[10px]">(Descuento Giros + Ganancias)</span>
             </p>
-            <p className="text-2xl font-bold text-red-600">{formatCurrency(tc as number)}</p>
+            <p className="text-2xl font-bold text-red-600">{formatCurrency(tc)}</p>
             <p className="text-xs text-muted-foreground mt-2">Por todos los giros</p>
           </div>
 
           {/* Ganancias */}
           <div className="p-4 rounded-lg border border-green-200 bg-green-50 dark:bg-green-950">
             <p className="text-xs text-muted-foreground mb-1">Ganancias Acumuladas</p>
-            <p className="text-2xl font-bold text-green-600">{formatCurrency(tp as number)}</p>
+            <p className="text-2xl font-bold text-green-600">{formatCurrency(tp)}</p>
             <p className="text-xs text-muted-foreground mt-2">Abonos automáticos</p>
           </div>
 
@@ -121,11 +121,10 @@ export function MinoristaTransactionHistory({ transactions, creditLimit }: Minor
         <div className="p-4 rounded-lg border-2 border-amber-400 bg-amber-50 dark:bg-amber-950 space-y-2">
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium">DEUDA NETA (Lo que debe pagar)</p>
-            <p className="text-3xl font-bold text-amber-600">{formatCurrency(tc as number)}</p>
+            <p className="text-3xl font-bold text-amber-600">{formatCurrency(tc)}</p>
           </div>
           <p className="text-xs text-muted-foreground">
-            Cálculo: {formatCurrency((tc as number) + (tp as number))} - {formatCurrency(tp as number)} ={' '}
-            {formatCurrency(tc as number)}
+            Cálculo: {formatCurrency(tc + tp)} - {formatCurrency(tp)} = {formatCurrency(tc)}
           </p>
         </div>
       </div>

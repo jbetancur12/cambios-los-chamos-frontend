@@ -8,6 +8,7 @@ import { ArrowLeft, CreditCard, DollarSign, TrendingDown, TrendingUp, User } fro
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
+import { DateRangeFilter, type DateRange } from '@/components/DateRangeFilter'
 
 export function MinoristaTransactionsPage() {
   const navigate = useNavigate()
@@ -37,6 +38,7 @@ export function MinoristaTransactionsPage() {
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
+  const [dateRange, setDateRange] = useState<DateRange>({ startDate: null, endDate: null })
 
   const fetchMinorista = useCallback(async () => {
     try {
@@ -53,10 +55,16 @@ export function MinoristaTransactionsPage() {
 
     try {
       setLoading(true)
+      let url = `/api/minorista/${minorista.id}/transactions?page=${page}&limit=50`
+
+      if (dateRange.startDate && dateRange.endDate) {
+        url += `&startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`
+      }
+
       const response = await api.get<{
         transactions: MinoristaTransaction[]
         pagination: { total: number; page: number; limit: number; totalPages: number }
-      }>(`/api/minorista/${minorista.id}/transactions?page=${page}&limit=50`)
+      }>(url)
 
       setTransactions(response.transactions)
       setTotalPages(response.pagination.totalPages)
@@ -65,7 +73,7 @@ export function MinoristaTransactionsPage() {
     } finally {
       setLoading(false)
     }
-  }, [page, minorista?.id])
+  }, [page, minorista?.id, dateRange])
 
   useEffect(() => {
     fetchMinorista()
@@ -186,6 +194,20 @@ export function MinoristaTransactionsPage() {
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Date Range Filter */}
+      <div className="max-w-5xl mx-auto mt-6">
+        <DateRangeFilter
+          onDateRangeChange={(range) => {
+            setDateRange(range)
+            setPage(1)
+          }}
+          onClear={() => {
+            setDateRange({ startDate: null, endDate: null })
+            setPage(1)
+          }}
+        />
       </div>
 
       {/* Transactions Table */}

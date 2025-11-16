@@ -184,6 +184,7 @@ export function UsersPage() {
       balance,
       creditLimit: 0,
       availableCredit: 0,
+      creditBalance: 0,
       user: {
         id: minoristaId,
         fullName,

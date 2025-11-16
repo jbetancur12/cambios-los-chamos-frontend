@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 import type { Minorista, MinoristaTransaction } from '@/types/api'
 import { AlertCircle, Eye, DollarSign } from 'lucide-react'
 import { MinoristaTransactionHistory } from './MinoristaTransactionHistory'
+import { DateRangeFilter, type DateRange } from './DateRangeFilter'
 
 interface RechargeMinoristaBalanceSheetProps {
   open: boolean
@@ -29,6 +30,9 @@ export function RechargeMinoristaBalanceSheet({
   const [transactions, setTransactions] = useState<MinoristaTransaction[]>([])
   const [transactionsLoading, setTransactionsLoading] = useState(false)
   const [localMinorista, setLocalMinorista] = useState<Minorista | null>(minorista)
+  const [page, setPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [dateRange, setDateRange] = useState<DateRange>({ startDate: null, endDate: null })
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('es-CO', {
@@ -42,10 +46,18 @@ export function RechargeMinoristaBalanceSheet({
     if (!localMinorista) return
     try {
       setTransactionsLoading(true)
-      const response = await api.get<{ transactions: MinoristaTransaction[] }>(
-        `/api/minorista/${localMinorista.id}/transactions`
-      )
+      let url = `/api/minorista/${localMinorista.id}/transactions?page=${page}&limit=10`
+
+      if (dateRange.startDate && dateRange.endDate) {
+        url += `&startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`
+      }
+
+      const response = await api.get<{
+        transactions: MinoristaTransaction[]
+        pagination: { total: number; page: number; limit: number; totalPages: number }
+      }>(url)
       setTransactions(response.transactions || [])
+      setTotalPages(response.pagination.totalPages)
     } catch (error) {
       console.error('Error loading transactions:', error)
     } finally {
@@ -74,7 +86,7 @@ export function RechargeMinoristaBalanceSheet({
         fetchTransactions()
       }
     }
-  }, [open, activeTab, localMinorista?.id])
+  }, [open, activeTab, localMinorista?.id, page, dateRange])
 
   const handlePayDebt = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -84,12 +96,6 @@ export function RechargeMinoristaBalanceSheet({
       return
     }
     if (!localMinorista) return
-
-    const currentDebtAmount = Math.abs(localMinorista.balance)
-    if (numericAmount > currentDebtAmount) {
-      toast.error(`La deuda es de ${formatCurrency(currentDebtAmount)}`)
-      return
-    }
 
     try {
       setLoading(true)
@@ -142,7 +148,7 @@ export function RechargeMinoristaBalanceSheet({
           <SheetTitle>Gestión de Crédito</SheetTitle>
         </SheetHeader>
 
-        <div className="w-full mt-6 space-y-4 px-4 sm:px-6 md:px-0">
+        <div className="w-full mt-6 space-y-4 px-4 sm:px-6 md:px-6">
           {/* Tab Navigation */}
           <div className="flex gap-2 border-b">
             <button
@@ -190,6 +196,30 @@ export function RechargeMinoristaBalanceSheet({
                 <p className="text-sm text-muted-foreground">{localMinorista.user.email}</p>
               </div>
 
+              {/* Resumen de Crédito */}
+              <div className="grid grid-cols-1 gap-3">
+                <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+                  <p className="text-xs text-muted-foreground mb-1">Cupo Asignado</p>
+                  <p className="text-lg font-semibold">{formatCurrency(localMinorista.creditLimit)}</p>
+                </div>
+                <div className="p-3 rounded-lg bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800">
+                  <p className="text-xs text-muted-foreground mb-1">Crédito Disponible</p>
+                  <p className="text-lg font-semibold text-green-600">{formatCurrency(localMinorista.availableCredit)}</p>
+                </div>
+                {localMinorista.creditBalance > 0 && (
+                  <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800">
+                    <p className="text-xs text-muted-foreground mb-1">Saldo a Favor</p>
+                    <p className="text-lg font-semibold text-blue-600">{formatCurrency(localMinorista.creditBalance)}</p>
+                  </div>
+                )}
+                {debtAmount > 0 && (
+                  <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800">
+                    <p className="text-xs text-muted-foreground mb-1">Deuda Actual</p>
+                    <p className="text-lg font-semibold text-red-600">{formatCurrency(debtAmount)}</p>
+                  </div>
+                )}
+              </div>
+
               {hasDebt && (
                 <div className="flex items-start gap-2 p-3 bg-red-50 dark:bg-red-950 rounded border border-red-200 dark:border-red-800">
                   <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
@@ -200,13 +230,55 @@ export function RechargeMinoristaBalanceSheet({
               )}
 
               {/* Historial de Transacciones */}
-              <div className="mt-6 pt-6 border-t">
+              <div className="mt-6 pt-6 border-t space-y-4">
+                <h3 className="font-semibold">Historial Detallado de Transacciones</h3>
+
+                {/* Date Filter */}
+                <DateRangeFilter
+                  onDateRangeChange={(range) => {
+                    setDateRange(range)
+                    setPage(1)
+                  }}
+                  onClear={() => {
+                    setDateRange({ startDate: null, endDate: null })
+                    setPage(1)
+                  }}
+                />
+
+                {/* Transactions */}
                 {transactionsLoading ? (
                   <div className="text-center py-4">
                     <p className="text-sm text-muted-foreground">Cargando historial...</p>
                   </div>
                 ) : (
-                  <MinoristaTransactionHistory transactions={transactions} creditLimit={localMinorista.creditLimit} />
+                  <>
+                    <MinoristaTransactionHistory transactions={transactions} creditLimit={localMinorista.creditLimit} />
+
+                    {/* Pagination Controls */}
+                    {totalPages > 1 && (
+                      <div className="flex items-center justify-center gap-2 pt-4 border-t">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={page === 1}
+                          onClick={() => setPage(page - 1)}
+                        >
+                          Anterior
+                        </Button>
+                        <span className="text-sm text-muted-foreground">
+                          Página {page} de {totalPages}
+                        </span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={page === totalPages}
+                          onClick={() => setPage(page + 1)}
+                        >
+                          Siguiente
+                        </Button>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </div>
@@ -294,18 +366,33 @@ export function RechargeMinoristaBalanceSheet({
                     </Button>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Deuda actual: {formatCurrency(debtAmount as number)}
+                    Deuda actual: {formatCurrency(debtAmount)}
                   </p>
                 </div>
 
                 {payAmount && !isNaN(parseFloat(payAmount)) && parseFloat(payAmount) > 0 && (
-                  <div className="rounded-lg bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 p-4">
-                    <p className="text-sm text-green-900 dark:text-green-100 font-medium mb-2">
-                      Deuda después del pago:
-                    </p>
-                    <p className="text-2xl font-bold text-green-600">
-                      {formatCurrency(Math.max(0, (debtAmount as number) - parseFloat(payAmount)))}
-                    </p>
+                  <div className="space-y-3">
+                    <div className="rounded-lg bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 p-4">
+                      <p className="text-sm text-green-900 dark:text-green-100 font-medium mb-2">
+                        Deuda después del pago:
+                      </p>
+                      <p className="text-2xl font-bold text-green-600">
+                        {formatCurrency(Math.max(0, debtAmount - parseFloat(payAmount)))}
+                      </p>
+                    </div>
+                    {parseFloat(payAmount) > debtAmount && !isNaN(debtAmount) && (
+                      <div className="rounded-lg bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 p-4">
+                        <p className="text-sm text-blue-900 dark:text-blue-100 font-medium mb-2">
+                          Saldo a Favor Después:
+                        </p>
+                        <p className="text-2xl font-bold text-blue-600">
+                          {formatCurrency(parseFloat(payAmount) - debtAmount + localMinorista.creditBalance)}
+                        </p>
+                        <p className="text-xs text-blue-700 dark:text-blue-300 mt-2">
+                          Exceso de pago + saldo anterior
+                        </p>
+                      </div>
+                    )}
                   </div>
                 )}
 

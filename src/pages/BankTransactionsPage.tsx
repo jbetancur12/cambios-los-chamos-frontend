@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 import { api } from '@/lib/api'
 import type { BankAccount, BankAccountTransaction, BankAccountTransactionType } from '@/types/api'
+import { DateRangeFilter, type DateRange } from '@/components/DateRangeFilter'
 
 export function BankTransactionsPage() {
   const { bankAccountId } = useParams<{ bankAccountId: string }>()
@@ -16,13 +17,14 @@ export function BankTransactionsPage() {
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
+  const [dateRange, setDateRange] = useState<DateRange>({ startDate: null, endDate: null })
 
   useEffect(() => {
     if (bankAccountId) {
       fetchBankAccount()
       fetchTransactions()
     }
-  }, [bankAccountId, page])
+  }, [bankAccountId, page, dateRange])
 
   const fetchBankAccount = async () => {
     try {
@@ -37,13 +39,20 @@ export function BankTransactionsPage() {
   const fetchTransactions = async () => {
     try {
       setLoading(true)
+      let url = `/api/bank-account/${bankAccountId}/transactions?page=${page}&limit=50`
+
+      if (dateRange.startDate && dateRange.endDate) {
+        url += `&startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`
+      }
+
       const response = await api.get<{
         transactions: BankAccountTransaction[]
         pagination: { total: number; page: number; limit: number; totalPages: number }
-      }>(`/api/bank-account/${bankAccountId}/transactions?page=${page}&limit=50`)
+      }>(url)
 
       setTransactions(response.transactions)
       setTotalPages(response.pagination.totalPages)
+      setPage(1) // Reset a la página 1 cuando cambia el filtro
     } catch (error: any) {
       toast.error(error.message || 'Error al cargar transacciones')
     } finally {
@@ -137,6 +146,18 @@ export function BankTransactionsPage() {
             </CardContent>
           </Card>
         )}
+
+        {/* Date Range Filter */}
+        <DateRangeFilter
+          onDateRangeChange={(range) => {
+            setDateRange(range)
+            setPage(1)
+          }}
+          onClear={() => {
+            setDateRange({ startDate: null, endDate: null })
+            setPage(1)
+          }}
+        />
 
         {/* Transactions Table */}
         <Card>

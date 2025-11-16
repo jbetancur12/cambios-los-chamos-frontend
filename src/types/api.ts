@@ -75,6 +75,7 @@ export interface Minorista {
   balance: number
   creditLimit: number
   availableCredit: number
+  creditBalance: number
   user: User
 }
 
