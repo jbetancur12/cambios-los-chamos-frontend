@@ -195,29 +195,36 @@ export function MinoristaTransactionHistory({ transactions, creditLimit }: Minor
                     )}
 
                     {/* Desglose de Saldo a Favor y Crédito (Solo para DISCOUNT) */}
-                    {transaction.type === 'DISCOUNT' && (transaction.balanceInFavorUsed !== undefined || transaction.creditUsed !== undefined) && (
-                      <div className="space-y-2 pt-2 border-t border-dashed">
-                        <p className="text-xs font-semibold text-muted-foreground">Desglose del Consumo:</p>
-                        {transaction.balanceInFavorUsed !== undefined && transaction.balanceInFavorUsed > 0 && (
-                          <div className="bg-emerald-100 dark:bg-emerald-900/30 rounded p-2">
-                            <p className="text-xs text-muted-foreground">Saldo a Favor Usado</p>
-                            <p className="font-semibold text-emerald-700 dark:text-emerald-300">{formatCurrency(transaction.balanceInFavorUsed)}</p>
-                          </div>
-                        )}
-                        {transaction.creditUsed !== undefined && transaction.creditUsed > 0 && (
-                          <div className="bg-blue-100 dark:bg-blue-900/30 rounded p-2">
-                            <p className="text-xs text-muted-foreground">Crédito Disponible Usado</p>
-                            <p className="font-semibold text-blue-700 dark:text-blue-300">{formatCurrency(transaction.creditUsed)}</p>
-                          </div>
-                        )}
-                        {transaction.remainingBalance !== undefined && transaction.remainingBalance > 0 && (
-                          <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded p-2">
-                            <p className="text-xs text-muted-foreground">Saldo a Favor Restante</p>
-                            <p className="font-semibold text-emerald-600 dark:text-emerald-400">{formatCurrency(transaction.remainingBalance)}</p>
-                          </div>
-                        )}
-                      </div>
-                    )}
+                    {transaction.type === 'DISCOUNT' &&
+                      (transaction.balanceInFavorUsed !== undefined || transaction.creditUsed !== undefined) && (
+                        <div className="space-y-2 pt-2 border-t border-dashed">
+                          <p className="text-xs font-semibold text-muted-foreground">Desglose del Consumo:</p>
+                          {transaction.balanceInFavorUsed !== undefined && transaction.balanceInFavorUsed > 0 && (
+                            <div className="bg-emerald-100 dark:bg-emerald-900/30 rounded p-2">
+                              <p className="text-xs text-muted-foreground">Saldo a Favor Usado</p>
+                              <p className="font-semibold text-emerald-700 dark:text-emerald-300">
+                                {formatCurrency(transaction.balanceInFavorUsed)}
+                              </p>
+                            </div>
+                          )}
+                          {transaction.creditUsed !== undefined && transaction.creditUsed > 0 && (
+                            <div className="bg-blue-100 dark:bg-blue-900/30 rounded p-2">
+                              <p className="text-xs text-muted-foreground">Crédito Disponible Usado</p>
+                              <p className="font-semibold text-blue-700 dark:text-blue-300">
+                                {formatCurrency(transaction.creditUsed)}
+                              </p>
+                            </div>
+                          )}
+                          {transaction.remainingBalance !== undefined && transaction.remainingBalance > 0 && (
+                            <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded p-2">
+                              <p className="text-xs text-muted-foreground">Saldo a Favor Restante</p>
+                              <p className="font-semibold text-emerald-600 dark:text-emerald-400">
+                                {formatCurrency(transaction.remainingBalance)}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      )}
 
                     {/* Cambio de Balance - Desglose Completo */}
                     <div className="pt-2 border-t border-dashed space-y-2">
@@ -227,11 +234,15 @@ export function MinoristaTransactionHistory({ transactions, creditLimit }: Minor
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         <div className="bg-gray-100 dark:bg-gray-800 rounded p-2">
                           <p className="text-muted-foreground text-xs">Crédito Anterior</p>
-                          <p className="font-mono font-semibold">{formatCurrency(transaction.previousAvailableCredit)}</p>
+                          <p className="font-mono font-semibold">
+                            {formatCurrency(transaction.previousAvailableCredit)}
+                          </p>
                         </div>
                         <div className="bg-emerald-100 dark:bg-emerald-900/30 rounded p-2">
                           <p className="text-muted-foreground text-xs">Saldo a Favor Anterior</p>
-                          <p className="font-mono font-semibold text-emerald-700 dark:text-emerald-300">{formatCurrency(transaction.previousBalanceInFavor)}</p>
+                          <p className="font-mono font-semibold text-emerald-700 dark:text-emerald-300">
+                            {formatCurrency(transaction.previousBalanceInFavor ?? 0)}
+                          </p>
                         </div>
                       </div>
 
@@ -239,7 +250,9 @@ export function MinoristaTransactionHistory({ transactions, creditLimit }: Minor
                       <div className="bg-blue-50 dark:bg-blue-900/20 rounded p-2">
                         <p className="text-muted-foreground text-xs">Balance Total Anterior</p>
                         <p className="font-mono font-semibold text-blue-700 dark:text-blue-300">
-                          {formatCurrency(transaction.previousAvailableCredit + transaction.previousBalanceInFavor)}
+                          {formatCurrency(
+                            transaction.previousAvailableCredit + (transaction.previousBalanceInFavor ?? 0)
+                          )}
                         </p>
                       </div>
 
@@ -251,7 +264,9 @@ export function MinoristaTransactionHistory({ transactions, creditLimit }: Minor
                         </div>
                         <div className="bg-emerald-100 dark:bg-emerald-900/30 rounded p-2">
                           <p className="text-muted-foreground text-xs">Saldo a Favor Nuevo</p>
-                          <p className="font-mono font-semibold text-emerald-700 dark:text-emerald-300">{formatCurrency(transaction.currentBalanceInFavor)}</p>
+                          <p className="font-mono font-semibold text-emerald-700 dark:text-emerald-300">
+                            {formatCurrency(transaction.currentBalanceInFavor ?? 0)}
+                          </p>
                         </div>
                       </div>
 
@@ -259,7 +274,7 @@ export function MinoristaTransactionHistory({ transactions, creditLimit }: Minor
                       <div className="bg-green-50 dark:bg-green-900/20 rounded p-2">
                         <p className="text-muted-foreground text-xs">Balance Total Nuevo</p>
                         <p className="font-mono font-semibold text-green-700 dark:text-green-300">
-                          {formatCurrency(transaction.availableCredit + transaction.currentBalanceInFavor)}
+                          {formatCurrency(transaction.availableCredit + (transaction.currentBalanceInFavor ?? 0))}
                         </p>
                       </div>
                     </div>

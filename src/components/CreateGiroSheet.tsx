@@ -209,7 +209,8 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
   }
 
   const hasInsufficientBalance = () => {
-    if (!isMinorista || minoristaBalance === null || minoristaBalanceInFavor === null || creditLimit === null) return false
+    if (!isMinorista || minoristaBalance === null || minoristaBalanceInFavor === null || creditLimit === null)
+      return false
 
     const amount = parseFloat(amountInput) || 0
     const balanceInFavor = minoristaBalanceInFavor

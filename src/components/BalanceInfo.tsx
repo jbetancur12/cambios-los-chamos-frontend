@@ -102,9 +102,7 @@ export function BalanceInfo({
             )}
           </div>
           {consumption.fromBalanceInFavor > 0 && (
-            <p className="text-xs text-amber-700 dark:text-amber-300 mt-2">
-              💡 El saldo a favor se consume primero
-            </p>
+            <p className="text-xs text-amber-700 dark:text-amber-300 mt-2">💡 El saldo a favor se consume primero</p>
           )}
         </div>
       )}

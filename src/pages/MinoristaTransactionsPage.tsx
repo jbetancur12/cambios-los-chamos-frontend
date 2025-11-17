@@ -237,14 +237,16 @@ export function MinoristaTransactionsPage() {
             ) : (
               <div className="space-y-3">
                 <div className="hidden md:block overflow-x-auto">
-                  <table className="w-full">
+                  <table className="w-full text-sm">
                     <thead className="border-b">
-                      <tr className="text-left text-sm text-muted-foreground">
+                      <tr className="text-left text-xs text-muted-foreground">
                         <th className="pb-3 font-medium">Fecha</th>
                         <th className="pb-3 font-medium">Tipo</th>
                         <th className="pb-3 font-medium text-right">Monto</th>
-                        <th className="pb-3 font-medium text-right pr-6">Dé</th>
-                        <th className="pb-3 font-medium text-right pr-6">Ahora</th>
+                        <th className="pb-3 font-medium text-right text-xs">Crédito Anterior</th>
+                        <th className="pb-3 font-medium text-right text-xs">Crédito Nuevo</th>
+                        <th className="pb-3 font-medium text-right text-xs">Saldo Favor Anterior</th>
+                        <th className="pb-3 font-medium text-right text-xs">Saldo Favor Nuevo</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -253,10 +255,13 @@ export function MinoristaTransactionsPage() {
                         const displayAmount = isPositive ? transaction.amount : -transaction.amount
 
                         return (
-                          <tr key={transaction.id} className="border-b last:border-0 hover:bg-muted/50">
-                            <td className="py-3 text-sm whitespace-nowrap">{formatDate(transaction.createdAt)}</td>
+                          <tr key={transaction.id} className="border-b last:border-0 hover:bg-muted/50 text-xs">
+                            <td className="py-3 whitespace-nowrap">{formatDate(transaction.createdAt)}</td>
                             <td className="py-3">
-                              <Badge variant="outline" className={getTransactionTypeColor(transaction.type)}>
+                              <Badge
+                                variant="outline"
+                                className={`text-xs ${getTransactionTypeColor(transaction.type)}`}
+                              >
                                 {getTransactionTypeLabel(transaction.type)}
                               </Badge>
                             </td>
@@ -268,11 +273,17 @@ export function MinoristaTransactionsPage() {
                               {isPositive && '+'}
                               {formatCurrency(displayAmount)}
                             </td>
-                            <td className="py-3 text-right text-sm text-muted-foreground pr-6 whitespace-nowrap">
+                            <td className="py-3 text-right text-muted-foreground pr-4 whitespace-nowrap">
                               {formatCurrency(transaction.previousAvailableCredit)}
                             </td>
-                            <td className="py-3 text-right font-semibold pr-6 whitespace-nowrap">
+                            <td className="py-3 text-right font-semibold pr-4 whitespace-nowrap">
                               {formatCurrency(transaction.availableCredit as number)}
+                            </td>
+                            <td className="py-3 text-right text-muted-foreground pr-4 whitespace-nowrap">
+                              {formatCurrency(transaction.previousBalanceInFavor || 0)}
+                            </td>
+                            <td className="py-3 text-right font-semibold pr-4 whitespace-nowrap">
+                              {formatCurrency(transaction.currentBalanceInFavor || 0)}
                             </td>
                           </tr>
                         )
@@ -305,18 +316,26 @@ export function MinoristaTransactionsPage() {
                             {formatCurrency(displayAmount)}
                           </span>
                         </div>
-                        <div className="space-y-2 text-sm">
+                        <div className="space-y-2 text-xs">
                           <div className="flex justify-between">
                             <span className="text-muted-foreground">Fecha</span>
                             <span>{formatDate(transaction.createdAt)}</span>
                           </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">De</span>
+                          <div className="flex justify-between border-t pt-2">
+                            <span className="text-muted-foreground">Crédito Anterior</span>
                             <span>{formatCurrency(transaction.previousAvailableCredit)}</span>
                           </div>
                           <div className="flex justify-between font-semibold">
-                            <span>Ahora</span>
+                            <span>Crédito Nuevo</span>
                             <span>{formatCurrency(transaction.availableCredit)}</span>
+                          </div>
+                          <div className="flex justify-between border-t pt-2">
+                            <span className="text-muted-foreground">Saldo a Favor Anterior</span>
+                            <span>{formatCurrency(transaction.previousBalanceInFavor || 0)}</span>
+                          </div>
+                          <div className="flex justify-between font-semibold">
+                            <span>Saldo a Favor Nuevo</span>
+                            <span>{formatCurrency(transaction.currentBalanceInFavor || 0)}</span>
                           </div>
                         </div>
                       </Card>

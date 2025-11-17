@@ -634,14 +634,15 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                     Cómo se descontó el cupo de este giro
                   </p>
                   <div className="space-y-2 text-sm">
-                    {minoristaTransaction.balanceInFavorUsed !== undefined && minoristaTransaction.balanceInFavorUsed > 0 && (
-                      <div className="p-3 bg-white dark:bg-slate-900 rounded border border-emerald-200 dark:border-emerald-700">
-                        <p className="text-xs text-muted-foreground mb-1">Saldo a Favor Utilizado</p>
-                        <p className="text-lg font-semibold text-emerald-700 dark:text-emerald-300">
-                          {formatCurrency(minoristaTransaction.balanceInFavorUsed, 'COP')}
-                        </p>
-                      </div>
-                    )}
+                    {minoristaTransaction.balanceInFavorUsed !== undefined &&
+                      minoristaTransaction.balanceInFavorUsed > 0 && (
+                        <div className="p-3 bg-white dark:bg-slate-900 rounded border border-emerald-200 dark:border-emerald-700">
+                          <p className="text-xs text-muted-foreground mb-1">Saldo a Favor Utilizado</p>
+                          <p className="text-lg font-semibold text-emerald-700 dark:text-emerald-300">
+                            {formatCurrency(minoristaTransaction.balanceInFavorUsed, 'COP')}
+                          </p>
+                        </div>
+                      )}
                     {minoristaTransaction.creditUsed !== undefined && minoristaTransaction.creditUsed > 0 && (
                       <div className="p-3 bg-white dark:bg-slate-900 rounded border border-blue-200 dark:border-blue-700">
                         <p className="text-xs text-muted-foreground mb-1">Crédito Disponible Utilizado</p>
@@ -650,14 +651,15 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                         </p>
                       </div>
                     )}
-                    {minoristaTransaction.remainingBalance !== undefined && minoristaTransaction.remainingBalance > 0 && (
-                      <div className="p-3 bg-white dark:bg-slate-900 rounded border border-emerald-200 dark:border-emerald-700">
-                        <p className="text-xs text-muted-foreground mb-1">Saldo a Favor Restante</p>
-                        <p className="text-lg font-semibold text-emerald-700 dark:text-emerald-300">
-                          {formatCurrency(minoristaTransaction.remainingBalance, 'COP')}
-                        </p>
-                      </div>
-                    )}
+                    {minoristaTransaction.remainingBalance !== undefined &&
+                      minoristaTransaction.remainingBalance > 0 && (
+                        <div className="p-3 bg-white dark:bg-slate-900 rounded border border-emerald-200 dark:border-emerald-700">
+                          <p className="text-xs text-muted-foreground mb-1">Saldo a Favor Restante</p>
+                          <p className="text-lg font-semibold text-emerald-700 dark:text-emerald-300">
+                            {formatCurrency(minoristaTransaction.remainingBalance, 'COP')}
+                          </p>
+                        </div>
+                      )}
                   </div>
                   <div className="text-xs text-emerald-600 dark:text-emerald-400 pt-2 border-t border-emerald-200 dark:border-emerald-700">
                     <p>💡 El saldo a favor se consume primero antes de usar el crédito disponible</p>

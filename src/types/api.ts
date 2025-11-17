@@ -157,8 +157,8 @@ export interface MinoristaTransaction {
   previousAvailableCredit: number
   availableCredit: number
   currentBalance: number
-  previousBalanceInFavor: number
-  currentBalanceInFavor: number
+  previousBalanceInFavor?: number // Optional for backward compatibility with old transactions
+  currentBalanceInFavor?: number // Optional for backward compatibility with old transactions
   creditConsumed?: number
   profitEarned?: number
   accumulatedDebt?: number
