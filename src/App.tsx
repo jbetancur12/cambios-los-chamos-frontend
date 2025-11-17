@@ -8,6 +8,7 @@ import { DashboardPage } from '@/pages/DashboardPage'
 import { UsersPage } from '@/pages/UsersPage'
 import { GirosPage } from '@/pages/GirosPage'
 import { CalculadoraPage } from '@/pages/CalculadoraPage'
+import { CalculadoraVesCompraPage } from '@/pages/CalculadoraVesCompraPage'
 import { ExchangeRatePage } from '@/pages/ExchangeRatePage'
 import { BankTransactionsPage } from '@/pages/BankTransactionsPage'
 import { BankAccountsPage } from '@/pages/BankAccountsPage'
@@ -112,6 +113,18 @@ function App() {
               <ProtectedRoute>
                 <DashboardLayout>
                   <CalculadoraPage />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Calculadora VES Compra (Super Admin) */}
+          <Route
+            path="/calculadora-ves-compra"
+            element={
+              <ProtectedRoute requiredRole="SUPER_ADMIN">
+                <DashboardLayout>
+                  <CalculadoraVesCompraPage />
                 </DashboardLayout>
               </ProtectedRoute>
             }

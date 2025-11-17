@@ -39,6 +39,12 @@ const navItems: NavItem[] = [
     href: '/calculadora',
     roles: ['SUPER_ADMIN', 'ADMIN', 'TRANSFERENCISTA', 'MINORISTA'],
   },
+  {
+    icon: Calculator,
+    label: 'Calc. Compra VES',
+    href: '/calculadora-ves-compra',
+    roles: ['SUPER_ADMIN'],
+  },
   { icon: Settings, label: 'Config', href: '/configuracion', roles: ['SUPER_ADMIN', 'ADMIN'] },
 ]
 
