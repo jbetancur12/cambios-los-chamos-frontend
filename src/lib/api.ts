@@ -21,6 +21,14 @@ const getApiBaseUrl = () => {
 
 const API_BASE_URL = getApiBaseUrl()
 
+const getAuthHeaders = (): Record<string, string> => {
+  const token = localStorage.getItem('authToken')
+  if (token) {
+    return { Authorization: `Bearer ${token}` }
+  }
+  return {}
+}
+
 export class ApiError extends Error {
   public code?: string
   public details?: unknown
@@ -50,6 +58,7 @@ export const api = {
       credentials: 'include', // Important for cookies
       headers: {
         'Content-Type': 'application/json',
+        ...getAuthHeaders(),
       },
     })
     return handleResponse<T>(response)
@@ -62,7 +71,10 @@ export const api = {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'POST',
       credentials: 'include', // Important for cookies
-      headers,
+      headers: {
+        ...headers,
+        ...getAuthHeaders(),
+      },
       body: isFormData ? body : body ? JSON.stringify(body) : undefined,
     })
     return handleResponse<T>(response)
@@ -74,6 +86,7 @@ export const api = {
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
+        ...getAuthHeaders(),
       },
       body: body ? JSON.stringify(body) : undefined,
     })
@@ -86,6 +99,7 @@ export const api = {
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
+        ...getAuthHeaders(),
       },
       body: body ? JSON.stringify(body) : undefined,
     })
@@ -98,6 +112,7 @@ export const api = {
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
+        ...getAuthHeaders(),
       },
     })
     return handleResponse<T>(response)

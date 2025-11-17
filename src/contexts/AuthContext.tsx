@@ -35,13 +35,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const login = async (credentials: LoginRequest) => {
-    const response = await api.post<LoginResponse>('/api/user/login', credentials)
+    const response = await api.post<LoginResponse & { token?: string }>('/api/user/login', credentials)
     setUser(response.user)
+    // Store token in localStorage as fallback when cookies don't work (e.g., mobile, cross-domain)
+    if (response.token) {
+      localStorage.setItem('authToken', response.token)
+    }
   }
 
   const logout = async () => {
     await api.post('/api/user/logout')
     setUser(null)
+    localStorage.removeItem('authToken')
   }
 
   const refetch = async () => {
