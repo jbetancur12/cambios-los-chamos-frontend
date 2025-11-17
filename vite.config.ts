@@ -70,7 +70,7 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
         runtimeCaching: [
-          { urlPattern: ({ url }) => url.origin.includes('localhost:3000'), handler: 'NetworkOnly' },
+          { urlPattern: ({ url }) => url.port === '3000' || url.hostname === 'localhost', handler: 'NetworkOnly' },
           { urlPattern: ({ url }) => url.pathname.startsWith('/api/'), handler: 'NetworkOnly' },
           { urlPattern: ({ url }) => url.origin.includes('firebase.googleapis.com'), handler: 'NetworkOnly' },
           { urlPattern: ({ url }) => url.origin.includes('fcm.googleapis.com'), handler: 'NetworkOnly' },
@@ -89,8 +89,8 @@ export default defineConfig({
   ],
 
   server: {
-    host: true,
+    host: '0.0.0.0',
     port: 5173,
-
+    strictPort: false,
   },
 })
