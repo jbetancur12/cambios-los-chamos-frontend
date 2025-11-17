@@ -104,7 +104,7 @@ export function CalculadoraPage() {
         {rate && (
           <Card className="mb-6">
             <CardContent className="pt-6">
-              <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="grid grid-cols-2 gap-4 text-center">
                 <div>
                   <p className="text-sm text-gray-600">BCV (Compra)</p>
                   <p className="text-xl font-bold text-blue-600">{formatCurrency(rate.usd)}</p>
@@ -112,10 +112,6 @@ export function CalculadoraPage() {
                 <div>
                   <p className="text-sm text-gray-600">Tasa Venta</p>
                   <p className="text-xl font-bold text-green-600">{formatCurrency(rate.sellRate)}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Tasa Compra</p>
-                  <p className="text-xl font-bold text-orange-600">{formatCurrency(rate.buyRate)}</p>
                 </div>
               </div>
             </CardContent>
