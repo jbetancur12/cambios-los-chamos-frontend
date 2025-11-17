@@ -31,6 +31,7 @@ const navItems: NavItem[] = [
   { icon: Building, label: 'Cuentas', href: '/cuentas-bancarias', roles: ['SUPER_ADMIN', 'ADMIN'] },
   { icon: DollarSign, label: 'Tasas', href: '/tasas', roles: ['SUPER_ADMIN'] },
   { icon: BarChart3, label: 'Reportes', href: '/reportes', roles: ['SUPER_ADMIN'] },
+  { icon: BarChart3, label: 'Mis Reportes', href: '/mis-reportes', roles: ['MINORISTA'] },
   { icon: Wallet, label: 'Transacciones', href: '/transacciones-minorista', roles: ['MINORISTA'] },
   {
     icon: Calculator,

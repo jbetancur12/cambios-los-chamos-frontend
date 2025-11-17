@@ -21,6 +21,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts'
+import { ChevronDown, ChevronUp } from 'lucide-react'
 
 interface SystemProfitReport {
   totalProfit: number
@@ -86,11 +87,11 @@ interface MinoristaTransactionReport {
 
 type TabType = 'system' | 'minoristas' | 'bank' | 'minoristaTransactions'
 
-const getDateRange = (range: 'today' | 'yesterday' | 'week' | 'month' | 'year') => {
+const getDateRange = (range: 'today' | 'yesterday' | 'week' | 'lastWeek' | 'month' | 'lastMonth' | 'year') => {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
   let dateFrom = new Date(today)
-  const dateTo = new Date(today)
+  let dateTo = new Date(today)
   dateTo.setHours(23, 59, 59, 999)
 
   switch (range) {
@@ -103,8 +104,19 @@ const getDateRange = (range: 'today' | 'yesterday' | 'week' | 'month' | 'year') 
     case 'week':
       dateFrom.setDate(dateFrom.getDate() - dateFrom.getDay())
       break
+    case 'lastWeek':
+      // Semana pasada: desde hace 14 días hasta hace 8 días (7 días completos)
+      dateFrom.setDate(dateFrom.getDate() - 14)
+      dateTo.setDate(dateTo.getDate() - 8)
+      break
     case 'month':
       dateFrom.setDate(1)
+      break
+    case 'lastMonth':
+      // Mes pasado: primer día del mes anterior hasta último día
+      dateFrom = new Date(today.getFullYear(), today.getMonth() - 1, 1)
+      dateTo = new Date(today.getFullYear(), today.getMonth(), 0)
+      dateTo.setHours(23, 59, 59, 999)
       break
     case 'year':
       dateFrom = new Date(today.getFullYear(), 0, 1)
@@ -124,12 +136,13 @@ export function ReportsPage() {
   const [dateFrom, setDateFrom] = useState<string>('')
   const [dateTo, setDateTo] = useState<string>('')
   const [loading, setLoading] = useState(false)
+  const [filterOpen, setFilterOpen] = useState(false)
   const [systemReport, setSystemReport] = useState<SystemProfitReport | null>(null)
   const [systemTrendReport, setSystemTrendReport] = useState<SystemProfitTrendReport | null>(null)
   const [minoristaReport, setMinoristaReport] = useState<TopMinoristaReport | null>(null)
   const [bankReport, setBankReport] = useState<BankTransactionReport | null>(null)
   const [minoristaTransactionReport, setMinoristaTransactionReport] = useState<MinoristaTransactionReport | null>(null)
-  const handleQuickDateRange = (range: 'today' | 'yesterday' | 'week' | 'month' | 'year') => {
+  const handleQuickDateRange = (range: 'today' | 'yesterday' | 'week' | 'lastWeek' | 'month' | 'lastMonth' | 'year') => {
     const dates = getDateRange(range)
     setDateFrom(dates.from)
     setDateTo(dates.to)
@@ -197,10 +210,16 @@ export function ReportsPage() {
 
         {/* Date Range Filters */}
         <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Filtrar por Rango de Fechas</CardTitle>
+          <CardHeader
+            className="cursor-pointer hover:bg-accent/50 transition-colors"
+            onClick={() => setFilterOpen(!filterOpen)}
+          >
+            <div className="flex items-center justify-between">
+              <CardTitle>Filtrar por Rango de Fechas</CardTitle>
+              {filterOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+            </div>
           </CardHeader>
-          <CardContent className="space-y-4">
+          {filterOpen && <CardContent className="space-y-4">
             {/* Quick Date Range Buttons */}
             <div className="flex gap-2 flex-wrap">
               <Button variant="outline" size="sm" onClick={() => handleQuickDateRange('today')}>
@@ -212,8 +231,14 @@ export function ReportsPage() {
               <Button variant="outline" size="sm" onClick={() => handleQuickDateRange('week')}>
                 Esta Semana
               </Button>
+              <Button variant="outline" size="sm" onClick={() => handleQuickDateRange('lastWeek')}>
+                Semana Pasada
+              </Button>
               <Button variant="outline" size="sm" onClick={() => handleQuickDateRange('month')}>
                 Este Mes
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => handleQuickDateRange('lastMonth')}>
+                Mes Pasado
               </Button>
               <Button variant="outline" size="sm" onClick={() => handleQuickDateRange('year')}>
                 Este Año
@@ -235,6 +260,7 @@ export function ReportsPage() {
               </Button>
             </div>
           </CardContent>
+          }
         </Card>
 
         {/* Tabs */}

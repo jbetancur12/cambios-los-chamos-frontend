@@ -12,6 +12,7 @@ import { ExchangeRatePage } from '@/pages/ExchangeRatePage'
 import { BankTransactionsPage } from '@/pages/BankTransactionsPage'
 import { BankAccountsPage } from '@/pages/BankAccountsPage'
 import { ReportsPage } from '@/pages/ReportsPage'
+import { MinoristaReportsPage } from '@/pages/MinoristaReportsPage'
 import { RechargeAmountsManager } from '@/components/RechargeAmountsManager'
 import { RechargeOperatorsManager } from '@/components/RechargeOperatorsManager'
 import { MinoristaTransactionsPage } from './pages/MinoristaTransactionsPage'
@@ -147,6 +148,18 @@ function App() {
               <ProtectedRoute>
                 <DashboardLayout>
                   <ReportsPage />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Minorista Reports */}
+          <Route
+            path="/mis-reportes"
+            element={
+              <ProtectedRoute requiredRole="MINORISTA">
+                <DashboardLayout>
+                  <MinoristaReportsPage />
                 </DashboardLayout>
               </ProtectedRoute>
             }
