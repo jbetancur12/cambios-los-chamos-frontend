@@ -12,7 +12,7 @@ interface ExchangeRate {
 }
 
 export function CalculadoraPage() {
-  const [activeTab, setActiveTab] = useState<'bcv' | 'manual'>('bcv')
+  const [activeTab, setActiveTab] = useState<'bcv' | 'manual' | 'ves'>('bcv')
   const [loading, setLoading] = useState(false)
   const [rate, setRate] = useState<ExchangeRate | null>(null)
 
@@ -24,6 +24,10 @@ export function CalculadoraPage() {
   const [usdManual, setUsdManual] = useState('')
   const [priceVES, setPriceVES] = useState('')
   const [resultManual, setResultManual] = useState<{ ves: number; cop: number } | null>(null)
+
+  // Tab 3: VES a COP
+  const [vesAmount, setVesAmount] = useState('')
+  const [resultVES, setResultVES] = useState<number | null>(null)
 
   // Fetch tasas al cargar
   const fetchRates = async () => {
@@ -91,6 +95,23 @@ export function CalculadoraPage() {
     setResultManual({ ves, cop })
   }
 
+  // Cálculo VES a COP: VES × Tasa venta = COP
+  const handleCalculateVES = () => {
+    if (!rate) {
+      toast.error('No hay tasa disponible')
+      return
+    }
+
+    const vesNum = parseFloat(vesAmount)
+    if (isNaN(vesNum) || vesNum <= 0) {
+      toast.error('Ingrese un valor válido en VES')
+      return
+    }
+
+    const cop = vesNum * rate.sellRate
+    setResultVES(cop)
+  }
+
   const formatCurrency = (value: number) => {
     return value.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
   }
@@ -119,10 +140,10 @@ export function CalculadoraPage() {
         )}
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-6">
+        <div className="flex gap-2 mb-6 overflow-x-auto">
           <button
             onClick={() => setActiveTab('bcv')}
-            className={`flex-1 py-3 rounded-lg font-medium transition-colors ${
+            className={`flex-1 py-3 rounded-lg font-medium transition-colors whitespace-nowrap ${
               activeTab === 'bcv'
                 ? 'bg-blue-600 text-white'
                 : 'bg-white text-gray-700 border hover:bg-gray-50'
@@ -132,13 +153,23 @@ export function CalculadoraPage() {
           </button>
           <button
             onClick={() => setActiveTab('manual')}
-            className={`flex-1 py-3 rounded-lg font-medium transition-colors ${
+            className={`flex-1 py-3 rounded-lg font-medium transition-colors whitespace-nowrap ${
               activeTab === 'manual'
                 ? 'bg-blue-600 text-white'
                 : 'bg-white text-gray-700 border hover:bg-gray-50'
             }`}
           >
             Precio Manual
+          </button>
+          <button
+            onClick={() => setActiveTab('ves')}
+            className={`flex-1 py-3 rounded-lg font-medium transition-colors whitespace-nowrap ${
+              activeTab === 'ves'
+                ? 'bg-blue-600 text-white'
+                : 'bg-white text-gray-700 border hover:bg-gray-50'
+            }`}
+          >
+            VES a COP
           </button>
         </div>
 
@@ -222,6 +253,40 @@ export function CalculadoraPage() {
                   <div className="flex justify-between items-center py-2 border-t pt-3">
                     <p className="text-gray-600">COP a recibir</p>
                     <p className="text-2xl font-bold text-green-600">{formatCurrency(resultManual.cop)}</p>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Tab 3: VES a COP */}
+        {activeTab === 'ves' && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Convertir VES a COP</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Bolivares (VES)</label>
+                <Input
+                  type="number"
+                  placeholder="Ej: 2500000"
+                  value={vesAmount}
+                  onChange={(e) => setVesAmount(e.target.value)}
+                  className="w-full"
+                />
+              </div>
+
+              <Button onClick={handleCalculateVES} disabled={loading} className="w-full">
+                {loading ? 'Cargando...' : 'Calcular'}
+              </Button>
+
+              {resultVES !== null && (
+                <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                  <div className="flex justify-between items-center">
+                    <p className="text-gray-600">COP</p>
+                    <p className="text-2xl font-bold text-green-600">{formatCurrency(resultVES)}</p>
                   </div>
                 </div>
               )}
