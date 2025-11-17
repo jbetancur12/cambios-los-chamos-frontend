@@ -170,21 +170,13 @@ export function CalculadoraPage() {
 
               {resultBCV && (
                 <div className="mt-6 p-4 bg-gray-50 rounded-lg space-y-3">
-                  <div className="border-b pb-3">
-                    <p className="text-sm text-gray-600">Paso 1: USD × BCV</p>
-                    <p className="font-semibold">
-                      {formatCurrency(parseFloat(usdBCV))} USD × {formatCurrency(rate?.usd || 0)} = <span className="text-blue-600">{formatCurrency(resultBCV.ves)} VES</span>
-                    </p>
+                  <div className="flex justify-between items-center py-2">
+                    <p className="text-gray-600">VES</p>
+                    <p className="text-xl font-bold text-blue-600">{formatCurrency(resultBCV.ves)}</p>
                   </div>
-                  <div className="border-b pb-3">
-                    <p className="text-sm text-gray-600">Paso 2: VES × Tasa Venta</p>
-                    <p className="font-semibold">
-                      {formatCurrency(resultBCV.ves)} VES × {formatCurrency(rate?.sellRate || 0)} = <span className="text-green-600">{formatCurrency(resultBCV.cop)} COP</span>
-                    </p>
-                  </div>
-                  <div className="pt-3 bg-white p-3 rounded border-2 border-green-600">
-                    <p className="text-sm text-gray-600 mb-1">Total a recibir</p>
-                    <p className="text-2xl font-bold text-green-600">{formatCurrency(resultBCV.cop)} COP</p>
+                  <div className="flex justify-between items-center py-2 border-t pt-3">
+                    <p className="text-gray-600">COP a recibir</p>
+                    <p className="text-2xl font-bold text-green-600">{formatCurrency(resultBCV.cop)}</p>
                   </div>
                 </div>
               )}
@@ -227,21 +219,13 @@ export function CalculadoraPage() {
 
               {resultManual && (
                 <div className="mt-6 p-4 bg-gray-50 rounded-lg space-y-3">
-                  <div className="border-b pb-3">
-                    <p className="text-sm text-gray-600">Paso 1: USD × Precio manual VES</p>
-                    <p className="font-semibold">
-                      {formatCurrency(parseFloat(usdManual))} USD × {formatCurrency(parseFloat(priceVES))} VES = <span className="text-blue-600">{formatCurrency(resultManual.ves)} VES</span>
-                    </p>
+                  <div className="flex justify-between items-center py-2">
+                    <p className="text-gray-600">VES</p>
+                    <p className="text-xl font-bold text-blue-600">{formatCurrency(resultManual.ves)}</p>
                   </div>
-                  <div className="border-b pb-3">
-                    <p className="text-sm text-gray-600">Paso 2: VES × Tasa Venta</p>
-                    <p className="font-semibold">
-                      {formatCurrency(resultManual.ves)} VES × {formatCurrency(rate?.sellRate || 0)} = <span className="text-green-600">{formatCurrency(resultManual.cop)} COP</span>
-                    </p>
-                  </div>
-                  <div className="pt-3 bg-white p-3 rounded border-2 border-green-600">
-                    <p className="text-sm text-gray-600 mb-1">Total a recibir</p>
-                    <p className="text-2xl font-bold text-green-600">{formatCurrency(resultManual.cop)} COP</p>
+                  <div className="flex justify-between items-center py-2 border-t pt-3">
+                    <p className="text-gray-600">COP a recibir</p>
+                    <p className="text-2xl font-bold text-green-600">{formatCurrency(resultManual.cop)}</p>
                   </div>
                 </div>
               )}
