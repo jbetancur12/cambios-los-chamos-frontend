@@ -1,6 +1,14 @@
 import { useEffect, useState } from 'react'
 import { api } from '@/lib/api'
 
+interface MinoristaGiroStats {
+  minoristaId: string
+  minoristaName: string
+  assignedTotal: number
+  processingToday: number
+  completedToday: number
+}
+
 interface DashboardStats {
   girosCount: number
   girosLabel: string
@@ -11,6 +19,7 @@ interface DashboardStats {
   systemEarnings?: number
   minoristaEarnings?: number
   earnings?: number // Para minoristas (solo su parte)
+  minoristaGiroStats?: MinoristaGiroStats[] // Para transferencistas
 }
 
 export function useDashboardStats() {
