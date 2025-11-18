@@ -24,7 +24,7 @@ import {
   Printer,
   Copy,
 } from 'lucide-react'
-import type { Giro, BankAccount, ExecutionType, GiroStatus, Bank, MinoristaTransaction } from '@/types/api'
+import type { Giro, BankAccount, GiroStatus, Bank, MinoristaTransaction } from '@/types/api'
 
 interface GiroDetailSheetProps {
   open: boolean

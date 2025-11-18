@@ -45,7 +45,7 @@ const navItems: NavItem[] = [
     href: '/calculadora-ves-compra',
     roles: ['SUPER_ADMIN'],
   },
-  { icon: Settings, label: 'Config', href: '/configuracion', roles: ['SUPER_ADMIN', 'ADMIN'] },
+  { icon: Settings, label: 'Config', href: '/configuracion', roles: ['SUPER_ADMIN', 'ADMIN', 'TRANSFERENCISTA'] },
 ]
 
 export function DashboardLayout({ children }: { children: ReactNode }) {
@@ -80,9 +80,9 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
       <aside className="hidden md:fixed md:inset-y-0 md:flex md:w-64 md:flex-col">
         <div className="flex flex-col flex-1 min-h-0 border-r" style={{ background: 'linear-gradient(to bottom, #136BBC, #274565)' }}>
           {/* Header */}
-          <div className="flex items-center gap-3 h-16 px-6 border-b" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
-            <img src="/icons/icon-48x48.png" alt="Logo" className="h-10 w-10" />
-            <h1 className="text-xl font-bold text-white">Cambios los Chamos</h1>
+          <div className="flex items-center gap-3 h-40 px-6 border-b" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+            <img src="/LogoLosChamos.avif" alt="Logo" className="h-30 w-30" />
+            {/* <h1 className="text-xl font-bold text-white">Cambios los Chamos</h1> */}
           </div>
 
           {/* Navigation */}
@@ -127,7 +127,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
       <div className="md:pl-64 flex flex-col min-h-screen">
         {/* Mobile Header */}
         <header className="sticky top-0 z-40 flex h-16 items-center gap-3 px-4 md:hidden text-white" style={{ background: 'linear-gradient(to right, #136BBC, #274565)', borderBottomColor: 'rgba(255, 255, 255, 0.1)' }} >
-          <img src="/icons/icon-48x48.png" alt="Logo" className="h-8 w-8" />
+          <img src="/LogoLosChamos.avif" alt="Logo" className="h-20 w-20" />
           <h1 className="text-lg font-semibold">Cambios los Chamos</h1>
         </header>
 

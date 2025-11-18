@@ -12,7 +12,7 @@ interface ExchangeRate {
 
 export function CalculadoraPage() {
   const [activeTab, setActiveTab] = useState<'bcv' | 'manual' | 'ves'>('bcv')
-  const [loading, setLoading] = useState(false)
+  const [, setLoading] = useState(false)
   const [rate, setRate] = useState<ExchangeRate | null>(null)
 
   // Tab 1: BCV (Tasa oficial)

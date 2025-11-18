@@ -14,12 +14,11 @@ import { BankTransactionsPage } from '@/pages/BankTransactionsPage'
 import { BankAccountsPage } from '@/pages/BankAccountsPage'
 import { ReportsPage } from '@/pages/ReportsPage'
 import { MinoristaReportsPage } from '@/pages/MinoristaReportsPage'
-import { RechargeOperatorsManager } from '@/components/RechargeOperatorsManager'
-import { OperatorAmountsManager } from '@/components/OperatorAmountsManager'
 import { MinoristaTransactionsPage } from './pages/MinoristaTransactionsPage'
 import { VerifyEmailPage } from '@/pages/VerifyEmailPage'
 import { ResetPasswordPage } from '@/pages/ResetPasswordPage'
 import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage'
+import { ConfigPage } from '@/pages/ConfigPage'
 import { useEffect } from 'react'
 import { requestNotifyPermission } from './firebase/messaging'
 
@@ -181,22 +180,9 @@ function App() {
           <Route
             path="/configuracion"
             element={
-              <ProtectedRoute requiredRole="SUPER_ADMIN">
+              <ProtectedRoute requiredRole={['SUPER_ADMIN', 'ADMIN', 'TRANSFERENCISTA']}>
                 <DashboardLayout>
-                  <div className="p-6">
-                    <h1 className="text-3xl font-bold mb-8">Configuración</h1>
-                    <div className="grid gap-6">
-                      {/* Recharge Operators Manager */}
-                      <div>
-                        <RechargeOperatorsManager />
-                      </div>
-
-                      {/* Operator Amounts Manager */}
-                      <div>
-                        <OperatorAmountsManager />
-                      </div>
-                    </div>
-                  </div>
+                  <ConfigPage />
                 </DashboardLayout>
               </ProtectedRoute>
             }

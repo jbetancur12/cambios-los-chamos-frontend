@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from 'react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetBody } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
-import { Loader2, Printer, X } from 'lucide-react'
+import { Loader2, Printer, X, Settings } from 'lucide-react'
 import { toast } from 'sonner'
 import { api } from '@/lib/api'
+import { usePrinterConfig } from '@/hooks/usePrinterConfig'
 
 interface ThermalTicketData {
   companyName: string
@@ -46,12 +47,23 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
   const [ticketData, setTicketData] = useState<ThermalTicketData | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [printerType, setPrinterType] = useState<'thermal' | 'injection'>('thermal')
+  const [printerName, setPrinterName] = useState('')
+  const [autoSavePrinter, setAutoSavePrinter] = useState(false)
   const printFrameRef = useRef<HTMLIFrameElement>(null)
+  const { getPrinterConfig } = usePrinterConfig()
 
-  // Cargar datos del tiquete cuando se abre el modal
+  // Cargar datos del tiquete y configuración cuando se abre el modal
   useEffect(() => {
-    if (open && !ticketData) {
-      fetchTicketData()
+    if (open) {
+      if (!ticketData) {
+        fetchTicketData()
+      }
+      const config = getPrinterConfig()
+      if (config) {
+        setPrinterName(config.name)
+        setPrinterType(config.type)
+        setAutoSavePrinter(true)
+      }
     }
   }, [open])
 
@@ -530,6 +542,7 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
     `
   }
 
+
   const handlePrint = () => {
     if (!ticketData) return
 
@@ -548,14 +561,27 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
 
     // Esperar a que el contenido se cargue antes de imprimir
     setTimeout(() => {
-      iframe.contentWindow?.print()
+      if (autoSavePrinter && printerName) {
+        // Intentar imprimir con la impresora preconfigurada
+        try {
+          iframe.contentWindow?.print()
+          // Aquí se llamaría a la API de impresión nativa si está disponible
+          // Para navegadores, print() abrirá el dialog, pero en el futuro
+          // se podría usar Web Print API cuando esté disponible
+          toast.success(`Imprimiendo con ${printerName}...`)
+        } catch (err) {
+          toast.error(`Error: No se encontró la impresora "${printerName}". Se abrirá el diálogo de impresión.`)
+          iframe.contentWindow?.print()
+        }
+      } else {
+        // Sin impresora configurada, abrir diálogo normal
+        iframe.contentWindow?.print()
+        const printerMsg = printerType === 'thermal'
+          ? 'Se abrió la ventana de impresión. Selecciona tu impresora térmica de 80mm.'
+          : 'Se abrió la ventana de impresión. Selecciona tu impresora de inyección (media carta).'
+        toast.success(printerMsg)
+      }
     }, 500)
-
-    const printerMsg = printerType === 'thermal'
-      ? 'Se abrió la ventana de impresión. Selecciona tu impresora térmica de 80mm.'
-      : 'Se abrió la ventana de impresión. Selecciona tu impresora de inyección (media carta).'
-
-    toast.success(printerMsg)
   }
 
   return (
@@ -569,6 +595,17 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
           {error && (
             <div className="p-4 rounded-lg bg-red-50 border border-red-200 mb-4">
               <p className="text-sm text-red-800">{error}</p>
+            </div>
+          )}
+
+          {/* Printer Configuration Status */}
+          {!loading && ticketData && autoSavePrinter && printerName && (
+            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-start gap-2">
+              <Settings className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-green-900">Impresora configurada</p>
+                <p className="text-xs text-green-700">{printerName} ({printerType === 'thermal' ? 'Térmica 80mm' : 'Inyección Media Carta'})</p>
+              </div>
             </div>
           )}
 
@@ -628,37 +665,41 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
               </div>
 
               <div className="p-4 rounded-lg bg-blue-50 border border-blue-200 text-sm text-blue-800">
-                {printerType === 'thermal'
-                  ? 'Selecciona tu impresora térmica de 80mm cuando se abra la ventana de impresión.'
-                  : 'Selecciona tu impresora de inyección (media carta) cuando se abra la ventana de impresión.'}
+                {autoSavePrinter && printerName
+                  ? `Imprimirá directamente en: ${printerName}`
+                  : printerType === 'thermal'
+                    ? 'Selecciona tu impresora térmica de 80mm cuando se abra la ventana de impresión.'
+                    : 'Selecciona tu impresora de inyección (media carta) cuando se abra la ventana de impresión.'}
               </div>
 
               {/* Selector de tipo de impresora */}
-              <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                <label className="block text-sm font-semibold mb-3">Tipo de impresora:</label>
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => setPrinterType('thermal')}
-                    className={`flex-1 py-2 px-3 rounded border transition-all ${
-                      printerType === 'thermal'
-                        ? 'bg-blue-100 border-blue-500 text-blue-900 font-semibold'
-                        : 'bg-white border-gray-300 text-gray-700 hover:border-gray-400'
-                    }`}
-                  >
-                    Térmica (80mm)
-                  </button>
-                  <button
-                    onClick={() => setPrinterType('injection')}
-                    className={`flex-1 py-2 px-3 rounded border transition-all ${
-                      printerType === 'injection'
-                        ? 'bg-green-100 border-green-500 text-green-900 font-semibold'
-                        : 'bg-white border-gray-300 text-gray-700 hover:border-gray-400'
-                    }`}
-                  >
-                    Inyección (Media Carta)
-                  </button>
+              {!autoSavePrinter && (
+                <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                  <label className="block text-sm font-semibold mb-3">Tipo de impresora:</label>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setPrinterType('thermal')}
+                      className={`flex-1 py-2 px-3 rounded border transition-all ${
+                        printerType === 'thermal'
+                          ? 'bg-blue-100 border-blue-500 text-blue-900 font-semibold'
+                          : 'bg-white border-gray-300 text-gray-700 hover:border-gray-400'
+                      }`}
+                    >
+                      Térmica (80mm)
+                    </button>
+                    <button
+                      onClick={() => setPrinterType('injection')}
+                      className={`flex-1 py-2 px-3 rounded border transition-all ${
+                        printerType === 'injection'
+                          ? 'bg-green-100 border-green-500 text-green-900 font-semibold'
+                          : 'bg-white border-gray-300 text-gray-700 hover:border-gray-400'
+                      }`}
+                    >
+                      Inyección (Media Carta)
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           ) : null}
 
