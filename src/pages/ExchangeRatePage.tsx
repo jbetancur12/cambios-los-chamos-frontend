@@ -166,7 +166,7 @@ export function ExchangeRatePage() {
                   }}
                   size="sm"
                   variant="outline"
-                  className="flex-1 sm:flex-initial gap-2"
+                  className="hidden sm:flex flex-1 sm:flex-initial gap-2"
                 >
                   <Eye className="h-4 w-4" />
                   Ver
