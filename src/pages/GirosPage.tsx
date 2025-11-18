@@ -694,7 +694,7 @@ export function GirosPage() {
                   </div>
                 ) : (
                   // TRASFERENCISTA / ADMIN: COP, BS, Ganancia Minoristas, Comisión Banco
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                     <div className="text-left">
                       <p className="text-xs opacity-80">Ganancia Minoristas</p>
                       <p className="font-semibold">{formatCurrency(totals.minoristaProfit, 'COP')}</p>
@@ -702,10 +702,6 @@ export function GirosPage() {
                     <div className="text-left">
                       <p className="text-xs opacity-80">Comisión Banco</p>
                       <p className="font-semibold">{formatCurrency(totals.bankCommission, 'COP')}</p>
-                    </div>
-                    <div className="text-left">
-                      <p className="text-xs opacity-80">Total Ganancias</p>
-                      <p className="font-semibold">{formatCurrency(totals.minoristaProfit + totals.bankCommission, 'COP')}</p>
                     </div>
                   </div>
                 )}
