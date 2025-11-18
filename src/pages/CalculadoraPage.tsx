@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { api } from '@/lib/api'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
 interface ExchangeRate {
@@ -50,67 +49,51 @@ export function CalculadoraPage() {
     fetchRates()
   }, [])
 
-  // Cálculo BCV: USD × BCV (compra) = VES, luego VES × Tasa venta = COP
-  const handleCalculateBCV = () => {
-    if (!rate) {
-      toast.error('No hay tasa disponible')
-      return
-    }
+  // Cálculo BCV en tiempo real
+  useEffect(() => {
+    if (!rate) return
 
     const usdNum = parseFloat(usdBCV)
     if (isNaN(usdNum) || usdNum <= 0) {
-      toast.error('Ingrese un valor válido en USD')
+      setResultBCV(null)
       return
     }
 
     const ves = usdNum * rate.usd
     const cop = ves * rate.sellRate
-
     setResultBCV({ ves, cop })
-  }
+  }, [usdBCV, rate])
 
-  // Cálculo Manual: USD × Precio VES manual = VES, luego VES × Tasa venta = COP
-  const handleCalculateManual = () => {
-    if (!rate) {
-      toast.error('No hay tasa disponible')
-      return
-    }
+  // Cálculo Manual en tiempo real
+  useEffect(() => {
+    if (!rate) return
 
     const usdNum = parseFloat(usdManual)
     const priceNum = parseFloat(priceVES)
 
-    if (isNaN(usdNum) || usdNum <= 0) {
-      toast.error('Ingrese un valor válido en USD')
-      return
-    }
-
-    if (isNaN(priceNum) || priceNum <= 0) {
-      toast.error('Ingrese un precio válido en VES')
+    if (isNaN(usdNum) || usdNum <= 0 || isNaN(priceNum) || priceNum <= 0) {
+      setResultManual(null)
       return
     }
 
     const ves = usdNum * priceNum
     const cop = ves * rate.sellRate
-
     setResultManual({ ves, cop })
-  }
+  }, [usdManual, priceVES, rate])
 
-  // Cálculo VES a COP: VES × Tasa venta = COP
-  const handleCalculateVES = () => {
-    if (!rate) {
-      toast.error('No hay tasa disponible')
-      return
-    }
+  // Cálculo VES a COP en tiempo real
+  useEffect(() => {
+    if (!rate) return
 
     const vesNum = parseFloat(vesAmount)
     if (isNaN(vesNum) || vesNum <= 0) {
-      toast.error('Ingrese un valor válido en VES')
+      setResultVES(null)
       return
     }
 
     const cop = vesNum * rate.sellRate
     setResultVES(cop)
-  }
+  }, [vesAmount, rate])
 
   const formatCurrency = (value: number) => {
     return value.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -191,10 +174,6 @@ export function CalculadoraPage() {
                 />
               </div>
 
-              <Button onClick={handleCalculateBCV} disabled={loading} className="w-full">
-                {loading ? 'Cargando...' : 'Calcular'}
-              </Button>
-
               {resultBCV && (
                 <div className="mt-6 p-4 bg-gray-50 rounded-lg space-y-3">
                   <div className="flex justify-between items-center py-2">
@@ -240,10 +219,6 @@ export function CalculadoraPage() {
                 />
               </div>
 
-              <Button onClick={handleCalculateManual} disabled={loading} className="w-full">
-                {loading ? 'Cargando...' : 'Calcular'}
-              </Button>
-
               {resultManual && (
                 <div className="mt-6 p-4 bg-gray-50 rounded-lg space-y-3">
                   <div className="flex justify-between items-center py-2">
@@ -277,10 +252,6 @@ export function CalculadoraPage() {
                   className="w-full"
                 />
               </div>
-
-              <Button onClick={handleCalculateVES} disabled={loading} className="w-full">
-                {loading ? 'Cargando...' : 'Calcular'}
-              </Button>
 
               {resultVES !== null && (
                 <div className="mt-6 p-4 bg-gray-50 rounded-lg">

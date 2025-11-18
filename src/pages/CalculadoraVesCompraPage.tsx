@@ -1,7 +1,5 @@
-import { useState } from 'react'
-import { toast } from 'sonner'
+import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
 export function CalculadoraVesCompraPage() {
@@ -9,23 +7,19 @@ export function CalculadoraVesCompraPage() {
   const [purchaseRate, setPurchaseRate] = useState('')
   const [result, setResult] = useState<number | null>(null)
 
-  const handleCalculate = () => {
+  // Cálculo en tiempo real
+  useEffect(() => {
     const vesNum = parseFloat(vesAmount)
     const rateNum = parseFloat(purchaseRate)
 
-    if (isNaN(vesNum) || vesNum <= 0) {
-      toast.error('Ingrese un valor válido en VES')
-      return
-    }
-
-    if (isNaN(rateNum) || rateNum <= 0) {
-      toast.error('Ingrese una tasa de compra válida')
+    if (isNaN(vesNum) || vesNum <= 0 || isNaN(rateNum) || rateNum <= 0) {
+      setResult(null)
       return
     }
 
     const cop = vesNum * rateNum
     setResult(cop)
-  }
+  }, [vesAmount, purchaseRate])
 
   const formatCurrency = (value: number) => {
     return value.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -63,10 +57,6 @@ export function CalculadoraVesCompraPage() {
                 className="w-full"
               />
             </div>
-
-            <Button onClick={handleCalculate} className="w-full">
-              Calcular
-            </Button>
 
             {result !== null && (
               <div className="mt-6 p-4 bg-gray-50 rounded-lg">
