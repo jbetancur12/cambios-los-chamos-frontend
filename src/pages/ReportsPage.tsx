@@ -131,10 +131,13 @@ const getDateRange = (range: 'today' | 'yesterday' | 'week' | 'lastWeek' | 'mont
 
 const CHART_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899']
 
+type DateRangeFilter = 'today' | 'yesterday' | 'week' | 'lastWeek' | 'month' | 'lastMonth' | 'year' | null
+
 export function ReportsPage() {
   const [activeTab, setActiveTab] = useState<TabType>('system')
   const [dateFrom, setDateFrom] = useState<string>('')
   const [dateTo, setDateTo] = useState<string>('')
+  const [selectedDateRange, setSelectedDateRange] = useState<DateRangeFilter>('today')
   const [loading, setLoading] = useState(false)
   const [filterOpen, setFilterOpen] = useState(false)
   const [systemReport, setSystemReport] = useState<SystemProfitReport | null>(null)
@@ -205,6 +208,7 @@ export function ReportsPage() {
     const dates = getDateRange(range)
     setDateFrom(dates.from)
     setDateTo(dates.to)
+    setSelectedDateRange(range)
   }
 
   const handleLoadReports = async () => {
@@ -243,25 +247,66 @@ export function ReportsPage() {
           {filterOpen && <CardContent className="space-y-4">
             {/* Quick Date Range Buttons */}
             <div className="flex gap-2 flex-wrap">
-              <Button variant="outline" size="sm" onClick={() => handleQuickDateRange('today')}>
+              <Button
+                size="sm"
+                onClick={() => handleQuickDateRange('today')}
+                className={selectedDateRange === 'today' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}
+                style={selectedDateRange === 'today' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+              >
                 Hoy
               </Button>
-              <Button variant="outline" size="sm" onClick={() => handleQuickDateRange('yesterday')}>
+              <Button
+                size="sm"
+                onClick={() => handleQuickDateRange('yesterday')}
+                variant={selectedDateRange === 'yesterday' ? undefined : 'outline'}
+                className={selectedDateRange === 'yesterday' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}
+                style={selectedDateRange === 'yesterday' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+              >
                 Ayer
               </Button>
-              <Button variant="outline" size="sm" onClick={() => handleQuickDateRange('week')}>
+              <Button
+                size="sm"
+                onClick={() => handleQuickDateRange('week')}
+                variant={selectedDateRange === 'week' ? undefined : 'outline'}
+                className={selectedDateRange === 'week' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}
+                style={selectedDateRange === 'week' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+              >
                 Esta Semana
               </Button>
-              <Button variant="outline" size="sm" onClick={() => handleQuickDateRange('lastWeek')}>
+              <Button
+                size="sm"
+                onClick={() => handleQuickDateRange('lastWeek')}
+                variant={selectedDateRange === 'lastWeek' ? undefined : 'outline'}
+                className={selectedDateRange === 'lastWeek' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}
+                style={selectedDateRange === 'lastWeek' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+              >
                 Semana Pasada
               </Button>
-              <Button variant="outline" size="sm" onClick={() => handleQuickDateRange('month')}>
+              <Button
+                size="sm"
+                onClick={() => handleQuickDateRange('month')}
+                variant={selectedDateRange === 'month' ? undefined : 'outline'}
+                className={selectedDateRange === 'month' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}
+                style={selectedDateRange === 'month' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+              >
                 Este Mes
               </Button>
-              <Button variant="outline" size="sm" onClick={() => handleQuickDateRange('lastMonth')}>
+              <Button
+                size="sm"
+                onClick={() => handleQuickDateRange('lastMonth')}
+                variant={selectedDateRange === 'lastMonth' ? undefined : 'outline'}
+                className={selectedDateRange === 'lastMonth' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}
+                style={selectedDateRange === 'lastMonth' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+              >
                 Mes Pasado
               </Button>
-              <Button variant="outline" size="sm" onClick={() => handleQuickDateRange('year')}>
+              <Button
+                size="sm"
+                onClick={() => handleQuickDateRange('year')}
+                variant={selectedDateRange === 'year' ? undefined : 'outline'}
+                className={selectedDateRange === 'year' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}
+                style={selectedDateRange === 'year' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+              >
                 Este Año
               </Button>
             </div>
@@ -270,11 +315,27 @@ export function ReportsPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
               <div>
                 <label className="block text-sm font-medium mb-2">Desde</label>
-                <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="w-full" />
+                <Input
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => {
+                    setDateFrom(e.target.value)
+                    setSelectedDateRange(null)
+                  }}
+                  className="w-full"
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-2">Hasta</label>
-                <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-full" />
+                <Input
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => {
+                    setDateTo(e.target.value)
+                    setSelectedDateRange(null)
+                  }}
+                  className="w-full"
+                />
               </div>
               <Button onClick={handleLoadReports} disabled={loading} className="w-full">
                 {loading ? 'Cargando...' : 'Cargar Reporte'}
