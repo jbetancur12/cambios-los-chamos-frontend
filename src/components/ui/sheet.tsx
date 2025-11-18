@@ -26,10 +26,14 @@ export function Sheet({ open, onOpenChange, children }: SheetProps) {
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/50 z-40 animate-in fade-in duration-200 "
-        onClick={() => onOpenChange(false)}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            onOpenChange(false)
+          }
+        }}
       />
       {/* Sheet */}
-      <div className="fixed inset-x-0 bottom-0 z-[60] animate-in slide-in-from-bottom duration-300 
+      <div className="fixed inset-x-0 bottom-0 z-[60] animate-in slide-in-from-bottom duration-300
                    lg:inset-0 lg:grid lg:place-items-center lg:slide-in-from-bottom">{children}</div>
     </>
   )
