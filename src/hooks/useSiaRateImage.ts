@@ -11,9 +11,14 @@ export function useSiaRateImage() {
       const ctx = canvas.getContext('2d')
       if (!ctx) return
 
-      // Background color
-      ctx.fillStyle = '#1a2332'
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
+      // Load and draw background image
+      const img = new Image()
+      img.src = '/rates-background.avif'
+      await new Promise((resolve, reject) => {
+        img.onload = resolve
+        img.onerror = reject
+      })
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
 
       // Header
       ctx.fillStyle = '#dc2626'
