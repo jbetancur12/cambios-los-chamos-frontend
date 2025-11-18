@@ -14,7 +14,6 @@ import { BankTransactionsPage } from '@/pages/BankTransactionsPage'
 import { BankAccountsPage } from '@/pages/BankAccountsPage'
 import { ReportsPage } from '@/pages/ReportsPage'
 import { MinoristaReportsPage } from '@/pages/MinoristaReportsPage'
-import { RechargeAmountsManager } from '@/components/RechargeAmountsManager'
 import { RechargeOperatorsManager } from '@/components/RechargeOperatorsManager'
 import { OperatorAmountsManager } from '@/components/OperatorAmountsManager'
 import { MinoristaTransactionsPage } from './pages/MinoristaTransactionsPage'
@@ -187,11 +186,6 @@ function App() {
                   <div className="p-6">
                     <h1 className="text-3xl font-bold mb-8">Configuración</h1>
                     <div className="grid gap-6">
-                      {/* Recharge Amounts Manager */}
-                      <div>
-                        <RechargeAmountsManager />
-                      </div>
-
                       {/* Recharge Operators Manager */}
                       <div>
                         <RechargeOperatorsManager />
