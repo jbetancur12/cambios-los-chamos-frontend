@@ -639,14 +639,14 @@ export function GirosPage() {
           <div className="mt-3 p-3 rounded border text-white text-xs flex justify-between items-center gap-4" style={{ background: 'linear-gradient(to right, #136BBC, #274565)', borderColor: '#136BBC' }}>
             <div>
               <span className="font-semibold">{totals.count}</span>
-              <span className="text-muted-foreground ml-1">giro{totals.count !== 1 ? 's' : ''}</span>
+              <span className="ml-1">giro{totals.count !== 1 ? 's' : ''}</span>
             </div>
             <div className="text-right">
-              <span className="font-semibold" style={{ color: '#136BBC' }}>COP: </span>
+              <span className="font-semibold">COP: </span>
               <span className="font-mono">{formatCurrency(totals.cop, 'COP')}</span>
             </div>
             <div className="text-right">
-              <span className="font-semibold" style={{ color: '#136BBC' }}>Bs: </span>
+              <span className="font-semibold">Bs: </span>
               <span className="font-mono">{totals.bs.toLocaleString('es-VE')}</span>
             </div>
           </div>
