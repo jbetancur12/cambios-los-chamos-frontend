@@ -16,13 +16,13 @@ import {
   User,
   Building,
   CreditCard,
-  Phone,
   DollarSign,
   Calendar,
   TrendingUp,
   ArrowRight,
   CornerDownLeft, // Nuevo ícono para devolver
   Printer,
+  Copy,
 } from 'lucide-react'
 import type { Giro, BankAccount, ExecutionType, GiroStatus, Bank, MinoristaTransaction } from '@/types/api'
 
@@ -58,7 +58,6 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
 
   // Execute form fields
   const [selectedBankAccountId, setSelectedBankAccountId] = useState('')
-  const [executionType, setExecutionType] = useState<ExecutionType>('TRANSFERENCIA')
   const [proofUrl, setProofUrl] = useState('')
   const [fee, setFee] = useState(0)
   const [banks, setBanks] = useState<Bank[]>([])
@@ -316,7 +315,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
   }
 
   const handleExecuteGiro = async () => {
-    if (!giro || !selectedBankAccountId || !executionType) {
+    if (!giro || !selectedBankAccountId || !giro.executionType) {
       toast.error('Por favor completa todos los campos requeridos')
       return
     }
@@ -325,7 +324,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
       setProcessing(true)
       await api.post(`/api/giro/${giro.id}/execute`, {
         bankAccountId: selectedBankAccountId,
-        executionType,
+        executionType: giro.executionType,
         fee,
         proofUrl: proofUrl || undefined,
       })
@@ -462,6 +461,11 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
     }).format(date)
   }
 
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text)
+    toast.success(`${label} copiado`)
+  }
+
   if (!giro && !loading) {
     return null
   }
@@ -478,37 +482,36 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
 
         <SheetBody>
           {loading ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">Cargando...</p>
+            <div className="text-center py-8">
+              <p className="text-xs text-muted-foreground">Cargando...</p>
             </div>
           ) : giro ? (
-            <div className="space-y-4">
+            <div className="space-y-2">
               {/* Status Badge */}
               {statusBadge && StatusIcon && (
-                <div className={`flex items-center justify-center gap-2 py-2 px-4 rounded-lg ${statusBadge.className}`}>
-                  <StatusIcon className="h-5 w-5" />
-                  <span className="font-semibold">{statusBadge.label}</span>
+                <div className={`flex items-center justify-center gap-1 py-1 px-3 rounded text-xs font-semibold ${statusBadge.className}`}>
+                  <StatusIcon className="h-3 w-3" />
+                  <span>{statusBadge.label}</span>
                 </div>
               )}
 
               {giro.status === 'DEVUELTO' && giro.returnReason && (
-                <div className="p-4 rounded-lg bg-orange-50 border border-orange-300">
-                  <p className="font-semibold text-orange-800 flex items-center gap-2 mb-1">
-                    <CornerDownLeft className="h-4 w-4" />
-                    Motivo de Devolución:
+                <div className="p-2 rounded bg-orange-50 border border-orange-300 text-xs">
+                  <p className="font-semibold text-orange-800 flex items-center gap-1 mb-0.5">
+                    <CornerDownLeft className="h-3 w-3" />
+                    Devolución:
                   </p>
-                  {/* Mostramos el motivo */}
-                  <p className="mt-1 text-sm text-orange-900 font-medium">{giro.returnReason}</p>
+                  <p className="text-orange-900 font-medium">{giro.returnReason}</p>
                 </div>
               )}
 
               {/* Beneficiary Info */}
-              <div className="space-y-3 p-4 bg-muted rounded-lg">
-                <h3 className="font-semibold flex items-center gap-2">
-                  <User className="h-4 w-4" />
+              <div className="p-2 bg-muted rounded text-xs space-y-1">
+                <h3 className="font-semibold flex items-center gap-1">
+                  <User className="h-3 w-3" />
                   Beneficiario
                 </h3>
-                <div className="space-y-2 text-sm">
+                <div className="space-y-1">
                   {isEditing ? (
                     // Formulario de edición
                     <div className="space-y-3">
@@ -539,31 +542,71 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                     </div>
                   ) : (
                     // Vista estática
-                    <div className="space-y-2">
-                      <div>
-                        <p className="text-muted-foreground">Nombre</p>
-                        <p className="font-medium">{giro.beneficiaryName}</p>
+                    <div className="space-y-1">
+                      {giro.executionType === 'PAGO_MOVIL' ? (
+                        // Para pago móvil, mostrar el celular como identificador principal
+                        <div className="flex justify-between items-center gap-1">
+                          <span className="text-muted-foreground">Celular:</span>
+                          <div className="flex items-center gap-1">
+                            <span className="font-medium">{giro.phone}</span>
+                            <button
+                              onClick={() => copyToClipboard(giro.phone, 'Celular')}
+                              className="p-0.5 hover:bg-muted rounded text-xs"
+                              title="Copiar celular"
+                            >
+                              <Copy className="h-3 w-3" />
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        // Para otras modalidades, mostrar nombre normalmente
+                        <div className="flex justify-between items-center">
+                          <span className="text-muted-foreground">Nombre:</span>
+                          <span className="font-medium">{giro.beneficiaryName}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between items-center gap-1">
+                        <span className="text-muted-foreground">Cédula:</span>
+                        <div className="flex items-center gap-1">
+                          <span className="font-medium">{giro.beneficiaryId}</span>
+                          <button
+                            onClick={() => copyToClipboard(giro.beneficiaryId, 'Cédula')}
+                            className="p-0.5 hover:bg-muted rounded text-xs"
+                            title="Copiar cédula"
+                          >
+                            <Copy className="h-3 w-3" />
+                          </button>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-muted-foreground">Cédula</p>
-                        <p className="font-medium">{giro.beneficiaryId}</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Phone className="h-3 w-3 text-muted-foreground" />
-                        <p className="font-medium">{giro.phone}</p>
-                      </div>
+                      {giro.executionType !== 'PAGO_MOVIL' && (
+                        <div className="flex justify-between items-center gap-1">
+                          <span className="text-muted-foreground">Teléfono:</span>
+                          <div className="flex items-center gap-1">
+                            <span className="font-medium">{giro.phone || '—'}</span>
+                            {giro.phone && (
+                              <button
+                                onClick={() => copyToClipboard(giro.phone, 'Teléfono')}
+                                className="p-0.5 hover:bg-muted rounded text-xs"
+                                title="Copiar teléfono"
+                              >
+                                <Copy className="h-3 w-3" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
               </div>
 
               {/* Bank Info */}
-              <div className="space-y-3 p-4 bg-muted rounded-lg">
-                <h3 className="font-semibold flex items-center gap-2">
-                  <Building className="h-4 w-4" />
-                  Banco Destino
+              <div className="p-2 bg-muted rounded text-xs space-y-1">
+                <h3 className="font-semibold flex items-center gap-1">
+                  <Building className="h-3 w-3" />
+                  Banco
                 </h3>
-                <div className="space-y-2 text-sm">
+                <div className="space-y-0.5">
                   {isEditing ? (
                     // Formulario de edición
                     <div className="space-y-3">
@@ -597,14 +640,23 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                     </div>
                   ) : (
                     // Vista estática
-                    <div className="space-y-2">
-                      <div>
-                        <p className="text-muted-foreground">Banco</p>
-                        <p className="font-medium">{giro.bankName}</p>
+                    <div className="space-y-1">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Banco:</span>
+                        <span className="font-medium">{giro.bankName}</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <CreditCard className="h-3 w-3 text-muted-foreground" />
-                        <p className="font-medium">{giro.accountNumber}</p>
+                      <div className="flex justify-between items-center gap-1">
+                        <span className="text-muted-foreground">Cuenta:</span>
+                        <div className="flex items-center gap-1">
+                          <span className="font-medium font-mono text-xs">{giro.accountNumber}</span>
+                          <button
+                            onClick={() => copyToClipboard(giro.accountNumber, 'Cuenta')}
+                            className="p-0.5 hover:bg-muted rounded text-xs"
+                            title="Copiar cuenta"
+                          >
+                            <Copy className="h-3 w-3" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -612,19 +664,19 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
               </div>
 
               {/* Amounts */}
-              <div className="space-y-3 p-4 bg-muted rounded-lg">
-                <h3 className="font-semibold flex items-center gap-2">
-                  <DollarSign className="h-4 w-4" />
+              <div className="p-2 bg-muted rounded text-xs space-y-1">
+                <h3 className="font-semibold flex items-center gap-1">
+                  <DollarSign className="h-3 w-3" />
                   Montos
                 </h3>
-                <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <p className="text-muted-foreground">Monto Enviado</p>
-                    <p className="text-lg font-semibold">{formatCurrency(giro.amountInput, giro.currencyInput)}</p>
+                    <p className="text-muted-foreground text-xs">Enviado</p>
+                    <p className="font-semibold">{formatCurrency(giro.amountInput, giro.currencyInput)}</p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground">Monto en Bs</p>
-                    <p className="text-lg font-semibold text-green-600">{formatCurrency(giro.amountBs, 'VES')}</p>
+                    <p className="text-muted-foreground text-xs">Bs</p>
+                    <p className="font-semibold text-green-600">{formatCurrency(giro.amountBs, 'VES')}</p>
                   </div>
                 </div>
               </div>
@@ -673,22 +725,15 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                 </div>
               )}
 
-              {/* Exchange Rate Applied */}
-              <div className="space-y-3 p-4 bg-muted rounded-lg">
-                <h3 className="font-semibold flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4" />
-                  Tasa Aplicada
+              {/* Exchange Rate Applied - Only shown to Admins */}
+              {isAdmin && (
+              <div className="p-2 bg-muted rounded text-xs space-y-1">
+                <h3 className="font-semibold flex items-center gap-1">
+                  <TrendingUp className="h-3 w-3" />
+                  Tasa
                 </h3>
 
-                {!isAdmin ? (
-                  // Solo tasa de venta para transferencista y minorista
-                  <div className="grid grid-cols-1 gap-2 text-xs">
-                    <div>
-                      <p className="text-muted-foreground">Venta</p>
-                      <p className="font-medium text-lg">{giro.rateApplied?.sellRate?.toFixed(2) || '0.00'}</p>
-                    </div>
-                  </div>
-                ) : isEditingRate ? (
+                {isEditingRate ? (
                   // MODO EDICIÓN PARA ADMIN/SUPER_ADMIN
                   <div className="space-y-3">
                     <div className="grid grid-cols-2 gap-2">
@@ -763,22 +808,22 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                 ) : (
                   // VISTA ESTÁTICA PARA ADMIN/SUPER_ADMIN
                   <>
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div>
-                        <p className="text-muted-foreground">Compra</p>
-                        <p className="font-medium">{giro.rateApplied?.buyRate?.toFixed(2) || '0.00'}</p>
+                    <div className="space-y-0.5">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Compra:</span>
+                        <span className="font-medium">{giro.rateApplied?.buyRate?.toFixed(2) || '0.00'}</span>
                       </div>
-                      <div>
-                        <p className="text-muted-foreground">Venta</p>
-                        <p className="font-medium">{giro.rateApplied?.sellRate?.toFixed(2) || '0.00'}</p>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Venta:</span>
+                        <span className="font-medium">{giro.rateApplied?.sellRate?.toFixed(2) || '0.00'}</span>
                       </div>
-                      <div>
-                        <p className="text-muted-foreground">USD</p>
-                        <p className="font-medium">{giro.rateApplied?.usd?.toFixed(2) || '0.00'}</p>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">USD:</span>
+                        <span className="font-medium">{giro.rateApplied?.usd?.toFixed(2) || '0.00'}</span>
                       </div>
-                      <div>
-                        <p className="text-muted-foreground">BCV</p>
-                        <p className="font-medium">{giro.rateApplied?.bcv?.toFixed(2) || '0.00'}</p>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">BCV:</span>
+                        <span className="font-medium">{giro.rateApplied?.bcv?.toFixed(2) || '0.00'}</span>
                       </div>
                     </div>
                     {!isNotEditableStatus && (
@@ -787,90 +832,75 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                         disabled={processing}
                         variant="outline"
                         size="sm"
-                        className="w-full mt-2"
+                        className="w-full mt-1"
                       >
-                        Editar Tasa
+                        Editar
                       </Button>
                     )}
                   </>
                 )}
               </div>
+              )}
 
               {canEdit && (
-                <div className="pt-2 flex gap-3">
+                <div className="flex gap-2 text-xs">
                   {!isEditing ? (
-                    <Button onClick={handleStartEdit} disabled={processing} variant="outline" className="w-full">
-                      Editar Giro
+                    <Button onClick={handleStartEdit} disabled={processing} variant="outline" className="w-full" size="sm">
+                      Editar
                     </Button>
                   ) : (
                     <>
-                      <Button onClick={handleSaveEdit} disabled={processing} className="flex-1">
-                        {processing ? 'Guardando...' : 'Guardar Cambios'}
+                      <Button onClick={handleSaveEdit} disabled={processing} className="flex-1" size="sm">
+                        {processing ? 'Guardando...' : 'Guardar'}
                       </Button>
                       <Button
                         onClick={() => setIsEditing(false)}
                         disabled={processing}
                         variant="outline"
                         className="flex-1"
+                        size="sm"
                       >
-                        Cancelar Edición
+                        Cancelar
                       </Button>
                     </>
                   )}
                 </div>
               )}
 
-              {/* Creator Info */}
-              {giro.createdBy && (
-                <div className="space-y-2 p-4 bg-muted rounded-lg text-sm">
-                  <p className="text-muted-foreground">Creado por</p>
-                  <p className="font-medium">{giro.createdBy.fullName}</p>
-                </div>
-              )}
-
-              {/* Transferencista Info */}
-              {giro.transferencista && (
-                <div className="space-y-2 p-4 bg-muted rounded-lg text-sm">
-                  <p className="text-muted-foreground">Transferencista Asignado</p>
-                  <p className="font-medium">{giro.transferencista.user.fullName}</p>
-                </div>
-              )}
 
               {/* Payment Proof Display */}
               {paymentProofUrl && (
-                <div className="p-4 rounded-lg border border-green-200 bg-green-50 dark:bg-green-950 space-y-3">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="h-5 w-5 text-green-600" />
-                    <p className="font-semibold text-green-900 dark:text-green-100">Comprobante de Pago</p>
+                <div className="p-2 rounded border border-green-200 bg-green-50 dark:bg-green-950 space-y-1 text-xs">
+                  <div className="flex items-center gap-1">
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    <p className="font-semibold text-green-900 dark:text-green-100">Comprobante</p>
                   </div>
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      onClick={() => window.open(paymentProofUrl, '_blank')}
-                      className="flex-1 gap-2"
-                    >
-                      Descargar Comprobante
-                    </Button>
-                  </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => window.open(paymentProofUrl, '_blank')}
+                    className="w-full"
+                  >
+                    Descargar
+                  </Button>
                 </div>
               )}
 
               {/* Dates */}
-              <div className="space-y-2 text-xs text-muted-foreground">
-                <div className="flex items-center gap-2">
+              <div className="space-y-0.5 text-xs text-muted-foreground p-2 bg-muted rounded">
+                <div className="flex items-center gap-1">
                   <Calendar className="h-3 w-3" />
                   <span>Creado: {formatDate(giro.createdAt)}</span>
                 </div>
-                {giro.updatedAt !== giro.createdAt && (
-                  <div className="flex items-center gap-2">
+                {giro.updatedAt !== giro.createdAt && giro.status !== 'COMPLETADO' && (
+                  <div className="flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
                     <span>Actualizado: {formatDate(giro.updatedAt)}</span>
                   </div>
                 )}
                 {giro.completedAt && giro.status === 'COMPLETADO' && (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
                     <span>Completado: {formatDate(giro.completedAt)}</span>
                   </div>
@@ -879,26 +909,23 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
 
               {/* Botón de impresión para giros completados */}
               {giro.status === 'COMPLETADO' && (
-                <div className="pt-4">
-                  <Button
-                    onClick={() => setShowPrintModal(true)}
-                    disabled={processing}
-                    variant="outline"
-                    className="w-full gap-2"
-                  >
-                    <Printer className="h-4 w-4" />
-                    Imprimir Tiquete
-                  </Button>
-                </div>
+                <Button
+                  onClick={() => setShowPrintModal(true)}
+                  disabled={processing}
+                  variant="outline"
+                  className="w-full gap-1 text-xs"
+                  size="sm"
+                >
+                  <Printer className="h-3 w-3" />
+                  Imprimir
+                </Button>
               )}
 
               {/* Actions for Transferencista */}
               {isTransferencista && giro.status === 'ASIGNADO' && (
-                <div className="pt-4">
-                  <Button onClick={handleMarkAsProcessing} disabled={processing} className="w-full">
-                    {processing ? 'Procesando...' : 'Marcar como Procesando'}
-                  </Button>
-                </div>
+                <Button onClick={handleMarkAsProcessing} disabled={processing} className="w-full text-xs" size="sm">
+                  {processing ? 'Procesando...' : 'Marcar Procesando'}
+                </Button>
               )}
 
               {/* Execute/Return Form for Transferencista */}
@@ -941,27 +968,17 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                           <option value="">Selecciona una cuenta</option>
                           {bankAccounts.map((account) => (
                             <option key={account.id} value={account.id}>
-                              {account.bank.name} - {account.accountNumber} ({formatCurrency(account.balance, 'VES')})
+                              {account.bank.name} - ...{account.accountNumber.slice(-4)} ({formatCurrency(account.balance, 'VES')})
                             </option>
                           ))}
                         </select>
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="executionType">Tipo de Ejecución</Label>
-                        <select
-                          id="executionType"
-                          value={executionType}
-                          onChange={(e) => setExecutionType(e.target.value as ExecutionType)}
-                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                          required
-                        >
-                          <option value="TRANSFERENCIA">Transferencia</option>
-                          <option value="PAGO_MOVIL">Pago Móvil</option>
-                          <option value="EFECTIVO">Efectivo</option>
-                          <option value="ZELLE">Zelle</option>
-                          <option value="OTROS">Otros</option>
-                        </select>
+                        <Label>Tipo de Ejecución</Label>
+                        <div className="p-2 bg-muted rounded text-sm font-medium">
+                          {giro.executionType ? giro.executionType.replace(/_/g, ' ') : 'No definido'}
+                        </div>
                       </div>
 
                       <div className="space-y-2">
@@ -1039,11 +1056,9 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
               {isMinorista &&
                 giro &&
                 (giro.status === 'PENDIENTE' || giro.status === 'ASIGNADO' || giro.status === 'DEVUELTO') && (
-                  <div className="pt-4 border-t">
-                    <Button onClick={handleDeleteGiro} disabled={processing} variant="destructive" className="w-full">
-                      {processing ? 'Eliminando...' : 'Eliminar Giro'}
-                    </Button>
-                  </div>
+                  <Button onClick={handleDeleteGiro} disabled={processing} variant="destructive" className="w-full text-xs" size="sm">
+                    {processing ? 'Eliminando...' : 'Eliminar'}
+                  </Button>
                 )}
             </div>
           ) : null}

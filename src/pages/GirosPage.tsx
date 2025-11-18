@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
   Plus,
@@ -14,6 +14,8 @@ import {
   Wallet,
   Signal,
   CreditCard,
+  Calendar,
+  ChevronDown,
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { api } from '@/lib/api'
@@ -25,12 +27,21 @@ import { RechargeSheet } from '@/components/RechargeSheet'
 import { useGiroWebSocket } from '@/hooks/useGiroWebSocket'
 import type { Giro, GiroStatus, Currency, ExecutionType } from '@/types/api'
 
+type DateFilterType = 'TODAY' | 'YESTERDAY' | 'THIS_WEEK' | 'LAST_WEEK' | 'THIS_MONTH' | 'LAST_MONTH' | 'CUSTOM' | 'ALL'
+
 export function GirosPage() {
   const { user } = useAuth()
   const { subscribe } = useGiroWebSocket()
   const [giros, setGiros] = useState<Giro[]>([])
   const [loading, setLoading] = useState(true)
-  const [filterStatus, setFilterStatus] = useState<GiroStatus | 'ALL'>('ALL')
+  const [filterStatus, setFilterStatus] = useState<GiroStatus | 'ALL'>('ASIGNADO')
+  const [filterDate, setFilterDate] = useState<DateFilterType>('TODAY')
+  const [customDateRange, setCustomDateRange] = useState<{ from: string; to: string }>({
+    from: new Date().toISOString().split('T')[0],
+    to: new Date().toISOString().split('T')[0],
+  })
+  const [customDateModalOpen, setCustomDateModalOpen] = useState(false)
+  const [dateFiltersExpanded, setDateFiltersExpanded] = useState(false)
   const [giroTypeMenuOpen, setGiroTypeMenuOpen] = useState(false)
   const [createSheetOpen, setCreateSheetOpen] = useState(false)
   const [mobilePaymentOpen, setMobilePaymentOpen] = useState(false)
@@ -38,12 +49,14 @@ export function GirosPage() {
   const [detailSheetOpen, setDetailSheetOpen] = useState(false)
   const [selectedGiroId, setSelectedGiroId] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const [page, setPage] = useState(1)
+  const itemsPerPage = 15
 
   const canCreateGiro = user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN' || user?.role === 'MINORISTA'
 
   useEffect(() => {
     fetchGiros()
-  }, [filterStatus])
+  }, [filterStatus, filterDate, customDateRange])
 
   // WebSocket event listeners
   useEffect(() => {
@@ -91,12 +104,80 @@ export function GirosPage() {
     }
   }, [subscribe])
 
+  const getDateRange = (filterType: DateFilterType) => {
+    const today = new Date()
+    const year = today.getFullYear()
+    const month = String(today.getMonth() + 1).padStart(2, '0')
+    const day = String(today.getDate()).padStart(2, '0')
+
+    let fromDate: string, toDate: string
+
+    switch (filterType) {
+      case 'TODAY':
+        fromDate = `${year}-${month}-${day}`
+        toDate = `${year}-${month}-${day}`
+        break
+      case 'YESTERDAY':
+        const yesterday = new Date(today)
+        yesterday.setDate(yesterday.getDate() - 1)
+        fromDate = yesterday.toISOString().split('T')[0]
+        toDate = yesterday.toISOString().split('T')[0]
+        break
+      case 'THIS_WEEK':
+        const dayOfWeek = today.getDay()
+        const startOfWeek = new Date(today)
+        startOfWeek.setDate(today.getDate() - dayOfWeek)
+        fromDate = startOfWeek.toISOString().split('T')[0]
+        toDate = `${year}-${month}-${day}`
+        break
+      case 'LAST_WEEK':
+        const dayOfWeekLast = today.getDay()
+        const endOfLastWeek = new Date(today)
+        endOfLastWeek.setDate(today.getDate() - dayOfWeekLast - 1)
+        const startOfLastWeek = new Date(endOfLastWeek)
+        startOfLastWeek.setDate(endOfLastWeek.getDate() - 6)
+        fromDate = startOfLastWeek.toISOString().split('T')[0]
+        toDate = endOfLastWeek.toISOString().split('T')[0]
+        break
+      case 'THIS_MONTH':
+        fromDate = `${year}-${month}-01`
+        toDate = `${year}-${month}-${day}`
+        break
+      case 'LAST_MONTH':
+        const lastMonth = new Date(year, parseInt(month) - 2, 1)
+        const lastMonthYear = lastMonth.getFullYear()
+        const lastMonthNum = String(lastMonth.getMonth() + 1).padStart(2, '0')
+        const lastDayOfLastMonth = new Date(lastMonthYear, parseInt(lastMonthNum), 0).getDate()
+        fromDate = `${lastMonthYear}-${lastMonthNum}-01`
+        toDate = `${lastMonthYear}-${lastMonthNum}-${String(lastDayOfLastMonth).padStart(2, '0')}`
+        break
+      case 'CUSTOM':
+        fromDate = customDateRange.from
+        toDate = customDateRange.to
+        break
+      default:
+        fromDate = '1970-01-01'
+        toDate = '2099-12-31'
+    }
+
+    return { from: fromDate, to: toDate }
+  }
+
   const fetchGiros = async () => {
     try {
       setLoading(true)
       const params = new URLSearchParams()
       if (filterStatus !== 'ALL') {
         params.append('status', filterStatus)
+      }
+
+      if (filterDate !== 'ALL') {
+        const dateRange = getDateRange(filterDate)
+        // Convert dates to ISO format at midnight (start and end of day)
+        const fromDate = new Date(`${dateRange.from}T00:00:00Z`)
+        const toDate = new Date(`${dateRange.to}T23:59:59Z`)
+        params.append('dateFrom', fromDate.toISOString())
+        params.append('dateTo', toDate.toISOString())
       }
 
       const response = await api.get<{
@@ -176,13 +257,6 @@ export function GirosPage() {
     }
   }
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return new Intl.DateTimeFormat('es-ES', {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    }).format(date)
-  }
 
   const handleGiroClick = (giroId: string) => {
     setSelectedGiroId(giroId)
@@ -200,6 +274,19 @@ export function GirosPage() {
       (giro.transferencista?.user.fullName.toLowerCase().includes(searchLower) ?? false)
     )
   })
+
+  // Pagination
+  const totalPages = Math.ceil(filteredGiros.length / itemsPerPage)
+  const startIndex = (page - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const paginatedGiros = filteredGiros.slice(startIndex, endIndex)
+
+  // Calculate totals
+  const totals = {
+    count: filteredGiros.length,
+    cop: filteredGiros.reduce((sum, g) => sum + (g.currencyInput === 'COP' ? g.amountInput : 0), 0),
+    bs: filteredGiros.reduce((sum, g) => sum + g.amountBs, 0),
+  }
 
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
@@ -228,50 +315,132 @@ export function GirosPage() {
         )}
       </div>
 
-      {/* Filters */}
-      <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-        <Button
-          variant={filterStatus === 'ALL' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setFilterStatus('ALL')}
+      {/* Status Filters */}
+      <div className="mb-4">
+        <p className="text-xs font-semibold text-muted-foreground mb-2">Estado</p>
+        <div className="flex gap-2 overflow-x-auto pb-2">
+          <Button
+            variant={filterStatus === 'ASIGNADO' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setFilterStatus('ASIGNADO')}
+          >
+            Asignados
+          </Button>
+          <Button
+            variant={filterStatus === 'PROCESANDO' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setFilterStatus('PROCESANDO')}
+          >
+            En Proceso
+          </Button>
+          <Button
+            variant={filterStatus === 'COMPLETADO' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setFilterStatus('COMPLETADO')}
+          >
+            Completados
+          </Button>
+          <Button
+            variant={filterStatus === 'ALL' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setFilterStatus('ALL')}
+          >
+            Todos
+          </Button>
+        </div>
+      </div>
+
+      {/* Collapsible Date Filters */}
+      <div className="mb-6 border rounded-lg bg-card">
+        <button
+          onClick={() => setDateFiltersExpanded(!dateFiltersExpanded)}
+          className="w-full flex items-center justify-between p-3 hover:bg-muted/50 transition-colors"
         >
-          Todos
-        </Button>
-        <Button
-          variant={filterStatus === 'ASIGNADO' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setFilterStatus('ASIGNADO')}
-        >
-          Asignados
-        </Button>
-        <Button
-          variant={filterStatus === 'PROCESANDO' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setFilterStatus('PROCESANDO')}
-        >
-          En Proceso
-        </Button>
-        <Button
-          variant={filterStatus === 'COMPLETADO' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setFilterStatus('COMPLETADO')}
-        >
-          Completados
-        </Button>
+          <p className="text-xs font-semibold text-muted-foreground">Fecha</p>
+          <ChevronDown
+            className={`h-4 w-4 text-muted-foreground transition-transform ${
+              dateFiltersExpanded ? 'rotate-180' : ''
+            }`}
+          />
+        </button>
+
+        {dateFiltersExpanded && (
+          <div className="border-t p-3 space-y-3">
+            <div className="flex gap-2 overflow-x-auto pb-2 flex-wrap">
+              <Button
+                variant={filterDate === 'TODAY' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilterDate('TODAY')}
+              >
+                Hoy
+              </Button>
+              <Button
+                variant={filterDate === 'YESTERDAY' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilterDate('YESTERDAY')}
+              >
+                Ayer
+              </Button>
+              <Button
+                variant={filterDate === 'THIS_WEEK' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilterDate('THIS_WEEK')}
+              >
+                Esta Semana
+              </Button>
+              <Button
+                variant={filterDate === 'LAST_WEEK' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilterDate('LAST_WEEK')}
+              >
+                Semana Pasada
+              </Button>
+              <Button
+                variant={filterDate === 'THIS_MONTH' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilterDate('THIS_MONTH')}
+              >
+                Este Mes
+              </Button>
+              <Button
+                variant={filterDate === 'LAST_MONTH' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilterDate('LAST_MONTH')}
+              >
+                Mes Pasado
+              </Button>
+              <Button
+                variant={filterDate === 'CUSTOM' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setCustomDateModalOpen(true)}
+              >
+                <Calendar className="h-3 w-3 mr-1" />
+                Personalizado
+              </Button>
+              <Button
+                variant={filterDate === 'ALL' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilterDate('ALL')}
+              >
+                Todos
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Giros List */}
       {loading ? (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">Cargando giros...</p>
+        <div className="text-center py-8">
+          <p className="text-sm text-muted-foreground">Cargando giros...</p>
         </div>
       ) : giros.length === 0 ? (
         <Card>
-          <CardContent className="p-12 text-center">
-            <ArrowRight className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-            <p className="text-muted-foreground mb-4">No hay giros registrados</p>
+          <CardContent className="p-8 text-center">
+            <ArrowRight className="h-8 w-8 mx-auto mb-3 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground mb-3">No hay giros registrados</p>
             {canCreateGiro && (
-              <Button onClick={() => setGiroTypeMenuOpen(true)}>
+              <Button onClick={() => setGiroTypeMenuOpen(true)} size="sm">
                 <Plus className="h-4 w-4 mr-2" />
                 Crear primer giro
               </Button>
@@ -280,117 +449,182 @@ export function GirosPage() {
         </Card>
       ) : filteredGiros.length === 0 ? (
         <Card>
-          <CardContent className="p-12 text-center">
-            <Search className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-            <p className="text-muted-foreground mb-2">No se encontraron giros</p>
-            <p className="text-xs text-muted-foreground">Intenta con otros términos de búsqueda</p>
+          <CardContent className="p-8 text-center">
+            <Search className="h-8 w-8 mx-auto mb-3 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">No se encontraron giros</p>
           </CardContent>
         </Card>
       ) : (
         <>
-          {searchQuery && (
-            <div className="mb-4 text-sm text-muted-foreground">
-              Se encontraron {filteredGiros.length} resultado(s) para "{searchQuery}"
+          {/* Desktop: Compact Table */}
+          <div className="hidden md:block border rounded-lg overflow-hidden bg-card">
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b bg-muted/50">
+                    {user?.role !== 'MINORISTA' && (
+                      <th className="px-3 py-2 text-left font-semibold w-28">Minorista</th>
+                    )}
+                    <th className="px-3 py-2 text-right font-semibold w-24">COP</th>
+                    <th className="px-3 py-2 text-right font-semibold w-20">Bs</th>
+                    <th className="px-3 py-2 text-left font-semibold w-32">Banco</th>
+                    <th className="px-3 py-2 text-center font-semibold w-20">Estado</th>
+                    <th className="px-3 py-2 text-center font-semibold w-24">Tipo</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedGiros.map((giro) => {
+                    const statusBadge = getStatusBadge(giro.status)
+                    const executionTypeBadge = getExecutionTypeBadge(giro.executionType)
+                    const copAmount = giro.currencyInput === 'COP' ? giro.amountInput : 0
+                    const minoristaName = user?.role === 'TRANSFERENCISTA' ? (giro.createdBy?.fullName || '—') : (giro.minorista?.user?.fullName || giro.createdBy?.fullName || '—')
+
+                    return (
+                      <tr
+                        key={giro.id}
+                        className="border-b hover:bg-muted/30 cursor-pointer transition-colors"
+                        onClick={() => handleGiroClick(giro.id)}
+                      >
+                        {user?.role !== 'MINORISTA' && (
+                          <td className="px-3 py-2 truncate text-sm w-28">
+                            <div className="font-medium text-foreground truncate">{minoristaName}</div>
+                          </td>
+                        )}
+                        <td className="px-3 py-2 text-right whitespace-nowrap font-semibold w-24">
+                          {copAmount > 0 ? formatCurrency(copAmount, 'COP') : '—'}
+                        </td>
+                        <td className="px-3 py-2 text-right whitespace-nowrap font-semibold w-20">
+                          {giro.amountBs > 0 ? giro.amountBs.toLocaleString('es-VE') : '—'}
+                        </td>
+                        <td className="px-3 py-2 truncate w-32">
+                          <div className="text-xs truncate" title={giro.bankName}>
+                            {giro.bankName}
+                          </div>
+                        </td>
+                        <td className="px-3 py-2 w-20">
+                          <div className="flex justify-center">
+                            <span
+                              className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium whitespace-nowrap ${statusBadge.className}`}
+                            >
+                              {statusBadge.label}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-3 py-2 w-24">
+                          <div className="flex justify-center">
+                            <span
+                              className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium whitespace-nowrap ${executionTypeBadge.className}`}
+                            >
+                              {executionTypeBadge.label}
+                            </span>
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
             </div>
-          )}
-          <div className="grid gap-4">
-            {filteredGiros.map((giro) => {
+          </div>
+
+          {/* Mobile: Compact Cards */}
+          <div className="md:hidden space-y-2">
+            {paginatedGiros.map((giro) => {
               const statusBadge = getStatusBadge(giro.status)
-              const StatusIcon = statusBadge.icon
               const executionTypeBadge = getExecutionTypeBadge(giro.executionType)
-              const ExecutionIcon = executionTypeBadge.icon
-              const isRecharge = giro.executionType === 'RECARGA'
+              const copAmount = giro.currencyInput === 'COP' ? giro.amountInput : 0
+              const minoristaName = user?.role === 'TRANSFERENCISTA' ? (giro.createdBy?.fullName || '—') : (giro.minorista?.user?.fullName || giro.createdBy?.fullName || '—')
 
               return (
-                <Card
+                <div
                   key={giro.id}
-                  className="cursor-pointer hover:shadow-md transition-shadow"
+                  className="bg-card border rounded p-3 cursor-pointer hover:bg-muted/50 transition-colors"
                   onClick={() => handleGiroClick(giro.id)}
                 >
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <CardTitle className="text-lg">{giro.beneficiaryName}</CardTitle>
-                        <p className="text-sm text-muted-foreground mt-1">ID: {giro.beneficiaryId}</p>
-                        <p className="text-xs text-muted-foreground mt-1">{formatDate(giro.createdAt)}</p>
-                      </div>
-                      <div className="flex flex-col items-end gap-2">
-                        <span
-                          className={`px-3 py-1 rounded-full text-xs font-medium ${statusBadge.className} flex items-center gap-1`}
-                        >
-                          <StatusIcon className="h-3 w-3" />
-                          {statusBadge.label}
-                        </span>
-                        <span
-                          className={`px-3 py-1 rounded-full text-xs font-medium ${executionTypeBadge.className} flex items-center gap-1`}
-                        >
-                          <ExecutionIcon className="h-3 w-3" />
-                          {executionTypeBadge.label}
-                        </span>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {/* Amount */}
-                    <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div className={`grid ${user?.role === 'MINORISTA' ? 'grid-cols-2' : 'grid-cols-2'} gap-2 text-xs`}>
+                    {user?.role !== 'MINORISTA' && (
                       <div>
-                        <p className="text-muted-foreground">Monto Enviado</p>
-                        <p className="font-semibold">{formatCurrency(giro.amountInput, giro.currencyInput)}</p>
+                        <p className="text-muted-foreground font-semibold">Minorista</p>
+                        <p className="font-medium truncate">{minoristaName}</p>
                       </div>
-                      <div>
-                        <p className="text-muted-foreground">Monto en Bs</p>
-                        <p className="font-semibold">{formatCurrency(giro.amountBs, 'VES')}</p>
-                      </div>
+                    )}
+                    <div className={user?.role === 'MINORISTA' ? 'col-span-1' : ''}>
+                      <p className="text-muted-foreground font-semibold">COP</p>
+                      <p className="font-semibold">{copAmount > 0 ? formatCurrency(copAmount, 'COP') : '—'}</p>
                     </div>
-
-                    {/* Bank/Operator Info */}
-                    <div className="text-sm">
-                      <p className="text-muted-foreground">{isRecharge ? 'Operador' : 'Banco Destino'}</p>
-                      <p className="font-medium">{giro.bankName}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {isRecharge ? 'Teléfono' : 'Cuenta'}: {giro.accountNumber}
-                      </p>
+                    <div>
+                      <p className="text-muted-foreground font-semibold">Bs</p>
+                      <p className="font-semibold">{giro.amountBs > 0 ? giro.amountBs.toLocaleString('es-VE') : '—'}</p>
                     </div>
-
-                    {/* Transferencista Info */}
-                    {giro.transferencista && (
-                      <div className="text-sm">
-                        <p className="text-muted-foreground">Transferencista Asignado</p>
-                        <p className="font-medium">{giro.transferencista.user.fullName}</p>
-                      </div>
-                    )}
-
-                    {/* Profit for Admin/SuperAdmin */}
-                    {(user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN') && (
-                      <div className="pt-2 border-t">
-                        <div className="grid grid-cols-2 gap-2 text-sm">
-                          <div>
-                            <p className="text-muted-foreground">Ganancia Sistema</p>
-                            <p className="font-semibold text-green-600">{formatCurrency(giro.systemProfit, 'COP')}</p>
-                          </div>
-                          {giro.minoristaProfit > 0 && (
-                            <div>
-                              <p className="text-muted-foreground">Ganancia Minorista</p>
-                              <p className="font-semibold text-blue-600">
-                                {formatCurrency(giro.minoristaProfit, 'COP')}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Minorista Profit */}
-                    {user?.role === 'MINORISTA' && giro.minoristaProfit > 0 && (
-                      <div className="pt-2 border-t text-sm">
-                        <p className="text-muted-foreground">Tu Ganancia</p>
-                        <p className="font-semibold text-green-600">{formatCurrency(giro.minoristaProfit, 'COP')}</p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
+                    <div>
+                      <p className="text-muted-foreground font-semibold">Banco</p>
+                      <p className="truncate text-xs">{giro.bankName}</p>
+                    </div>
+                    <div>
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${statusBadge.className}`}
+                      >
+                        {statusBadge.label}
+                      </span>
+                    </div>
+                    <div className="text-right">
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${executionTypeBadge.className}`}
+                      >
+                        {executionTypeBadge.label}
+                      </span>
+                    </div>
+                  </div>
+                </div>
               )
             })}
+          </div>
+
+          {/* Ultra-thin Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-1 mt-3">
+              <button
+                onClick={() => setPage(Math.max(1, page - 1))}
+                disabled={page === 1}
+                className="px-2 py-0.5 text-xs border rounded hover:bg-muted disabled:opacity-50"
+              >
+                ←
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                <button
+                  key={pageNum}
+                  onClick={() => setPage(pageNum)}
+                  className={`px-2 py-0.5 text-xs border rounded ${
+                    page === pageNum ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              ))}
+              <button
+                onClick={() => setPage(Math.min(totalPages, page + 1))}
+                disabled={page === totalPages}
+                className="px-2 py-0.5 text-xs border rounded hover:bg-muted disabled:opacity-50"
+              >
+                →
+              </button>
+            </div>
+          )}
+
+          {/* Compact Summary Footer */}
+          <div className="mt-3 p-3 bg-muted/50 rounded border text-xs flex justify-between items-center gap-4">
+            <div>
+              <span className="font-semibold">{totals.count}</span>
+              <span className="text-muted-foreground ml-1">giro{totals.count !== 1 ? 's' : ''}</span>
+            </div>
+            <div className="text-right">
+              <span className="font-semibold text-foreground">COP: </span>
+              <span className="font-mono">{formatCurrency(totals.cop, 'COP')}</span>
+            </div>
+            <div className="text-right">
+              <span className="font-semibold text-foreground">Bs: </span>
+              <span className="font-mono">{totals.bs.toLocaleString('es-VE')}</span>
+            </div>
           </div>
         </>
       )}
@@ -453,6 +687,57 @@ export function GirosPage() {
         giroId={selectedGiroId}
         onUpdate={fetchGiros}
       />
+
+      {/* Custom Date Range Modal */}
+      {customDateModalOpen && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <Card className="w-full max-w-sm">
+            <div className="p-6 space-y-4">
+              <h2 className="text-lg font-semibold">Rango de Fechas Personalizado</h2>
+              <div className="space-y-2">
+                <label className="text-xs font-semibold">Desde</label>
+                <Input
+                  type="date"
+                  value={customDateRange.from}
+                  onChange={(e) =>
+                    setCustomDateRange({ ...customDateRange, from: e.target.value })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-semibold">Hasta</label>
+                <Input
+                  type="date"
+                  value={customDateRange.to}
+                  onChange={(e) =>
+                    setCustomDateRange({ ...customDateRange, to: e.target.value })
+                  }
+                />
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button
+                  onClick={() => {
+                    setFilterDate('CUSTOM')
+                    setCustomDateModalOpen(false)
+                  }}
+                  className="flex-1"
+                  size="sm"
+                >
+                  Aplicar
+                </Button>
+                <Button
+                  onClick={() => setCustomDateModalOpen(false)}
+                  variant="outline"
+                  className="flex-1"
+                  size="sm"
+                >
+                  Cancelar
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
     </div>
   )
 }

@@ -3,7 +3,6 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
 import type { ExchangeRate } from '@/types/api'
@@ -61,9 +60,15 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    console.log(cedula, selectedBank, phone, senderName, amountCop)
-    if (!cedula || !selectedBank || !phone || !senderName || !amountCop) {
+    console.log({ cedula, selectedBank, phone, senderName, amountCop })
+    if (!cedula?.trim() || !selectedBank || !phone?.trim() || !senderName?.trim() || !amountCop) {
       toast.error('Por favor completa todos los campos')
+      return
+    }
+
+    const amount = parseFloat(amountCop as string)
+    if (isNaN(amount) || amount <= 0) {
+      toast.error('El monto debe ser un número positivo')
       return
     }
 
@@ -102,40 +107,51 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
         </SheetHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 mt-6 px-6">
-          <div>
-            <Label htmlFor="cedula">Cédula del Beneficiario</Label>
-            <Input id="cedula" placeholder="V-12345678" value={cedula} onChange={(e) => setCedula(e.target.value)} />
-          </div>
+          {/* Información del Beneficiario */}
+          <div className="bg-blue-50 p-3 rounded mb-4 border border-blue-200">
+            <p className="text-xs font-semibold text-blue-900 mb-3">Datos del Beneficiario</p>
 
-          <div>
-            <Label htmlFor="bank">Banco</Label>
-            <Select value={selectedBank} onValueChange={setSelectedBank}>
-              <SelectTrigger id="bank">
-                <SelectValue placeholder="Selecciona un banco" />
-              </SelectTrigger>
-              <SelectContent>
+            <div>
+              <Label htmlFor="phone">Teléfono del Beneficiario</Label>
+              <Input id="phone" placeholder="04141234567" value={phone} onChange={(e) => setPhone(e.target.value)} />
+            </div>
+
+            <div className="mt-3">
+              <Label htmlFor="cedula">Cédula del Beneficiario</Label>
+              <Input id="cedula" placeholder="V-12345678" value={cedula} onChange={(e) => setCedula(e.target.value)} />
+            </div>
+
+            <div className="mt-3">
+              <Label htmlFor="bank">Banco del Beneficiario</Label>
+              <select
+                id="bank"
+                value={selectedBank}
+                onChange={(e) => setSelectedBank(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="">Seleccionar banco</option>
                 {banks.map((bank) => (
-                  <SelectItem key={bank.id} value={bank.id}>
+                  <option key={bank.id} value={bank.id}>
                     {bank.name}
-                  </SelectItem>
+                  </option>
                 ))}
-              </SelectContent>
-            </Select>
+              </select>
+            </div>
           </div>
 
-          <div>
-            <Label htmlFor="phone">Teléfono</Label>
-            <Input id="phone" placeholder="04141234567" value={phone} onChange={(e) => setPhone(e.target.value)} />
-          </div>
+          {/* Información del Remitente */}
+          <div className="bg-green-50 p-3 rounded mb-4 border border-green-200">
+            <p className="text-xs font-semibold text-green-900 mb-3">Datos del Remitente</p>
 
-          <div>
-            <Label htmlFor="senderName">Contacto que Envía</Label>
-            <Input
-              id="senderName"
-              placeholder="Nombre del remitente"
-              value={senderName}
-              onChange={(e) => setSenderName(e.target.value)}
-            />
+            <div>
+              <Label htmlFor="senderName">Nombre del Remitente</Label>
+              <Input
+                id="senderName"
+                placeholder="Tu nombre"
+                value={senderName}
+                onChange={(e) => setSenderName(e.target.value)}
+              />
+            </div>
           </div>
 
           <div>

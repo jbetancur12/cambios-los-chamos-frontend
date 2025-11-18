@@ -8,6 +8,8 @@ import { toast } from 'sonner'
 import { useAuth } from '@/contexts/AuthContext'
 import type { Bank, ExchangeRate, Currency, Minorista } from '@/types/api'
 import { BalanceInfo } from './BalanceInfo'
+import { BeneficiaryAutocomplete } from './BeneficiaryAutocomplete'
+import { useBeneficiarySuggestions } from '@/hooks/useBeneficiarySuggestions'
 
 interface CreateGiroSheetProps {
   open: boolean
@@ -17,6 +19,12 @@ interface CreateGiroSheetProps {
 
 export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroSheetProps) {
   const { user } = useAuth()
+  const {
+    getSuggestionsByName,
+    getSuggestionsByPhone,
+    addSuggestion
+  } = useBeneficiarySuggestions()
+
   const [loading, setLoading] = useState(false)
   const [banks, setBanks] = useState<Bank[]>([])
   const [currentRate, setCurrentRate] = useState<ExchangeRate | null>(null)
@@ -34,6 +42,10 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
   const [accountNumber, setAccountNumber] = useState('')
   const [amountInput, setAmountInput] = useState('')
   const [currencyInput, setCurrencyInput] = useState<Currency>('COP')
+
+  // Suggestions
+  const [nameSuggestions, setNameSuggestions] = useState<any[]>([])
+  const [phoneSuggestions, setPhoneSuggestions] = useState<any[]>([])
 
   // Custom rate override (solo SUPER_ADMIN)
   const [useCustomRate, setUseCustomRate] = useState(false)
@@ -104,13 +116,53 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
     setAmountInput('')
     setCurrencyInput('COP')
     setUseCustomRate(false)
+    setNameSuggestions([])
+    setPhoneSuggestions([])
+  }
+
+  const handleNameChange = (value: string) => {
+    setBeneficiaryName(value)
+    if (value.trim()) {
+      const suggestions = getSuggestionsByName(value)
+      setNameSuggestions(suggestions)
+    } else {
+      setNameSuggestions([])
+    }
+  }
+
+  const handlePhoneChange = (value: string) => {
+    setPhone(value)
+    if (value.trim()) {
+      const suggestions = getSuggestionsByPhone(value)
+      setPhoneSuggestions(suggestions)
+    } else {
+      setPhoneSuggestions([])
+    }
+  }
+
+  const handleSelectBeneficiaryFromName = (suggestion: any) => {
+    setBeneficiaryName(suggestion.name)
+    setBeneficiaryId(suggestion.id)
+    setPhone(suggestion.phone)
+    setBankId(suggestion.bankId)
+    setAccountNumber(suggestion.accountNumber)
+    setNameSuggestions([])
+  }
+
+  const handleSelectBeneficiaryFromPhone = (suggestion: any) => {
+    setBeneficiaryName(suggestion.name)
+    setBeneficiaryId(suggestion.id)
+    setPhone(suggestion.phone)
+    setBankId(suggestion.bankId)
+    setAccountNumber(suggestion.accountNumber)
+    setPhoneSuggestions([])
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!beneficiaryName || !beneficiaryId || !phone || !bankId || !accountNumber || !amountInput) {
-      toast.error('Por favor complete todos los campos')
+    if (!beneficiaryName || !beneficiaryId || !bankId || !accountNumber || !amountInput) {
+      toast.error('Por favor complete todos los campos requeridos')
       return
     }
 
@@ -150,6 +202,15 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
       }
 
       const response = await api.post<{ giro: any; message: string }>('/api/giro/create', payload)
+
+      // Save beneficiary suggestion for future use
+      addSuggestion({
+        name: beneficiaryName,
+        id: beneficiaryId,
+        phone,
+        bankId,
+        accountNumber,
+      })
 
       toast.success(response.message || 'Giro creado exitosamente')
       resetForm()
@@ -288,12 +349,14 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Beneficiary Info */}
             <div className="space-y-2">
-              <Label htmlFor="beneficiaryName">Nombre del Beneficiario</Label>
-              <Input
-                id="beneficiaryName"
+              <BeneficiaryAutocomplete
                 value={beneficiaryName}
-                onChange={(e) => setBeneficiaryName(e.target.value)}
+                onChange={handleNameChange}
+                onSelectSuggestion={handleSelectBeneficiaryFromName}
+                suggestions={nameSuggestions}
+                label="Nombre del Beneficiario"
                 placeholder="Nombre completo"
+                displayField="name"
                 required
               />
             </div>
@@ -310,14 +373,14 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="phone">Teléfono</Label>
-              <Input
-                id="phone"
-                type="tel"
+              <BeneficiaryAutocomplete
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={handlePhoneChange}
+                onSelectSuggestion={handleSelectBeneficiaryFromPhone}
+                suggestions={phoneSuggestions}
+                label="Teléfono (Opcional)"
                 placeholder="+58 424 1234567"
-                required
+                displayField="phone"
               />
             </div>
 
@@ -375,6 +438,7 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   required
                 >
+                  <option value="">Selecciona moneda</option>
                   <option value="COP">COP</option>
                   <option value="VES">VES</option>
                   {isSuperAdmin && <option value="USD">USD</option>}
