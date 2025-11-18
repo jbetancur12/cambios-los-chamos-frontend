@@ -715,21 +715,30 @@ export function GirosPage() {
         {giroTypeMenuOpen && (
           <div className="absolute bottom-16 right-0 bg-card border rounded-lg shadow-lg p-2 space-y-1 min-w-[200px] mb-2 z-50">
             <button
-              onClick={() => setCreateSheetOpen(true)}
+              onClick={() => {
+                setCreateSheetOpen(true)
+                setGiroTypeMenuOpen(false)
+              }}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-md hover:bg-accent transition-colors text-left"
             >
               <Banknote className="h-5 w-5" style={{ color: '#136BBC' }} />
               <span className="font-medium">Transferencia</span>
             </button>
             <button
-              onClick={() => setMobilePaymentOpen(true)}
+              onClick={() => {
+                setMobilePaymentOpen(true)
+                setGiroTypeMenuOpen(false)
+              }}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-md hover:bg-accent transition-colors text-left"
             >
               <Wallet className="h-5 w-5 text-green-600" />
               <span className="font-medium">Pago Movil</span>
             </button>
             <button
-              onClick={() => setRechargeOpen(true)}
+              onClick={() => {
+                setRechargeOpen(true)
+                setGiroTypeMenuOpen(false)
+              }}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-md hover:bg-accent transition-colors text-left"
             >
               <Signal className="h-5 w-5 text-orange-600" />
