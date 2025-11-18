@@ -203,8 +203,20 @@ export function RechargeSheet({ open, onOpenChange }: RechargeSheetProps) {
             </div>
           </div>
 
-          <div className="mt-6 pb-6">
-            <Button type="submit" disabled={loading} className="w-full">
+          <div className="mt-6 pb-6 flex gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={loading}
+              onClick={() => {
+                onOpenChange(false)
+                resetForm()
+              }}
+              className="flex-1"
+            >
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={loading} className="flex-1">
               {loading ? 'Procesando...' : 'Registrar Recarga'}
             </Button>
           </div>
