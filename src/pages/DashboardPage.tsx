@@ -142,32 +142,17 @@ export function DashboardPage() {
       {/* Stats Grid - Different for each role */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
         {/* Giros - Shown to all roles */}
-        <Card className={isTransferencista && stats?.minoristaGiroStats && stats.minoristaGiroStats.length > 0 ? 'lg:col-span-2' : ''}>
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 md:p-6">
             <CardTitle className="text-xs md:text-sm font-medium">{stats?.girosLabel || 'Giros'}</CardTitle>
             <FileText className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
           </CardHeader>
           <CardContent className="p-4 pt-0 md:p-6 md:pt-0">
             <div className="text-xl md:text-2xl font-bold">{stats?.girosCount ?? 0}</div>
-            {isTransferencista && stats?.minoristaGiroStats && stats.minoristaGiroStats.length > 0 ? (
-              <div className="text-xs text-muted-foreground space-y-2 mt-3">
-                <p className="font-semibold text-foreground text-xs">Por minorista:</p>
-                {stats.minoristaGiroStats.map((stat) => (
-                  <div key={stat.minoristaId} className="border-t pt-1.5">
-                    <p className="font-medium text-foreground truncate text-xs">{stat.minoristaName}</p>
-                    <div className="flex gap-2 text-xs mt-1 flex-wrap">
-                      <span className="bg-gray-100 px-2 py-0.5 rounded">
-                        Asignados: <span className="font-semibold">{stat.assignedTotal}</span>
-                      </span>
-                      <span className="bg-blue-50 px-2 py-0.5 rounded text-blue-700">
-                        Procesando: <span className="font-semibold">{stat.processingToday}</span>
-                      </span>
-                      <span className="bg-green-50 px-2 py-0.5 rounded text-green-700">
-                        Completados: <span className="font-semibold">{stat.completedToday}</span>
-                      </span>
-                    </div>
-                  </div>
-                ))}
+            {isTransferencista && (stats?.processingToday !== undefined || stats?.completedToday !== undefined) ? (
+              <div className="text-xs text-muted-foreground space-y-1 mt-2">
+                <p>Procesando hoy: <span className="font-semibold text-blue-600">{stats?.processingToday ?? 0}</span></p>
+                <p>Completados hoy: <span className="font-semibold text-green-600">{stats?.completedToday ?? 0}</span></p>
               </div>
             ) : (
               <p className="text-xs text-muted-foreground">{isTransferencista ? 'Asignados' : 'Pendientes'}</p>
