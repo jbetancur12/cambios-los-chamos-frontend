@@ -36,8 +36,15 @@ export function Sheet({ open, onOpenChange, children }: SheetProps) {
 }
 
 export function SheetContent({ children }: { children: React.ReactNode }) {
-  return <div className="bg-background rounded-t-3xl shadow-2xl max-h-[90vh] overflow-y-auto w-full
-                 lg:rounded-xl lg:max-w-lg lg:max-h-[90vh] lg:m-auto">{children}</div>
+  return (
+    <div
+      className="bg-background rounded-t-3xl shadow-2xl max-h-[90vh] overflow-y-auto w-full
+                 lg:rounded-xl lg:max-w-lg lg:max-h-[90vh] lg:m-auto"
+      onClick={(e) => e.stopPropagation()}
+    >
+      {children}
+    </div>
+  )
 }
 
 export function SheetHeader({ children, onClose }: { children: React.ReactNode; onClose?: () => void }) {
