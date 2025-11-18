@@ -663,23 +663,50 @@ export function GirosPage() {
 
             {/* Additional info when viewing completed giros */}
             {filterStatus === 'COMPLETADO' && (
-              <div className="border-t border-white border-opacity-30 px-3 py-2 grid grid-cols-2 md:grid-cols-4 gap-2">
-                <div className="text-left">
-                  <p className="text-xs opacity-80">Ganancia Minoristas</p>
-                  <p className="font-semibold">{formatCurrency(totals.minoristaProfit, 'COP')}</p>
-                </div>
-                <div className="text-left">
-                  <p className="text-xs opacity-80">Comisión Banco</p>
-                  <p className="font-semibold">{formatCurrency(totals.bankCommission, 'COP')}</p>
-                </div>
-                <div className="text-left">
-                  <p className="text-xs opacity-80">Total Ganancia</p>
-                  <p className="font-semibold">{formatCurrency(totals.minoristaProfit + totals.bankCommission, 'COP')}</p>
-                </div>
-                {user?.role === 'SUPER_ADMIN' && (
-                  <div className="text-left">
-                    <p className="text-xs opacity-80">Ganancia del Sitio</p>
-                    <p className="font-semibold">{formatCurrency(totals.systemProfit, 'COP')}</p>
+              <div className="border-t border-white border-opacity-30 px-3 py-2">
+                {user?.role === 'MINORISTA' ? (
+                  // MINORISTA: COP, BS, Ganancia Minorista
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                    <div className="text-left">
+                      <p className="text-xs opacity-80">Ganancia</p>
+                      <p className="font-semibold">{formatCurrency(totals.minoristaProfit, 'COP')}</p>
+                    </div>
+                  </div>
+                ) : user?.role === 'SUPER_ADMIN' ? (
+                  // SUPER_ADMIN: COP, BS, Ganancia Minoristas, Comisión Banco, Ganancias Sitio
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                    <div className="text-left">
+                      <p className="text-xs opacity-80">Ganancia Minoristas</p>
+                      <p className="font-semibold">{formatCurrency(totals.minoristaProfit, 'COP')}</p>
+                    </div>
+                    <div className="text-left">
+                      <p className="text-xs opacity-80">Comisión Banco</p>
+                      <p className="font-semibold">{formatCurrency(totals.bankCommission, 'COP')}</p>
+                    </div>
+                    <div className="text-left">
+                      <p className="text-xs opacity-80">Ganancia del Sitio</p>
+                      <p className="font-semibold">{formatCurrency(totals.systemProfit, 'COP')}</p>
+                    </div>
+                    <div className="text-left">
+                      <p className="text-xs opacity-80">Total Ganancias</p>
+                      <p className="font-semibold">{formatCurrency(totals.minoristaProfit + totals.bankCommission + totals.systemProfit, 'COP')}</p>
+                    </div>
+                  </div>
+                ) : (
+                  // TRASFERENCISTA / ADMIN: COP, BS, Ganancia Minoristas, Comisión Banco
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    <div className="text-left">
+                      <p className="text-xs opacity-80">Ganancia Minoristas</p>
+                      <p className="font-semibold">{formatCurrency(totals.minoristaProfit, 'COP')}</p>
+                    </div>
+                    <div className="text-left">
+                      <p className="text-xs opacity-80">Comisión Banco</p>
+                      <p className="font-semibold">{formatCurrency(totals.bankCommission, 'COP')}</p>
+                    </div>
+                    <div className="text-left">
+                      <p className="text-xs opacity-80">Total Ganancias</p>
+                      <p className="font-semibold">{formatCurrency(totals.minoristaProfit + totals.bankCommission, 'COP')}</p>
+                    </div>
                   </div>
                 )}
               </div>
