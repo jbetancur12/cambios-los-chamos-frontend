@@ -636,7 +636,7 @@ export function GirosPage() {
           )}
 
           {/* Compact Summary Footer */}
-          <div className="mt-3 p-3 rounded border text-xs flex justify-between items-center gap-4" style={{ backgroundColor: 'rgba(19, 107, 188, 0.08)', borderColor: '#136BBC' }}>
+          <div className="mt-3 p-3 rounded border text-white text-xs flex justify-between items-center gap-4" style={{ background: 'linear-gradient(to right, #136BBC, #274565)', borderColor: '#136BBC' }}>
             <div>
               <span className="font-semibold">{totals.count}</span>
               <span className="text-muted-foreground ml-1">giro{totals.count !== 1 ? 's' : ''}</span>
