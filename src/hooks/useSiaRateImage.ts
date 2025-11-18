@@ -234,20 +234,12 @@ export function useSiaRateImage() {
     try {
       const imageUrl = await generateImage(rate);
       if (imageUrl) {
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-        if (isMobile) {
-          // Para mobile, abrir en nueva pestaña para que se guarde en galería
-          window.open(imageUrl, '_blank');
-        } else {
-          // Para desktop, descargar normalmente
-          const a = document.createElement('a');
-          a.href = imageUrl;
-          const dateForFilename = new Date().toISOString().split('T')[0];
-          a.download = `tasa-${dateForFilename}.png`;
-          a.click();
-          URL.revokeObjectURL(imageUrl);
-        }
+        const a = document.createElement('a');
+        a.href = imageUrl;
+        const dateForFilename = new Date().toISOString().split('T')[0];
+        a.download = `tasa-${dateForFilename}.png`;
+        a.click();
+        URL.revokeObjectURL(imageUrl);
       }
     } catch (error) {
       console.error('Error downloading image:', error);
