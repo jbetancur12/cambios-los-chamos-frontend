@@ -113,62 +113,68 @@ export function ExchangeRatePage() {
   }
 
   return (
-    <div className="p-4 md:p-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-foreground">Tasas de Cambio</h1>
-        <p className="text-sm md:text-base text-muted-foreground mt-1">Gestiona las tasas de cambio del sistema</p>
-      </div>
+    <div className="min-h-screen p-4 md:p-6" style={{
+      backgroundImage: 'url(/rates-background.avif)',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundAttachment: 'fixed'
+    }}>
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-6">
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground">Tasas de Cambio</h1>
+          <p className="text-sm md:text-base text-muted-foreground mt-1">Gestiona las tasas de cambio del sistema</p>
+        </div>
 
-      {/* Current Rate Card */}
-      {currentRate && (
-        <Card className="mb-6 border-primary">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <TrendingUp className="h-5 w-5 text-primary" />
-              Tasa Actual
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="space-y-1">
-                <p className="text-xs text-muted-foreground">Tasa de Compra</p>
-                <p className="text-2xl font-bold text-green-600">{currentRate.buyRate.toFixed(2)}</p>
+        {/* Current Rate Card */}
+        {currentRate && (
+          <Card className="mb-6 border-primary backdrop-blur-sm bg-white/95 dark:bg-slate-950/95">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <TrendingUp className="h-5 w-5" style={{ color: '#136BBC' }} />
+                Tasa Actual
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="space-y-1">
+                  <p className="text-xs text-muted-foreground">Tasa de Compra</p>
+                  <p className="text-2xl font-bold text-green-600">{currentRate.buyRate.toFixed(2)}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs text-muted-foreground">Tasa de Venta</p>
+                  <p className="text-2xl font-bold text-blue-600">{currentRate.sellRate.toFixed(2)}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs text-muted-foreground">USD</p>
+                  <p className="text-2xl font-bold text-purple-600">{currentRate.usd.toFixed(2)}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs text-muted-foreground">BCV</p>
+                  <p className="text-2xl font-bold text-orange-600">{currentRate.bcv.toFixed(2)}</p>
+                </div>
               </div>
-              <div className="space-y-1">
-                <p className="text-xs text-muted-foreground">Tasa de Venta</p>
-                <p className="text-2xl font-bold text-blue-600">{currentRate.sellRate.toFixed(2)}</p>
+              <div className="mt-4 space-y-2">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Calendar className="h-3 w-3" />
+                  <span>Actualizado: {formatDate(currentRate.createdAt)}</span>
+                </div>
+                <Button
+                  onClick={() => {
+                    generateAndDownloadImage(currentRate)
+                    toast.success('Tasa descargada como imagen')
+                  }}
+                  size="sm"
+                  variant="outline"
+                  className="w-full sm:w-auto gap-2"
+                >
+                  <Download className="h-4 w-4" />
+                  Descargar
+                </Button>
               </div>
-              <div className="space-y-1">
-                <p className="text-xs text-muted-foreground">USD</p>
-                <p className="text-2xl font-bold text-purple-600">{currentRate.usd.toFixed(2)}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-xs text-muted-foreground">BCV</p>
-                <p className="text-2xl font-bold text-orange-600">{currentRate.bcv.toFixed(2)}</p>
-              </div>
-            </div>
-            <div className="mt-4 space-y-2">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Calendar className="h-3 w-3" />
-                <span>Actualizado: {formatDate(currentRate.createdAt)}</span>
-              </div>
-              <Button
-                onClick={() => {
-                  generateAndDownloadImage(currentRate)
-                  toast.success('Tasa descargada como imagen')
-                }}
-                size="sm"
-                variant="outline"
-                className="w-full sm:w-auto gap-2"
-              >
-                <Download className="h-4 w-4" />
-                Descargar
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+            </CardContent>
+          </Card>
+        )}
 
       {/* Create Button */}
       {canCreateRate && (
@@ -204,7 +210,7 @@ export function ExchangeRatePage() {
         ) : (
           <div className="grid gap-4">
             {rates.map((rate) => (
-              <Card key={rate.id} className={rate.id === currentRate?.id ? 'border-primary' : ''}>
+              <Card key={rate.id} className={`backdrop-blur-sm bg-white/95 dark:bg-slate-950/95 ${rate.id === currentRate?.id ? 'border-primary' : ''}`}>
                 <CardContent className="p-4">
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div>
@@ -240,6 +246,7 @@ export function ExchangeRatePage() {
             ))}
           </div>
         )}
+      </div>
       </div>
 
       {/* Create Rate Sheet */}
