@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
-import { Trash2, Plus, Edit2 } from 'lucide-react'
+import { Trash2, Plus, Edit2, Phone, Check, X } from 'lucide-react'
 
 interface RechargeOperator {
   id: string
@@ -112,40 +112,68 @@ export function RechargeOperatorsManager() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Gestionar Operadores de Recarga</CardTitle>
+      <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b">
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <Phone className="h-5 w-5 text-blue-600" />
+          Gestionar Operadores de Recarga
+        </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 pt-6">
         {/* Form */}
-        <form onSubmit={handleAdd} className="space-y-4 p-4 bg-gray-50 rounded">
-          <h3 className="font-semibold text-sm">{editingId ? 'Editar Operador' : 'Nuevo Operador'}</h3>
+        <form onSubmit={handleAdd} className={`space-y-4 p-6 rounded-lg border-2 transition-all ${
+          editingId
+            ? 'border-amber-200 bg-amber-50'
+            : 'border-blue-200 bg-blue-50'
+        }`}>
+          <div className="flex items-center gap-2">
+            {editingId ? (
+              <Edit2 className="h-5 w-5 text-amber-600" />
+            ) : (
+              <Plus className="h-5 w-5 text-blue-600" />
+            )}
+            <h3 className="font-bold text-sm">
+              {editingId ? 'Editar Operador' : 'Nuevo Operador'}
+            </h3>
+          </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="operatorName">Nombre</Label>
+              <Label htmlFor="operatorName" className="text-xs font-semibold">
+                Nombre
+              </Label>
               <Input
                 id="operatorName"
                 placeholder="Ej: Movistar"
                 value={editingId ? editingName : newOperatorName}
                 onChange={(e) => (editingId ? setEditingName(e.target.value) : setNewOperatorName(e.target.value))}
+                className="mt-2"
               />
             </div>
 
             <div>
-              <Label htmlFor="operatorType">Tipo</Label>
+              <Label htmlFor="operatorType" className="text-xs font-semibold">
+                Tipo
+              </Label>
               <Input
                 id="operatorType"
                 placeholder="Ej: MOVISTAR"
                 value={editingId ? editingType : newOperatorType}
                 onChange={(e) => (editingId ? setEditingType(e.target.value) : setNewOperatorType(e.target.value))}
+                className="mt-2"
               />
             </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 pt-2">
             {editingId ? (
               <>
-                <Button type="button" onClick={() => handleUpdate(editingId)} disabled={submitting} size="sm">
+                <Button
+                  type="button"
+                  onClick={() => handleUpdate(editingId)}
+                  disabled={submitting}
+                  className="flex items-center gap-2 bg-amber-600 hover:bg-amber-700"
+                >
+                  <Check className="h-4 w-4" />
                   Guardar Cambios
                 </Button>
                 <Button
@@ -156,14 +184,19 @@ export function RechargeOperatorsManager() {
                     setEditingType('')
                   }}
                   variant="outline"
-                  size="sm"
+                  className="flex items-center gap-2"
                 >
+                  <X className="h-4 w-4" />
                   Cancelar
                 </Button>
               </>
             ) : (
-              <Button type="submit" disabled={submitting} size="sm">
-                <Plus className="h-4 w-4 mr-2" />
+              <Button
+                type="submit"
+                disabled={submitting}
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+              >
+                <Plus className="h-4 w-4" />
                 Agregar Operador
               </Button>
             )}
@@ -171,43 +204,63 @@ export function RechargeOperatorsManager() {
         </form>
 
         {/* List */}
-        {loading ? (
-          <div className="text-center py-8 text-gray-500">Cargando...</div>
-        ) : operators.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">No hay operadores registrados</div>
-        ) : (
-          <div className="space-y-2">
-            {operators.map((operator) => (
-              <div
-                key={operator.id}
-                className={`flex items-center justify-between p-3 rounded border ${
-                  operator.isActive ? 'bg-white' : 'bg-gray-100 opacity-60'
-                }`}
-              >
-                <div>
-                  <p className="font-medium">{operator.name}</p>
-                  <p className="text-xs text-gray-500">{operator.type}</p>
+        <div>
+          <h3 className="font-bold text-sm mb-4 text-gray-800">
+            Operadores Registrados ({operators.length})
+          </h3>
+
+          {loading ? (
+            <div className="text-center py-8 text-gray-500">
+              <div className="inline-block animate-pulse">Cargando...</div>
+            </div>
+          ) : operators.length === 0 ? (
+            <div className="text-center py-12 text-gray-500 bg-gray-50 rounded-lg border border-gray-200">
+              <Phone className="h-12 w-12 mx-auto mb-2 text-gray-300" />
+              <p>No hay operadores registrados</p>
+            </div>
+          ) : (
+            <div className="grid gap-3">
+              {operators.map((operator) => (
+                <div
+                  key={operator.id}
+                  className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all ${
+                    operator.isActive
+                      ? 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-md'
+                      : 'border-gray-200 bg-gray-50 opacity-60'
+                  }`}
+                >
+                  <div className="flex-1">
+                    <p className="font-bold text-gray-900">{operator.name}</p>
+                    <p className="text-sm text-gray-600 mt-1">{operator.type}</p>
+                    {!operator.isActive && (
+                      <span className="inline-block mt-2 px-2 py-1 bg-gray-200 text-gray-700 text-xs font-semibold rounded">
+                        Inactivo
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => startEdit(operator)}
+                      className="p-2.5 hover:bg-blue-100 rounded-lg transition-colors text-blue-600 hover:text-blue-800"
+                      title="Editar operador"
+                      aria-label="Editar operador"
+                    >
+                      <Edit2 className="h-5 w-5" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(operator.id)}
+                      className="p-2.5 hover:bg-red-100 rounded-lg transition-colors text-red-600 hover:text-red-800"
+                      title="Eliminar operador"
+                      aria-label="Eliminar operador"
+                    >
+                      <Trash2 className="h-5 w-5" />
+                    </button>
+                  </div>
                 </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => startEdit(operator)}
-                    className="p-2 hover:bg-blue-100 rounded transition-colors"
-                    title="Editar"
-                  >
-                    <Edit2 className="h-4 w-4 text-blue-600" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(operator.id)}
-                    className="p-2 hover:bg-red-100 rounded transition-colors"
-                    title="Eliminar"
-                  >
-                    <Trash2 className="h-4 w-4 text-red-600" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   )

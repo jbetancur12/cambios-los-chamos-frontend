@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
-import { Trash2, Plus, Edit2 } from 'lucide-react'
+import { Trash2, Plus, Edit2, Check, X } from 'lucide-react'
 
 interface RechargeOperator {
   id: string
@@ -29,10 +29,8 @@ interface OperatorAmount {
 
 export function OperatorAmountsManager() {
   const [operators, setOperators] = useState<RechargeOperator[]>([])
-  const [amounts, setAmounts] = useState<RechargeAmount[]>([])
   const [operatorAmounts, setOperatorAmounts] = useState<OperatorAmount[]>([])
   const [selectedOperatorId, setSelectedOperatorId] = useState('')
-  const [selectedAmountId, setSelectedAmountId] = useState('')
   const [newAmountValue, setNewAmountValue] = useState('')
   const [editingAmountId, setEditingAmountId] = useState<string | null>(null)
   const [editingAmountValue, setEditingAmountValue] = useState('')
@@ -52,18 +50,14 @@ export function OperatorAmountsManager() {
   const loadOperatorsAndAmounts = async () => {
     try {
       setLoading(true)
-      const [operatorsData, amountsData] = await Promise.all([
-        api.get<RechargeOperator[]>('/api/recharge-operators/all'),
-        api.get<RechargeAmount[]>('/api/recharge-amounts/all'),
-      ])
+      const operatorsData = await api.get<RechargeOperator[]>('/api/recharge-operators/all')
       setOperators(operatorsData)
-      setAmounts(amountsData)
       if (operatorsData.length > 0 && !selectedOperatorId) {
         setSelectedOperatorId(operatorsData[0].id)
       }
     } catch (error) {
-      console.error('Error loading data:', error)
-      toast.error('Error al cargar operadores y montos')
+      console.error('Error loading operators:', error)
+      toast.error('Error al cargar operadores')
     } finally {
       setLoading(false)
     }
@@ -80,36 +74,6 @@ export function OperatorAmountsManager() {
     }
   }
 
-  const handleAddExistingAmount = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!selectedOperatorId || !selectedAmountId) {
-      toast.error('Por favor selecciona operador y monto')
-      return
-    }
-
-    // Check if relation already exists
-    const alreadyExists = operatorAmounts.some((oa) => oa.amount.id === selectedAmountId && oa.isActive)
-    if (alreadyExists) {
-      toast.error('Este monto ya está asignado a este operador')
-      return
-    }
-
-    setSubmitting(true)
-    try {
-      await api.post('/api/operator-amounts', {
-        operatorId: selectedOperatorId,
-        amountId: selectedAmountId,
-      })
-      await loadOperatorAmounts(selectedOperatorId)
-      setSelectedAmountId('')
-      toast.success('Monto agregado al operador exitosamente')
-    } catch (error: any) {
-      toast.error(error.message || 'Error al agregar monto')
-    } finally {
-      setSubmitting(false)
-    }
-  }
 
   const handleCreateNewAmount = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -191,17 +155,20 @@ export function OperatorAmountsManager() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Gestionar Montos por Operador</CardTitle>
+      <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 border-b">
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <DollarSign className="h-5 w-5 text-green-600" />
+          Gestionar Montos por Operador
+        </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 pt-6">
         {/* Operator Selector */}
         <div className="space-y-2">
-          <label className="text-sm font-medium">Selecciona un Operador</label>
+          <label className="text-sm font-semibold text-gray-800">Selecciona un Operador</label>
           <select
             value={selectedOperatorId}
             onChange={(e) => setSelectedOperatorId(e.target.value)}
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <option value="">Seleccionar operador</option>
             {operators.map((operator) => (
@@ -215,11 +182,16 @@ export function OperatorAmountsManager() {
         {selectedOperatorId && currentOperator && (
           <>
             {/* Create New Amount Form */}
-            <form onSubmit={handleCreateNewAmount} className="space-y-4 p-4 bg-blue-50 rounded border border-blue-200">
-              <h3 className="font-semibold text-sm">Crear Nuevo Monto para {currentOperator.name}</h3>
+            <form onSubmit={handleCreateNewAmount} className="space-y-4 p-6 rounded-lg border-2 border-blue-200 bg-blue-50">
+              <div className="flex items-center gap-2">
+                <Plus className="h-5 w-5 text-blue-600" />
+                <h3 className="font-bold text-sm">Crear Nuevo Monto para {currentOperator.name}</h3>
+              </div>
 
               <div>
-                <Label htmlFor="newAmount">Nuevo Monto en Bs</Label>
+                <Label htmlFor="newAmount" className="text-xs font-semibold">
+                  Nuevo Monto en Bs
+                </Label>
                 <Input
                   id="newAmount"
                   type="number"
@@ -227,64 +199,44 @@ export function OperatorAmountsManager() {
                   step="1"
                   value={newAmountValue}
                   onChange={(e) => setNewAmountValue(e.target.value)}
+                  className="mt-2"
                 />
               </div>
 
-              <Button type="submit" disabled={submitting} size="sm">
-                <Plus className="h-4 w-4 mr-2" />
+              <Button type="submit" disabled={submitting} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 w-full">
+                <Plus className="h-4 w-4" />
                 Crear y Asignar Monto
               </Button>
             </form>
 
-            {/* Add Existing Amount Form */}
-            <form onSubmit={handleAddExistingAmount} className="space-y-4 p-4 bg-green-50 rounded border border-green-200">
-              <h3 className="font-semibold text-sm">Agregar Monto Existente a {currentOperator.name}</h3>
-
-              <div className="space-y-2">
-                <label htmlFor="amountSelect" className="text-sm font-medium">
-                  Selecciona un Monto Disponible
-                </label>
-                <select
-                  id="amountSelect"
-                  value={selectedAmountId}
-                  onChange={(e) => setSelectedAmountId(e.target.value)}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <option value="">Seleccionar monto</option>
-                  {amounts
-                    .filter((amount) => !operatorAmounts.some((oa) => oa.amount.id === amount.id && oa.isActive))
-                    .map((amount) => (
-                      <option key={amount.id} value={amount.id}>
-                        {amount.amountBs.toLocaleString('es-VE')} Bs {!amount.isActive && '(Inactivo)'}
-                      </option>
-                    ))}
-                </select>
-              </div>
-
-              <Button type="submit" disabled={submitting} size="sm">
-                <Plus className="h-4 w-4 mr-2" />
-                Agregar Monto Existente
-              </Button>
-            </form>
 
             {/* Operator Amounts List */}
-            <div className="space-y-2">
-              <h3 className="font-semibold text-sm">Montos Asignados a {currentOperator.name}</h3>
+            <div className="space-y-3">
+              <h3 className="font-bold text-sm text-gray-800">
+                Montos Asignados a {currentOperator.name} ({operatorAmounts.length})
+              </h3>
               {loading ? (
-                <div className="text-center py-8 text-gray-500">Cargando...</div>
+                <div className="text-center py-8 text-gray-500">
+                  <div className="inline-block animate-pulse">Cargando...</div>
+                </div>
               ) : operatorAmounts.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">No hay montos asignados a este operador</div>
+                <div className="text-center py-12 text-gray-500 bg-gray-50 rounded-lg border border-gray-200">
+                  <Plus className="h-12 w-12 mx-auto mb-2 text-gray-300" />
+                  <p>No hay montos asignados a este operador</p>
+                </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {operatorAmounts.map((oa) => (
                     <div
                       key={oa.id}
-                      className={`flex items-center justify-between p-4 rounded border ${
-                        oa.isActive ? 'bg-white' : 'bg-gray-100 opacity-60'
+                      className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all ${
+                        oa.isActive
+                          ? 'border-gray-200 bg-white hover:border-green-300 hover:shadow-md'
+                          : 'border-gray-200 bg-gray-50 opacity-60'
                       }`}
                     >
                       {editingAmountId === oa.id ? (
-                        <div className="flex-1 space-y-2">
+                        <div className="flex-1 space-y-3">
                           <Input
                             type="number"
                             placeholder="Nuevo monto"
@@ -298,27 +250,35 @@ export function OperatorAmountsManager() {
                               size="sm"
                               onClick={() => handleEditAmount(oa.id)}
                               disabled={submitting}
+                              className="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700"
                             >
+                              <Check className="h-4 w-4" />
                               Guardar
                             </Button>
                             <Button
                               type="button"
                               size="sm"
                               variant="outline"
+                              className="flex-1 flex items-center justify-center gap-2"
                               onClick={() => {
                                 setEditingAmountId(null)
                                 setEditingAmountValue('')
                               }}
                             >
+                              <X className="h-4 w-4" />
                               Cancelar
                             </Button>
                           </div>
                         </div>
                       ) : (
                         <>
-                          <div>
-                            <p className="font-bold text-lg">{oa.amount.amountBs.toLocaleString('es-VE')} Bs</p>
-                            {!oa.isActive && <p className="text-xs text-gray-500">Inactivo</p>}
+                          <div className="flex-1">
+                            <p className="font-bold text-lg text-gray-900">{oa.amount.amountBs.toLocaleString('es-VE')} Bs</p>
+                            {!oa.isActive && (
+                              <span className="inline-block mt-2 px-2 py-1 bg-gray-200 text-gray-700 text-xs font-semibold rounded">
+                                Inactivo
+                              </span>
+                            )}
                           </div>
                           <div className="flex gap-2">
                             <button
@@ -326,17 +286,19 @@ export function OperatorAmountsManager() {
                                 setEditingAmountId(oa.id)
                                 setEditingAmountValue(oa.amount.amountBs.toString())
                               }}
-                              className="p-2 hover:bg-blue-100 rounded transition-colors"
+                              className="p-2.5 hover:bg-blue-100 rounded-lg transition-colors text-blue-600 hover:text-blue-800"
                               title="Editar monto"
+                              aria-label="Editar monto"
                             >
-                              <Edit2 className="h-4 w-4 text-blue-600" />
+                              <Edit2 className="h-5 w-5" />
                             </button>
                             <button
                               onClick={() => handleDeleteAmount(oa.id)}
-                              className="p-2 hover:bg-red-100 rounded transition-colors"
+                              className="p-2.5 hover:bg-red-100 rounded-lg transition-colors text-red-600 hover:text-red-800"
                               title="Remover monto"
+                              aria-label="Remover monto"
                             >
-                              <Trash2 className="h-4 w-4 text-red-600" />
+                              <Trash2 className="h-5 w-5" />
                             </button>
                           </div>
                         </>
