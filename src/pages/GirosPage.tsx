@@ -286,6 +286,15 @@ export function GirosPage() {
     count: filteredGiros.length,
     cop: filteredGiros.reduce((sum, g) => sum + (g.currencyInput === 'COP' ? g.amountInput : 0), 0),
     bs: filteredGiros.reduce((sum, g) => sum + g.amountBs, 0),
+    minoristaProfit: filteredGiros.reduce((sum, g) => sum + (g.minoristaProfit || 0), 0),
+    systemProfit: filteredGiros.reduce((sum, g) => sum + (g.systemProfit || 0), 0),
+    bankCommission: filteredGiros.reduce((sum, g) => {
+      // Bank commission = (amountInput * 0.01) for COP, or (amountBs * 0.01) for Bs
+      if (g.currencyInput === 'COP') {
+        return sum + (g.amountInput * 0.01)
+      }
+      return sum + (g.amountBs * 0.01)
+    }, 0),
   }
 
   return (
@@ -636,19 +645,45 @@ export function GirosPage() {
           )}
 
           {/* Compact Summary Footer */}
-          <div className="mt-3 p-3 rounded border text-white text-xs flex justify-between items-center gap-4" style={{ background: 'linear-gradient(to right, #136BBC, #274565)', borderColor: '#136BBC' }}>
-            <div>
-              <span className="font-semibold">{totals.count}</span>
-              <span className="ml-1">giro{totals.count !== 1 ? 's' : ''}</span>
+          <div className="mt-3 rounded border text-white text-xs" style={{ background: 'linear-gradient(to right, #136BBC, #274565)', borderColor: '#136BBC' }}>
+            <div className="p-3 flex justify-between items-center gap-4">
+              <div>
+                <span className="font-semibold">{totals.count}</span>
+                <span className="ml-1">giro{totals.count !== 1 ? 's' : ''}</span>
+              </div>
+              <div className="text-right">
+                <span className="font-semibold">COP: </span>
+                <span className="font-mono">{formatCurrency(totals.cop, 'COP')}</span>
+              </div>
+              <div className="text-right">
+                <span className="font-semibold">Bs: </span>
+                <span className="font-mono">{totals.bs.toLocaleString('es-VE')}</span>
+              </div>
             </div>
-            <div className="text-right">
-              <span className="font-semibold">COP: </span>
-              <span className="font-mono">{formatCurrency(totals.cop, 'COP')}</span>
-            </div>
-            <div className="text-right">
-              <span className="font-semibold">Bs: </span>
-              <span className="font-mono">{totals.bs.toLocaleString('es-VE')}</span>
-            </div>
+
+            {/* Additional info when viewing completed giros */}
+            {filterStatus === 'COMPLETADO' && (
+              <div className="border-t border-white border-opacity-30 px-3 py-2 grid grid-cols-2 md:grid-cols-4 gap-2">
+                <div className="text-left">
+                  <p className="text-xs opacity-80">Ganancia Minoristas</p>
+                  <p className="font-semibold">{formatCurrency(totals.minoristaProfit, 'COP')}</p>
+                </div>
+                <div className="text-left">
+                  <p className="text-xs opacity-80">Comisión Banco</p>
+                  <p className="font-semibold">{formatCurrency(totals.bankCommission, 'COP')}</p>
+                </div>
+                <div className="text-left">
+                  <p className="text-xs opacity-80">Total Ganancia</p>
+                  <p className="font-semibold">{formatCurrency(totals.minoristaProfit + totals.bankCommission, 'COP')}</p>
+                </div>
+                {user?.role === 'SUPER_ADMIN' && (
+                  <div className="text-left">
+                    <p className="text-xs opacity-80">Ganancia del Sitio</p>
+                    <p className="font-semibold">{formatCurrency(totals.systemProfit, 'COP')}</p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </>
       )}
