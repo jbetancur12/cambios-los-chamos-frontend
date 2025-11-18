@@ -642,11 +642,11 @@ export function GirosPage() {
               <span className="text-muted-foreground ml-1">giro{totals.count !== 1 ? 's' : ''}</span>
             </div>
             <div className="text-right">
-              <span className="font-semibold text-foreground">COP: </span>
+              <span className="font-semibold" style={{ color: '#136BBC' }}>COP: </span>
               <span className="font-mono">{formatCurrency(totals.cop, 'COP')}</span>
             </div>
             <div className="text-right">
-              <span className="font-semibold text-foreground">Bs: </span>
+              <span className="font-semibold" style={{ color: '#136BBC' }}>Bs: </span>
               <span className="font-mono">{totals.bs.toLocaleString('es-VE')}</span>
             </div>
           </div>
@@ -660,7 +660,7 @@ export function GirosPage() {
               onClick={() => setCreateSheetOpen(true)}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-md hover:bg-accent transition-colors text-left"
             >
-              <Banknote className="h-5 w-5 text-blue-600" />
+              <Banknote className="h-5 w-5" style={{ color: '#136BBC' }} />
               <span className="font-medium">Transferencia</span>
             </button>
             <button
