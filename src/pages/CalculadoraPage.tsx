@@ -111,7 +111,7 @@ export function CalculadoraPage() {
               <div className="grid grid-cols-2 gap-4 text-center">
                 <div>
                   <p className="text-sm text-gray-600">BCV (Compra)</p>
-                  <p className="text-xl font-bold text-blue-600">{formatCurrency(rate.usd)}</p>
+                  <p className="text-xl font-bold" style={{ color: '#136BBC' }}>{formatCurrency(rate.usd)}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Tasa Venta</p>
@@ -128,9 +128,10 @@ export function CalculadoraPage() {
             onClick={() => setActiveTab('bcv')}
             className={`flex-1 py-3 rounded-lg font-medium transition-colors whitespace-nowrap ${
               activeTab === 'bcv'
-                ? 'bg-blue-600 text-white'
+                ? 'text-white'
                 : 'bg-white text-gray-700 border hover:bg-gray-50'
             }`}
+            style={activeTab === 'bcv' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             Tasa BCV
           </button>
@@ -138,9 +139,10 @@ export function CalculadoraPage() {
             onClick={() => setActiveTab('manual')}
             className={`flex-1 py-3 rounded-lg font-medium transition-colors whitespace-nowrap ${
               activeTab === 'manual'
-                ? 'bg-blue-600 text-white'
+                ? 'text-white'
                 : 'bg-white text-gray-700 border hover:bg-gray-50'
             }`}
+            style={activeTab === 'manual' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             Precio Manual
           </button>
@@ -148,9 +150,10 @@ export function CalculadoraPage() {
             onClick={() => setActiveTab('ves')}
             className={`flex-1 py-3 rounded-lg font-medium transition-colors whitespace-nowrap ${
               activeTab === 'ves'
-                ? 'bg-blue-600 text-white'
+                ? 'text-white'
                 : 'bg-white text-gray-700 border hover:bg-gray-50'
             }`}
+            style={activeTab === 'ves' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             VES a COP
           </button>
@@ -178,7 +181,7 @@ export function CalculadoraPage() {
                 <div className="mt-6 p-4 bg-gray-50 rounded-lg space-y-3">
                   <div className="flex justify-between items-center py-2">
                     <p className="text-gray-600">VES</p>
-                    <p className="text-xl font-bold text-blue-600">{formatCurrency(resultBCV.ves)}</p>
+                    <p className="text-xl font-bold" style={{ color: '#136BBC' }}>{formatCurrency(resultBCV.ves)}</p>
                   </div>
                   <div className="flex justify-between items-center py-2 border-t pt-3">
                     <p className="text-gray-600">COP a recibir</p>
@@ -223,7 +226,7 @@ export function CalculadoraPage() {
                 <div className="mt-6 p-4 bg-gray-50 rounded-lg space-y-3">
                   <div className="flex justify-between items-center py-2">
                     <p className="text-gray-600">VES</p>
-                    <p className="text-xl font-bold text-blue-600">{formatCurrency(resultManual.ves)}</p>
+                    <p className="text-xl font-bold" style={{ color: '#136BBC' }}>{formatCurrency(resultManual.ves)}</p>
                   </div>
                   <div className="flex justify-between items-center py-2 border-t pt-3">
                     <p className="text-gray-600">COP a recibir</p>

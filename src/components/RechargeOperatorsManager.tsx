@@ -112,9 +112,9 @@ export function RechargeOperatorsManager() {
 
   return (
     <Card>
-      <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b">
+      <CardHeader className="border-b text-white" style={{ background: 'linear-gradient(to right, #136BBC, #274565)' }}>
         <CardTitle className="flex items-center gap-2 text-lg">
-          <Phone className="h-5 w-5 text-blue-600" />
+          <Phone className="h-5 w-5" />
           Gestionar Operadores de Recarga
         </CardTitle>
       </CardHeader>
@@ -122,14 +122,14 @@ export function RechargeOperatorsManager() {
         {/* Form */}
         <form onSubmit={handleAdd} className={`space-y-4 p-6 rounded-lg border-2 transition-all ${
           editingId
-            ? 'border-amber-200 bg-amber-50'
-            : 'border-blue-200 bg-blue-50'
-        }`}>
+            ? 'border-blue-200'
+            : 'border-blue-200'
+        }`} style={{ backgroundColor: editingId ? 'rgba(19, 107, 188, 0.05)' : 'rgba(19, 107, 188, 0.05)' }}>
           <div className="flex items-center gap-2">
             {editingId ? (
-              <Edit2 className="h-5 w-5 text-amber-600" />
+              <Edit2 className="h-5 w-5" style={{ color: '#136BBC' }} />
             ) : (
-              <Plus className="h-5 w-5 text-blue-600" />
+              <Plus className="h-5 w-5" style={{ color: '#136BBC' }} />
             )}
             <h3 className="font-bold text-sm">
               {editingId ? 'Editar Operador' : 'Nuevo Operador'}
@@ -171,7 +171,8 @@ export function RechargeOperatorsManager() {
                   type="button"
                   onClick={() => handleUpdate(editingId)}
                   disabled={submitting}
-                  className="flex items-center gap-2 bg-amber-600 hover:bg-amber-700"
+                  className="flex items-center gap-2 text-white"
+                  style={{ background: 'linear-gradient(to right, #136BBC, #274565)' }}
                 >
                   <Check className="h-4 w-4" />
                   Guardar Cambios
@@ -185,6 +186,7 @@ export function RechargeOperatorsManager() {
                   }}
                   variant="outline"
                   className="flex items-center gap-2"
+                  style={{ borderColor: '#136BBC', color: '#136BBC' }}
                 >
                   <X className="h-4 w-4" />
                   Cancelar
@@ -194,7 +196,8 @@ export function RechargeOperatorsManager() {
               <Button
                 type="submit"
                 disabled={submitting}
-                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+                className="flex items-center gap-2 text-white"
+                style={{ background: 'linear-gradient(to right, #136BBC, #274565)' }}
               >
                 <Plus className="h-4 w-4" />
                 Agregar Operador
@@ -241,7 +244,8 @@ export function RechargeOperatorsManager() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => startEdit(operator)}
-                      className="p-2.5 hover:bg-blue-100 rounded-lg transition-colors text-blue-600 hover:text-blue-800"
+                      className="p-2.5 hover:bg-blue-100 rounded-lg transition-colors"
+                      style={{ color: '#136BBC' }}
                       title="Editar operador"
                       aria-label="Editar operador"
                     >

@@ -86,7 +86,8 @@ export function ForgotPasswordPage() {
 
               <Button
                 type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+                className="w-full text-white font-semibold"
+                style={{ background: 'linear-gradient(to right, #136BBC, #274565)' }}
                 disabled={loading}
               >
                 {loading ? 'Enviando...' : 'Enviar Enlace de Recuperación'}
@@ -95,7 +96,8 @@ export function ForgotPasswordPage() {
               <button
                 type="button"
                 onClick={() => navigate('/login')}
-                className="w-full flex items-center justify-center gap-2 text-blue-600 hover:text-blue-800 font-medium text-sm mt-2"
+                className="w-full flex items-center justify-center gap-2 font-medium text-sm mt-2"
+                style={{ color: '#136BBC' }}
               >
                 <ArrowLeft className="h-4 w-4" />
                 Volver a iniciar sesión
@@ -118,7 +120,8 @@ export function ForgotPasswordPage() {
               <button
                 type="button"
                 onClick={() => navigate('/login')}
-                className="w-full text-blue-600 hover:text-blue-800 font-medium text-sm"
+                className="w-full font-medium text-sm"
+                style={{ color: '#136BBC' }}
               >
                 Ir a inicio de sesión ahora
               </button>

@@ -268,24 +268,27 @@ export function ReportsPage() {
           <button
             onClick={() => handleTabChange('system')}
             className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${
-              activeTab === 'system' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+              activeTab === 'system' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
             }`}
+            style={activeTab === 'system' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             Ganancias del Sistema
           </button>
           <button
             onClick={() => handleTabChange('minoristas')}
             className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${
-              activeTab === 'minoristas' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+              activeTab === 'minoristas' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
             }`}
+            style={activeTab === 'minoristas' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             Top Minoristas
           </button>
           <button
             onClick={() => handleTabChange('bank')}
             className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${
-              activeTab === 'bank' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+              activeTab === 'bank' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
             }`}
+            style={activeTab === 'bank' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             Transacciones Bancarias
           </button>
@@ -293,9 +296,10 @@ export function ReportsPage() {
             onClick={() => handleTabChange('minoristaTransactions')}
             className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${
               activeTab === 'minoristaTransactions'
-                ? 'bg-blue-600 text-white'
+                ? 'text-white'
                 : 'bg-white text-gray-700 hover:bg-gray-100'
             }`}
+            style={activeTab === 'minoristaTransactions' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             Transacciones Minoristas
           </button>

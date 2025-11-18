@@ -323,6 +323,8 @@ export function GirosPage() {
             variant={filterStatus === 'ASIGNADO' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setFilterStatus('ASIGNADO')}
+            className={filterStatus === 'ASIGNADO' ? 'text-white' : ''}
+            style={filterStatus === 'ASIGNADO' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             Asignados
           </Button>
@@ -330,6 +332,8 @@ export function GirosPage() {
             variant={filterStatus === 'PROCESANDO' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setFilterStatus('PROCESANDO')}
+            className={filterStatus === 'PROCESANDO' ? 'text-white' : ''}
+            style={filterStatus === 'PROCESANDO' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             En Proceso
           </Button>
@@ -337,6 +341,8 @@ export function GirosPage() {
             variant={filterStatus === 'COMPLETADO' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setFilterStatus('COMPLETADO')}
+            className={filterStatus === 'COMPLETADO' ? 'text-white' : ''}
+            style={filterStatus === 'COMPLETADO' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             Completados
           </Button>
@@ -344,6 +350,8 @@ export function GirosPage() {
             variant={filterStatus === 'ALL' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setFilterStatus('ALL')}
+            className={filterStatus === 'ALL' ? 'text-white' : ''}
+            style={filterStatus === 'ALL' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             Todos
           </Button>
@@ -371,6 +379,8 @@ export function GirosPage() {
                 variant={filterDate === 'TODAY' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterDate('TODAY')}
+                className={filterDate === 'TODAY' ? 'text-white' : ''}
+                style={filterDate === 'TODAY' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
               >
                 Hoy
               </Button>
@@ -378,6 +388,8 @@ export function GirosPage() {
                 variant={filterDate === 'YESTERDAY' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterDate('YESTERDAY')}
+                className={filterDate === 'YESTERDAY' ? 'text-white' : ''}
+                style={filterDate === 'YESTERDAY' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
               >
                 Ayer
               </Button>
@@ -385,6 +397,8 @@ export function GirosPage() {
                 variant={filterDate === 'THIS_WEEK' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterDate('THIS_WEEK')}
+                className={filterDate === 'THIS_WEEK' ? 'text-white' : ''}
+                style={filterDate === 'THIS_WEEK' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
               >
                 Esta Semana
               </Button>
@@ -392,6 +406,8 @@ export function GirosPage() {
                 variant={filterDate === 'LAST_WEEK' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterDate('LAST_WEEK')}
+                className={filterDate === 'LAST_WEEK' ? 'text-white' : ''}
+                style={filterDate === 'LAST_WEEK' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
               >
                 Semana Pasada
               </Button>
@@ -399,6 +415,8 @@ export function GirosPage() {
                 variant={filterDate === 'THIS_MONTH' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterDate('THIS_MONTH')}
+                className={filterDate === 'THIS_MONTH' ? 'text-white' : ''}
+                style={filterDate === 'THIS_MONTH' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
               >
                 Este Mes
               </Button>
@@ -406,6 +424,8 @@ export function GirosPage() {
                 variant={filterDate === 'LAST_MONTH' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterDate('LAST_MONTH')}
+                className={filterDate === 'LAST_MONTH' ? 'text-white' : ''}
+                style={filterDate === 'LAST_MONTH' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
               >
                 Mes Pasado
               </Button>
@@ -413,6 +433,8 @@ export function GirosPage() {
                 variant={filterDate === 'CUSTOM' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setCustomDateModalOpen(true)}
+                className={filterDate === 'CUSTOM' ? 'text-white' : ''}
+                style={filterDate === 'CUSTOM' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
               >
                 <Calendar className="h-3 w-3 mr-1" />
                 Personalizado
@@ -421,6 +443,8 @@ export function GirosPage() {
                 variant={filterDate === 'ALL' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterDate('ALL')}
+                className={filterDate === 'ALL' ? 'text-white' : ''}
+                style={filterDate === 'ALL' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
               >
                 Todos
               </Button>
@@ -440,7 +464,7 @@ export function GirosPage() {
             <ArrowRight className="h-8 w-8 mx-auto mb-3 text-muted-foreground" />
             <p className="text-sm text-muted-foreground mb-3">No hay giros registrados</p>
             {canCreateGiro && (
-              <Button onClick={() => setGiroTypeMenuOpen(true)} size="sm">
+              <Button onClick={() => setGiroTypeMenuOpen(true)} size="sm" className="text-white" style={{ background: 'linear-gradient(to right, #136BBC, #274565)' }}>
                 <Plus className="h-4 w-4 mr-2" />
                 Crear primer giro
               </Button>
@@ -661,9 +685,10 @@ export function GirosPage() {
           <div className="fixed bottom-20 md:bottom-8 right-4 md:right-8 z-50">
             <button
               onClick={() => setGiroTypeMenuOpen(!giroTypeMenuOpen)}
-              className={`bg-primary text-primary-foreground rounded-full p-4 shadow-lg hover:shadow-xl transition-all active:scale-95 ${
+              className={`text-white rounded-full p-4 shadow-lg hover:shadow-xl transition-all active:scale-95 ${
                 giroTypeMenuOpen ? 'rotate-45' : ''
               }`}
+              style={{ background: 'linear-gradient(to right, #136BBC, #274565)' }}
             >
               <Plus className="h-6 w-6" />
             </button>

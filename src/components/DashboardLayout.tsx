@@ -78,11 +78,11 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-background">
       {/* Desktop Sidebar */}
       <aside className="hidden md:fixed md:inset-y-0 md:flex md:w-64 md:flex-col">
-        <div className="flex flex-col flex-1 min-h-0 border-r bg-card">
+        <div className="flex flex-col flex-1 min-h-0 border-r" style={{ background: 'linear-gradient(to bottom, #136BBC, #274565)' }}>
           {/* Header */}
-          <div className="flex items-center gap-3 h-16 px-6 border-b">
+          <div className="flex items-center gap-3 h-16 px-6 border-b" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
             <img src="/icons/icon-48x48.png" alt="Logo" className="h-10 w-10" />
-            <h1 className="text-xl font-bold text-foreground">Cambios los Chamos</h1>
+            <h1 className="text-xl font-bold text-white">Cambios los Chamos</h1>
           </div>
 
           {/* Navigation */}
@@ -97,9 +97,10 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
                   className={cn(
                     'flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors',
                     isActive
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                      ? 'text-white'
+                      : 'text-blue-100 hover:text-white'
                   )}
+                  style={isActive ? { backgroundColor: 'rgba(255, 255, 255, 0.15)' } : { backgroundColor: 'transparent' }}
                 >
                   <Icon className="w-5 h-5" />
                   <span>{item.label}</span>
@@ -109,12 +110,12 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
           </nav>
 
           {/* User Info & Logout */}
-          <div className="p-4 border-t">
+          <div className="p-4 border-t" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
             <div className="mb-3 px-3">
-              <p className="text-sm font-medium text-foreground">{user?.fullName}</p>
-              <p className="text-xs text-muted-foreground">{user?.email}</p>
+              <p className="text-sm font-medium text-white">{user?.fullName}</p>
+              <p className="text-xs text-blue-100">{user?.email}</p>
             </div>
-            <Button variant="outline" className="w-full justify-start gap-2" onClick={handleLogout}>
+            <Button className="w-full justify-start gap-2 text-white hover:text-white" style={{ backgroundColor: '#37B6FF', border: 'none' }} onClick={handleLogout}>
               <LogOut className="w-4 h-4" />
               Cerrar Sesión
             </Button>
@@ -125,7 +126,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
       {/* Main Content */}
       <div className="md:pl-64 flex flex-col min-h-screen">
         {/* Mobile Header */}
-        <header className="sticky top-0 z-40 flex h-16 items-center gap-3 border-b bg-card px-4 md:hidden">
+        <header className="sticky top-0 z-40 flex h-16 items-center gap-3 px-4 md:hidden text-white" style={{ background: 'linear-gradient(to right, #136BBC, #274565)', borderBottomColor: 'rgba(255, 255, 255, 0.1)' }} >
           <img src="/icons/icon-48x48.png" alt="Logo" className="h-8 w-8" />
           <h1 className="text-lg font-semibold">Cambios los Chamos</h1>
         </header>
@@ -134,7 +135,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         <main className="flex-1 pb-20 md:pb-6">{children}</main>
 
         {/* Mobile Bottom Navigation */}
-        <nav id="mobileNav" className="fixed bottom-0 left-0 right-0 bg-card border-t z-50 md:hidden overflow-x-auto">
+        <nav id="mobileNav" className="fixed bottom-0 left-0 right-0 z-50 md:hidden overflow-x-auto text-white" style={{ background: 'linear-gradient(to right, #136BBC, #274565)', borderTopColor: 'rgba(255, 255, 255, 0.1)' }}>
           <div className="flex h-16 items-center space-x-4 px-4 w-max">
             {visibleItems.map((item) => {
               const Icon = item.icon
@@ -145,7 +146,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
                   to={item.href}
                   className={cn(
                     'flex flex-col items-center justify-center gap-1 transition-colors min-w-[80px] shrink-0',
-                    isActive ? 'text-primary' : 'text-muted-foreground'
+                    isActive ? 'text-white font-semibold' : 'text-blue-100 hover:text-white'
                   )}
                 >
                   <Icon className="w-5 h-5" />
@@ -156,14 +157,14 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
 
             <button
               onClick={handleLogout}
-              className="flex flex-col items-center justify-center gap-1 text-muted-foreground min-w-[80px] shrink-0"
+              className="flex flex-col items-center justify-center gap-1 text-blue-100 hover:text-white min-w-[80px] shrink-0 transition-colors"
             >
               <LogOut className="w-5 h-5" />
               <span className="text-xs">Salir</span>
             </button>
           </div>
-          <div className="pointer-events-none absolute right-0 top-0 h-full w-12 bg-gradient-to-l from-card/95 via-card/60 to-transparent" />
-          <div className="pointer-events-none absolute left-0 top-0 h-full w-12 bg-gradient-to-r from-card/95 via-card/60 to-transparent" />
+          <div className="pointer-events-none absolute right-0 top-0 h-full w-12" style={{ background: 'linear-gradient(to left, #274565, transparent)' }} />
+          <div className="pointer-events-none absolute left-0 top-0 h-full w-12" style={{ background: 'linear-gradient(to right, #136BBC, transparent)' }} />
         </nav>
       </div>
     </div>

@@ -155,9 +155,9 @@ export function OperatorAmountsManager() {
 
   return (
     <Card>
-      <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 border-b">
+      <CardHeader className="border-b text-white" style={{ background: 'linear-gradient(to right, #136BBC, #274565)' }}>
         <CardTitle className="flex items-center gap-2 text-lg">
-          <DollarSign className="h-5 w-5 text-green-600" />
+          <DollarSign className="h-5 w-5" />
           Gestionar Montos por Operador
         </CardTitle>
       </CardHeader>
@@ -168,7 +168,8 @@ export function OperatorAmountsManager() {
           <select
             value={selectedOperatorId}
             onChange={(e) => setSelectedOperatorId(e.target.value)}
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            style={{ '--tw-ring-color': '#136BBC' } as React.CSSProperties}
           >
             <option value="">Seleccionar operador</option>
             {operators.map((operator) => (
@@ -182,9 +183,9 @@ export function OperatorAmountsManager() {
         {selectedOperatorId && currentOperator && (
           <>
             {/* Create New Amount Form */}
-            <form onSubmit={handleCreateNewAmount} className="space-y-4 p-6 rounded-lg border-2 border-blue-200 bg-blue-50">
+            <form onSubmit={handleCreateNewAmount} className="space-y-4 p-6 rounded-lg border-2 border-blue-200" style={{ backgroundColor: 'rgba(19, 107, 188, 0.05)' }}>
               <div className="flex items-center gap-2">
-                <Plus className="h-5 w-5 text-blue-600" />
+                <Plus className="h-5 w-5" style={{ color: '#136BBC' }} />
                 <h3 className="font-bold text-sm">Crear Nuevo Monto para {currentOperator.name}</h3>
               </div>
 
@@ -203,7 +204,7 @@ export function OperatorAmountsManager() {
                 />
               </div>
 
-              <Button type="submit" disabled={submitting} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 w-full">
+              <Button type="submit" disabled={submitting} className="flex items-center gap-2 text-white w-full" style={{ background: 'linear-gradient(to right, #136BBC, #274565)' }}>
                 <Plus className="h-4 w-4" />
                 Crear y Asignar Monto
               </Button>
@@ -250,7 +251,8 @@ export function OperatorAmountsManager() {
                               size="sm"
                               onClick={() => handleEditAmount(oa.id)}
                               disabled={submitting}
-                              className="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700"
+                              className="flex-1 flex items-center justify-center gap-2 text-white"
+                              style={{ background: 'linear-gradient(to right, #136BBC, #274565)' }}
                             >
                               <Check className="h-4 w-4" />
                               Guardar
@@ -260,6 +262,7 @@ export function OperatorAmountsManager() {
                               size="sm"
                               variant="outline"
                               className="flex-1 flex items-center justify-center gap-2"
+                              style={{ borderColor: '#136BBC', color: '#136BBC' }}
                               onClick={() => {
                                 setEditingAmountId(null)
                                 setEditingAmountValue('')
@@ -286,7 +289,8 @@ export function OperatorAmountsManager() {
                                 setEditingAmountId(oa.id)
                                 setEditingAmountValue(oa.amount.amountBs.toString())
                               }}
-                              className="p-2.5 hover:bg-blue-100 rounded-lg transition-colors text-blue-600 hover:text-blue-800"
+                              className="p-2.5 hover:bg-blue-100 rounded-lg transition-colors"
+                              style={{ color: '#136BBC' }}
                               title="Editar monto"
                               aria-label="Editar monto"
                             >

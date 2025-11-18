@@ -78,7 +78,8 @@ export function LoginPage() {
                 <button
                   type="button"
                   onClick={() => navigate('/forgot-password')}
-                  className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                  className="text-xs font-medium"
+                  style={{ color: '#136BBC' }}
                 >
                   ¿Olvidaste tu contraseña?
                 </button>
@@ -96,7 +97,8 @@ export function LoginPage() {
 
             <Button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+              className="w-full text-white font-semibold"
+              style={{ background: 'linear-gradient(to right, #136BBC, #274565)' }}
               disabled={isSubmitting}
             >
               {isSubmitting ? 'Iniciando sesión...' : 'Iniciar Sesión'}
