@@ -184,8 +184,20 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
             )}
           </div>
 
-          <div className="mt-6 pb-6 ">
-            <Button type="submit" disabled={loading} className="w-full bg-[linear-gradient(to_right,#136BBC,#274565)]">
+          <div className="mt-6 pb-6 flex gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={loading}
+              onClick={() => {
+                onOpenChange(false)
+                resetForm()
+              }}
+              className="flex-1"
+            >
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={loading} className="flex-1 bg-[linear-gradient(to_right,#136BBC,#274565)]">
               {loading ? 'Procesando...' : 'Registrar Pago Móvil'}
             </Button>
           </div>
