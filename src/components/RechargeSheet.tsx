@@ -19,6 +19,13 @@ interface RechargeAmount {
   amountBs: number
 }
 
+interface OperatorAmount {
+  id: string
+  operator: RechargeOperator
+  amount: RechargeAmount
+  isActive: boolean
+}
+
 interface RechargeSheetProps {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -37,10 +44,16 @@ export function RechargeSheet({ open, onOpenChange }: RechargeSheetProps) {
   useEffect(() => {
     if (open) {
       loadOperators()
-      loadAmounts()
       loadExchangeRate()
     }
   }, [open])
+
+  // Load amounts when operator is selected
+  useEffect(() => {
+    if (selectedOperator) {
+      loadAmountsByOperator(selectedOperator)
+    }
+  }, [selectedOperator])
 
   const loadOperators = async () => {
     try {
@@ -55,16 +68,22 @@ export function RechargeSheet({ open, onOpenChange }: RechargeSheetProps) {
     }
   }
 
-  const loadAmounts = async () => {
+  const loadAmountsByOperator = async (operatorId: string) => {
     try {
-      const data = await api.get<RechargeAmount[]>('/api/recharge-amounts')
-      setAmounts(data)
-      if (data.length > 0 && !selectedAmount) {
-        setSelectedAmount(data[0].id)
+      const data = await api.get<OperatorAmount[]>(`/api/operator-amounts/${operatorId}`)
+      const amounts = data.map((oa) => oa.amount)
+      setAmounts(amounts)
+      if (amounts.length > 0) {
+        setSelectedAmount(amounts[0].id)
+      } else {
+        setSelectedAmount('')
+        toast.warning('Este operador no tiene montos disponibles')
       }
     } catch (error) {
       console.error('Error loading amounts:', error)
-      toast.error('Error al cargar los montos')
+      toast.error('Error al cargar los montos del operador')
+      setAmounts([])
+      setSelectedAmount('')
     }
   }
 

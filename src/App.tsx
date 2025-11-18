@@ -16,6 +16,7 @@ import { ReportsPage } from '@/pages/ReportsPage'
 import { MinoristaReportsPage } from '@/pages/MinoristaReportsPage'
 import { RechargeAmountsManager } from '@/components/RechargeAmountsManager'
 import { RechargeOperatorsManager } from '@/components/RechargeOperatorsManager'
+import { OperatorAmountsManager } from '@/components/OperatorAmountsManager'
 import { MinoristaTransactionsPage } from './pages/MinoristaTransactionsPage'
 import { VerifyEmailPage } from '@/pages/VerifyEmailPage'
 import { ResetPasswordPage } from '@/pages/ResetPasswordPage'
@@ -194,6 +195,11 @@ function App() {
                       {/* Recharge Operators Manager */}
                       <div>
                         <RechargeOperatorsManager />
+                      </div>
+
+                      {/* Operator Amounts Manager */}
+                      <div>
+                        <OperatorAmountsManager />
                       </div>
                     </div>
                   </div>
