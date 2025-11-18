@@ -362,7 +362,8 @@ export function ExchangeRatePage() {
               <img
                 src={previewImage}
                 alt="Vista previa de tasa"
-                className="max-w-full h-auto border rounded-lg shadow-lg"
+                className="max-w-sm h-auto border rounded-lg shadow-lg"
+                style={{ maxWidth: '400px' }}
               />
               <div className="mt-4 flex gap-2 justify-center">
                 <Button
