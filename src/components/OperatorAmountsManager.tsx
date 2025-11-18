@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
-import { Trash2, Plus, Edit2, Check, X } from 'lucide-react'
+import { Trash2, Plus, Edit2, Check, X, DollarSign } from 'lucide-react'
 
 interface RechargeOperator {
   id: string
