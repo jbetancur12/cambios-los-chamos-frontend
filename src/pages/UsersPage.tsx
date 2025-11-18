@@ -502,10 +502,10 @@ export function UsersPage() {
         {/* FAB Button */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className={`bg-primary text-primary-foreground rounded-full p-4 shadow-lg hover:shadow-xl transition-all active:scale-95 ${menuOpen ? 'rotate-45' : ''
+          className={`bg-[linear-gradient(to_right,#136BBC,#274565)] bg-primary text-primary-foreground rounded-full p-4 shadow-lg hover:shadow-xl transition-all active:scale-95 ${menuOpen ? 'rotate-45' : ''
             }`}
         >
-          <Plus className="h-6 w-6" />
+          <Plus className="h-6 w-6 " />
         </button>
       </div>
 

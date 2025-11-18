@@ -127,7 +127,7 @@ export function CreateUserSheet({ open, onOpenChange, onUserCreated, role }: Cre
               >
                 Cancelar
               </Button>
-              <Button type="submit" className="flex-1" disabled={loading}>
+              <Button type="submit" className="flex-1 bg-[linear-gradient(to_right,#136BBC,#274565)]" disabled={loading}>
                 {loading ? 'Creando...' : 'Crear Usuario'}
               </Button>
             </div>

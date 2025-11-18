@@ -652,7 +652,7 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="flex-1">
                 Cancelar
               </Button>
-              <Button type="submit" disabled={loading || hasInsufficientBalance()} className="flex-1">
+              <Button type="submit" disabled={loading || hasInsufficientBalance()} className="flex-1 bg-[linear-gradient(to_right,#136BBC,#274565)]">
                 {loading ? 'Creando...' : 'Crear Giro'}
               </Button>
             </div>

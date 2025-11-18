@@ -108,7 +108,7 @@ export function useSiaRateImage() {
       const headerX = offsetX + 30;
 
       ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 28px Arial';
+      ctx.font = 'bold 40px Arial';
       ctx.textAlign = 'center';
 
       const colGap = 20;
