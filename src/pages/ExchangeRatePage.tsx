@@ -390,7 +390,7 @@ export function ExchangeRatePage() {
                     const a = document.createElement('a')
                     a.href = previewImage
                     const dateForFilename = new Date().toISOString().split('T')[0]
-                    a.download = `tasa-sia-${dateForFilename}.png`
+                    a.download = `tasa-${dateForFilename}.png`
                     a.click()
                   }}
                   variant="outline"

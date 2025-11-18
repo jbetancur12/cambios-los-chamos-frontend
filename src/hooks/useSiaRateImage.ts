@@ -237,7 +237,7 @@ export function useSiaRateImage() {
         const a = document.createElement('a');
         a.href = imageUrl;
         const dateForFilename = new Date().toISOString().split('T')[0];
-        a.download = `tasa-sia-${dateForFilename}.png`;
+        a.download = `tasa-${dateForFilename}.png`;
         a.click();
         URL.revokeObjectURL(imageUrl);
       }
