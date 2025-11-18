@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 import { useAuth } from '@/contexts/AuthContext'
 import { useGiroWebSocket } from '@/hooks/useGiroWebSocket'
 import { PaymentProofUpload } from './PaymentProofUpload'
+import { PrintTicketModal } from './PrintTicketModal'
 import {
   Clock,
   CheckCircle,
@@ -21,6 +22,7 @@ import {
   TrendingUp,
   ArrowRight,
   CornerDownLeft, // Nuevo ícono para devolver
+  Printer,
 } from 'lucide-react'
 import type { Giro, BankAccount, ExecutionType, GiroStatus, Bank, MinoristaTransaction } from '@/types/api'
 
@@ -79,6 +81,9 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
 
   // ESTADO PARA DETALLES DE TRANSACCIÓN DEL MINORISTA
   const [minoristaTransaction, setMinoristaTransaction] = useState<MinoristaTransaction | null>(null)
+
+  // ESTADO PARA MODAL DE IMPRESIÓN
+  const [showPrintModal, setShowPrintModal] = useState(false)
 
   const isTransferencista = user?.role === 'TRANSFERENCISTA'
   const isMinorista = user?.role === 'MINORISTA'
@@ -325,8 +330,9 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
         proofUrl: proofUrl || undefined,
       })
       toast.success('Giro ejecutado exitosamente')
+      // Mostrar modal de impresión después de ejecutar
+      setShowPrintModal(true)
       onUpdate()
-      onOpenChange(false)
     } catch (error: any) {
       toast.error(error.message || 'Error al ejecutar giro')
     } finally {
@@ -863,6 +869,21 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                 )}
               </div>
 
+              {/* Botón de impresión para giros completados */}
+              {giro.status === 'COMPLETADO' && (
+                <div className="pt-4">
+                  <Button
+                    onClick={() => setShowPrintModal(true)}
+                    disabled={processing}
+                    variant="outline"
+                    className="w-full gap-2"
+                  >
+                    <Printer className="h-4 w-4" />
+                    Imprimir Tiquete
+                  </Button>
+                </div>
+              )}
+
               {/* Actions for Transferencista */}
               {isTransferencista && giro.status === 'ASIGNADO' && (
                 <div className="pt-4">
@@ -1020,6 +1041,21 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
           ) : null}
         </SheetBody>
       </SheetContent>
+
+      {/* Modal de impresión de tiquete */}
+      {giro && (
+        <PrintTicketModal
+          giroId={giro.id}
+          open={showPrintModal}
+          onOpenChange={(open) => {
+            setShowPrintModal(open)
+            // Cerrar el sheet principal después de cerrar el modal de impresión
+            if (!open) {
+              onOpenChange(false)
+            }
+          }}
+        />
+      )}
     </Sheet>
   )
 }
