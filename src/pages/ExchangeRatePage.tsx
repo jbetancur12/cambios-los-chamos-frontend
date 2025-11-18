@@ -192,7 +192,7 @@ export function ExchangeRatePage() {
       {/* Create Button */}
       {canCreateRate && (
         <div className="mb-6">
-          <Button onClick={() => setCreateSheetOpen(true)}>
+          <Button onClick={() => setCreateSheetOpen(true)} className='bg-[linear-gradient(to_right,#136BBC,#274565)]'>
             <Plus className="h-4 w-4 mr-2" />
             Crear Nueva Tasa
           </Button>
@@ -249,7 +249,7 @@ export function ExchangeRatePage() {
                       <span>{formatDate(rate.createdAt)}</span>
                     </div>
                     {rate.id === currentRate?.id && (
-                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-primary text-primary-foreground">
+                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-primary text-primary-foreground bg-[linear-gradient(to_right,#136BBC,#274565)]">
                         Actual
                       </span>
                     )}

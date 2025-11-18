@@ -301,6 +301,7 @@ export function UsersPage() {
           variant={selectedRole === 'ALL' ? 'default' : 'outline'}
           size="sm"
           onClick={() => setSelectedRole('ALL')}
+          style={selectedRole == "ALL" ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
         >
           Todos
         </Button>
@@ -308,6 +309,8 @@ export function UsersPage() {
           variant={selectedRole === 'ADMIN' ? 'default' : 'outline'}
           size="sm"
           onClick={() => setSelectedRole('ADMIN')}
+          style={selectedRole == "ADMIN" ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+
         >
           Admins
         </Button>
@@ -315,6 +318,8 @@ export function UsersPage() {
           variant={selectedRole === 'TRANSFERENCISTA' ? 'default' : 'outline'}
           size="sm"
           onClick={() => setSelectedRole('TRANSFERENCISTA')}
+          style={selectedRole == "TRANSFERENCISTA" ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+
         >
           Transferencistas
         </Button>
@@ -322,6 +327,8 @@ export function UsersPage() {
           variant={selectedRole === 'MINORISTA' ? 'default' : 'outline'}
           size="sm"
           onClick={() => setSelectedRole('MINORISTA')}
+          style={selectedRole == "MINORISTA" ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+
         >
           Minoristas
         </Button>
@@ -391,6 +398,7 @@ export function UsersPage() {
                         <Switch
                           checked={user.isActive}
                           onCheckedChange={(checked) => handleToggleActive(user.id, checked)}
+
                         />
                         <span className="text-sm text-muted-foreground">
                           {user.isActive ? 'Activo' : 'Desactivado'}
@@ -494,9 +502,8 @@ export function UsersPage() {
         {/* FAB Button */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className={`bg-primary text-primary-foreground rounded-full p-4 shadow-lg hover:shadow-xl transition-all active:scale-95 ${
-            menuOpen ? 'rotate-45' : ''
-          }`}
+          className={`bg-primary text-primary-foreground rounded-full p-4 shadow-lg hover:shadow-xl transition-all active:scale-95 ${menuOpen ? 'rotate-45' : ''
+            }`}
         >
           <Plus className="h-6 w-6" />
         </button>

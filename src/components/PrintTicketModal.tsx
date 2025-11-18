@@ -102,8 +102,13 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
         }
 
         @page {
-            size: 5.5in 8.5in;
-            margin: 0.3in;
+            margin: 0;                   
+            @top-left { content: none; }
+            @top-center { content: none; }
+            @top-right { content: none; }
+            @bottom-left { content: none; }
+            @bottom-center { content: none; }
+            @bottom-right { content: none; }
         }
 
         body {
@@ -321,10 +326,20 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tiquete Giro #${data.giroId}</title>
     <style>
-        * {
+            * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+        }
+
+        @page {
+            margin: 0;                   
+            @top-left { content: none; }
+            @top-center { content: none; }
+            @top-right { content: none; }
+            @bottom-left { content: none; }
+            @bottom-center { content: none; }
+            @bottom-right { content: none; }
         }
 
         body {
@@ -506,20 +521,12 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
             <div class="amount-highlight">
                 Bs. ${data.amountBs}
             </div>
-            ${data.commission ? `
-            <div class="row">
-                <span class="label">Comisión:</span>
-                <span class="value">Bs. ${data.commission}</span>
-            </div>
-            ` : ''}
+        
         </div>
 
         <!-- OPERADORES -->
         <div class="section">
-            <div class="row">
-                <span class="label">Creado por:</span>
-                <span class="value">${data.createdByName}</span>
-            </div>
+           
             ${data.executedByName ? `
             <div class="row">
                 <span class="label">Ejecutado por:</span>

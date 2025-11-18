@@ -57,17 +57,17 @@ export function useSiaRateImage() {
       ctx.drawImage(img, 0, 0, img.width, img.height);
 
       const offsetX = 30;
-      const offsetY = 240;
+      const offsetY = 250;
 
       const cardWidth = img.width - 60;
       const cardHeight = 1040;
 
       // Draw main logo
-      const mainLogoHeight = 400;
+      const mainLogoHeight = 600;
       const mainLogoWidth = (mainLogo.width / mainLogo.height) * mainLogoHeight;
 
       const mainLogoX = offsetX + (cardWidth / 2) - (mainLogoWidth / 2);
-      const mainLogoY = offsetY - 320;
+      const mainLogoY = offsetY - 400;
 
       ctx.drawImage(mainLogo, mainLogoX, mainLogoY, mainLogoWidth, mainLogoHeight);
 
@@ -84,7 +84,7 @@ export function useSiaRateImage() {
 
       // Date
       ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 20px Arial';
+      ctx.font = 'bold 28px Arial';
       ctx.textAlign = 'left';
 
       const dateStr = new Date().toLocaleDateString('es-ES', {
@@ -93,14 +93,14 @@ export function useSiaRateImage() {
         day: 'numeric'
       });
 
-      ctx.fillText(dateStr, offsetX + 30, offsetY + 32);
+      ctx.fillText(dateStr, offsetX + 30, offsetY + 35);
 
       // Sell Rate
       ctx.textAlign = 'right';
       ctx.fillText(
         'TASA ' + rate.sellRate.toFixed(1),
         offsetX + cardWidth - 30,
-        offsetY + 32
+        offsetY + 35
       );
 
       // ---- TABLE HEADER (TEXT ONLY) ----
@@ -108,7 +108,7 @@ export function useSiaRateImage() {
       const headerX = offsetX + 30;
 
       ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 20px Arial';
+      ctx.font = 'bold 28px Arial';
       ctx.textAlign = 'center';
 
       const colGap = 20;
@@ -129,6 +129,15 @@ export function useSiaRateImage() {
       const bcvLogoX = col3X + (colWidth / 2) - (bcvLogoWidth / 2);
       const bcvLogoY = offsetY + 88 - (bcvLogoHeight / 2) - 5;
 
+      const headerCircleRadius = bcvLogoHeight / 2; // Radio del círculo
+      const headerCircleX = bcvLogoX + bcvLogoWidth / 2;
+      const headerCircleY = bcvLogoY + bcvLogoHeight / 2;
+
+      ctx.beginPath();
+      ctx.arc(headerCircleX, headerCircleY, headerCircleRadius, 0, Math.PI * 2, false);
+      ctx.fillStyle = '#ffffff'; // Color blanco
+      ctx.fill();
+
       ctx.drawImage(bcvLogo, bcvLogoX, bcvLogoY, bcvLogoWidth, bcvLogoHeight);
 
       // ---- DATA TABLE ----
@@ -147,17 +156,17 @@ export function useSiaRateImage() {
 
         // Draw cell background
         ctx.fillStyle = '#260000';
-        roundRect(ctx, col1X, y - 30, colWidth, rowHeight, 8);
+        roundRect(ctx, col1X, y - 38, colWidth, rowHeight, 8);
         ctx.fill();
 
-        roundRect(ctx, col2X, y - 30, colWidth, rowHeight, 8);
+        roundRect(ctx, col2X, y - 38, colWidth, rowHeight, 8);
         ctx.fill();
 
-        roundRect(ctx, col3X, y - 30, colWidth, rowHeight, 8);
+        roundRect(ctx, col3X, y - 38, colWidth, rowHeight, 8);
         ctx.fill();
 
         ctx.fillStyle = '#ffffff';
-        ctx.font = '20px Arial';
+        ctx.font = '28px Arial';
         ctx.textAlign = 'center';
 
         // COP
@@ -178,7 +187,7 @@ export function useSiaRateImage() {
 
       // ---- FOOTER BCV (ROUNDED RECTANGLE) ----
       const footerRectWidth = 240;
-      const footerRectHeight = 70;
+      const footerRectHeight = 90;
       const footerRadius = 15;
 
       const footerX = 600
@@ -194,6 +203,16 @@ export function useSiaRateImage() {
 
       const logoX = footerX + 20;
       const logoY = footerY + (footerRectHeight / 2) - (logoHeight / 2);
+
+      const circleRadius = logoHeight / 2; // Un poco más grande que la mitad del alto del logo para un margen
+      const circleX = logoX + logoWidth / 2;
+      const circleY = logoY + logoHeight / 2;
+
+      ctx.beginPath();
+      ctx.arc(circleX, circleY, circleRadius, 0, Math.PI * 2, false);
+      ctx.fillStyle = '#ffffff'; // Color blanco para el círculo
+      ctx.fill();
+      // ------------
 
       ctx.drawImage(bcvLogo, logoX, logoY, logoWidth, logoHeight);
 
@@ -234,12 +253,20 @@ export function useSiaRateImage() {
     try {
       const imageUrl = await generateImage(rate);
       if (imageUrl) {
-        const a = document.createElement('a');
-        a.href = imageUrl;
-        const dateForFilename = new Date().toISOString().split('T')[0];
-        a.download = `tasa-${dateForFilename}.png`;
-        a.click();
-        URL.revokeObjectURL(imageUrl);
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        if (isMobile) {
+          // Para mobile, abrir en nueva pestaña para que se guarde en galería
+          window.open(imageUrl, '_blank');
+        } else {
+          // Para desktop, descargar normalmente
+          const a = document.createElement('a');
+          a.href = imageUrl;
+          const dateForFilename = new Date().toISOString().split('T')[0];
+          a.download = `tasa-${dateForFilename}.png`;
+          a.click();
+          URL.revokeObjectURL(imageUrl);
+        }
       }
     } catch (error) {
       console.error('Error downloading image:', error);
