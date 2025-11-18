@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -142,23 +142,17 @@ export function ReportsPage() {
   const [minoristaReport, setMinoristaReport] = useState<TopMinoristaReport | null>(null)
   const [bankReport, setBankReport] = useState<BankTransactionReport | null>(null)
   const [minoristaTransactionReport, setMinoristaTransactionReport] = useState<MinoristaTransactionReport | null>(null)
-  const handleQuickDateRange = (range: 'today' | 'yesterday' | 'week' | 'lastWeek' | 'month' | 'lastMonth' | 'year') => {
-    const dates = getDateRange(range)
-    setDateFrom(dates.from)
-    setDateTo(dates.to)
-  }
 
-  const handleLoadReports = async () => {
-    if (!dateFrom || !dateTo) {
-      toast.error('Por favor selecciona un rango de fechas')
+  const loadReports = async (fromDate: string, toDate: string) => {
+    if (!fromDate || !toDate) {
       return
     }
 
     setLoading(true)
 
     try {
-      const dateFromISO = new Date(dateFrom).toISOString()
-      const dateToISO = new Date(dateTo).toISOString()
+      const dateFromISO = new Date(fromDate).toISOString()
+      const dateToISO = new Date(toDate).toISOString()
 
       if (activeTab === 'system') {
         const data = await api.get<SystemProfitReport>(
@@ -185,13 +179,40 @@ export function ReportsPage() {
         )
         setMinoristaTransactionReport(data)
       }
-      toast.success('Reporte cargado exitosamente')
     } catch (err: any) {
       toast.error(err.message || 'Error al cargar reporte')
       console.error(err)
     } finally {
       setLoading(false)
     }
+  }
+
+  // Load today's data on component mount
+  useEffect(() => {
+    const dates = getDateRange('today')
+    setDateFrom(dates.from)
+    setDateTo(dates.to)
+  }, [])
+
+  // Auto-load reports when dates change
+  useEffect(() => {
+    if (dateFrom && dateTo) {
+      loadReports(dateFrom, dateTo)
+    }
+  }, [dateFrom, dateTo, activeTab])
+
+  const handleQuickDateRange = (range: 'today' | 'yesterday' | 'week' | 'lastWeek' | 'month' | 'lastMonth' | 'year') => {
+    const dates = getDateRange(range)
+    setDateFrom(dates.from)
+    setDateTo(dates.to)
+  }
+
+  const handleLoadReports = async () => {
+    if (!dateFrom || !dateTo) {
+      toast.error('Por favor selecciona un rango de fechas')
+      return
+    }
+    await loadReports(dateFrom, dateTo)
   }
 
   const handleTabChange = (tab: TabType) => {
