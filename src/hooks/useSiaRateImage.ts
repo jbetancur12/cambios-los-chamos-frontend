@@ -20,72 +20,83 @@ export function useSiaRateImage() {
       })
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
 
-      // Header
+      // Header (Red bar)
       ctx.fillStyle = '#dc2626'
-      ctx.fillRect(0, 0, canvas.width, 100)
+      ctx.fillRect(0, 80, canvas.width, 50)
 
-      // Date and Rate
+      // Date and Rate in header
       ctx.fillStyle = '#ffffff'
-      ctx.font = 'bold 28px Arial'
+      ctx.font = 'bold 20px Arial'
       ctx.textAlign = 'left'
-      const dateStr = new Date().toLocaleDateString('es-VE', { year: 'numeric', month: 'short', day: 'numeric' })
-      ctx.fillText(dateStr, 30, 60)
+      const dateStr = new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' })
+      ctx.fillText(dateStr, 30, 115)
 
       ctx.textAlign = 'right'
-      ctx.fillText('TASA 13', canvas.width - 30, 60)
+      ctx.fillText('TASA ' + rate.sellRate.toFixed(1), canvas.width - 30, 115)
 
-      // Table header
-      ctx.fillStyle = '#374151'
-      ctx.fillRect(30, 120, 740, 40)
+      // Table header with blue background
+      ctx.fillStyle = '#1e3a5f'
+      ctx.fillRect(30, 140, 740, 40)
 
       ctx.fillStyle = '#ffffff'
       ctx.font = 'bold 18px Arial'
       ctx.textAlign = 'center'
-      ctx.fillText('COP', 180, 155)
-      ctx.fillText('BS', 420, 155)
-      ctx.fillText('USD', 650, 155)
+      ctx.fillText('COP', 200, 175)
+      ctx.fillText('BS', 420, 175)
+      ctx.fillText('USD', 640, 175)
 
       // Table rows
       const amounts = [10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000, 200000, 300000]
       const rowHeight = 40
-      const startY = 170
-
-      ctx.fillStyle = '#1f2937'
-      ctx.font = '16px Arial'
+      const startY = 190
+      const colWidth = 250
 
       amounts.forEach((amount, index) => {
         const y = startY + index * rowHeight
 
-        // Alternate row colors
-        if (index % 2 === 1) {
-          ctx.fillStyle = '#111827'
-          ctx.fillRect(30, y - 30, 740, rowHeight)
-        }
+        // Draw cell borders (blue lines)
+        ctx.strokeStyle = '#2563eb'
+        ctx.lineWidth = 2
+
+        // Draw columns
+        ctx.strokeRect(30, y - 30, colWidth - 10, rowHeight)
+        ctx.strokeRect(30 + colWidth - 10, y - 30, colWidth - 10, rowHeight)
+        ctx.strokeRect(30 + (colWidth - 10) * 2, y - 30, colWidth - 10, rowHeight)
+
+        // Dark background for rows
+        ctx.fillStyle = '#1a1a2e'
+        ctx.fillRect(31, y - 29, colWidth - 12, rowHeight - 2)
+        ctx.fillRect(31 + colWidth - 10, y - 29, colWidth - 12, rowHeight - 2)
+        ctx.fillRect(31 + (colWidth - 10) * 2, y - 29, colWidth - 12, rowHeight - 2)
 
         ctx.fillStyle = '#ffffff'
+        ctx.font = '14px Arial'
         ctx.textAlign = 'center'
 
         // COP
-        ctx.fillText(amount.toLocaleString('es-VE'), 180, y)
+        ctx.fillText(amount.toLocaleString('es-VE'), 30 + (colWidth - 10) / 2, y)
 
         // BS
         const bs = (amount / rate.buyRate) * rate.bcv
-        ctx.fillText(bs.toFixed(2), 420, y)
+        ctx.fillText(bs.toFixed(2), 30 + colWidth - 10 + (colWidth - 10) / 2, y)
 
         // USD
         const usd = amount / rate.usd
-        ctx.fillText(usd.toFixed(2), 650, y)
+        ctx.fillText(usd.toFixed(2), 30 + (colWidth - 10) * 2 + (colWidth - 10) / 2, y)
       })
 
-      // Footer with rate info
+      // Footer with rate info (red circle with rate)
       ctx.fillStyle = '#dc2626'
-      ctx.fillRect(0, canvas.height - 60, canvas.width, 60)
+      ctx.beginPath()
+      ctx.arc(canvas.width - 60, canvas.height - 40, 45, 0, Math.PI * 2)
+      ctx.fill()
 
       ctx.fillStyle = '#ffffff'
-      ctx.font = 'bold 24px Arial'
+      ctx.font = 'bold 32px Arial'
       ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
       const sellRateStr = rate.sellRate.toFixed(2)
-      ctx.fillText(sellRateStr, canvas.width / 2, canvas.height - 20)
+      ctx.fillText(sellRateStr, canvas.width - 60, canvas.height - 40)
 
       // Download
       canvas.toBlob((blob) => {
