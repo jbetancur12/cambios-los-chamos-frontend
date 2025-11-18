@@ -820,6 +820,14 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                 </div>
               )}
 
+              {/* Creator Info */}
+              {giro.createdBy && (
+                <div className="space-y-2 p-4 bg-muted rounded-lg text-sm">
+                  <p className="text-muted-foreground">Creado por</p>
+                  <p className="font-medium">{giro.createdBy.fullName}</p>
+                </div>
+              )}
+
               {/* Transferencista Info */}
               {giro.transferencista && (
                 <div className="space-y-2 p-4 bg-muted rounded-lg text-sm">
