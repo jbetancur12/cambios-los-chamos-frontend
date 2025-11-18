@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetBody } from '@/components/ui/sheet'
-import { Plus, TrendingUp, Calendar, Download } from 'lucide-react'
+import { Plus, TrendingUp, Calendar, Download, Eye } from 'lucide-react'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
 import { useSiaRateImage } from '@/hooks/useSiaRateImage'
@@ -17,6 +17,8 @@ export function ExchangeRatePage() {
   const [currentRate, setCurrentRate] = useState<ExchangeRate | null>(null)
   const [loading, setLoading] = useState(true)
   const [createSheetOpen, setCreateSheetOpen] = useState(false)
+  const [previewOpen, setPreviewOpen] = useState(false)
+  const [previewImage, setPreviewImage] = useState<string | null>(null)
 
   // Form fields
   const [buyRate, setBuyRate] = useState('')
@@ -26,7 +28,7 @@ export function ExchangeRatePage() {
   const [submitting, setSubmitting] = useState(false)
 
   const canCreateRate = user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN'
-  const { generateAndDownloadImage } = useSiaRateImage()
+  const { generateAndDownloadImage, generatePreviewImage } = useSiaRateImage()
 
   useEffect(() => {
     fetchRates()
@@ -153,18 +155,35 @@ export function ExchangeRatePage() {
                 <Calendar className="h-3 w-3" />
                 <span>Actualizado: {formatDate(currentRate.createdAt)}</span>
               </div>
-              <Button
-                onClick={() => {
-                  generateAndDownloadImage(currentRate)
-                  toast.success('Tasa descargada como imagen')
-                }}
-                size="sm"
-                variant="outline"
-                className="w-full sm:w-auto gap-2"
-              >
-                <Download className="h-4 w-4" />
-                Descargar
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  onClick={async () => {
+                    const imageUrl = await generatePreviewImage(currentRate)
+                    if (imageUrl) {
+                      setPreviewImage(imageUrl)
+                      setPreviewOpen(true)
+                    }
+                  }}
+                  size="sm"
+                  variant="outline"
+                  className="flex-1 sm:flex-initial gap-2"
+                >
+                  <Eye className="h-4 w-4" />
+                  Ver
+                </Button>
+                <Button
+                  onClick={() => {
+                    generateAndDownloadImage(currentRate)
+                    toast.success('Tasa descargada como imagen')
+                  }}
+                  size="sm"
+                  variant="outline"
+                  className="flex-1 sm:flex-initial gap-2"
+                >
+                  <Download className="h-4 w-4" />
+                  Descargar
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -328,6 +347,60 @@ export function ExchangeRatePage() {
               </div>
             </form>
           </SheetBody>
+        </SheetContent>
+      </Sheet>
+
+      {/* Preview Sheet */}
+      <Sheet open={previewOpen} onOpenChange={setPreviewOpen}>
+        <SheetContent>
+          <SheetHeader>
+            <SheetTitle>Vista Previa de Tasa</SheetTitle>
+          </SheetHeader>
+
+          {previewImage && (
+            <div className="mt-6 flex flex-col items-center justify-center overflow-y-auto max-h-[calc(100vh-150px)]">
+              <img
+                src={previewImage}
+                alt="Vista previa de tasa"
+                className="max-w-full h-auto border rounded-lg shadow-lg"
+              />
+              <div className="mt-4 flex gap-2 justify-center">
+                <Button
+                  onClick={() => {
+                    // Copy to clipboard
+                    fetch(previewImage)
+                      .then(res => res.blob())
+                      .then(blob => navigator.clipboard.write([
+                        new ClipboardItem({ 'image/png': blob })
+                      ]))
+                      .then(() => toast.success('Imagen copiada al portapapeles'))
+                      .catch(err => {
+                        console.error('Error copying to clipboard:', err)
+                        toast.error('No se pudo copiar la imagen')
+                      })
+                  }}
+                  variant="outline"
+                  size="sm"
+                >
+                  Copiar
+                </Button>
+                <Button
+                  onClick={() => {
+                    const a = document.createElement('a')
+                    a.href = previewImage
+                    const dateForFilename = new Date().toISOString().split('T')[0]
+                    a.download = `tasa-sia-${dateForFilename}.png`
+                    a.click()
+                  }}
+                  variant="outline"
+                  size="sm"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Descargar
+                </Button>
+              </div>
+            </div>
+          )}
         </SheetContent>
       </Sheet>
     </div>

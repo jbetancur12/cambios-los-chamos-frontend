@@ -15,7 +15,7 @@ function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, width: n
   ctx.closePath()
 }
 export function useSiaRateImage() {
-  const generateAndDownloadImage = useCallback(async (rate: ExchangeRate) => {
+  const generateImage = useCallback(async (rate: ExchangeRate): Promise<string> => {
     console.log("🚀 ~ useSiaRateImage ~ rate:", rate)
     try {
       // Load main logo
@@ -51,7 +51,7 @@ export function useSiaRateImage() {
       canvas.height = img.height;
 
       const ctx = canvas.getContext('2d');
-      if (!ctx) return;
+      if (!ctx) return '';
 
       // Draw background
       ctx.drawImage(img, 0, 0, img.width, img.height);
@@ -213,17 +213,16 @@ export function useSiaRateImage() {
         bcvRateTextY
       );
 
-      // ---- EXPORT ----
-      canvas.toBlob((blob) => {
-        if (blob) {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          const dateForFilename = new Date().toISOString().split('T')[0];
-          a.download = `tasa-sia-${dateForFilename}.png`;
-          a.click();
-          URL.revokeObjectURL(url);
-        }
+      // ---- RETURN IMAGE AS DATA URL ----
+      return new Promise((resolve) => {
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const url = URL.createObjectURL(blob);
+            resolve(url);
+          } else {
+            resolve('');
+          }
+        });
       });
     } catch (error) {
       console.error('Error generating image:', error);
@@ -231,5 +230,30 @@ export function useSiaRateImage() {
     }
   }, []);
 
-  return { generateAndDownloadImage }
+  const generateAndDownloadImage = useCallback(async (rate: ExchangeRate) => {
+    try {
+      const imageUrl = await generateImage(rate);
+      if (imageUrl) {
+        const a = document.createElement('a');
+        a.href = imageUrl;
+        const dateForFilename = new Date().toISOString().split('T')[0];
+        a.download = `tasa-sia-${dateForFilename}.png`;
+        a.click();
+        URL.revokeObjectURL(imageUrl);
+      }
+    } catch (error) {
+      console.error('Error downloading image:', error);
+    }
+  }, [generateImage]);
+
+  const generatePreviewImage = useCallback(async (rate: ExchangeRate) => {
+    try {
+      return await generateImage(rate);
+    } catch (error) {
+      console.error('Error generating preview:', error);
+      return null;
+    }
+  }, [generateImage]);
+
+  return { generateAndDownloadImage, generatePreviewImage }
 }
