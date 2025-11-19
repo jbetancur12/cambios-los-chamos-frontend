@@ -105,50 +105,50 @@ export function GirosPage() {
   }, [subscribe])
 
   const getDateRange = (filterType: DateFilterType) => {
-    // Use UTC date to ensure consistent filtering across timezones
+    // Use local timezone dates. Backend will convert to UTC for database comparison.
     const today = new Date()
-    const utcYear = today.getUTCFullYear()
-    const utcMonth = String(today.getUTCMonth() + 1).padStart(2, '0')
-    const utcDay = String(today.getUTCDate()).padStart(2, '0')
+    const year = today.getFullYear()
+    const month = String(today.getMonth() + 1).padStart(2, '0')
+    const day = String(today.getDate()).padStart(2, '0')
 
     let fromDate: string, toDate: string
 
     switch (filterType) {
       case 'TODAY':
-        fromDate = `${utcYear}-${utcMonth}-${utcDay}`
-        toDate = `${utcYear}-${utcMonth}-${utcDay}`
+        fromDate = `${year}-${month}-${day}`
+        toDate = `${year}-${month}-${day}`
         break
       case 'YESTERDAY':
         const yesterday = new Date(today)
-        yesterday.setUTCDate(yesterday.getUTCDate() - 1)
-        fromDate = `${yesterday.getUTCFullYear()}-${String(yesterday.getUTCMonth() + 1).padStart(2, '0')}-${String(yesterday.getUTCDate()).padStart(2, '0')}`
-        toDate = fromDate
+        yesterday.setDate(yesterday.getDate() - 1)
+        fromDate = yesterday.toISOString().split('T')[0]
+        toDate = yesterday.toISOString().split('T')[0]
         break
       case 'THIS_WEEK':
-        const dayOfWeek = today.getUTCDay()
+        const dayOfWeek = today.getDay()
         const startOfWeek = new Date(today)
-        startOfWeek.setUTCDate(today.getUTCDate() - dayOfWeek)
-        fromDate = `${startOfWeek.getUTCFullYear()}-${String(startOfWeek.getUTCMonth() + 1).padStart(2, '0')}-${String(startOfWeek.getUTCDate()).padStart(2, '0')}`
-        toDate = `${utcYear}-${utcMonth}-${utcDay}`
+        startOfWeek.setDate(today.getDate() - dayOfWeek)
+        fromDate = startOfWeek.toISOString().split('T')[0]
+        toDate = `${year}-${month}-${day}`
         break
       case 'LAST_WEEK':
-        const dayOfWeekLast = today.getUTCDay()
+        const dayOfWeekLast = today.getDay()
         const endOfLastWeek = new Date(today)
-        endOfLastWeek.setUTCDate(today.getUTCDate() - dayOfWeekLast - 1)
+        endOfLastWeek.setDate(today.getDate() - dayOfWeekLast - 1)
         const startOfLastWeek = new Date(endOfLastWeek)
-        startOfLastWeek.setUTCDate(endOfLastWeek.getUTCDate() - 6)
-        fromDate = `${startOfLastWeek.getUTCFullYear()}-${String(startOfLastWeek.getUTCMonth() + 1).padStart(2, '0')}-${String(startOfLastWeek.getUTCDate()).padStart(2, '0')}`
-        toDate = `${endOfLastWeek.getUTCFullYear()}-${String(endOfLastWeek.getUTCMonth() + 1).padStart(2, '0')}-${String(endOfLastWeek.getUTCDate()).padStart(2, '0')}`
+        startOfLastWeek.setDate(endOfLastWeek.getDate() - 6)
+        fromDate = startOfLastWeek.toISOString().split('T')[0]
+        toDate = endOfLastWeek.toISOString().split('T')[0]
         break
       case 'THIS_MONTH':
-        fromDate = `${utcYear}-${utcMonth}-01`
-        toDate = `${utcYear}-${utcMonth}-${utcDay}`
+        fromDate = `${year}-${month}-01`
+        toDate = `${year}-${month}-${day}`
         break
       case 'LAST_MONTH':
-        const lastMonth = new Date(utcYear, parseInt(utcMonth) - 2, 1)
-        const lastMonthYear = lastMonth.getUTCFullYear()
-        const lastMonthNum = String(lastMonth.getUTCMonth() + 1).padStart(2, '0')
-        const lastDayOfLastMonth = new Date(lastMonthYear, parseInt(lastMonthNum), 0).getUTCDate()
+        const lastMonth = new Date(year, parseInt(month) - 2, 1)
+        const lastMonthYear = lastMonth.getFullYear()
+        const lastMonthNum = String(lastMonth.getMonth() + 1).padStart(2, '0')
+        const lastDayOfLastMonth = new Date(lastMonthYear, parseInt(lastMonthNum), 0).getDate()
         fromDate = `${lastMonthYear}-${lastMonthNum}-01`
         toDate = `${lastMonthYear}-${lastMonthNum}-${String(lastDayOfLastMonth).padStart(2, '0')}`
         break
@@ -174,11 +174,10 @@ export function GirosPage() {
 
       if (filterDate !== 'ALL') {
         const dateRange = getDateRange(filterDate)
-        // Convert dates to ISO format at midnight (start and end of day)
-        const fromDate = new Date(`${dateRange.from}T00:00:00Z`)
-        const toDate = new Date(`${dateRange.to}T23:59:59Z`)
-        params.append('dateFrom', fromDate.toISOString())
-        params.append('dateTo', toDate.toISOString())
+        // Send local dates as-is (YYYY-MM-DD format)
+        // Backend will convert from local timezone to UTC
+        params.append('dateFrom', dateRange.from)
+        params.append('dateTo', dateRange.to)
       }
 
       const response = await api.get<{
