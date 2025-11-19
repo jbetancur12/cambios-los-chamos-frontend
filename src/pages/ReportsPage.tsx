@@ -87,6 +87,14 @@ interface MinoristaTransactionReport {
 
 type TabType = 'system' | 'minoristas' | 'bank' | 'minoristaTransactions'
 
+// Helper function to format a Date as YYYY-MM-DD in local timezone (not UTC)
+const formatLocalDate = (date: Date): string => {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 const getDateRange = (range: 'today' | 'yesterday' | 'week' | 'lastWeek' | 'month' | 'lastMonth' | 'year') => {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
@@ -124,8 +132,8 @@ const getDateRange = (range: 'today' | 'yesterday' | 'week' | 'lastWeek' | 'mont
   }
 
   return {
-    from: dateFrom.toISOString().split('T')[0],
-    to: dateTo.toISOString().split('T')[0],
+    from: formatLocalDate(dateFrom),
+    to: formatLocalDate(dateTo),
   }
 }
 
@@ -154,31 +162,29 @@ export function ReportsPage() {
     setLoading(true)
 
     try {
-      const dateFromISO = new Date(fromDate).toISOString()
-      const dateToISO = new Date(toDate).toISOString()
-
+      // Send dates as YYYY-MM-DD format (local timezone, backend will convert to UTC)
       if (activeTab === 'system') {
         const data = await api.get<SystemProfitReport>(
-          `/api/reports/system-profit?dateFrom=${dateFromISO}&dateTo=${dateToISO}`
+          `/api/reports/system-profit?dateFrom=${fromDate}&dateTo=${toDate}`
         )
         const trendData = await api.get<SystemProfitTrendReport>(
-          `/api/reports/system-profit-trend?dateFrom=${dateFromISO}&dateTo=${dateToISO}`
+          `/api/reports/system-profit-trend?dateFrom=${fromDate}&dateTo=${toDate}`
         )
         setSystemReport(data)
         setSystemTrendReport(trendData)
       } else if (activeTab === 'minoristas') {
         const data = await api.get<TopMinoristaReport>(
-          `/api/reports/minorista-profit?dateFrom=${dateFromISO}&dateTo=${dateToISO}`
+          `/api/reports/minorista-profit?dateFrom=${fromDate}&dateTo=${toDate}`
         )
         setMinoristaReport(data)
       } else if (activeTab === 'bank') {
         const data = await api.get<BankTransactionReport>(
-          `/api/reports/bank-transactions?dateFrom=${dateFromISO}&dateTo=${dateToISO}`
+          `/api/reports/bank-transactions?dateFrom=${fromDate}&dateTo=${toDate}`
         )
         setBankReport(data)
       } else if (activeTab === 'minoristaTransactions') {
         const data = await api.get<MinoristaTransactionReport>(
-          `/api/reports/minorista-transactions?dateFrom=${dateFromISO}&dateTo=${dateToISO}`
+          `/api/reports/minorista-transactions?dateFrom=${fromDate}&dateTo=${toDate}`
         )
         setMinoristaTransactionReport(data)
       }

@@ -45,6 +45,14 @@ interface MinoristaGiroTrendReport {
   averageProfitPerGiro: number
 }
 
+// Helper function to format a Date as YYYY-MM-DD in local timezone (not UTC)
+const formatLocalDate = (date: Date): string => {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 const getDateRange = (range: 'today' | 'yesterday' | 'week' | 'lastWeek' | 'month' | 'lastMonth' | 'year') => {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
@@ -82,8 +90,8 @@ const getDateRange = (range: 'today' | 'yesterday' | 'week' | 'lastWeek' | 'mont
   }
 
   return {
-    from: dateFrom.toISOString().split('T')[0],
-    to: dateTo.toISOString().split('T')[0],
+    from: formatLocalDate(dateFrom),
+    to: formatLocalDate(dateTo),
   }
 }
 
@@ -118,12 +126,10 @@ export function MinoristaReportsPage() {
     setLoading(true)
 
     try {
-      const dateFromISO = new Date(dateFrom).toISOString()
-      const dateToISO = new Date(dateTo).toISOString()
-
+      // Send dates as YYYY-MM-DD format (local timezone, backend will convert to UTC)
       const [reportData, trendData] = await Promise.all([
-        api.get<MinoristaGiroReport>(`/api/reports/minorista/giros?dateFrom=${dateFromISO}&dateTo=${dateToISO}`),
-        api.get<MinoristaGiroTrendReport>(`/api/reports/minorista/giros-trend?dateFrom=${dateFromISO}&dateTo=${dateToISO}`),
+        api.get<MinoristaGiroReport>(`/api/reports/minorista/giros?dateFrom=${dateFrom}&dateTo=${dateTo}`),
+        api.get<MinoristaGiroTrendReport>(`/api/reports/minorista/giros-trend?dateFrom=${dateFrom}&dateTo=${dateTo}`),
       ])
 
       setReport(reportData)
