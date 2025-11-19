@@ -337,7 +337,7 @@ export function ReportsPage() {
                   className="w-full"
                 />
               </div>
-              <Button onClick={handleLoadReports} disabled={loading} className="w-full">
+              <Button onClick={handleLoadReports} disabled={loading} className="w-full bg-[linear-gradient(to_right,#136BBC,#274565)]">
                 {loading ? 'Cargando...' : 'Cargar Reporte'}
               </Button>
             </div>

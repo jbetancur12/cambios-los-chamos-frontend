@@ -33,8 +33,7 @@ export function Sheet({ open, onOpenChange, children }: SheetProps) {
         }}
       />
       {/* Sheet */}
-      <div className="fixed inset-x-0 bottom-0 z-[60] animate-in slide-in-from-bottom duration-300
-                   lg:inset-0 lg:grid lg:place-items-center lg:slide-in-from-bottom">{children}</div>
+      <div className="fixed inset-x-0 bottom-0 z-[60] animate-in slide-in-from-bottom duration-300">{children}</div>
     </>
   )
 }
@@ -43,7 +42,7 @@ export function SheetContent({ children }: { children: React.ReactNode }) {
   return (
     <div
       className="bg-background rounded-t-3xl shadow-2xl max-h-[90vh] overflow-y-auto w-full
-                 lg:rounded-xl lg:max-w-lg lg:max-h-[90vh] lg:m-auto"
+                 lg:rounded-xl  lg:max-h-[90vh] lg:m-auto"
       onClick={(e) => e.stopPropagation()}
     >
       {children}

@@ -194,7 +194,7 @@ export function MinoristaReportsPage() {
               <label className="block text-sm font-medium mb-2">Hasta</label>
               <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-full" />
             </div>
-            <Button onClick={handleLoadReports} disabled={loading} className="w-full">
+            <Button onClick={handleLoadReports} disabled={loading} className="w-full bg-[linear-gradient(to_right,#136BBC,#274565)]">
               {loading ? 'Cargando...' : 'Cargar Reporte'}
             </Button>
           </div>

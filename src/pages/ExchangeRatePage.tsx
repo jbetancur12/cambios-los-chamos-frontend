@@ -281,7 +281,6 @@ export function ExchangeRatePage() {
                   placeholder="Ej: 1.05"
                   required
                 />
-                <p className="text-xs text-muted-foreground">Cuántos bolívares se dan por cada peso colombiano</p>
               </div>
 
               <div className="space-y-2">
@@ -295,11 +294,10 @@ export function ExchangeRatePage() {
                   placeholder="Ej: 0.95"
                   required
                 />
-                <p className="text-xs text-muted-foreground">Cuántos pesos colombianos se dan por cada bolívar</p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="usd">Dólar Paralelo (USD)</Label>
+                <Label htmlFor="usd">Dólar (USD)</Label>
                 <Input
                   id="usd"
                   type="number"
@@ -309,7 +307,7 @@ export function ExchangeRatePage() {
                   placeholder="Ej: 45.50"
                   required
                 />
-                <p className="text-xs text-muted-foreground">Precio del dólar en el mercado paralelo (Bs)</p>
+                {/* <p className="text-xs text-muted-foreground">Precio del dólar en el mercado (Bs)</p> */}
               </div>
 
               <div className="space-y-2">
@@ -323,7 +321,7 @@ export function ExchangeRatePage() {
                   placeholder="Ej: 36.50"
                   required
                 />
-                <p className="text-xs text-muted-foreground">Precio oficial del dólar según BCV (Bs)</p>
+                {/* <p className="text-xs text-muted-foreground">Precio oficial del dólar según BCV (Bs)</p> */}
               </div>
 
               {/* Preview */}

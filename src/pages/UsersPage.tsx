@@ -458,7 +458,7 @@ export function UsersPage() {
                           }
                         >
                           <Wallet className="h-4 w-4 mr-2" />
-                          Recargar Saldo
+                          Gestión de Credito
                         </Button>
                       </div>
                     </CardContent>
