@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
+import { useBeneficiarySuggestions, type BeneficiaryData } from '@/hooks/useBeneficiarySuggestions'
 import type { ExchangeRate } from '@/types/api'
 
 interface Bank {
@@ -26,6 +27,10 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
   const [banks, setBanks] = useState<Bank[]>([])
   const [exchangeRate, setExchangeRate] = useState<ExchangeRate | null>(null)
   const [loading, setLoading] = useState(false)
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const { getSuggestions, addSuggestion } = useBeneficiarySuggestions()
+
+  const filteredSuggestions = getSuggestions(phone, 'PAGO_MOVIL')
 
   useEffect(() => {
     if (open) {
@@ -97,6 +102,23 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
     setPhone('')
     setSenderName('')
     setAmountCop('')
+    setShowSuggestions(false)
+  }
+
+  const handleSelectBeneficiary = (beneficiary: BeneficiaryData) => {
+    setPhone(beneficiary.phone)
+    setCedula(beneficiary.id)
+    setSenderName(beneficiary.phone) // Use phone as name for mobile payments
+    // Try to find bank if it's stored
+    if (beneficiary.bankId && banks.length > 0) {
+      setSelectedBank(beneficiary.bankId)
+    }
+    setShowSuggestions(false)
+  }
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPhone(e.target.value)
+    setShowSuggestions(true)
   }
 
   return (
@@ -113,7 +135,33 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
 
             <div>
               <Label htmlFor="phone">Teléfono del Beneficiario</Label>
-              <Input id="phone" placeholder="04141234567" value={phone} onChange={(e) => setPhone(e.target.value)} />
+              <div className="relative">
+                <Input
+                  id="phone"
+                  placeholder="04141234567"
+                  value={phone}
+                  onChange={handlePhoneChange}
+                  onFocus={() => phone && setShowSuggestions(true)}
+                />
+                {/* Sugerencias inline */}
+                {showSuggestions && filteredSuggestions.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-card border rounded-md shadow-lg z-50 max-h-48 overflow-y-auto">
+                    {filteredSuggestions.map((suggestion, index) => (
+                      <button
+                        key={`${suggestion.phone}-${suggestion.id}-${index}`}
+                        type="button"
+                        onClick={() => handleSelectBeneficiary(suggestion)}
+                        className="w-full text-left px-3 py-2 hover:bg-muted/50 transition-colors text-sm border-b last:border-b-0"
+                      >
+                        <div className="font-medium">{suggestion.phone}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {suggestion.name} • {suggestion.id}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="mt-3">

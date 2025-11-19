@@ -521,44 +521,37 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
             {/* Exchange Rate Info */}
             {!loadingRate && currentRate && (
               <div className="p-3 bg-muted rounded-lg space-y-2">
-                <p className="text-sm font-medium">
-                  {' '}
-                  {!loadingRate && currentRate && (
-                    <div className="p-3 bg-muted rounded-lg space-y-2">
-                      <p className="text-sm font-medium">Tasa de Cambio Actual</p>
+                <p className="text-sm font-medium">Tasa de Cambio Actual</p>
 
-                      {isMinorista ? (
-                        // Mostrar solo tasa de venta para minoristas
-                        <div className="grid grid-cols-1 gap-2 text-xs">
-                          <div>
-                            <span className="text-muted-foreground">Tasa de Venta: </span>
-                            <span className="font-semibold text-lg">{currentRate.sellRate.toFixed(2)}</span>
-                          </div>
-                        </div>
-                      ) : (
-                        // Mostrar todas las tasas para SUPER_ADMIN y ADMIN
-                        <div className="grid grid-cols-2 gap-2 text-xs">
-                          <div>
-                            <span className="text-muted-foreground">Compra: </span>
-                            <span className="font-semibold">{currentRate.buyRate.toFixed(2)}</span>
-                          </div>
-                          <div>
-                            <span className="text-muted-foreground">Venta: </span>
-                            <span className="font-semibold">{currentRate.sellRate.toFixed(2)}</span>
-                          </div>
-                          <div>
-                            <span className="text-muted-foreground">USD: </span>
-                            <span className="font-semibold">{currentRate.usd.toFixed(2)}</span>
-                          </div>
-                          <div>
-                            <span className="text-muted-foreground">BCV: </span>
-                            <span className="font-semibold">{currentRate.bcv.toFixed(2)}</span>
-                          </div>
-                        </div>
-                      )}
+                {isMinorista ? (
+                  // Mostrar solo tasa de venta para minoristas
+                  <div className="grid grid-cols-1 gap-2 text-xs">
+                    <div>
+                      <span className="text-muted-foreground">Tasa de Venta: </span>
+                      <span className="font-semibold text-lg">{currentRate.sellRate.toFixed(2)}</span>
                     </div>
-                  )}
-                </p>
+                  </div>
+                ) : (
+                  // Mostrar todas las tasas para SUPER_ADMIN y ADMIN
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <span className="text-muted-foreground">Compra: </span>
+                      <span className="font-semibold">{currentRate.buyRate.toFixed(2)}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Venta: </span>
+                      <span className="font-semibold">{currentRate.sellRate.toFixed(2)}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">USD: </span>
+                      <span className="font-semibold">{currentRate.usd.toFixed(2)}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">BCV: </span>
+                      <span className="font-semibold">{currentRate.bcv.toFixed(2)}</span>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 

@@ -7,7 +7,7 @@ export interface BeneficiaryData {
   phone: string
   bankId: string
   accountNumber: string
-  executionType?: 'TRANSFERENCIA' | 'PAGO_MOVIL'
+  executionType: 'TRANSFERENCIA' | 'PAGO_MOVIL' | 'RECARGA' | 'EFECTIVO' | 'ZELLE' | 'OTROS'
 }
 
 export function useBeneficiarySuggestions() {
@@ -26,6 +26,7 @@ export function useBeneficiarySuggestions() {
           phone: s.phone,
           bankId: s.bankId,
           accountNumber: s.accountNumber,
+          executionType: s.executionType || 'TRANSFERENCIA',
         }))
         setSuggestions(beneficiaries)
       } catch (error) {
@@ -47,12 +48,13 @@ export function useBeneficiarySuggestions() {
         phone: beneficiary.phone,
         bankId: beneficiary.bankId,
         accountNumber: beneficiary.accountNumber,
+        executionType: beneficiary.executionType,
       })
 
       // Update local state optimistically
       setSuggestions((prev) => {
         const filtered = prev.filter(
-          (b) => !(b.name === beneficiary.name && b.id === beneficiary.id && b.phone === beneficiary.phone)
+          (b) => !(b.name === beneficiary.name && b.id === beneficiary.id && b.phone === beneficiary.phone && b.executionType === beneficiary.executionType)
         )
         return [beneficiary, ...filtered]
       })
@@ -63,15 +65,18 @@ export function useBeneficiarySuggestions() {
 
   // Get suggestions based on search query
   const getSuggestions = useCallback(
-    (query: string, executionType?: 'TRANSFERENCIA' | 'PAGO_MOVIL'): BeneficiaryData[] => {
-      if (!query.trim()) return []
-
+    (query: string, executionType?: 'TRANSFERENCIA' | 'PAGO_MOVIL' | 'RECARGA' | 'EFECTIVO' | 'ZELLE' | 'OTROS'): BeneficiaryData[] => {
       const searchLower = query.toLowerCase()
 
       return suggestions.filter((b) => {
         // Filter by execution type if provided
-        if (executionType && b.executionType && b.executionType !== executionType) {
+        if (executionType && b.executionType !== executionType) {
           return false
+        }
+
+        // If no query, return all suggestions of that type
+        if (!query.trim()) {
+          return true
         }
 
         // Search by name, ID, or phone
