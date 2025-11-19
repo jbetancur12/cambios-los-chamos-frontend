@@ -105,49 +105,50 @@ export function GirosPage() {
   }, [subscribe])
 
   const getDateRange = (filterType: DateFilterType) => {
+    // Use UTC date to ensure consistent filtering across timezones
     const today = new Date()
-    const year = today.getFullYear()
-    const month = String(today.getMonth() + 1).padStart(2, '0')
-    const day = String(today.getDate()).padStart(2, '0')
+    const utcYear = today.getUTCFullYear()
+    const utcMonth = String(today.getUTCMonth() + 1).padStart(2, '0')
+    const utcDay = String(today.getUTCDate()).padStart(2, '0')
 
     let fromDate: string, toDate: string
 
     switch (filterType) {
       case 'TODAY':
-        fromDate = `${year}-${month}-${day}`
-        toDate = `${year}-${month}-${day}`
+        fromDate = `${utcYear}-${utcMonth}-${utcDay}`
+        toDate = `${utcYear}-${utcMonth}-${utcDay}`
         break
       case 'YESTERDAY':
         const yesterday = new Date(today)
-        yesterday.setDate(yesterday.getDate() - 1)
-        fromDate = yesterday.toISOString().split('T')[0]
-        toDate = yesterday.toISOString().split('T')[0]
+        yesterday.setUTCDate(yesterday.getUTCDate() - 1)
+        fromDate = `${yesterday.getUTCFullYear()}-${String(yesterday.getUTCMonth() + 1).padStart(2, '0')}-${String(yesterday.getUTCDate()).padStart(2, '0')}`
+        toDate = fromDate
         break
       case 'THIS_WEEK':
-        const dayOfWeek = today.getDay()
+        const dayOfWeek = today.getUTCDay()
         const startOfWeek = new Date(today)
-        startOfWeek.setDate(today.getDate() - dayOfWeek)
-        fromDate = startOfWeek.toISOString().split('T')[0]
-        toDate = `${year}-${month}-${day}`
+        startOfWeek.setUTCDate(today.getUTCDate() - dayOfWeek)
+        fromDate = `${startOfWeek.getUTCFullYear()}-${String(startOfWeek.getUTCMonth() + 1).padStart(2, '0')}-${String(startOfWeek.getUTCDate()).padStart(2, '0')}`
+        toDate = `${utcYear}-${utcMonth}-${utcDay}`
         break
       case 'LAST_WEEK':
-        const dayOfWeekLast = today.getDay()
+        const dayOfWeekLast = today.getUTCDay()
         const endOfLastWeek = new Date(today)
-        endOfLastWeek.setDate(today.getDate() - dayOfWeekLast - 1)
+        endOfLastWeek.setUTCDate(today.getUTCDate() - dayOfWeekLast - 1)
         const startOfLastWeek = new Date(endOfLastWeek)
-        startOfLastWeek.setDate(endOfLastWeek.getDate() - 6)
-        fromDate = startOfLastWeek.toISOString().split('T')[0]
-        toDate = endOfLastWeek.toISOString().split('T')[0]
+        startOfLastWeek.setUTCDate(endOfLastWeek.getUTCDate() - 6)
+        fromDate = `${startOfLastWeek.getUTCFullYear()}-${String(startOfLastWeek.getUTCMonth() + 1).padStart(2, '0')}-${String(startOfLastWeek.getUTCDate()).padStart(2, '0')}`
+        toDate = `${endOfLastWeek.getUTCFullYear()}-${String(endOfLastWeek.getUTCMonth() + 1).padStart(2, '0')}-${String(endOfLastWeek.getUTCDate()).padStart(2, '0')}`
         break
       case 'THIS_MONTH':
-        fromDate = `${year}-${month}-01`
-        toDate = `${year}-${month}-${day}`
+        fromDate = `${utcYear}-${utcMonth}-01`
+        toDate = `${utcYear}-${utcMonth}-${utcDay}`
         break
       case 'LAST_MONTH':
-        const lastMonth = new Date(year, parseInt(month) - 2, 1)
-        const lastMonthYear = lastMonth.getFullYear()
-        const lastMonthNum = String(lastMonth.getMonth() + 1).padStart(2, '0')
-        const lastDayOfLastMonth = new Date(lastMonthYear, parseInt(lastMonthNum), 0).getDate()
+        const lastMonth = new Date(utcYear, parseInt(utcMonth) - 2, 1)
+        const lastMonthYear = lastMonth.getUTCFullYear()
+        const lastMonthNum = String(lastMonth.getUTCMonth() + 1).padStart(2, '0')
+        const lastDayOfLastMonth = new Date(lastMonthYear, parseInt(lastMonthNum), 0).getUTCDate()
         fromDate = `${lastMonthYear}-${lastMonthNum}-01`
         toDate = `${lastMonthYear}-${lastMonthNum}-${String(lastDayOfLastMonth).padStart(2, '0')}`
         break
