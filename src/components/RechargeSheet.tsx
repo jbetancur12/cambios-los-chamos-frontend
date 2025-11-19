@@ -130,16 +130,18 @@ export function RechargeSheet({ open, onOpenChange }: RechargeSheetProps) {
     if (minoristaBalance === null || minoristaBalanceInFavor === null) return null
 
     const totalBalance = minoristaBalance + minoristaBalanceInFavor
+    const amountCopNum = parseFloat(amountCop)
 
-    return totalBalance - selectedAmountBs
+    return totalBalance - amountCopNum
   }
 
   const hasInsufficientBalance = () => {
     if (minoristaBalance === null || minoristaBalanceInFavor === null) return false
 
     const totalBalance = minoristaBalance + minoristaBalanceInFavor
+    const amountCopNum = parseFloat(amountCop)
 
-    return totalBalance < selectedAmountBs
+    return totalBalance < amountCopNum
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -246,7 +248,7 @@ export function RechargeSheet({ open, onOpenChange }: RechargeSheetProps) {
             <BalanceInfo
               minoristaBalance={minoristaBalance}
               minoristaBalanceInFavor={minoristaBalanceInFavor}
-              amountInput={selectedAmountBs.toString()}
+              amountInput={amountCop}
               getEarnedProfit={getEarnedProfit}
               getRemainingBalance={getRemainingBalance}
               hasInsufficientBalance={hasInsufficientBalance}
