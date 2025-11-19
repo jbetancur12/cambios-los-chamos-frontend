@@ -6,7 +6,8 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
-import type { ExchangeRate } from '@/types/api'
+import type { ExchangeRate, Minorista } from '@/types/api'
+import { BalanceInfo } from './BalanceInfo'
 
 interface RechargeOperator {
   id: string
@@ -40,11 +41,15 @@ export function RechargeSheet({ open, onOpenChange }: RechargeSheetProps) {
   const [amounts, setAmounts] = useState<RechargeAmount[]>([])
   const [exchangeRate, setExchangeRate] = useState<ExchangeRate | null>(null)
   const [loading, setLoading] = useState(false)
+  const [minoristaBalance, setMinoristaBalance] = useState<number | null>(null)
+  const [minoristaBalanceInFavor, setMinoristaBalanceInFavor] = useState<number | null>(null)
+  const [loadingBalance, setLoadingBalance] = useState(false)
 
   useEffect(() => {
     if (open) {
       loadOperators()
       loadExchangeRate()
+      fetchMinoristaBalance()
     }
   }, [open])
 
@@ -97,11 +102,45 @@ export function RechargeSheet({ open, onOpenChange }: RechargeSheetProps) {
     }
   }
 
+  const fetchMinoristaBalance = async () => {
+    try {
+      setLoadingBalance(true)
+      const response = await api.get<{ minorista: Minorista }>('/api/minorista/me')
+      setMinoristaBalance(response.minorista.availableCredit)
+      setMinoristaBalanceInFavor(response.minorista.creditBalance || 0)
+    } catch (error: any) {
+      console.error('Error loading balance:', error)
+      toast.error(error.message || 'Error al cargar balance')
+    } finally {
+      setLoadingBalance(false)
+    }
+  }
+
   const selectedAmountBs = amounts.find((a) => a.id === selectedAmount)?.amountBs || 0
 
   const amountCop = exchangeRate ? (selectedAmountBs * Number(exchangeRate.sellRate)).toFixed(2) : '0.00'
 
   const amountUsd = exchangeRate ? (selectedAmountBs / Number(exchangeRate.bcv)).toFixed(2) : '0.00'
+
+  const getEarnedProfit = () => {
+    return 0 // No profit for recharges
+  }
+
+  const getRemainingBalance = () => {
+    if (minoristaBalance === null || minoristaBalanceInFavor === null) return null
+
+    const totalBalance = minoristaBalance + minoristaBalanceInFavor
+
+    return totalBalance - selectedAmountBs
+  }
+
+  const hasInsufficientBalance = () => {
+    if (minoristaBalance === null || minoristaBalanceInFavor === null) return false
+
+    const totalBalance = minoristaBalance + minoristaBalanceInFavor
+
+    return totalBalance < selectedAmountBs
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -203,6 +242,17 @@ export function RechargeSheet({ open, onOpenChange }: RechargeSheetProps) {
             </div>
           </div>
 
+          {!loadingBalance && minoristaBalance !== null && (
+            <BalanceInfo
+              minoristaBalance={minoristaBalance}
+              minoristaBalanceInFavor={minoristaBalanceInFavor}
+              amountInput={selectedAmountBs.toString()}
+              getEarnedProfit={getEarnedProfit}
+              getRemainingBalance={getRemainingBalance}
+              hasInsufficientBalance={hasInsufficientBalance}
+            />
+          )}
+
           <div className="mt-6 pb-6 flex gap-3">
             <Button
               type="button"
@@ -216,7 +266,7 @@ export function RechargeSheet({ open, onOpenChange }: RechargeSheetProps) {
             >
               Cancelar
             </Button>
-            <Button type="submit" disabled={loading} className="flex-1">
+            <Button type="submit" disabled={loading || hasInsufficientBalance()} className="flex-1">
               {loading ? 'Procesando...' : 'Registrar Recarga'}
             </Button>
           </div>

@@ -6,7 +6,8 @@ import { Label } from '@/components/ui/label'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
 import { useBeneficiarySuggestions, type BeneficiaryData } from '@/hooks/useBeneficiarySuggestions'
-import type { ExchangeRate } from '@/types/api'
+import type { ExchangeRate, Minorista } from '@/types/api'
+import { BalanceInfo } from './BalanceInfo'
 
 interface Bank {
   id: string
@@ -28,6 +29,9 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
   const [exchangeRate, setExchangeRate] = useState<ExchangeRate | null>(null)
   const [loading, setLoading] = useState(false)
   const [showSuggestions, setShowSuggestions] = useState(false)
+  const [minoristaBalance, setMinoristaBalance] = useState<number | null>(null)
+  const [minoristaBalanceInFavor, setMinoristaBalanceInFavor] = useState<number | null>(null)
+  const [loadingBalance, setLoadingBalance] = useState(false)
   const { getSuggestions, addSuggestion } = useBeneficiarySuggestions()
 
   const filteredSuggestions = getSuggestions(phone, 'PAGO_MOVIL')
@@ -36,6 +40,7 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
     if (open) {
       loadBanks()
       loadExchangeRate()
+      fetchMinoristaBalance()
     }
   }, [open])
 
@@ -57,6 +62,42 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
       console.error('Error loading exchange rate:', error)
       toast.error('Error al cargar la tasa BCV')
     }
+  }
+
+  const fetchMinoristaBalance = async () => {
+    try {
+      setLoadingBalance(true)
+      const response = await api.get<{ minorista: Minorista }>('/api/minorista/me')
+      setMinoristaBalance(response.minorista.availableCredit)
+      setMinoristaBalanceInFavor(response.minorista.creditBalance || 0)
+    } catch (error: any) {
+      console.error('Error loading balance:', error)
+      toast.error(error.message || 'Error al cargar balance')
+    } finally {
+      setLoadingBalance(false)
+    }
+  }
+
+  const getEarnedProfit = () => {
+    return 0 // No profit for mobile payments
+  }
+
+  const getRemainingBalance = () => {
+    if (minoristaBalance === null || minoristaBalanceInFavor === null) return null
+
+    const amount = parseFloat(amountCop) || 0
+    const totalBalance = minoristaBalance + minoristaBalanceInFavor
+
+    return totalBalance - amount
+  }
+
+  const hasInsufficientBalance = () => {
+    if (minoristaBalance === null || minoristaBalanceInFavor === null) return false
+
+    const amount = parseFloat(amountCop) || 0
+    const totalBalance = minoristaBalance + minoristaBalanceInFavor
+
+    return totalBalance < amount
   }
 
   const amountBs = exchangeRate && amountCop ? (Number(amountCop) / Number(exchangeRate.sellRate)).toFixed(2) : '0.00'
@@ -232,6 +273,17 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
             )}
           </div>
 
+          {!loadingBalance && minoristaBalance !== null && (
+            <BalanceInfo
+              minoristaBalance={minoristaBalance}
+              minoristaBalanceInFavor={minoristaBalanceInFavor}
+              amountInput={amountCop}
+              getEarnedProfit={getEarnedProfit}
+              getRemainingBalance={getRemainingBalance}
+              hasInsufficientBalance={hasInsufficientBalance}
+            />
+          )}
+
           <div className="mt-6 pb-6 flex gap-3">
             <Button
               type="button"
@@ -245,7 +297,7 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
             >
               Cancelar
             </Button>
-            <Button type="submit" disabled={loading} className="flex-1 bg-[linear-gradient(to_right,#136BBC,#274565)]">
+            <Button type="submit" disabled={loading || hasInsufficientBalance()} className="flex-1 bg-[linear-gradient(to_right,#136BBC,#274565)]">
               {loading ? 'Procesando...' : 'Registrar Pago Móvil'}
             </Button>
           </div>
