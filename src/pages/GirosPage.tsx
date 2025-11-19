@@ -104,6 +104,14 @@ export function GirosPage() {
     }
   }, [subscribe])
 
+  // Helper function to format a Date as YYYY-MM-DD in local timezone (not UTC)
+  const formatLocalDate = (date: Date): string => {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+
   const getDateRange = (filterType: DateFilterType) => {
     // Use local timezone dates. Backend will convert to UTC for database comparison.
     const today = new Date()
@@ -121,14 +129,14 @@ export function GirosPage() {
       case 'YESTERDAY':
         const yesterday = new Date(today)
         yesterday.setDate(yesterday.getDate() - 1)
-        fromDate = yesterday.toISOString().split('T')[0]
-        toDate = yesterday.toISOString().split('T')[0]
+        fromDate = formatLocalDate(yesterday)
+        toDate = formatLocalDate(yesterday)
         break
       case 'THIS_WEEK':
         const dayOfWeek = today.getDay()
         const startOfWeek = new Date(today)
         startOfWeek.setDate(today.getDate() - dayOfWeek)
-        fromDate = startOfWeek.toISOString().split('T')[0]
+        fromDate = formatLocalDate(startOfWeek)
         toDate = `${year}-${month}-${day}`
         break
       case 'LAST_WEEK':
@@ -137,8 +145,8 @@ export function GirosPage() {
         endOfLastWeek.setDate(today.getDate() - dayOfWeekLast - 1)
         const startOfLastWeek = new Date(endOfLastWeek)
         startOfLastWeek.setDate(endOfLastWeek.getDate() - 6)
-        fromDate = startOfLastWeek.toISOString().split('T')[0]
-        toDate = endOfLastWeek.toISOString().split('T')[0]
+        fromDate = formatLocalDate(startOfLastWeek)
+        toDate = formatLocalDate(endOfLastWeek)
         break
       case 'THIS_MONTH':
         fromDate = `${year}-${month}-01`
