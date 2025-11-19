@@ -108,6 +108,7 @@ export interface Giro {
   bcvValueApplied: number
   systemProfit: number
   minoristaProfit: number
+  commision: number | null
   status: GiroStatus
   proofUrl?: string
   executionType?: ExecutionType

@@ -296,13 +296,7 @@ export function GirosPage() {
     bs: filteredGiros.reduce((sum, g) => sum + g.amountBs, 0),
     minoristaProfit: filteredGiros.reduce((sum, g) => sum + (g.minoristaProfit || 0), 0),
     systemProfit: filteredGiros.reduce((sum, g) => sum + (g.systemProfit || 0), 0),
-    bankCommission: filteredGiros.reduce((sum, g) => {
-      // Bank commission = (amountInput * 0.01) for COP, or (amountBs * 0.01) for Bs
-      if (g.currencyInput === 'COP') {
-        return sum + (g.amountInput * 0.01)
-      }
-      return sum + (g.amountBs * 0.01)
-    }, 0),
+    bankCommission: filteredGiros.reduce((sum, g) => sum + (g.commision || 0), 0),
   }
 
   return (
@@ -697,7 +691,7 @@ export function GirosPage() {
                     </div>
                     <div className="text-left">
                       <p className="text-xs opacity-80">Total Ganancias</p>
-                      <p className="font-semibold">{formatCurrency(totals.minoristaProfit + totals.bankCommission + totals.systemProfit, 'COP')}</p>
+                      <p className="font-semibold">{formatCurrency(totals.minoristaProfit + totals.systemProfit, 'COP')}</p>
                     </div>
                   </div>
                 ) : (

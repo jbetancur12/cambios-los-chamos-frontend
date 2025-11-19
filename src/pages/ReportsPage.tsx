@@ -87,20 +87,18 @@ interface MinoristaTransactionReport {
 
 type TabType = 'system' | 'minoristas' | 'bank' | 'minoristaTransactions'
 
-// Helper function to format a Date as YYYY-MM-DD in local timezone (not UTC)
-const formatLocalDate = (date: Date): string => {
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
+const formatDateForInput = (date: Date) =>
+  new Date(date.getFullYear(), date.getMonth(), date.getDate())
+    .toISOString()
+    .slice(0, 10);
+
 
 const getDateRange = (range: 'today' | 'yesterday' | 'week' | 'lastWeek' | 'month' | 'lastMonth' | 'year') => {
   const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  let dateFrom = new Date(today)
-  let dateTo = new Date(today)
-  dateTo.setHours(23, 59, 59, 999)
+  let dateFrom = new Date(today.setHours(0, 0, 0, 0))
+  let dateTo = new Date(today.setHours(23, 59, 59, 999))
+
+
 
   switch (range) {
     case 'today':
@@ -131,9 +129,11 @@ const getDateRange = (range: 'today' | 'yesterday' | 'week' | 'lastWeek' | 'mont
       break
   }
 
+  console.log("🚀 ~ getDateRange ~ dateFrom:", dateFrom)
+
   return {
-    from: formatLocalDate(dateFrom),
-    to: formatLocalDate(dateTo),
+    from: dateFrom.toISOString(),
+    to: dateTo.toISOString(),
   }
 }
 
@@ -323,9 +323,11 @@ export function ReportsPage() {
                 <label className="block text-sm font-medium mb-2">Desde</label>
                 <Input
                   type="date"
-                  value={dateFrom}
+                  value={formatDateForInput(new Date(dateFrom))}
                   onChange={(e) => {
-                    setDateFrom(e.target.value)
+                    const [year, month, day] = e.target.value.split('-').map(Number);
+                    const localDate = new Date(year, month - 1, day, 0, 0, 0);                    
+                    setDateFrom( localDate.toISOString())
                     setSelectedDateRange(null)
                   }}
                   className="w-full"
@@ -335,9 +337,11 @@ export function ReportsPage() {
                 <label className="block text-sm font-medium mb-2">Hasta</label>
                 <Input
                   type="date"
-                  value={dateTo}
+                  value={formatDateForInput(new Date(dateTo))}
                   onChange={(e) => {
-                    setDateTo(e.target.value)
+                     const [year, month, day] = e.target.value.split('-').map(Number);
+                    const localDate = new Date(year, month - 1, day, 23, 59, 59);                    
+                    setDateTo( localDate.toISOString())
                     setSelectedDateRange(null)
                   }}
                   className="w-full"
@@ -355,38 +359,34 @@ export function ReportsPage() {
         <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
           <button
             onClick={() => handleTabChange('system')}
-            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${
-              activeTab === 'system' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
-            }`}
+            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${activeTab === 'system' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+              }`}
             style={activeTab === 'system' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             Ganancias del Sistema
           </button>
           <button
             onClick={() => handleTabChange('minoristas')}
-            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${
-              activeTab === 'minoristas' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
-            }`}
+            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${activeTab === 'minoristas' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+              }`}
             style={activeTab === 'minoristas' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             Top Minoristas
           </button>
           <button
             onClick={() => handleTabChange('bank')}
-            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${
-              activeTab === 'bank' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
-            }`}
+            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${activeTab === 'bank' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+              }`}
             style={activeTab === 'bank' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             Transacciones Bancarias
           </button>
           <button
             onClick={() => handleTabChange('minoristaTransactions')}
-            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${
-              activeTab === 'minoristaTransactions'
+            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${activeTab === 'minoristaTransactions'
                 ? 'text-white'
                 : 'bg-white text-gray-700 hover:bg-gray-100'
-            }`}
+              }`}
             style={activeTab === 'minoristaTransactions' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             Transacciones Minoristas

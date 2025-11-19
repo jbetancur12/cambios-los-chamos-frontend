@@ -32,7 +32,7 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
   const [minoristaBalance, setMinoristaBalance] = useState<number | null>(null)
   const [minoristaBalanceInFavor, setMinoristaBalanceInFavor] = useState<number | null>(null)
   const [loadingBalance, setLoadingBalance] = useState(false)
-  const { getSuggestions, addSuggestion } = useBeneficiarySuggestions()
+  const { getSuggestions } = useBeneficiarySuggestions()
 
   const filteredSuggestions = getSuggestions(phone, 'PAGO_MOVIL')
 

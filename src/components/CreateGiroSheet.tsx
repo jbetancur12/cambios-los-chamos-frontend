@@ -210,6 +210,7 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
         phone,
         bankId,
         accountNumber,
+        executionType: 'TRANSFERENCIA',
       })
 
       toast.success(response.message || 'Giro creado exitosamente')
