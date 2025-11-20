@@ -2,6 +2,7 @@
 import { initializeApp } from 'firebase/app'
 import { getMessaging, getToken } from 'firebase/messaging'
 import { firebaseConfig } from './firebase-config'
+import { api } from '@/lib/api'
 
 let messaging: ReturnType<typeof getMessaging> | null = null
 
@@ -23,17 +24,8 @@ async function loadMessaging() {
 
 async function saveTokenToBackend(userId: string, token: string): Promise<void> {
   try {
-    const response = await fetch('http://localhost:3000/api/notifications/save-token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, token }),
-    })
-
-    if (response.ok) {
-      console.log('Token guardado en la DB con éxito.')
-    } else {
-      console.error('Fallo al guardar el token en la DB. Estado:', response.status)
-    }
+    await api.post('/api/notifications/save-token', { userId, token })
+    console.log('Token guardado en la DB con éxito.')
   } catch (error) {
     console.error('Error en saveTokenToBackend:', error)
   }
