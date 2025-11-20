@@ -42,7 +42,7 @@ export function CreateUserSheet({ open, onOpenChange, onUserCreated, role }: Cre
 
     try {
       setLoading(true)
-      await api.post('/api/user/register', { ...formData, role })
+      await api.post('/user/register', { ...formData, role })
 
       // Reset form
       setFormData({

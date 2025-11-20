@@ -34,7 +34,7 @@ export function TransferencistaAccountsSheet({
     try {
       setLoading(true)
       const response = await api.get<{ bankAccounts: BankAccount[] }>(
-        `/api/bank-account/transferencista/${transferencistaId}`
+        `/bank-account/transferencista/${transferencistaId}`
       )
       setAccounts(response.bankAccounts || [])
     } catch (error: any) {

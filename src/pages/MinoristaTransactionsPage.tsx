@@ -42,7 +42,7 @@ export function MinoristaTransactionsPage() {
 
   const fetchMinorista = useCallback(async () => {
     try {
-      const response = await api.get<{ minorista: Minorista }>(`/api/minorista/me`)
+      const response = await api.get<{ minorista: Minorista }>(`/minorista/me`)
       setMinorista(response.minorista)
     } catch (error: any) {
       toast.error(error.message || 'Error al cargar información del minorista')
@@ -55,7 +55,7 @@ export function MinoristaTransactionsPage() {
 
     try {
       setLoading(true)
-      let url = `/api/minorista/${minorista.id}/transactions?page=${page}&limit=50`
+      let url = `/minorista/${minorista.id}/transactions?page=${page}&limit=50`
 
       if (dateRange.startDate && dateRange.endDate) {
         url += `&startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`

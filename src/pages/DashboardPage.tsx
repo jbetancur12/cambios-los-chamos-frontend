@@ -44,7 +44,7 @@ export function DashboardPage() {
   const fetchMinoristaBalance = async () => {
     try {
       setLoadingBalance(true)
-      const response = await api.get<{ minorista: Minorista }>('/api/minorista/me')
+      const response = await api.get<{ minorista: Minorista }>('/minorista/me')
       setMinoristaBalance(response.minorista.availableCredit)
       setMinoristaBalanceInFavor(response.minorista.creditBalance || 0)
     } catch (error: any) {
@@ -57,7 +57,7 @@ export function DashboardPage() {
   const fetchBankAccounts = async () => {
     try {
       setLoadingAccounts(true)
-      const response = await api.get<{ bankAccounts: BankAccount[] }>('/api/bank-account/my-accounts')
+      const response = await api.get<{ bankAccounts: BankAccount[] }>('/bank-account/my-accounts')
       setBankAccounts(response.bankAccounts)
     } catch (error: any) {
       toast.error(error.message || 'Error al cargar cuentas bancarias')

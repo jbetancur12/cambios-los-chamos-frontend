@@ -50,7 +50,7 @@ export function OperatorAmountsManager() {
   const loadOperatorsAndAmounts = async () => {
     try {
       setLoading(true)
-      const operatorsData = await api.get<RechargeOperator[]>('/api/recharge-operators/all')
+      const operatorsData = await api.get<RechargeOperator[]>('/recharge-operators/all')
       setOperators(operatorsData)
       if (operatorsData.length > 0 && !selectedOperatorId) {
         setSelectedOperatorId(operatorsData[0].id)
@@ -65,7 +65,7 @@ export function OperatorAmountsManager() {
 
   const loadOperatorAmounts = async (operatorId: string) => {
     try {
-      const data = await api.get<OperatorAmount[]>(`/api/operator-amounts/${operatorId}/all`)
+      const data = await api.get<OperatorAmount[]>(`/operator-amounts/${operatorId}/all`)
       setOperatorAmounts(data)
     } catch (error) {
       console.error('Error loading operator amounts:', error)
@@ -91,12 +91,12 @@ export function OperatorAmountsManager() {
     setSubmitting(true)
     try {
       // Create the amount
-      const newAmount = await api.post<RechargeAmount>('/api/recharge-amounts', {
+      const newAmount = await api.post<RechargeAmount>('/recharge-amounts', {
         amountBs: Number(newAmountValue),
       })
 
       // Assign it to the operator
-      await api.post('/api/operator-amounts', {
+      await api.post('/operator-amounts', {
         operatorId: selectedOperatorId,
         amountId: newAmount.id,
       })
@@ -122,7 +122,7 @@ export function OperatorAmountsManager() {
       const operatorAmount = operatorAmounts.find((oa) => oa.id === operatorAmountId)
       if (!operatorAmount) return
 
-      await api.put<RechargeAmount>(`/api/recharge-amounts/${operatorAmount.amount.id}`, {
+      await api.put<RechargeAmount>(`/recharge-amounts/${operatorAmount.amount.id}`, {
         amountBs: Number(editingAmountValue),
       })
 
@@ -143,7 +143,7 @@ export function OperatorAmountsManager() {
     }
 
     try {
-      await api.delete(`/api/operator-amounts/${operatorAmountId}`)
+      await api.delete(`/operator-amounts/${operatorAmountId}`)
       await loadOperatorAmounts(selectedOperatorId)
       toast.success('Monto removido del operador')
     } catch (error: any) {

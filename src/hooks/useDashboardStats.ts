@@ -25,7 +25,7 @@ export function useDashboardStats() {
       try {
         setLoading(true)
         setError(null)
-        const data = await api.get<DashboardStats>('/api/dashboard/stats')
+        const data = await api.get<DashboardStats>('/dashboard/stats')
         setStats(data)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Error al cargar estadísticas')

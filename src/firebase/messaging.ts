@@ -24,7 +24,7 @@ async function loadMessaging() {
 
 async function saveTokenToBackend(userId: string, token: string): Promise<void> {
   try {
-    await api.post('/api/notifications/save-token', { userId, token })
+    await api.post('/notifications/save-token', { userId, token })
     console.log('Token guardado en la DB con éxito.')
   } catch (error) {
     console.error('Error en saveTokenToBackend:', error)

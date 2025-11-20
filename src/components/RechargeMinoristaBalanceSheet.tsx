@@ -46,7 +46,7 @@ export function RechargeMinoristaBalanceSheet({
     if (!localMinorista) return
     try {
       setTransactionsLoading(true)
-      let url = `/api/minorista/${localMinorista.id}/transactions?page=${page}&limit=10`
+      let url = `/minorista/${localMinorista.id}/transactions?page=${page}&limit=10`
 
       if (dateRange.startDate && dateRange.endDate) {
         url += `&startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`
@@ -74,7 +74,7 @@ export function RechargeMinoristaBalanceSheet({
       // Cargar datos actualizados del minorista
       const loadUpdatedMinorista = async () => {
         try {
-          const response = await api.get<{ minorista: Minorista }>(`/api/minorista/${localMinorista.id}`)
+          const response = await api.get<{ minorista: Minorista }>(`/minorista/${localMinorista.id}`)
           setLocalMinorista(response.minorista)
         } catch (error) {
           console.error('Error loading updated minorista:', error)
@@ -99,7 +99,7 @@ export function RechargeMinoristaBalanceSheet({
 
     try {
       setLoading(true)
-      await api.post(`/api/minorista/${localMinorista.id}/pay-debt`, {
+      await api.post(`/minorista/${localMinorista.id}/pay-debt`, {
         amount: numericAmount,
       })
       setPayAmount('')
@@ -123,7 +123,7 @@ export function RechargeMinoristaBalanceSheet({
 
     try {
       setLoading(true)
-      const response = await api.post<{ minorista: Minorista }>(`/api/minorista/${localMinorista.id}/credit-limit`, {
+      const response = await api.post<{ minorista: Minorista }>(`/minorista/${localMinorista.id}/credit-limit`, {
         creditLimit: numericAmount,
       })
       setLocalMinorista(response.minorista)

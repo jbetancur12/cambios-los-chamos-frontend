@@ -28,7 +28,7 @@ export function RechargeAmountsManager() {
   const loadAmounts = async () => {
     try {
       setLoading(true)
-      const data = await api.get<RechargeAmount[]>('/api/recharge-amounts/all')
+      const data = await api.get<RechargeAmount[]>('/recharge-amounts/all')
       setAmounts(data)
     } catch (error) {
       console.error('Error loading amounts:', error)
@@ -48,7 +48,7 @@ export function RechargeAmountsManager() {
 
     setSubmitting(true)
     try {
-      const newAmountData = await api.post<RechargeAmount>('/api/recharge-amounts', {
+      const newAmountData = await api.post<RechargeAmount>('/recharge-amounts', {
         amountBs: Number(newAmount),
       })
       setAmounts([...amounts, newAmountData].sort((a, b) => a.amountBs - b.amountBs))
@@ -69,7 +69,7 @@ export function RechargeAmountsManager() {
 
     setSubmitting(true)
     try {
-      const updated = await api.put<RechargeAmount>(`/api/recharge-amounts/${id}`, {
+      const updated = await api.put<RechargeAmount>(`/recharge-amounts/${id}`, {
         amountBs: Number(editingAmount),
       })
       setAmounts(amounts.map((amt) => (amt.id === id ? updated : amt)).sort((a, b) => a.amountBs - b.amountBs))
@@ -89,7 +89,7 @@ export function RechargeAmountsManager() {
     }
 
     try {
-      await api.delete(`/api/recharge-amounts/${id}`)
+      await api.delete(`/recharge-amounts/${id}`)
       setAmounts(amounts.filter((amt) => amt.id !== id))
       toast.success('Monto eliminado exitosamente')
     } catch (error: any) {

@@ -32,7 +32,7 @@ export function CalculadoraPage() {
   const fetchRates = async () => {
     try {
       setLoading(true)
-      const response = await api.get<{ rate: ExchangeRate }>('/api/exchange-rate/current')
+      const response = await api.get<{ rate: ExchangeRate }>('/exchange-rate/current')
       if (response?.rate) {
         setRate(response.rate)
       } else {

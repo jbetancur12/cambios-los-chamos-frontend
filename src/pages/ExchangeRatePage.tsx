@@ -37,7 +37,7 @@ export function ExchangeRatePage() {
 
   const fetchCurrentRate = async () => {
     try {
-      const response = await api.get<{ rate: ExchangeRate }>('/api/exchange-rate/current')
+      const response = await api.get<{ rate: ExchangeRate }>('/exchange-rate/current')
       setCurrentRate(response.rate)
     } catch (error: any) {
       console.error('Error fetching current rate:', error)
@@ -50,7 +50,7 @@ export function ExchangeRatePage() {
       const response = await api.get<{
         rates: ExchangeRate[]
         pagination: { total: number; page: number; limit: number; totalPages: number }
-      }>('/api/exchange-rate/list?limit=20')
+      }>('/exchange-rate/list?limit=20')
 
       setRates(response.rates)
     } catch (error: any) {
@@ -87,7 +87,7 @@ export function ExchangeRatePage() {
 
     try {
       setSubmitting(true)
-      const response = await api.post<{ data: ExchangeRate; message: string }>('/api/exchange-rate/create', {
+      const response = await api.post<{ data: ExchangeRate; message: string }>('/exchange-rate/create', {
         buyRate: buyRateNum,
         sellRate: sellRateNum,
         usd: usdNum,

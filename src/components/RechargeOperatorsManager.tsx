@@ -31,7 +31,7 @@ export function RechargeOperatorsManager() {
   const loadOperators = async () => {
     try {
       setLoading(true)
-      const data = await api.get<RechargeOperator[]>('/api/recharge-operators/all')
+      const data = await api.get<RechargeOperator[]>('/recharge-operators/all')
       setOperators(data)
     } catch (error) {
       console.error('Error loading operators:', error)
@@ -51,7 +51,7 @@ export function RechargeOperatorsManager() {
 
     setSubmitting(true)
     try {
-      const newOperator = await api.post<RechargeOperator>('/api/recharge-operators', {
+      const newOperator = await api.post<RechargeOperator>('/recharge-operators', {
         name: newOperatorName,
         type: newOperatorType,
       })
@@ -74,7 +74,7 @@ export function RechargeOperatorsManager() {
 
     setSubmitting(true)
     try {
-      const updated = await api.put<RechargeOperator>(`/api/recharge-operators/${id}`, {
+      const updated = await api.put<RechargeOperator>(`/recharge-operators/${id}`, {
         name: editingName,
         type: editingType,
       })
@@ -96,7 +96,7 @@ export function RechargeOperatorsManager() {
     }
 
     try {
-      await api.delete(`/api/recharge-operators/${id}`)
+      await api.delete(`/recharge-operators/${id}`)
       setOperators(operators.filter((op) => op.id !== id))
       toast.success('Operador eliminado exitosamente')
     } catch (error: any) {

@@ -71,7 +71,7 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
     setLoading(true)
     setError(null)
     try {
-      const ticketData = await api.get<ThermalTicketData>(`/api/giro/${giroId}/thermal-ticket`)
+      const ticketData = await api.get<ThermalTicketData>(`/giro/${giroId}/thermal-ticket`)
       setTicketData(ticketData)
     } catch (err: any) {
       const message = err.message || 'Error al cargar los datos del tiquete'

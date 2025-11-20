@@ -69,7 +69,7 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
 
   const fetchBanks = async () => {
     try {
-      const response = await api.get<{ banks: Bank[] }>('/api/bank/all')
+      const response = await api.get<{ banks: Bank[] }>('/bank/all')
       setBanks(response.banks)
     } catch (error: any) {
       toast.error(error.message || 'Error al cargar bancos')
@@ -79,7 +79,7 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
   const fetchCurrentRate = async () => {
     try {
       setLoadingRate(true)
-      const response = await api.get<{ rate: ExchangeRate }>('/api/exchange-rate/current')
+      const response = await api.get<{ rate: ExchangeRate }>('/exchange-rate/current')
       setCurrentRate(response.rate)
       // Pre-fill custom rate with current values
       setCustomBuyRate(response.rate.buyRate.toString())
@@ -96,7 +96,7 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
   const fetchMinoristaBalance = async () => {
     try {
       setLoadingBalance(true)
-      const response = await api.get<{ minorista: Minorista }>('/api/minorista/me')
+      const response = await api.get<{ minorista: Minorista }>('/minorista/me')
       setMinoristaBalance(response.minorista.availableCredit)
       setMinoristaBalanceInFavor(response.minorista.creditBalance || 0)
       setCreditLimit(response.minorista.creditLimit)
@@ -201,7 +201,7 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
         payload.customRate = { buyRate, sellRate, usd, bcv }
       }
 
-      const response = await api.post<{ giro: any; message: string }>('/api/giro/create', payload)
+      const response = await api.post<{ giro: any; message: string }>('/giro/create', payload)
 
       // Save beneficiary suggestion for future use
       addSuggestion({

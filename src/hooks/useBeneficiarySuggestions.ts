@@ -19,7 +19,7 @@ export function useBeneficiarySuggestions() {
     const loadSuggestions = async () => {
       setIsLoading(true)
       try {
-        const data = await api.get<{ suggestions: any[] }>('/api/beneficiary-suggestion/list')
+        const data = await api.get<{ suggestions: any[] }>('/beneficiary-suggestion/list')
         const beneficiaries = data.suggestions.map((s: any) => ({
           name: s.beneficiaryName,
           id: s.beneficiaryId,
@@ -42,7 +42,7 @@ export function useBeneficiarySuggestions() {
   // Add or update a beneficiary suggestion
   const addSuggestion = useCallback(async (beneficiary: BeneficiaryData) => {
     try {
-      await api.post('/api/beneficiary-suggestion/save', {
+      await api.post('/beneficiary-suggestion/save', {
         beneficiaryName: beneficiary.name,
         beneficiaryId: beneficiary.id,
         phone: beneficiary.phone,
@@ -122,7 +122,7 @@ export function useBeneficiarySuggestions() {
   // Clear all suggestions
   const clearAllSuggestions = useCallback(async () => {
     try {
-      await api.delete('/api/beneficiary-suggestion')
+      await api.delete('/beneficiary-suggestion')
       setSuggestions([])
     } catch (error) {
       console.error('Error clearing suggestions:', error)

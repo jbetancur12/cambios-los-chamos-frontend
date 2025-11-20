@@ -63,14 +63,14 @@ export function UsersPage() {
       let usersData: UserData[] = []
 
       if (role && role !== 'ALL') {
-        const response = await api.get<{ users: any[] }>(`/api/user/by-role/${role}`)
+        const response = await api.get<{ users: any[] }>(`/user/by-role/${role}`)
         usersData = response.users
 
         // Si es TRANSFERENCISTA, obtener los IDs de transferencista y disponibilidad
         if (role === 'TRANSFERENCISTA') {
           const transferencistaResponse = await api.get<{
             transferencistas: { id: string; available: boolean; user: { id: string } }[]
-          }>('/api/transferencista/list')
+          }>('/transferencista/list')
           const transferencistaMap = new Map(
             transferencistaResponse.transferencistas.map((t: any) => [t.user.id, { id: t.id, available: t.available }])
           )
@@ -88,7 +88,7 @@ export function UsersPage() {
         if (role === 'MINORISTA') {
           const minoristaResponse = await api.get<{
             minoristas: { id: string; balance: number; user: { id: string } }[]
-          }>('/api/minorista/list')
+          }>('/minorista/list')
           const minoristaMap = new Map(
             minoristaResponse.minoristas.map((m: any) => [m.user.id, { id: m.id, balance: m.balance }])
           )
@@ -105,13 +105,13 @@ export function UsersPage() {
         // Fetch all roles
         const [admins, transferencistasUsers, minoristasUsers, transferencistasList, minoristasList] =
           await Promise.all([
-            api.get<{ users: any[] }>('/api/user/by-role/ADMIN'),
-            api.get<{ users: any[] }>('/api/user/by-role/TRANSFERENCISTA'),
-            api.get<{ users: any[] }>('/api/user/by-role/MINORISTA'),
+            api.get<{ users: any[] }>('/user/by-role/ADMIN'),
+            api.get<{ users: any[] }>('/user/by-role/TRANSFERENCISTA'),
+            api.get<{ users: any[] }>('/user/by-role/MINORISTA'),
             api.get<{ transferencistas: { id: string; available: boolean; user: { id: string } }[] }>(
-              '/api/transferencista/list'
+              '/transferencista/list'
             ),
-            api.get<{ minoristas: { id: string; balance: number; user: { id: string } }[] }>('/api/minorista/list'),
+            api.get<{ minoristas: { id: string; balance: number; user: { id: string } }[] }>('/minorista/list'),
           ])
 
         // Map transferencista IDs and availability
@@ -204,7 +204,7 @@ export function UsersPage() {
 
   const handleToggleActive = async (userId: string, newValue: boolean) => {
     try {
-      await api.put(`/api/user/${userId}/toggle-active`, { isActive: newValue })
+      await api.put(`/user/${userId}/toggle-active`, { isActive: newValue })
       setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, isActive: newValue } : u)))
       toast.success(newValue ? 'Usuario activado' : 'Usuario desactivado')
     } catch (error) {
@@ -223,7 +223,7 @@ export function UsersPage() {
           redistributionErrors?: number
         }
         message: string
-      }>(`/api/transferencista/${transferencistaId}/toggle-availability`, {
+      }>(`/transferencista/${transferencistaId}/toggle-availability`, {
         isAvailable: newValue,
       })
 

@@ -39,7 +39,7 @@ export function CreateBankAccountSheet({
 
   const fetchBanks = async () => {
     try {
-      const response = await api.get<{ banks: Bank[] }>('/api/bank/all')
+      const response = await api.get<{ banks: Bank[] }>('/bank/all')
       setBanks(response.banks || [])
     } catch (error) {
       toast.error('Error al cargar bancos')
@@ -57,7 +57,7 @@ export function CreateBankAccountSheet({
 
     try {
       setLoading(true)
-      await api.post('/api/bank-account/create', {
+      await api.post('/bank-account/create', {
         transferencistaId,
         ...formData,
       })

@@ -51,7 +51,7 @@ export function RechargeBalanceSheet({ open, onOpenChange, account, onBalanceUpd
     // en el backend para manejar montos negativos y restarlos al saldo.
     try {
       setLoading(true)
-      await api.patch('/api/bank-account/update', {
+      await api.patch('/bank-account/update', {
         bankAccountId: account.id,
         amount: numericAmount, // Se envía el monto con el signo (+ o -)
       })

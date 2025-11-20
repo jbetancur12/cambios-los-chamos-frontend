@@ -51,7 +51,7 @@ export function PaymentProofUpload({
         giro: any
         paymentProofUrl: string
         message: string
-      }>(`/api/giro/${giroId}/payment-proof/upload`, formData)
+      }>(`/giro/${giroId}/payment-proof/upload`, formData)
 
       const newProof = {
         key: response.giro.paymentProofKey,

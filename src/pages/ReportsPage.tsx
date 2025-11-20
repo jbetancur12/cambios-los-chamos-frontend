@@ -165,26 +165,26 @@ export function ReportsPage() {
       // Send dates as YYYY-MM-DD format (local timezone, backend will convert to UTC)
       if (activeTab === 'system') {
         const data = await api.get<SystemProfitReport>(
-          `/api/reports/system-profit?dateFrom=${fromDate}&dateTo=${toDate}`
+          `/reports/system-profit?dateFrom=${fromDate}&dateTo=${toDate}`
         )
         const trendData = await api.get<SystemProfitTrendReport>(
-          `/api/reports/system-profit-trend?dateFrom=${fromDate}&dateTo=${toDate}`
+          `/reports/system-profit-trend?dateFrom=${fromDate}&dateTo=${toDate}`
         )
         setSystemReport(data)
         setSystemTrendReport(trendData)
       } else if (activeTab === 'minoristas') {
         const data = await api.get<TopMinoristaReport>(
-          `/api/reports/minorista-profit?dateFrom=${fromDate}&dateTo=${toDate}`
+          `/reports/minorista-profit?dateFrom=${fromDate}&dateTo=${toDate}`
         )
         setMinoristaReport(data)
       } else if (activeTab === 'bank') {
         const data = await api.get<BankTransactionReport>(
-          `/api/reports/bank-transactions?dateFrom=${fromDate}&dateTo=${toDate}`
+          `/reports/bank-transactions?dateFrom=${fromDate}&dateTo=${toDate}`
         )
         setBankReport(data)
       } else if (activeTab === 'minoristaTransactions') {
         const data = await api.get<MinoristaTransactionReport>(
-          `/api/reports/minorista-transactions?dateFrom=${fromDate}&dateTo=${toDate}`
+          `/reports/minorista-transactions?dateFrom=${fromDate}&dateTo=${toDate}`
         )
         setMinoristaTransactionReport(data)
       }

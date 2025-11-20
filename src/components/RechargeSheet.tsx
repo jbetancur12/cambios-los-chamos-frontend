@@ -62,7 +62,7 @@ export function RechargeSheet({ open, onOpenChange }: RechargeSheetProps) {
 
   const loadOperators = async () => {
     try {
-      const data = await api.get<RechargeOperator[]>('/api/recharge-operators')
+      const data = await api.get<RechargeOperator[]>('/recharge-operators')
       setOperators(data)
       if (data.length > 0 && !selectedOperator) {
         setSelectedOperator(data[0].id)
@@ -75,7 +75,7 @@ export function RechargeSheet({ open, onOpenChange }: RechargeSheetProps) {
 
   const loadAmountsByOperator = async (operatorId: string) => {
     try {
-      const data = await api.get<OperatorAmount[]>(`/api/operator-amounts/${operatorId}`)
+      const data = await api.get<OperatorAmount[]>(`/operator-amounts/${operatorId}`)
       const amounts = data.map((oa) => oa.amount)
       setAmounts(amounts)
       if (amounts.length > 0) {
@@ -94,7 +94,7 @@ export function RechargeSheet({ open, onOpenChange }: RechargeSheetProps) {
 
   const loadExchangeRate = async () => {
     try {
-      const response = await api.get<{ rate: ExchangeRate }>('/api/exchange-rate/current')
+      const response = await api.get<{ rate: ExchangeRate }>('/exchange-rate/current')
       setExchangeRate(response.rate)
     } catch (error) {
       console.error('Error loading exchange rate:', error)
@@ -105,7 +105,7 @@ export function RechargeSheet({ open, onOpenChange }: RechargeSheetProps) {
   const fetchMinoristaBalance = async () => {
     try {
       setLoadingBalance(true)
-      const response = await api.get<{ minorista: Minorista }>('/api/minorista/me')
+      const response = await api.get<{ minorista: Minorista }>('/minorista/me')
       setMinoristaBalance(response.minorista.availableCredit)
       setMinoristaBalanceInFavor(response.minorista.creditBalance || 0)
     } catch (error: any) {
@@ -154,7 +154,7 @@ export function RechargeSheet({ open, onOpenChange }: RechargeSheetProps) {
 
     setLoading(true)
     try {
-      await api.post('/api/giro/recharge/create', {
+      await api.post('/giro/recharge/create', {
         operatorId: selectedOperator,
         amountBsId: selectedAmount,
         phone,

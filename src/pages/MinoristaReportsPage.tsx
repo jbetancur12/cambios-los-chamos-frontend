@@ -128,8 +128,8 @@ export function MinoristaReportsPage() {
     try {
       // Send dates as YYYY-MM-DD format (local timezone, backend will convert to UTC)
       const [reportData, trendData] = await Promise.all([
-        api.get<MinoristaGiroReport>(`/api/reports/minorista/giros?dateFrom=${dateFrom}&dateTo=${dateTo}`),
-        api.get<MinoristaGiroTrendReport>(`/api/reports/minorista/giros-trend?dateFrom=${dateFrom}&dateTo=${dateTo}`),
+        api.get<MinoristaGiroReport>(`/reports/minorista/giros?dateFrom=${dateFrom}&dateTo=${dateTo}`),
+        api.get<MinoristaGiroTrendReport>(`/reports/minorista/giros-trend?dateFrom=${dateFrom}&dateTo=${dateTo}`),
       ])
 
       setReport(reportData)

@@ -46,7 +46,7 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
 
   const loadBanks = async () => {
     try {
-      const data = await api.get<{ banks: Bank[] }>('/api/bank/all')
+      const data = await api.get<{ banks: Bank[] }>('/bank/all')
       setBanks(data.banks || [])
     } catch (error) {
       console.error('Error loading banks:', error)
@@ -56,7 +56,7 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
 
   const loadExchangeRate = async () => {
     try {
-      const response = await api.get<{ rate: ExchangeRate }>('/api/exchange-rate/current')
+      const response = await api.get<{ rate: ExchangeRate }>('/exchange-rate/current')
       setExchangeRate(response.rate)
     } catch (error) {
       console.error('Error loading exchange rate:', error)
@@ -67,7 +67,7 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
   const fetchMinoristaBalance = async () => {
     try {
       setLoadingBalance(true)
-      const response = await api.get<{ minorista: Minorista }>('/api/minorista/me')
+      const response = await api.get<{ minorista: Minorista }>('/minorista/me')
       setMinoristaBalance(response.minorista.availableCredit)
       setMinoristaBalanceInFavor(response.minorista.creditBalance || 0)
     } catch (error: any) {
@@ -120,7 +120,7 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
 
     setLoading(true)
     try {
-      await api.post('/api/giro/mobile-payment/create', {
+      await api.post('/giro/mobile-payment/create', {
         cedula,
         bankId: selectedBank,
         phone,

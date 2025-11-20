@@ -10,7 +10,7 @@ export function usePrinterConfigAPI() {
   const getPrinterConfig = useCallback(async (): Promise<PrinterConfig | null> => {
     try {
       const response = await api.get<{ config: PrinterConfig | null }>(
-        '/api/printer/config'
+        '/printer/config'
       )
       return response.config
     } catch (error) {
@@ -21,7 +21,7 @@ export function usePrinterConfigAPI() {
 
   const setPrinterConfig = useCallback(async (config: PrinterConfig) => {
     try {
-      await api.post('/api/printer/config', {
+      await api.post('/printer/config', {
         name: config.name,
         type: config.type,
       })
@@ -33,7 +33,7 @@ export function usePrinterConfigAPI() {
 
   const clearPrinterConfig = useCallback(async () => {
     try {
-      await api.delete('/api/printer/config')
+      await api.delete('/printer/config')
     } catch (error) {
       console.error('Error clearing printer config:', error)
       throw error

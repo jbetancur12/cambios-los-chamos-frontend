@@ -28,7 +28,7 @@ export function BankTransactionsPage() {
 
   const fetchBankAccount = async () => {
     try {
-      const response = await api.get<{ bankAccount: BankAccount }>(`/api/bank-account/${bankAccountId}`)
+      const response = await api.get<{ bankAccount: BankAccount }>(`/bank-account/${bankAccountId}`)
       setBankAccount(response.bankAccount)
     } catch (error: any) {
       toast.error(error.message || 'Error al cargar cuenta bancaria')
@@ -39,7 +39,7 @@ export function BankTransactionsPage() {
   const fetchTransactions = async () => {
     try {
       setLoading(true)
-      let url = `/api/bank-account/${bankAccountId}/transactions?page=${page}&limit=50`
+      let url = `/bank-account/${bankAccountId}/transactions?page=${page}&limit=50`
 
       if (dateRange.startDate && dateRange.endDate) {
         url += `&startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`

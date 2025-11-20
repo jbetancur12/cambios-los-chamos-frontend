@@ -7,6 +7,7 @@ import { api } from '@/lib/api'
 import { toast } from 'sonner'
 import { useAuth } from '@/contexts/AuthContext'
 import { useGiroWebSocket } from '@/hooks/useGiroWebSocket'
+import { useIsDesktop } from '@/hooks/useIsDesktop'
 import { PaymentProofUpload } from './PaymentProofUpload'
 import { PrintTicketModal } from './PrintTicketModal'
 import {
@@ -43,6 +44,7 @@ const RETURN_REASON_OPTIONS = [
 export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDetailSheetProps) {
   const { user } = useAuth()
   const { subscribe } = useGiroWebSocket()
+  const isDesktop = useIsDesktop()
   const [giro, setGiro] = useState<Giro | null>(null)
   const [loading, setLoading] = useState(false)
   const [processing, setProcessing] = useState(false)
@@ -182,7 +184,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
 
     try {
       setLoading(true)
-      const response = await api.get<{ giro: Giro }>(`/api/giro/${giroId}`)
+      const response = await api.get<{ giro: Giro }>(`/giro/${giroId}`)
       setGiro(response.giro)
 
       if (response.giro) {
@@ -210,7 +212,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
     if (!giroId || !isMinorista) return
 
     try {
-      const response = await api.get<{ transaction: MinoristaTransaction }>(`/api/giro/${giroId}/minorista-transaction`)
+      const response = await api.get<{ transaction: MinoristaTransaction }>(`/giro/${giroId}/minorista-transaction`)
       setMinoristaTransaction(response.transaction)
     } catch (error: any) {
       // Silently fail if no transaction details available
@@ -220,7 +222,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
 
   const fetchBankAccounts = async () => {
     try {
-      const response = await api.get<{ bankAccounts: BankAccount[] }>('/api/bank-account/my-accounts')
+      const response = await api.get<{ bankAccounts: BankAccount[] }>('/bank-account/my-accounts')
       setBankAccounts(response.bankAccounts)
       if (response.bankAccounts.length > 0) {
         setSelectedBankAccountId(response.bankAccounts[0].id)
@@ -235,7 +237,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
 
     try {
       const response = await api.get<{ paymentProofUrl: string; filename: string }>(
-        `/api/giro/${giroId}/payment-proof/download`
+        `/giro/${giroId}/payment-proof/download`
       )
       setPaymentProofUrl(response.paymentProofUrl)
     } catch (error: any) {
@@ -246,7 +248,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
 
   const fetchBanks = async () => {
     try {
-      const response = await api.get<{ banks: Bank[] }>('/api/bank/all')
+      const response = await api.get<{ banks: Bank[] }>('/bank/all')
       setBanks(response.banks)
     } catch (error: any) {
       toast.error(error.message || 'Error al cargar bancos')
@@ -258,7 +260,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
 
     try {
       setProcessing(true)
-      await api.post(`/api/giro/${giro.id}/mark-processing`)
+      await api.post(`/giro/${giro.id}/mark-processing`)
       toast.success('Giro marcado como procesando')
       // El WebSocket emitirá giro:processing y actualizará el estado automáticamente
       // No llamamos a fetchGiroDetails ni onUpdate porque el WebSocket lo hará
@@ -295,7 +297,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
     try {
       setProcessing(true)
       // Endpoint que debe crearse en el backend para editar los datos
-      await api.patch(`/api/giro/${giro.id}`, {
+      await api.patch(`/giro/${giro.id}`, {
         beneficiaryName: editableBeneficiaryName,
         beneficiaryId: editableBeneficiaryId,
         phone: editablePhone,
@@ -322,15 +324,17 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
 
     try {
       setProcessing(true)
-      await api.post(`/api/giro/${giro.id}/execute`, {
+      await api.post(`/giro/${giro.id}/execute`, {
         bankAccountId: selectedBankAccountId,
         executionType: giro.executionType,
         fee,
         proofUrl: proofUrl || undefined,
       })
       toast.success('Giro ejecutado exitosamente')
-      // Mostrar modal de impresión después de ejecutar
-      setShowPrintModal(true)
+      // Mostrar modal de impresión solo en desktop
+      if (isDesktop) {
+        setShowPrintModal(true)
+      }
       onUpdate()
     } catch (error: any) {
       toast.error(error.message || 'Error al ejecutar giro')
@@ -349,7 +353,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
     try {
       setProcessing(true)
       // Endpoint para la devolución del giro (el backend manejará el cambio de estado)
-      await api.post(`/api/giro/${giro.id}/return`, {
+      await api.post(`/giro/${giro.id}/return`, {
         reason: returnReason,
       })
 
@@ -378,7 +382,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
 
     try {
       setProcessing(true)
-      await api.delete(`/api/giro/${giro.id}`)
+      await api.delete(`/giro/${giro.id}`)
 
       toast.success('Giro eliminado exitosamente.')
       onUpdate()
@@ -402,7 +406,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
 
     try {
       setProcessing(true)
-      await api.patch(`/api/giro/${giro.id}/rate`, {
+      await api.patch(`/giro/${giro.id}/rate`, {
         buyRate: editableRate.buyRate,
         sellRate: editableRate.sellRate,
         usd: editableRate.usd,
@@ -907,8 +911,8 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                 )}
               </div>
 
-              {/* Botón de impresión para giros completados */}
-              {giro.status === 'COMPLETADO' && (
+              {/* Botón de impresión para giros completados (solo desktop) */}
+              {giro.status === 'COMPLETADO' && isDesktop && (
                 <Button
                   onClick={() => setShowPrintModal(true)}
                   disabled={processing}

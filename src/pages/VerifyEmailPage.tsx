@@ -46,7 +46,7 @@ export function VerifyEmailPage() {
     setLoading(true)
 
     try {
-      await api.post('/api/email_verification/confirm?token=' + token, {
+      await api.post('/email_verification/confirm?token=' + token, {
         password,
         passwordConfirm,
       })

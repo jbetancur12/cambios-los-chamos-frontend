@@ -38,7 +38,7 @@ export function BankAccountsPage() {
   const fetchAccounts = async () => {
     try {
       setLoading(true)
-      const response = await api.get<{ bankAccounts: BankAccount[] }>('/api/bank-account/all')
+      const response = await api.get<{ bankAccounts: BankAccount[] }>('/bank-account/all')
       setAccounts(response.bankAccounts)
       setFilteredAccounts(response.bankAccounts)
     } catch (error: any) {

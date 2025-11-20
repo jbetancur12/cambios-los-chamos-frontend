@@ -26,7 +26,7 @@ export function useRecentGiros(limit = 5) {
     try {
       setLoading(true)
       setError(null)
-      const data = await api.get<{ giros: RecentGiro[] }>(`/api/dashboard/recent-giros?limit=${limit}`)
+      const data = await api.get<{ giros: RecentGiro[] }>(`/dashboard/recent-giros?limit=${limit}`)
       setGiros(data.giros)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al cargar giros recientes')

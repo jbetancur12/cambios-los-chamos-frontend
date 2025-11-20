@@ -14,9 +14,14 @@ const getApiBaseUrl = () => {
     return `${protocol}//${hostname}`
   }
 
-  // Si accedes desde localhost, usa localhost:3000
-  // Si accedes desde una IP (ej: 192.168.40.15), usa esa IP:3000
-  return `http://${hostname}:3000`
+  // En desarrollo local (Vite): usa localhost:3000
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return 'http://localhost:3000/api'
+  }
+
+  // En producción: usa /api (proxy a través de Nginx)
+  // Si accedes desde una IP o dominio, el backend estará en /api
+  return `${protocol}//${hostname}/api`
 }
 
 const API_BASE_URL = getApiBaseUrl()

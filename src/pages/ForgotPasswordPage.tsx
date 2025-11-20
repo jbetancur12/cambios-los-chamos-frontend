@@ -32,7 +32,7 @@ export function ForgotPasswordPage() {
     setLoading(true)
 
     try {
-      await api.post('/api/user/send-reset-password', { email })
+      await api.post('/user/send-reset-password', { email })
 
       toast.success('✅ Email enviado correctamente')
       toast.info('Revisa tu correo para restablecer tu contraseña')
