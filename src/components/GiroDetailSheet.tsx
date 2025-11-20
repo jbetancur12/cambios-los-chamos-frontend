@@ -77,9 +77,6 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
     bcv: 0,
   })
 
-  // ESTADO PARA PAYMENT PROOF
-  const [paymentProofUrl, setPaymentProofUrl] = useState<string | null>(null)
-
   // ESTADO PARA DETALLES DE TRANSACCIÓN DEL MINORISTA
   const [minoristaTransaction, setMinoristaTransaction] = useState<MinoristaTransaction | null>(null)
 
@@ -103,7 +100,6 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
       setProofUrl('')
 
       fetchGiroDetails()
-      fetchPaymentProof()
       if (isTransferencista) {
         fetchBankAccounts()
       }
@@ -229,20 +225,6 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
       }
     } catch (error: any) {
       toast.error(error.message || 'Error al cargar cuentas bancarias')
-    }
-  }
-
-  const fetchPaymentProof = async () => {
-    if (!giroId) return
-
-    try {
-      const response = await api.get<{ paymentProofUrl: string; filename: string }>(
-        `/giro/${giroId}/payment-proof/download`
-      )
-      setPaymentProofUrl(response.paymentProofUrl)
-    } catch (error: any) {
-      // Silently fail if no payment proof exists
-      setPaymentProofUrl(null)
     }
   }
 
@@ -872,18 +854,34 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
               )}
 
 
-              {/* Payment Proof Display */}
-              {paymentProofUrl && (
+              {/* Payment Proof Display - Show for completed giros */}
+              {giro.status === 'COMPLETADO' && (
                 <div className="p-2 rounded border border-green-200 bg-green-50 dark:bg-green-950 space-y-1 text-xs">
                   <div className="flex items-center gap-1">
                     <CheckCircle className="h-3 w-3 text-green-600" />
-                    <p className="font-semibold text-green-900 dark:text-green-100">Comprobante</p>
+                    <p className="font-semibold text-green-900 dark:text-green-100">
+                      Comprobante
+                    </p>
                   </div>
                   <Button
                     type="button"
                     size="sm"
                     variant="outline"
-                    onClick={() => window.open(paymentProofUrl, '_blank')}
+                    onClick={async () => {
+                      try {
+                        const { blob, filename } = await api.downloadFile(`/giro/${giro.id}/payment-proof/download`)
+                        const url = window.URL.createObjectURL(blob)
+                        const a = document.createElement('a')
+                        a.href = url
+                        a.download = filename
+                        document.body.appendChild(a)
+                        a.click()
+                        window.URL.revokeObjectURL(url)
+                        document.body.removeChild(a)
+                      } catch (error: any) {
+                        toast.error('Error al descargar el comprobante')
+                      }
+                    }}
                     className="w-full"
                   >
                     Descargar

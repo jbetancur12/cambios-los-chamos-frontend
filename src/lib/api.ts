@@ -16,7 +16,7 @@ const getApiBaseUrl = () => {
 
   // En desarrollo local (Vite): usa localhost:3000
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    return 'http://localhost:3000/api'
+    return 'http://localhost:3000'
   }
 
   // En producción: usa /api (proxy a través de Nginx)
@@ -121,5 +121,38 @@ export const api = {
       },
     })
     return handleResponse<T>(response)
+  },
+
+  async downloadFile(endpoint: string): Promise<{ blob: Blob; filename: string }> {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        ...getAuthHeaders(),
+      },
+    })
+    if (!response.ok) {
+      throw new ApiError('Error al descargar el archivo')
+    }
+
+    // Extraer nombre del archivo del header Content-Disposition
+    const contentDisposition = response.headers.get('content-disposition')
+    let filename = 'comprobante'
+    if (contentDisposition) {
+      // Intenta con comillas primero: filename="nombre.ext"
+      let match = contentDisposition.match(/filename="([^"]+)"/)
+      if (match && match[1]) {
+        filename = match[1]
+      } else {
+        // Intenta sin comillas: filename=nombre.ext
+        match = contentDisposition.match(/filename=([^;\s]+)/)
+        if (match && match[1]) {
+          filename = match[1]
+        }
+      }
+    }
+
+    const blob = await response.blob()
+    return { blob, filename }
   },
 }
