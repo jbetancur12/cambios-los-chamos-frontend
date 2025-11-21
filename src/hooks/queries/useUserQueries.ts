@@ -13,6 +13,9 @@ export interface UserData {
   transferencistaId?: string
   minoristaId?: string
   balance?: number
+  creditLimit?: number
+  availableCredit?: number
+  creditBalance?: number
 }
 
 interface AdminResponse {
@@ -31,6 +34,9 @@ interface MinoristaResponse {
   minoristas: {
     id: string
     balance: number
+    creditLimit: number
+    availableCredit: number
+    creditBalance: number
     user: { id: string }
   }[]
 }
@@ -87,7 +93,7 @@ export function useMinoristas() {
       const minoristaMap = new Map(
         minoristaResponse.minoristas.map((m) => [
           m.user.id,
-          { id: m.id, balance: m.balance },
+          { id: m.id, balance: m.balance, creditLimit: m.creditLimit, availableCredit: m.availableCredit, creditBalance: m.creditBalance },
         ])
       )
 
@@ -97,6 +103,9 @@ export function useMinoristas() {
           ...user,
           minoristaId: minoristaData?.id,
           balance: minoristaData?.balance,
+          creditLimit: minoristaData?.creditLimit,
+          availableCredit: minoristaData?.availableCredit,
+          creditBalance: minoristaData?.creditBalance,
         } as UserData
       })
     },
@@ -145,7 +154,7 @@ async function fetchUsersByRole(role?: UserRole | 'ALL' | null): Promise<UserDat
       const minoristaResponse = await api.get<MinoristaResponse>('/minorista/list')
 
       const minoristaMap = new Map(
-        minoristaResponse.minoristas.map((m) => [m.user.id, { id: m.id, balance: m.balance }])
+        minoristaResponse.minoristas.map((m) => [m.user.id, { id: m.id, balance: m.balance, creditLimit: m.creditLimit, availableCredit: m.availableCredit, creditBalance: m.creditBalance }])
       )
 
       return response.users.map((user) => {
@@ -154,6 +163,9 @@ async function fetchUsersByRole(role?: UserRole | 'ALL' | null): Promise<UserDat
           ...user,
           minoristaId: minoristaData?.id,
           balance: minoristaData?.balance,
+          creditLimit: minoristaData?.creditLimit,
+          availableCredit: minoristaData?.availableCredit,
+          creditBalance: minoristaData?.creditBalance,
         }
       })
     }
@@ -181,7 +193,7 @@ async function fetchUsersByRole(role?: UserRole | 'ALL' | null): Promise<UserDat
   )
 
   const minoristaMap = new Map(
-    minoristaListResponse.minoristas.map((m) => [m.user.id, { id: m.id, balance: m.balance }])
+    minoristaListResponse.minoristas.map((m) => [m.user.id, { id: m.id, balance: m.balance, creditLimit: m.creditLimit, availableCredit: m.availableCredit, creditBalance: m.creditBalance }])
   )
 
   const transferencistasData = transferencistasResponse.users.map((user) => {
@@ -199,6 +211,9 @@ async function fetchUsersByRole(role?: UserRole | 'ALL' | null): Promise<UserDat
       ...user,
       minoristaId: minoristaData?.id,
       balance: minoristaData?.balance,
+      creditLimit: minoristaData?.creditLimit,
+      availableCredit: minoristaData?.availableCredit,
+      creditBalance: minoristaData?.creditBalance,
     }
   })
 

@@ -258,14 +258,14 @@ export function UsersPage() {
                         <div className="flex items-center justify-between p-3 rounded-md bg-muted">
                           <div className="flex items-center gap-2">
                             <Wallet className="h-4 w-4 text-green-600" />
-                            <span className="text-sm text-muted-foreground">Saldo:</span>
+                            <span className="text-sm text-muted-foreground">Saldo Disponible:</span>
                           </div>
                           <span className="font-bold text-green-600">
                             {new Intl.NumberFormat('es-CO', {
                               style: 'currency',
                               currency: 'COP',
                               minimumFractionDigits: 0,
-                            }).format(user.balance || 0)}
+                            }).format(user.availableCredit || 0)}
                           </span>
                         </div>
                         {/* Recharge Button */}
@@ -274,7 +274,7 @@ export function UsersPage() {
                           size="sm"
                           className="w-full"
                           onClick={() =>
-                            handleRechargeMinorista(user.minoristaId!, user.fullName, user.email, user.balance || 0)
+                            handleRechargeMinorista(user.minoristaId!, user.fullName, user.email, user.availableCredit || 0)
                           }
                         >
                           <Wallet className="h-4 w-4 mr-2" />
