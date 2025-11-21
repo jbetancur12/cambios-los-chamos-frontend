@@ -38,7 +38,12 @@ export function useGiroDetail(giroId: string | null) {
     queryKey: ['giro', giroId],
     queryFn: async () => {
       if (!giroId) return null
-      return await api.get<Giro>(`/giro/${giroId}`)
+      const response = await api.get<{ giro: Giro } | Giro>(`/giro/${giroId}`)
+      // The API returns the giro wrapped in a {giro: ...} object, so we unwrap it
+      if (response && typeof response === 'object' && 'giro' in response) {
+        return (response as { giro: Giro }).giro
+      }
+      return response as Giro
     },
     enabled: !!giroId,
   })

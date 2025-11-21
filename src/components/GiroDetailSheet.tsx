@@ -10,6 +10,7 @@ import { useIsDesktop } from '@/hooks/useIsDesktop'
 import { useGiroDetail, useMinoristaTransaction } from '@/hooks/queries/useGiroQueries'
 import { useBankAccountsList, useBanksList } from '@/hooks/queries/useBankQueries'
 import { useExecuteGiro, useMarkGiroAsProcessing, useReturnGiro, useDeleteGiro, useUpdateGiro, useUpdateGiroRate } from '@/hooks/mutations/useGiroMutations'
+import { useQueryClient } from '@tanstack/react-query'
 import { PaymentProofUpload } from './PaymentProofUpload'
 import { PrintTicketModal } from './PrintTicketModal'
 import {
@@ -47,16 +48,25 @@ const RETURN_REASON_OPTIONS = [
 export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDetailSheetProps) {
   const { user } = useAuth()
   const isDesktop = useIsDesktop()
+  const queryClient = useQueryClient()
 
   const isTransferencista = user?.role === 'TRANSFERENCISTA'
   const isMinorista = user?.role === 'MINORISTA'
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN'
+
+  // Invalidate cache when giroId changes to force a fresh fetch
+  useEffect(() => {
+    if (giroId) {
+      queryClient.invalidateQueries({ queryKey: ['giro', giroId] })
+    }
+  }, [giroId, queryClient])
 
   // React Query hooks
   const { data: giro, isLoading } = useGiroDetail(open ? giroId : null)
   const { data: bankAccounts = [] } = useBankAccountsList()
   const { data: banks = [] } = useBanksList()
   const { data: minoristaTransaction } = useMinoristaTransaction(open && isMinorista ? giroId : null)
+
 
   // Mutations
   const executeGiroMutation = useExecuteGiro()
