@@ -4,8 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { api } from '@/lib/api'
 import { toast } from 'sonner'
+import {
+  useSystemProfitReport,
+  useSystemProfitTrendReport,
+  useMinoristaProfitReport,
+  useBankTransactionReport,
+  useMinoristaTransactionReport,
+} from '@/hooks/queries/useReportQueries'
 import {
   LineChart,
   Line,
@@ -22,68 +28,6 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import { ChevronDown, ChevronUp } from 'lucide-react'
-
-interface SystemProfitReport {
-  totalProfit: number
-  totalGiros: number
-  completedGiros: number
-  averageProfitPerGiro: number
-  profitByStatus: Array<{
-    status: string
-    count: number
-    totalProfit: number
-  }>
-}
-
-interface ProfitTrendData {
-  date: string
-  profit: number
-}
-
-interface SystemProfitTrendReport {
-  trendData: ProfitTrendData[]
-  totalProfit: number
-  totalGiros: number
-  completedGiros: number
-  averageProfitPerGiro: number
-}
-
-interface MinoristaProfit {
-  minoristaId: string
-  minoristaName: string
-  email: string
-  totalProfit: number
-  giroCount: number
-  availableCredit: number
-}
-
-interface TopMinoristaReport {
-  minoristas: MinoristaProfit[]
-  totalMinoristas: number
-}
-
-interface BankTransactionReport {
-  totalTransactions: number
-  totalDeposits: number
-  totalWithdrawals: number
-  totalAdjustments: number
-  depositAmount: number
-  withdrawalAmount: number
-  adjustmentAmount: number
-  netAmount: number
-}
-
-interface MinoristaTransactionReport {
-  totalTransactions: number
-  recharges: number
-  discounts: number
-  adjustments: number
-  profits: number
-  totalRechargeAmount: number
-  totalDiscountAmount: number
-  totalAdjustmentAmount: number
-  totalProfitAmount: number
-}
 
 type TabType = 'system' | 'minoristas' | 'bank' | 'minoristaTransactions'
 
@@ -146,55 +90,32 @@ export function ReportsPage() {
   const [dateFrom, setDateFrom] = useState<string>('')
   const [dateTo, setDateTo] = useState<string>('')
   const [selectedDateRange, setSelectedDateRange] = useState<DateRangeFilter>('today')
-  const [loading, setLoading] = useState(false)
   const [filterOpen, setFilterOpen] = useState(false)
-  const [systemReport, setSystemReport] = useState<SystemProfitReport | null>(null)
-  const [systemTrendReport, setSystemTrendReport] = useState<SystemProfitTrendReport | null>(null)
-  const [minoristaReport, setMinoristaReport] = useState<TopMinoristaReport | null>(null)
-  const [bankReport, setBankReport] = useState<BankTransactionReport | null>(null)
-  const [minoristaTransactionReport, setMinoristaTransactionReport] = useState<MinoristaTransactionReport | null>(null)
 
-  const loadReports = async (fromDate: string, toDate: string) => {
-    if (!fromDate || !toDate) {
-      return
-    }
+  // React Query hooks for each report type
+  const systemReportQuery = useSystemProfitReport(dateFrom || null, dateTo || null)
+  const systemTrendReportQuery = useSystemProfitTrendReport(dateFrom || null, dateTo || null)
+  const minoristaReportQuery = useMinoristaProfitReport(dateFrom || null, dateTo || null)
+  const bankReportQuery = useBankTransactionReport(dateFrom || null, dateTo || null)
+  const minoristaTransactionReportQuery = useMinoristaTransactionReport(dateFrom || null, dateTo || null)
 
-    setLoading(true)
-
-    try {
-      // Send dates as YYYY-MM-DD format (local timezone, backend will convert to UTC)
-      if (activeTab === 'system') {
-        const data = await api.get<SystemProfitReport>(
-          `/reports/system-profit?dateFrom=${fromDate}&dateTo=${toDate}`
-        )
-        const trendData = await api.get<SystemProfitTrendReport>(
-          `/reports/system-profit-trend?dateFrom=${fromDate}&dateTo=${toDate}`
-        )
-        setSystemReport(data)
-        setSystemTrendReport(trendData)
-      } else if (activeTab === 'minoristas') {
-        const data = await api.get<TopMinoristaReport>(
-          `/reports/minorista-profit?dateFrom=${fromDate}&dateTo=${toDate}`
-        )
-        setMinoristaReport(data)
-      } else if (activeTab === 'bank') {
-        const data = await api.get<BankTransactionReport>(
-          `/reports/bank-transactions?dateFrom=${fromDate}&dateTo=${toDate}`
-        )
-        setBankReport(data)
-      } else if (activeTab === 'minoristaTransactions') {
-        const data = await api.get<MinoristaTransactionReport>(
-          `/reports/minorista-transactions?dateFrom=${fromDate}&dateTo=${toDate}`
-        )
-        setMinoristaTransactionReport(data)
-      }
-    } catch (err: any) {
-      toast.error(err.message || 'Error al cargar reporte')
-      console.error(err)
-    } finally {
-      setLoading(false)
+  // Determine which query to use based on active tab
+  const getActiveQueryState = () => {
+    switch (activeTab) {
+      case 'system':
+        return { isLoading: systemReportQuery.isLoading, error: systemReportQuery.error }
+      case 'minoristas':
+        return { isLoading: minoristaReportQuery.isLoading, error: minoristaReportQuery.error }
+      case 'bank':
+        return { isLoading: bankReportQuery.isLoading, error: bankReportQuery.error }
+      case 'minoristaTransactions':
+        return { isLoading: minoristaTransactionReportQuery.isLoading, error: minoristaTransactionReportQuery.error }
+      default:
+        return { isLoading: false, error: null }
     }
   }
+
+  const { isLoading } = getActiveQueryState()
 
   // Load today's data on component mount
   useEffect(() => {
@@ -202,13 +123,6 @@ export function ReportsPage() {
     setDateFrom(dates.from)
     setDateTo(dates.to)
   }, [])
-
-  // Auto-load reports when dates change
-  useEffect(() => {
-    if (dateFrom && dateTo) {
-      loadReports(dateFrom, dateTo)
-    }
-  }, [dateFrom, dateTo, activeTab])
 
   const handleQuickDateRange = (range: 'today' | 'yesterday' | 'week' | 'lastWeek' | 'month' | 'lastMonth' | 'year') => {
     const dates = getDateRange(range)
@@ -222,16 +136,11 @@ export function ReportsPage() {
       toast.error('Por favor selecciona un rango de fechas')
       return
     }
-    await loadReports(dateFrom, dateTo)
+    // React Query automatically refetches when dates/tab changes
   }
 
   const handleTabChange = (tab: TabType) => {
     setActiveTab(tab)
-    setSystemReport(null)
-    setSystemTrendReport(null)
-    setMinoristaReport(null)
-    setBankReport(null)
-    setMinoristaTransactionReport(null)
   }
 
   return (
@@ -347,8 +256,8 @@ export function ReportsPage() {
                   className="w-full"
                 />
               </div>
-              <Button onClick={handleLoadReports} disabled={loading} className="w-full bg-[linear-gradient(to_right,#136BBC,#274565)]">
-                {loading ? 'Cargando...' : 'Cargar Reporte'}
+              <Button onClick={handleLoadReports} disabled={isLoading} className="w-full bg-[linear-gradient(to_right,#136BBC,#274565)]">
+                {isLoading ? 'Cargando...' : 'Cargar Reporte'}
               </Button>
             </div>
           </CardContent>
@@ -394,31 +303,31 @@ export function ReportsPage() {
         </div>
 
         {/* System Profit Report */}
-        {activeTab === 'system' && systemReport && (
+        {activeTab === 'system' && systemReportQuery.data && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <StatCard
               label="Ganancia Total"
-              value={`$${systemReport.totalProfit.toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
+              value={`$${systemReportQuery.data.totalProfit.toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
               color="bg-green-100"
             />
-            <StatCard label="Giros Totales" value={systemReport.totalGiros.toString()} color="bg-blue-100" />
-            <StatCard label="Giros Completados" value={systemReport.completedGiros.toString()} color="bg-purple-100" />
+            <StatCard label="Giros Totales" value={systemReportQuery.data.totalGiros.toString()} color="bg-blue-100" />
+            <StatCard label="Giros Completados" value={systemReportQuery.data.completedGiros.toString()} color="bg-purple-100" />
             <StatCard
               label="Ganancia Promedio"
-              value={`$${systemReport.averageProfitPerGiro.toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
+              value={`$${systemReportQuery.data.averageProfitPerGiro.toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
               color="bg-orange-100"
             />
           </div>
         )}
 
-        {activeTab === 'system' && systemTrendReport && systemTrendReport.trendData.length > 0 && (
+        {activeTab === 'system' && systemTrendReportQuery.data && systemTrendReportQuery.data.trendData.length > 0 && (
           <Card className="mb-6">
             <CardHeader>
               <CardTitle>Tendencia de Ganancias del Sistema</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={systemTrendReport.trendData}>
+                <LineChart data={systemTrendReportQuery.data.trendData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="date" />
                   <YAxis />
@@ -438,7 +347,7 @@ export function ReportsPage() {
           </Card>
         )}
 
-        {activeTab === 'system' && systemReport && (
+        {activeTab === 'system' && systemReportQuery.data && (
           <Card>
             <CardHeader>
               <CardTitle>Ganancias por Estado</CardTitle>
@@ -454,7 +363,7 @@ export function ReportsPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {systemReport.profitByStatus.map((status) => (
+                    {systemReportQuery.data.profitByStatus.map((status) => (
                       <tr key={status.status} className="border-b hover:bg-gray-50">
                         <td className="py-3 px-4">
                           <Badge variant="default">{status.status}</Badge>
@@ -473,25 +382,25 @@ export function ReportsPage() {
         )}
 
         {/* Minorista Profit Report */}
-        {activeTab === 'minoristas' && minoristaReport && (
+        {activeTab === 'minoristas' && minoristaReportQuery.data && (
           <>
             <Card className="mb-4">
               <CardContent className="pt-6">
                 <p className="text-gray-600">
-                  Total de minoristas registrados: <span className="font-bold">{minoristaReport.totalMinoristas}</span>
+                  Total de minoristas registrados: <span className="font-bold">{minoristaReportQuery.data.totalMinoristas}</span>
                 </p>
               </CardContent>
             </Card>
 
             {/* Minoristas Bar Chart */}
-            {minoristaReport.minoristas.length > 0 && (
+            {minoristaReportQuery.data.minoristas.length > 0 && (
               <Card className="mb-6">
                 <CardHeader>
                   <CardTitle>Ganancias por Minorista</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={minoristaReport.minoristas}>
+                    <BarChart data={minoristaReportQuery.data.minoristas}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="minoristaName" angle={-45} textAnchor="end" height={80} />
                       <YAxis />
@@ -520,7 +429,7 @@ export function ReportsPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {minoristaReport.minoristas.map((m) => (
+                      {minoristaReportQuery.data.minoristas.map((m) => (
                         <tr key={m.minoristaId} className="border-b hover:bg-gray-50">
                           <td className="py-3 px-4">{m.minoristaName}</td>
                           <td className="py-3 px-4 text-xs text-gray-600">{m.email}</td>
@@ -542,28 +451,28 @@ export function ReportsPage() {
         )}
 
         {/* Bank Transaction Report */}
-        {activeTab === 'bank' && bankReport && (
+        {activeTab === 'bank' && bankReportQuery.data && (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
               <StatCard
                 label="Depósitos"
-                value={`$${bankReport.depositAmount.toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
+                value={`$${bankReportQuery.data.depositAmount.toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
                 color="bg-green-100"
               />
               <StatCard
                 label="Retiros"
-                value={`$${bankReport.withdrawalAmount.toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
+                value={`$${bankReportQuery.data.withdrawalAmount.toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
                 color="bg-red-100"
               />
               <StatCard
                 label="Ajustes"
-                value={`$${bankReport.adjustmentAmount.toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
+                value={`$${bankReportQuery.data.adjustmentAmount.toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
                 color="bg-yellow-100"
               />
               <StatCard
                 label="Neto"
-                value={`$${bankReport.netAmount.toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
-                color={bankReport.netAmount >= 0 ? 'bg-blue-100' : 'bg-orange-100'}
+                value={`$${bankReportQuery.data.netAmount.toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
+                color={bankReportQuery.data.netAmount >= 0 ? 'bg-blue-100' : 'bg-orange-100'}
               />
             </div>
 
@@ -577,9 +486,9 @@ export function ReportsPage() {
                   <PieChart>
                     <Pie
                       data={[
-                        { name: 'Depósitos', value: bankReport.totalDeposits, fill: CHART_COLORS[0] },
-                        { name: 'Retiros', value: bankReport.totalWithdrawals, fill: CHART_COLORS[1] },
-                        { name: 'Ajustes', value: bankReport.totalAdjustments, fill: CHART_COLORS[2] },
+                        { name: 'Depósitos', value: bankReportQuery.data.totalDeposits, fill: CHART_COLORS[0] },
+                        { name: 'Retiros', value: bankReportQuery.data.totalWithdrawals, fill: CHART_COLORS[1] },
+                        { name: 'Ajustes', value: bankReportQuery.data.totalAdjustments, fill: CHART_COLORS[2] },
                       ]}
                       dataKey="value"
                       label
@@ -601,10 +510,10 @@ export function ReportsPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <StatRow label="Total de Transacciones" value={bankReport.totalTransactions.toString()} />
-                  <StatRow label="Total de Depósitos" value={bankReport.totalDeposits.toString()} />
-                  <StatRow label="Total de Retiros" value={bankReport.totalWithdrawals.toString()} />
-                  <StatRow label="Total de Ajustes" value={bankReport.totalAdjustments.toString()} />
+                  <StatRow label="Total de Transacciones" value={bankReportQuery.data.totalTransactions.toString()} />
+                  <StatRow label="Total de Depósitos" value={bankReportQuery.data.totalDeposits.toString()} />
+                  <StatRow label="Total de Retiros" value={bankReportQuery.data.totalWithdrawals.toString()} />
+                  <StatRow label="Total de Ajustes" value={bankReportQuery.data.totalAdjustments.toString()} />
                 </div>
               </CardContent>
             </Card>
@@ -612,27 +521,27 @@ export function ReportsPage() {
         )}
 
         {/* Minorista Transaction Report */}
-        {activeTab === 'minoristaTransactions' && minoristaTransactionReport && (
+        {activeTab === 'minoristaTransactions' && minoristaTransactionReportQuery.data && (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
               <StatCard
                 label="Recargas"
-                value={`$${minoristaTransactionReport.totalRechargeAmount.toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
+                value={`$${minoristaTransactionReportQuery.data.totalRechargeAmount.toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
                 color="bg-blue-100"
               />
               <StatCard
                 label="Descuentos"
-                value={`$${minoristaTransactionReport.totalDiscountAmount.toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
+                value={`$${minoristaTransactionReportQuery.data.totalDiscountAmount.toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
                 color="bg-red-100"
               />
               <StatCard
                 label="Ganancias"
-                value={`$${minoristaTransactionReport.totalProfitAmount.toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
+                value={`$${minoristaTransactionReportQuery.data.totalProfitAmount.toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
                 color="bg-green-100"
               />
               <StatCard
                 label="Ajustes"
-                value={`$${minoristaTransactionReport.totalAdjustmentAmount.toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
+                value={`$${minoristaTransactionReportQuery.data.totalAdjustmentAmount.toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
                 color="bg-yellow-100"
               />
             </div>
@@ -647,10 +556,10 @@ export function ReportsPage() {
                   <PieChart>
                     <Pie
                       data={[
-                        { name: 'Recargas', value: minoristaTransactionReport.recharges, fill: CHART_COLORS[0] },
-                        { name: 'Descuentos', value: minoristaTransactionReport.discounts, fill: CHART_COLORS[1] },
-                        { name: 'Ganancias', value: minoristaTransactionReport.profits, fill: CHART_COLORS[2] },
-                        { name: 'Ajustes', value: minoristaTransactionReport.adjustments, fill: CHART_COLORS[3] },
+                        { name: 'Recargas', value: minoristaTransactionReportQuery.data.recharges, fill: CHART_COLORS[0] },
+                        { name: 'Descuentos', value: minoristaTransactionReportQuery.data.discounts, fill: CHART_COLORS[1] },
+                        { name: 'Ganancias', value: minoristaTransactionReportQuery.data.profits, fill: CHART_COLORS[2] },
+                        { name: 'Ajustes', value: minoristaTransactionReportQuery.data.adjustments, fill: CHART_COLORS[3] },
                       ]}
                       dataKey="value"
                       label
@@ -674,19 +583,19 @@ export function ReportsPage() {
                 <div className="space-y-3">
                   <StatRow
                     label="Total de Transacciones"
-                    value={minoristaTransactionReport.totalTransactions.toString()}
+                    value={minoristaTransactionReportQuery.data.totalTransactions.toString()}
                   />
-                  <StatRow label="Recargas" value={minoristaTransactionReport.recharges.toString()} />
-                  <StatRow label="Descuentos" value={minoristaTransactionReport.discounts.toString()} />
-                  <StatRow label="Ajustes" value={minoristaTransactionReport.adjustments.toString()} />
-                  <StatRow label="Ganancias" value={minoristaTransactionReport.profits.toString()} />
+                  <StatRow label="Recargas" value={minoristaTransactionReportQuery.data.recharges.toString()} />
+                  <StatRow label="Descuentos" value={minoristaTransactionReportQuery.data.discounts.toString()} />
+                  <StatRow label="Ajustes" value={minoristaTransactionReportQuery.data.adjustments.toString()} />
+                  <StatRow label="Ganancias" value={minoristaTransactionReportQuery.data.profits.toString()} />
                 </div>
               </CardContent>
             </Card>
           </>
         )}
 
-        {!systemReport && !minoristaReport && !bankReport && !minoristaTransactionReport && !loading && (
+        {!systemReportQuery.data && !minoristaReportQuery.data && !bankReportQuery.data && !minoristaTransactionReportQuery.data && !isLoading && (
           <Card>
             <CardContent className="text-center py-8">
               <p className="text-gray-500">Selecciona un rango de fechas y haz clic en "Cargar Reporte"</p>
