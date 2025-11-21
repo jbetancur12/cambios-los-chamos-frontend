@@ -15,6 +15,9 @@ export function setupWebSocketSync(queryClient: QueryClient) {
         queryClient.invalidateQueries({ queryKey: ['giros'] })
         queryClient.invalidateQueries({ queryKey: ['giros', 'recent'] })
         queryClient.invalidateQueries({ queryKey: ['dashboard', 'stats'] })
+
+        // Invalidate minorista balance when giro is created
+        queryClient.invalidateQueries({ queryKey: ['minorista', 'balance'] })
       })
 
       // Escuchar actualización de giros
@@ -37,6 +40,13 @@ export function setupWebSocketSync(queryClient: QueryClient) {
         queryClient.invalidateQueries({ queryKey: ['giros', 'recent'] })
         queryClient.invalidateQueries({ queryKey: ['dashboard', 'stats'] })
         queryClient.invalidateQueries({ queryKey: ['minorista', 'balance'] })
+
+        // Invalidate transferencista bank accounts when giro is executed
+        if (event.giro.transferencista?.id) {
+          queryClient.invalidateQueries({
+            queryKey: ['transferencista', event.giro.transferencista.id, 'bankAccounts']
+          })
+        }
       })
 
       // Escuchar giro devuelto
@@ -52,6 +62,9 @@ export function setupWebSocketSync(queryClient: QueryClient) {
         queryClient.invalidateQueries({ queryKey: ['giros'] })
         queryClient.invalidateQueries({ queryKey: ['giros', 'recent'] })
         queryClient.invalidateQueries({ queryKey: ['dashboard', 'stats'] })
+
+        // Invalidate minorista balance on delete (for refund)
+        queryClient.invalidateQueries({ queryKey: ['minorista', 'balance'] })
       })
 
       // Retornar función para desuscribirse

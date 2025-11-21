@@ -27,9 +27,26 @@ import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage'
 import { ConfigPage } from '@/pages/ConfigPage'
 import { useEffect } from 'react'
 import { requestNotifyPermission } from './firebase/messaging'
+import { useGiroWebSocket } from '@/hooks/useGiroWebSocket'
+import { setupWebSocketSync } from '@/lib/websocketSync'
 
 function QueryMonitorInitializer() {
   useQueryMonitor()
+  return null
+}
+
+function WebSocketSyncInitializer() {
+  const { subscribe } = useGiroWebSocket()
+
+  useEffect(() => {
+    const { setupGiroSync } = setupWebSocketSync(queryClient)
+    const unsubscribe = setupGiroSync(subscribe)
+
+    return () => {
+      unsubscribe()
+    }
+  }, [subscribe])
+
   return null
 }
 
@@ -49,6 +66,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <QueryMonitorInitializer />
+      <WebSocketSyncInitializer />
       <BrowserRouter>
         <AuthProvider>
           {/* <PushInitializer /> */}

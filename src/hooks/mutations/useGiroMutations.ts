@@ -60,6 +60,8 @@ export function useCreateGiro() {
       // Invalidar listas de giros
       queryClient.invalidateQueries({ queryKey: ['giros'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      // Invalidar balance del minorista para actualizar crédito disponible
+      queryClient.invalidateQueries({ queryKey: ['minorista', 'balance'] })
     },
   })
 }
@@ -111,6 +113,8 @@ export function useReturnGiro() {
     onSuccess: (giro) => {
       queryClient.invalidateQueries({ queryKey: ['giro', giro.id] })
       queryClient.invalidateQueries({ queryKey: ['giros'] })
+      // Invalidar balance del minorista para actualizar crédito disponible (refund)
+      queryClient.invalidateQueries({ queryKey: ['minorista', 'balance'] })
     },
   })
 }
@@ -124,6 +128,8 @@ export function useDeleteGiro() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['giros'] })
+      // Invalidar balance del minorista para actualizar crédito disponible (refund)
+      queryClient.invalidateQueries({ queryKey: ['minorista', 'balance'] })
     },
   })
 }
