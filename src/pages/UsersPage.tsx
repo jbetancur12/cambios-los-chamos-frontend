@@ -190,7 +190,7 @@ export function UsersPage() {
                     }
                   }}
                 >
-                  <CardHeader className="pb-2">
+                  <CardHeader className="pb-0">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <CardTitle className="text-lg">{user.fullName}</CardTitle>
@@ -203,7 +203,7 @@ export function UsersPage() {
                         </div>
                       )}
                     </div>
-                    <div className="flex items-center gap-4 mt-2 flex-wrap">
+                    <div className="flex items-center gap-4 mt-1 flex-wrap">
                       {/* Switch activar/desactivar */}
                       <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                         <Switch
@@ -230,9 +230,9 @@ export function UsersPage() {
                     </div>
                   </CardHeader>
                   {user.minoristaId && (
-                    <CardContent className="pt-2">
+                    <CardContent className="pt-1">
                       {/* Balance Display */}
-                      <div className="flex items-center justify-between p-2 rounded-md bg-muted">
+                      <div className="flex items-center justify-between p-1 rounded-md bg-muted">
                         <span className="text-sm text-muted-foreground hidden md:inline">Saldo Disponible:</span>
                         <span className="font-bold text-green-600">
                           {new Intl.NumberFormat('es-CO', {
