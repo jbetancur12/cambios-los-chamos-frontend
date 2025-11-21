@@ -3,27 +3,23 @@ import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
-  Plus,
   ArrowRight,
   Clock,
   CheckCircle,
   XCircle,
   Search,
   X as XIcon,
-  Banknote,
-  Wallet,
-  Signal,
   CreditCard,
   Calendar,
   ChevronDown,
+  Banknote,
+  Wallet,
+  Signal,
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
-import { CreateGiroSheet } from '@/components/CreateGiroSheet'
 import { GiroDetailSheet } from '@/components/GiroDetailSheet'
-import { MobilePaymentSheet } from '@/components/MobilePaymentSheet'
-import { RechargeSheet } from '@/components/RechargeSheet'
 import { useGiroWebSocket } from '@/hooks/useGiroWebSocket'
 import type { Giro, GiroStatus, Currency, ExecutionType } from '@/types/api'
 
@@ -42,17 +38,11 @@ export function GirosPage() {
   })
   const [customDateModalOpen, setCustomDateModalOpen] = useState(false)
   const [dateFiltersExpanded, setDateFiltersExpanded] = useState(false)
-  const [giroTypeMenuOpen, setGiroTypeMenuOpen] = useState(false)
-  const [createSheetOpen, setCreateSheetOpen] = useState(false)
-  const [mobilePaymentOpen, setMobilePaymentOpen] = useState(false)
-  const [rechargeOpen, setRechargeOpen] = useState(false)
   const [detailSheetOpen, setDetailSheetOpen] = useState(false)
   const [selectedGiroId, setSelectedGiroId] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [page, setPage] = useState(1)
   const itemsPerPage = 15
-
-  const canCreateGiro = user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN' || user?.role === 'MINORISTA'
 
   useEffect(() => {
     fetchGiros()
@@ -473,13 +463,7 @@ export function GirosPage() {
         <Card>
           <CardContent className="p-8 text-center">
             <ArrowRight className="h-8 w-8 mx-auto mb-3 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground mb-3">No hay giros registrados</p>
-            {canCreateGiro && (
-              <Button onClick={() => setGiroTypeMenuOpen(true)} size="sm" className="text-white" style={{ background: 'linear-gradient(to right, #136BBC, #274565)' }}>
-                <Plus className="h-4 w-4 mr-2" />
-                Crear primer giro
-              </Button>
-            )}
+            <p className="text-sm text-muted-foreground">No hay giros registrados</p>
           </CardContent>
         </Card>
       ) : filteredGiros.length === 0 ? (
@@ -712,67 +696,7 @@ export function GirosPage() {
           </div>
         </>
       )}
-      <div className="fixed bottom-20 md:bottom-8 right-4 md:right-8 z-50">
-        {/* Menu Options */}
-        {giroTypeMenuOpen && (
-          <div className="absolute bottom-16 right-0 bg-card border rounded-lg shadow-lg p-2 space-y-1 min-w-[200px] mb-2 z-50">
-            <button
-              onClick={() => {
-                setCreateSheetOpen(true)
-                setGiroTypeMenuOpen(false)
-              }}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-md hover:bg-accent transition-colors text-left"
-            >
-              <Banknote className="h-5 w-5" style={{ color: '#136BBC' }} />
-              <span className="font-medium">Transferencia</span>
-            </button>
-            <button
-              onClick={() => {
-                setMobilePaymentOpen(true)
-                setGiroTypeMenuOpen(false)
-              }}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-md hover:bg-accent transition-colors text-left"
-            >
-              <Wallet className="h-5 w-5 text-green-600" />
-              <span className="font-medium">Pago Movil</span>
-            </button>
-            <button
-              onClick={() => {
-                setRechargeOpen(true)
-                setGiroTypeMenuOpen(false)
-              }}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-md hover:bg-accent transition-colors text-left"
-            >
-              <Signal className="h-5 w-5 text-orange-600" />
-              <span className="font-medium">Recarga</span>
-            </button>
-          </div>
-        )}
 
-        {/* FAB - Create Giro */}
-        {canCreateGiro && (
-          <div className="fixed bottom-20 md:bottom-8 right-4 md:right-8 z-50">
-            <button
-              onClick={() => setGiroTypeMenuOpen(!giroTypeMenuOpen)}
-              className={`text-white rounded-full p-4 shadow-lg hover:shadow-xl transition-all active:scale-95 ${
-                giroTypeMenuOpen ? 'rotate-45' : ''
-              }`}
-              style={{ background: 'linear-gradient(to right, #136BBC, #274565)' }}
-            >
-              <Plus className="h-6 w-6" />
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* Create Giro Sheet */}
-      <CreateGiroSheet open={createSheetOpen} onOpenChange={setCreateSheetOpen} onSuccess={fetchGiros} />
-
-      {/* Mobile Payment Sheet */}
-      <MobilePaymentSheet open={mobilePaymentOpen} onOpenChange={setMobilePaymentOpen} />
-
-      {/* Recharge Sheet */}
-      <RechargeSheet open={rechargeOpen} onOpenChange={setRechargeOpen} />
 
       {/* Giro Detail Sheet */}
       <GiroDetailSheet
