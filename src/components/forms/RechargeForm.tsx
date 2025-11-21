@@ -118,16 +118,19 @@ export function RechargeForm({ onSuccess }: RechargeFormProps) {
   const amountUsd = exchangeRate ? (selectedAmountBs / Number(exchangeRate.bcv)).toFixed(2) : '0.00'
 
   const getEarnedProfit = () => {
-    return 0
+    const amount = parseFloat(amountCop) || 0
+    if (amount <= 0) return 0
+    return amount * 0.05
   }
 
   const getRemainingBalance = () => {
     if (minoristaBalance === null || minoristaBalanceInFavor === null) return null
 
     const totalBalance = minoristaBalance + minoristaBalanceInFavor
-    const amountCopNum = parseFloat(amountCop)
+    const amountCopNum = parseFloat(amountCop) || 0
+    const profit = getEarnedProfit() || 0
 
-    return totalBalance - amountCopNum
+    return totalBalance - amountCopNum + profit
   }
 
   const hasInsufficientBalance = () => {

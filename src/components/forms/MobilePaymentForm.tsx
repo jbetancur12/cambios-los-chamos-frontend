@@ -75,16 +75,19 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   }
 
   const getEarnedProfit = () => {
-    return 0
+    const amount = parseFloat(amountCop) || 0
+    if (amount <= 0) return 0
+    return amount * 0.05
   }
 
   const getRemainingBalance = () => {
     if (minoristaBalance === null || minoristaBalanceInFavor === null) return null
 
     const amount = parseFloat(amountCop) || 0
+    const profit = getEarnedProfit() || 0
     const totalBalance = minoristaBalance + minoristaBalanceInFavor
 
-    return totalBalance - amount
+    return totalBalance - amount + profit
   }
 
   const hasInsufficientBalance = () => {
