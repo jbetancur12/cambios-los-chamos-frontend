@@ -24,6 +24,7 @@ import {
   CornerDownLeft, // Nuevo ícono para devolver
   Printer,
   Copy,
+  Share2,
 } from 'lucide-react'
 import type { Giro, BankAccount, GiroStatus, Bank, MinoristaTransaction } from '@/types/api'
 
@@ -870,21 +871,38 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                     onClick={async () => {
                       try {
                         const { blob, filename } = await api.downloadFile(`/giro/${giro.id}/payment-proof/download`)
-                        const url = window.URL.createObjectURL(blob)
-                        const a = document.createElement('a')
-                        a.href = url
-                        a.download = filename
-                        document.body.appendChild(a)
-                        a.click()
-                        window.URL.revokeObjectURL(url)
-                        document.body.removeChild(a)
+                        const file = new File([blob], filename, { type: blob.type })
+
+                        if (navigator.share && navigator.canShare?.({ files: [file] })) {
+                          console.log("----------")
+                          await navigator.share({
+                            title: 'Comprobante de pago',
+                            text: 'Mi comprobante de pago',
+                            files: [file],
+                          })
+                        } else {
+                          // Fallback to direct download for unsupported browsers
+                          const url = window.URL.createObjectURL(blob)
+                          const a = document.createElement('a')
+                          a.href = url
+                          a.download = filename
+                          document.body.appendChild(a)
+                          a.click()
+                          window.URL.revokeObjectURL(url)
+                          document.body.removeChild(a)
+                        }
                       } catch (error: any) {
-                        toast.error('Error al descargar el comprobante')
+                        console.log(error)
+                        // Ignorar cancelaciones de usuario y permisos denegados
+                        if (error.name !== 'AbortError' && error.name !== 'NotAllowedError') {
+                          toast.error('Error al compartir el comprobante')
+                        }
                       }
                     }}
-                    className="w-full"
+                    className="w-full gap-1"
                   >
-                    Descargar
+                    <Share2 className="h-3 w-3" />
+                    Guardar/Compartir
                   </Button>
                 </div>
               )}
