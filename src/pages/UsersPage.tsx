@@ -19,7 +19,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { CreateUserSheet } from '@/components/CreateUserSheet'
 import { RechargeMinoristaBalanceSheet } from '@/components/RechargeMinoristaBalanceSheet'
 import { useAllUsers } from '@/hooks/queries/useUserQueries'
-import type { UserRole, Minorista } from '@/types/api'
+import type { Minorista } from '@/types/api'
 import { Switch } from '@/components/ui/switch'
 
 export function UsersPage() {
@@ -118,16 +118,6 @@ export function UsersPage() {
     )
   }
 
-  const getRoleBadge = (role: UserRole) => {
-    const roleMap: Record<UserRole, { label: string; className: string }> = {
-      SUPER_ADMIN: { label: 'Super Admin', className: 'bg-purple-100 text-purple-800' },
-      ADMIN: { label: 'Admin', className: 'bg-blue-100 text-blue-800' },
-      TRANSFERENCISTA: { label: 'Transferencista', className: 'bg-green-100 text-green-800' },
-      MINORISTA: { label: 'Minorista', className: 'bg-orange-100 text-orange-800' },
-    }
-    return roleMap[role] || { label: role, className: 'bg-gray-100 text-gray-800' }
-  }
-
   // Filter users based on search query
   const filteredUsers = users.filter((user) => {
     const searchLower = searchQuery.toLowerCase()
@@ -192,7 +182,6 @@ export function UsersPage() {
           )}
           <div className="grid gap-4 grid-cols-1">
             {filteredUsers.map((user) => {
-              const roleBadge = getRoleBadge(user.role)
               return (
                 <Card key={user.id}>
                   <CardHeader className="pb-3">
@@ -214,16 +203,13 @@ export function UsersPage() {
                           </span>
                         </div>
                       </div>
-                      <div className="flex flex-col items-end gap-2">
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${roleBadge.className}`}>
-                          {roleBadge.label}
-                        </span>
-                        {!user.isActive && (
+                      {!user.isActive && (
+                        <div>
                           <span className="px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
                             Inactivo
                           </span>
-                        )}
-                      </div>
+                        </div>
+                      )}
                     </div>
                     <div className="flex items-center gap-6 mt-3 flex-wrap">
                       {/* Switch activar/desactivar */}
