@@ -2,10 +2,17 @@ import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 
 interface DashboardStats {
-  totalGiros: number
-  totalAmount: number
-  pendingGiros: number
-  completedToday: number
+  girosCount?: number
+  girosLabel?: string
+  usersCount?: number
+  volumeBs?: number
+  volumeCOP?: number
+  volumeUSD?: number
+  systemEarnings?: number
+  minoristaEarnings?: number
+  earnings?: number
+  processingToday?: number
+  completedToday?: number
 }
 
 export function useDashboardStats() {

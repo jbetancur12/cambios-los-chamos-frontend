@@ -1,79 +1,39 @@
 import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { FileText, Users, TrendingUp, DollarSign, Wallet, Coins, Clock, ArrowRight, Building } from 'lucide-react'
-import { useDashboardStats } from '@/hooks/useDashboardStats'
-import { useRecentGiros } from '@/hooks/useRecentGiros'
-import type { RecentGiro } from '@/hooks/useRecentGiros'
+import { useDashboardStats, useMinoristaBalance } from '@/hooks/queries/useDashboardQueries'
+import { useRecentGiros } from '@/hooks/queries/useGiroQueries'
+import { useBankAccountsList } from '@/hooks/queries/useBankQueries'
 import { GiroDetailSheet } from '@/components/GiroDetailSheet'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { api } from '@/lib/api'
-import { toast } from 'sonner'
-import type { Minorista, BankAccount } from '@/types/api'
+import type { Giro } from '@/types/api'
 
 export function DashboardPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
-  const { stats, loading, error } = useDashboardStats()
-  const { giros, loading: girosLoading } = useRecentGiros(5)
-  const [selectedGiro, setSelectedGiro] = useState<RecentGiro | null>(null)
+
+  // React Query hooks
+  const { data: stats, isLoading, error } = useDashboardStats()
+  const { data: giros = [] } = useRecentGiros(5)
+  const { data: minoristaBalanceData } = useMinoristaBalance()
+  const { data: bankAccounts = [] } = useBankAccountsList()
+
+  // Local UI state
+  const [selectedGiro, setSelectedGiro] = useState<Giro | null>(null)
   const [sheetOpen, setSheetOpen] = useState(false)
-
-  // Minorista balance
-  const [minoristaBalance, setMinoristaBalance] = useState<number | null>(null)
-  const [minoristaBalanceInFavor, setMinoristaBalanceInFavor] = useState<number | null>(null)
-  const [loadingBalance, setLoadingBalance] = useState(false)
-
-  // Transferencista bank accounts
-  const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([])
-  const [loadingAccounts, setLoadingAccounts] = useState(false)
 
   const isSuperAdmin = user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN'
   const isTransferencista = user?.role === 'TRANSFERENCISTA'
   const isMinorista = user?.role === 'MINORISTA'
 
-  useEffect(() => {
-    if (isMinorista) {
-      fetchMinoristaBalance()
-    }
-    if (isTransferencista) {
-      fetchBankAccounts()
-    }
-  }, [isMinorista, isTransferencista])
-
-  const fetchMinoristaBalance = async () => {
-    try {
-      setLoadingBalance(true)
-      const response = await api.get<{ minorista: Minorista }>('/minorista/me')
-      setMinoristaBalance(response.minorista.availableCredit)
-      setMinoristaBalanceInFavor(response.minorista.creditBalance || 0)
-    } catch (error: any) {
-      toast.error(error.message || 'Error al cargar balance')
-    } finally {
-      setLoadingBalance(false)
-    }
-  }
-
-  const fetchBankAccounts = async () => {
-    try {
-      setLoadingAccounts(true)
-      const response = await api.get<{ bankAccounts: BankAccount[] }>('/bank-account/my-accounts')
-      setBankAccounts(response.bankAccounts)
-    } catch (error: any) {
-      toast.error(error.message || 'Error al cargar cuentas bancarias')
-    } finally {
-      setLoadingAccounts(false)
-    }
-  }
-
-  const handleGiroClick = (giro: RecentGiro) => {
+  const handleGiroClick = (giro: Giro) => {
     setSelectedGiro(giro)
     setSheetOpen(true)
   }
 
   const handleDetailClose = () => {
     setSheetOpen(false)
-    // Recargar giros recientes si es necesario
   }
 
   const formatCurrency = (amount: number, currency: 'VES' | 'COP' | 'USD' = 'VES') => {
@@ -109,7 +69,7 @@ export function DashboardPage() {
     return statusMap[status] || { label: status, className: 'bg-gray-100 text-gray-800' }
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="p-4 md:p-6 max-w-7xl mx-auto">
         <div className="text-center py-12">
@@ -124,7 +84,7 @@ export function DashboardPage() {
       <div className="p-4 md:p-6 max-w-7xl mx-auto">
         <Card className="border-destructive">
           <CardContent className="p-6">
-            <p className="text-sm text-destructive">{error}</p>
+            <p className="text-sm text-destructive">{error instanceof Error ? error.message : 'Error al cargar estadísticas'}</p>
           </CardContent>
         </Card>
       </div>
@@ -260,7 +220,7 @@ export function DashboardPage() {
       </div>
 
       {/* Minorista Balance Card */}
-      {isMinorista && (
+      {isMinorista && minoristaBalanceData && (
         <Card className="mb-6 border-blue-200 dark:border-blue-800">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
@@ -271,37 +231,31 @@ export function DashboardPage() {
             </div>
           </CardHeader>
           <CardContent>
-            {loadingBalance ? (
-              <div className="text-center py-4">
-                <p className="text-sm text-muted-foreground">Cargando balance...</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Crédito Disponible */}
-                <div className="space-y-2">
-                  <p className="text-xs md:text-sm font-medium text-muted-foreground uppercase tracking-wider">
-                    Crédito Disponible
-                  </p>
-                  <div className="text-2xl md:text-3xl font-bold text-blue-600">
-                    {minoristaBalance !== null ? formatCurrency(minoristaBalance, 'COP') : '$ 0,00'}
-                  </div>
-                  <p className="text-xs text-muted-foreground">Para crear giros</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Crédito Disponible */}
+              <div className="space-y-2">
+                <p className="text-xs md:text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                  Crédito Disponible
+                </p>
+                <div className="text-2xl md:text-3xl font-bold text-blue-600">
+                  {minoristaBalanceData?.balance ? formatCurrency(minoristaBalanceData.balance, 'COP') : '$ 0,00'}
                 </div>
-
-                {/* Saldo a Favor - Solo mostrar si existe */}
-                {minoristaBalanceInFavor !== null && minoristaBalanceInFavor > 0 && (
-                  <div className="space-y-2 bg-emerald-50 dark:bg-emerald-950 p-3 rounded-lg border border-emerald-200 dark:border-emerald-800">
-                    <p className="text-xs md:text-sm font-medium text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
-                      Saldo a Favor
-                    </p>
-                    <div className="text-2xl md:text-3xl font-bold text-emerald-700 dark:text-emerald-300">
-                      {formatCurrency(minoristaBalanceInFavor, 'COP')}
-                    </div>
-                    <p className="text-xs text-emerald-600 dark:text-emerald-400">Balance acreditado</p>
-                  </div>
-                )}
+                <p className="text-xs text-muted-foreground">Para crear giros</p>
               </div>
-            )}
+
+              {/* Saldo a Favor - Solo mostrar si existe */}
+              {minoristaBalanceData?.credit && minoristaBalanceData.credit > 0 && (
+                <div className="space-y-2 bg-emerald-50 dark:bg-emerald-950 p-3 rounded-lg border border-emerald-200 dark:border-emerald-800">
+                  <p className="text-xs md:text-sm font-medium text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+                    Saldo a Favor
+                  </p>
+                  <div className="text-2xl md:text-3xl font-bold text-emerald-700 dark:text-emerald-300">
+                    {formatCurrency(minoristaBalanceData.credit, 'COP')}
+                  </div>
+                  <p className="text-xs text-emerald-600 dark:text-emerald-400">Balance acreditado</p>
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
       )}
@@ -316,11 +270,7 @@ export function DashboardPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {loadingAccounts ? (
-              <div className="text-center py-4">
-                <p className="text-sm text-muted-foreground">Cargando cuentas...</p>
-              </div>
-            ) : bankAccounts.length === 0 ? (
+            {bankAccounts.length === 0 ? (
               <div className="text-center py-8">
                 <p className="text-sm text-muted-foreground">No tienes cuentas bancarias registradas</p>
               </div>
@@ -378,11 +328,7 @@ export function DashboardPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="px-2 md:px-6">
-          {girosLoading ? (
-            <div className="text-center py-8">
-              <p className="text-sm text-muted-foreground">Cargando...</p>
-            </div>
-          ) : giros.length === 0 ? (
+          {giros.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-sm text-muted-foreground">No hay giros recientes</p>
             </div>
@@ -421,12 +367,6 @@ export function DashboardPage() {
                       <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
                         <Clock className="h-3 w-3" />
                         <span>{formatDate(giro.createdAt)}</span>
-                        {isSuperAdmin && giro.minoristaName && (
-                          <>
-                            <span>•</span>
-                            <span>{giro.minoristaName}</span>
-                          </>
-                        )}
                         {(isTransferencista || isMinorista) && giro.bankName && (
                           <>
                             <span>•</span>
@@ -436,16 +376,9 @@ export function DashboardPage() {
                       </div>
                     </div>
 
-                    {/* Right side - Earnings or Arrow */}
+                    {/* Right side - Arrow */}
                     <div className="flex items-center ml-2">
-                      {isMinorista && giro.earnings !== undefined ? (
-                        <div className="text-right">
-                          <p className="text-xs text-muted-foreground">Ganancia</p>
-                          <p className="font-semibold text-sm text-green-600">{formatCurrency(giro.earnings, 'COP')}</p>
-                        </div>
-                      ) : (
-                        <ArrowRight className="h-5 w-5 text-muted-foreground" />
-                      )}
+                      <ArrowRight className="h-5 w-5 text-muted-foreground" />
                     </div>
                   </div>
                 )
