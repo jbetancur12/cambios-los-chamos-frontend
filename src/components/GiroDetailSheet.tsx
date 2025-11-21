@@ -84,6 +84,11 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
   // ESTADO PARA MODAL DE IMPRESIÓN
   const [showPrintModal, setShowPrintModal] = useState(false)
 
+  // ESTADO PARA PREVIEW DE COMPROBANTE
+  const [showProofPreview, setShowProofPreview] = useState(false)
+  const [proofPreviewBlob, setProofPreviewBlob] = useState<Blob | null>(null)
+  const [proofPreviewFilename, setProofPreviewFilename] = useState('')
+
   const isTransferencista = user?.role === 'TRANSFERENCISTA'
   const isMinorista = user?.role === 'MINORISTA'
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN'
@@ -871,17 +876,25 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                     onClick={async () => {
                       try {
                         const { blob, filename } = await api.downloadFile(`/giro/${giro.id}/payment-proof/download`)
-                        const file = new File([blob], filename, { type: blob.type })
 
-                        if (navigator.share && navigator.canShare?.({ files: [file] })) {
-                          console.log("----------")
+                        // Detectar si es mobile/tablet
+                        const isMobileOrTablet = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+
+                        if (isMobileOrTablet && navigator.share && navigator.canShare?.({ files: [new File([blob], filename, { type: blob.type })] })) {
+                          // Mobile/Tablet: usar Web Share API
+                          const file = new File([blob], filename, { type: blob.type })
                           await navigator.share({
                             title: 'Comprobante de pago',
                             text: 'Mi comprobante de pago',
                             files: [file],
                           })
+                        } else if (!isMobileOrTablet) {
+                          // Desktop: mostrar preview primero
+                          setProofPreviewBlob(blob)
+                          setProofPreviewFilename(filename)
+                          setShowProofPreview(true)
                         } else {
-                          // Fallback to direct download for unsupported browsers
+                          // Navegadores sin soporte Web Share: descarga normal
                           const url = window.URL.createObjectURL(blob)
                           const a = document.createElement('a')
                           a.href = url
@@ -892,17 +905,16 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                           document.body.removeChild(a)
                         }
                       } catch (error: any) {
-                        console.log(error)
                         // Ignorar cancelaciones de usuario y permisos denegados
                         if (error.name !== 'AbortError' && error.name !== 'NotAllowedError') {
-                          toast.error('Error al compartir el comprobante')
+                          toast.error('Error al descargar el comprobante')
                         }
                       }
                     }}
                     className="w-full gap-1"
                   >
                     <Share2 className="h-3 w-3" />
-                    Guardar/Compartir
+                    Descargar
                   </Button>
                 </div>
               )}
@@ -1098,6 +1110,62 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
             }
           }}
         />
+      )}
+
+      {/* Modal de preview de comprobante (Desktop) */}
+      {showProofPreview && proofPreviewBlob && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-lg shadow-lg max-w-2xl w-full max-h-[90vh] flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b dark:border-slate-700">
+              <h2 className="text-lg font-semibold">Comprobante de Pago</h2>
+              <button
+                onClick={() => setShowProofPreview(false)}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 overflow-auto p-4">
+              <img
+                src={URL.createObjectURL(proofPreviewBlob)}
+                alt="Comprobante de pago"
+                className="w-full h-auto rounded border border-slate-200 dark:border-slate-700"
+              />
+            </div>
+
+            {/* Footer */}
+            <div className="flex gap-2 p-4 border-t dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+              <Button
+                variant="outline"
+                onClick={() => setShowProofPreview(false)}
+                className="flex-1"
+              >
+                Cerrar
+              </Button>
+              <Button
+                onClick={() => {
+                  // Descargar archivo
+                  const url = URL.createObjectURL(proofPreviewBlob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = proofPreviewFilename
+                  document.body.appendChild(a)
+                  a.click()
+                  window.URL.revokeObjectURL(url)
+                  document.body.removeChild(a)
+                  setShowProofPreview(false)
+                }}
+                className="flex-1 gap-1"
+              >
+                <Share2 className="h-4 w-4" />
+                Guardar
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
     </Sheet>
   )

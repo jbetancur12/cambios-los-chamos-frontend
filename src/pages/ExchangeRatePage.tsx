@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetBody } from '@/components/ui/sheet'
-import { Plus, TrendingUp, Calendar, Download, Eye } from 'lucide-react'
+import { Plus, TrendingUp, Calendar, Download, Eye, Share2 } from 'lucide-react'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
 import { useSiaRateImage } from '@/hooks/useSiaRateImage'
@@ -17,8 +17,11 @@ export function ExchangeRatePage() {
   const [currentRate, setCurrentRate] = useState<ExchangeRate | null>(null)
   const [loading, setLoading] = useState(true)
   const [createSheetOpen, setCreateSheetOpen] = useState(false)
-  const [previewOpen, setPreviewOpen] = useState(false)
-  const [previewImage, setPreviewImage] = useState<string | null>(null)
+
+  // Estados para modal de preview en desktop
+  const [showImagePreview, setShowImagePreview] = useState(false)
+  const [imagePreviewBlob, setImagePreviewBlob] = useState<Blob | null>(null)
+  const [imagePreviewFilename, setImagePreviewFilename] = useState('')
 
   // Form fields
   const [buyRate, setBuyRate] = useState('')
@@ -28,7 +31,7 @@ export function ExchangeRatePage() {
   const [submitting, setSubmitting] = useState(false)
 
   const canCreateRate = user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN'
-  const { generateAndDownloadImage, generatePreviewImage } = useSiaRateImage()
+  const { generatePreviewImage } = useSiaRateImage()
 
   useEffect(() => {
     fetchRates()
@@ -158,23 +161,75 @@ export function ExchangeRatePage() {
               <div className="flex gap-2">
                 <Button
                   onClick={async () => {
-                    const imageUrl = await generatePreviewImage(currentRate)
-                    if (imageUrl) {
-                      setPreviewImage(imageUrl)
-                      setPreviewOpen(true)
+                    try {
+                      // Generar imagen como URL
+                      const imageUrl = await generatePreviewImage(currentRate)
+                      if (imageUrl) {
+                        // Convertir URL a blob
+                        const response = await fetch(imageUrl)
+                        const blob = await response.blob()
+
+                        setImagePreviewBlob(blob)
+                        setImagePreviewFilename(`tasa-${new Date().toISOString().split('T')[0]}.png`)
+                        setShowImagePreview(true)
+                      }
+                    } catch (error: any) {
+                      toast.error('Error al generar la vista previa')
                     }
                   }}
                   size="sm"
                   variant="outline"
-                  className="hidden sm:flex flex-1 sm:flex-initial gap-2"
+                  className="flex-1 gap-2"
                 >
                   <Eye className="h-4 w-4" />
                   Ver
                 </Button>
                 <Button
-                  onClick={() => {
-                    generateAndDownloadImage(currentRate)
-                    toast.success('Tasa descargada como imagen')
+                  onClick={async () => {
+                    try {
+                      // Generar imagen como URL
+                      const imageUrl = await generatePreviewImage(currentRate)
+                      if (!imageUrl) {
+                        toast.error('Error al generar la imagen')
+                        return
+                      }
+
+                      // Convertir URL a blob
+                      const response = await fetch(imageUrl)
+                      const blob = await response.blob()
+
+                      // Detectar si es mobile/tablet
+                      const isMobileOrTablet = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+
+                      if (isMobileOrTablet && navigator.share && navigator.canShare?.({ files: [new File([blob], 'tasa.png', { type: 'image/png' })] })) {
+                        // Mobile/Tablet: usar Web Share API
+                        const file = new File([blob], `tasa-${new Date().toISOString().split('T')[0]}.png`, { type: 'image/png' })
+                        await navigator.share({
+                          title: 'Tasa de Cambio',
+                          text: 'Tasa de cambio actual',
+                          files: [file],
+                        })
+                      } else if (!isMobileOrTablet) {
+                        // Desktop: mostrar preview primero
+                        setImagePreviewBlob(blob)
+                        setImagePreviewFilename(`tasa-${new Date().toISOString().split('T')[0]}.png`)
+                        setShowImagePreview(true)
+                      } else {
+                        // Navegadores sin soporte Web Share: descarga normal
+                        const url = URL.createObjectURL(blob)
+                        const a = document.createElement('a')
+                        a.href = url
+                        a.download = `tasa-${new Date().toISOString().split('T')[0]}.png`
+                        document.body.appendChild(a)
+                        a.click()
+                        window.URL.revokeObjectURL(url)
+                        document.body.removeChild(a)
+                      }
+                    } catch (error: any) {
+                      if (error.name !== 'AbortError' && error.name !== 'NotAllowedError') {
+                        toast.error('Error al procesar la imagen')
+                      }
+                    }
                   }}
                   size="sm"
                   variant="outline"
@@ -348,60 +403,61 @@ export function ExchangeRatePage() {
         </SheetContent>
       </Sheet>
 
-      {/* Preview Sheet */}
-      <Sheet open={previewOpen} onOpenChange={setPreviewOpen}>
-        <SheetContent>
-          <SheetHeader>
-            <SheetTitle>Vista Previa de Tasa</SheetTitle>
-          </SheetHeader>
-
-          {previewImage && (
-            <div className="mt-6 flex flex-col items-center justify-center overflow-y-auto max-h-[calc(100vh-150px)]">
-              <img
-                src={previewImage}
-                alt="Vista previa de tasa"
-                className="max-w-sm h-auto border rounded-lg shadow-lg"
-                style={{ maxWidth: '400px' }}
-              />
-              <div className="mt-4 flex gap-2 justify-center">
-                <Button
-                  onClick={() => {
-                    // Copy to clipboard
-                    fetch(previewImage)
-                      .then(res => res.blob())
-                      .then(blob => navigator.clipboard.write([
-                        new ClipboardItem({ 'image/png': blob })
-                      ]))
-                      .then(() => toast.success('Imagen copiada al portapapeles'))
-                      .catch(err => {
-                        console.error('Error copying to clipboard:', err)
-                        toast.error('No se pudo copiar la imagen')
-                      })
-                  }}
-                  variant="outline"
-                  size="sm"
-                >
-                  Copiar
-                </Button>
-                <Button
-                  onClick={() => {
-                    const a = document.createElement('a')
-                    a.href = previewImage
-                    const dateForFilename = new Date().toISOString().split('T')[0]
-                    a.download = `tasa-${dateForFilename}.png`
-                    a.click()
-                  }}
-                  variant="outline"
-                  size="sm"
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Descargar
-                </Button>
-              </div>
+      {/* Modal de preview de imagen (Desktop) */}
+      {showImagePreview && imagePreviewBlob && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-lg shadow-lg max-w-2xl w-full max-h-[90vh] flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b dark:border-slate-700">
+              <h2 className="text-lg font-semibold">Tasa de Cambio</h2>
+              <button
+                onClick={() => setShowImagePreview(false)}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                ✕
+              </button>
             </div>
-          )}
-        </SheetContent>
-      </Sheet>
+
+            {/* Content */}
+            <div className="flex-1 overflow-auto p-4">
+              <img
+                src={URL.createObjectURL(imagePreviewBlob)}
+                alt="Tasa de cambio"
+                className="w-full h-auto rounded border border-slate-200 dark:border-slate-700"
+              />
+            </div>
+
+            {/* Footer */}
+            <div className="flex gap-2 p-4 border-t dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+              <Button
+                variant="outline"
+                onClick={() => setShowImagePreview(false)}
+                className="flex-1"
+              >
+                Cerrar
+              </Button>
+              <Button
+                onClick={() => {
+                  // Descargar archivo
+                  const url = URL.createObjectURL(imagePreviewBlob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = imagePreviewFilename
+                  document.body.appendChild(a)
+                  a.click()
+                  window.URL.revokeObjectURL(url)
+                  document.body.removeChild(a)
+                  setShowImagePreview(false)
+                }}
+                className="flex-1 gap-1"
+              >
+                <Share2 className="h-4 w-4" />
+                Guardar
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
