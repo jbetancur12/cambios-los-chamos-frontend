@@ -259,8 +259,8 @@ function App() {
                 }
               />
 
-              {/* Redirect root to dashboard */}
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              {/* Redirect root to enviar-giro */}
+              <Route path="/" element={<Navigate to="/enviar-giro" replace />} />
 
               {/* 404 */}
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
