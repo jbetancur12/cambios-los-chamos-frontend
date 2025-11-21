@@ -1,11 +1,11 @@
 import { useState } from 'react'
-import { CreateGiroSheet } from '@/components/CreateGiroSheet'
-import { MobilePaymentSheet } from '@/components/MobilePaymentSheet'
-import { RechargeSheet } from '@/components/RechargeSheet'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { ChevronDown } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { TransferForm } from '@/components/forms/TransferForm'
+import { MobilePaymentForm } from '@/components/forms/MobilePaymentForm'
+import { RechargeForm } from '@/components/forms/RechargeForm'
 
 type GiroType = 'TRANSFERENCIA' | 'PAGO_MOVIL' | 'RECARGA'
 
@@ -37,13 +37,9 @@ export function SendGiroPage() {
   const navigate = useNavigate()
   const [selectedType, setSelectedType] = useState<GiroType>('TRANSFERENCIA')
   const [dropdownOpen, setDropdownOpen] = useState(false)
-  const [showForm, setShowForm] = useState(true)
 
   const handleSuccess = () => {
-    setShowForm(false)
-    setTimeout(() => {
-      navigate('/giros')
-    }, 500)
+    navigate('/giros')
   }
 
   const currentTypeLabel = giroTypes.find((t) => t.value === selectedType)?.label || ''
@@ -56,72 +52,62 @@ export function SendGiroPage() {
         <p className="mt-2 text-gray-600">Completa el formulario para enviar un giro</p>
       </div>
 
-      {showForm && (
-        <>
-          {/* Type Selector Dropdown */}
-          <Card className="mb-8 overflow-hidden border border-gray-200">
-            <div className="relative">
-              <Button
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="w-full justify-between rounded-none border-0 bg-white px-6 py-4 text-left font-semibold text-gray-900 hover:bg-gray-50"
-              >
-                <span>{currentTypeLabel}</span>
-                <ChevronDown
-                  className={`h-5 w-5 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`}
-                />
-              </Button>
+      {/* Type Selector Dropdown */}
+      <Card className="mb-8 overflow-hidden border border-gray-200">
+        <div className="relative">
+          <Button
+            onClick={() => setDropdownOpen(!dropdownOpen)}
+            className="w-full justify-between rounded-none border-0 bg-white px-6 py-4 text-left font-semibold text-gray-900 hover:bg-gray-50"
+          >
+            <span>{currentTypeLabel}</span>
+            <ChevronDown
+              className={`h-5 w-5 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`}
+            />
+          </Button>
 
-              {dropdownOpen && (
-                <div className="border-t border-gray-200 bg-white">
-                  {giroTypes.map((type) => (
-                    <button
-                      key={type.value}
-                      onClick={() => {
-                        setSelectedType(type.value)
-                        setDropdownOpen(false)
-                      }}
-                      className={`flex w-full flex-col gap-1 border-b border-gray-100 px-6 py-4 text-left transition-colors last:border-0 ${
-                        selectedType === type.value ? 'bg-blue-50' : 'hover:bg-gray-50'
-                      }`}
-                    >
-                      <span
-                        className={`font-medium ${selectedType === type.value ? 'text-blue-600' : 'text-gray-900'}`}
-                      >
-                        {type.label}
-                      </span>
-                      <span className="text-sm text-gray-500">{type.description}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
+          {dropdownOpen && (
+            <div className="border-t border-gray-200 bg-white">
+              {giroTypes.map((type) => (
+                <button
+                  key={type.value}
+                  onClick={() => {
+                    setSelectedType(type.value)
+                    setDropdownOpen(false)
+                  }}
+                  className={`flex w-full flex-col gap-1 border-b border-gray-100 px-6 py-4 text-left transition-colors last:border-0 ${
+                    selectedType === type.value ? 'bg-blue-50' : 'hover:bg-gray-50'
+                  }`}
+                >
+                  <span
+                    className={`font-medium ${selectedType === type.value ? 'text-blue-600' : 'text-gray-900'}`}
+                  >
+                    {type.label}
+                  </span>
+                  <span className="text-sm text-gray-500">{type.description}</span>
+                </button>
+              ))}
             </div>
-          </Card>
-
-          {/* Forms - Rendered as full page forms, not sheets */}
-          {selectedType === 'TRANSFERENCIA' && (
-            <CreateGiroSheet open={true} onOpenChange={() => {}} onSuccess={handleSuccess} />
           )}
+        </div>
+      </Card>
 
-          {selectedType === 'PAGO_MOVIL' && (
-            <MobilePaymentSheet open={true} onOpenChange={() => {}} />
-          )}
+      {/* Forms - Rendered inline based on selection */}
+      <Card className="border border-gray-200">
+        {selectedType === 'TRANSFERENCIA' && <TransferForm onSuccess={handleSuccess} />}
+        {selectedType === 'PAGO_MOVIL' && <MobilePaymentForm onSuccess={handleSuccess} />}
+        {selectedType === 'RECARGA' && <RechargeForm onSuccess={handleSuccess} />}
+      </Card>
 
-          {selectedType === 'RECARGA' && (
-            <RechargeSheet open={true} onOpenChange={() => {}} />
-          )}
-
-          {/* Back Button */}
-          <div className="mt-8 flex justify-center">
-            <Button
-              variant="outline"
-              onClick={() => navigate('/giros')}
-              className="border-gray-300 text-gray-700 hover:bg-gray-50"
-            >
-              Volver a Solicitudes
-            </Button>
-          </div>
-        </>
-      )}
+      {/* Back Button */}
+      <div className="mt-8 flex justify-center">
+        <Button
+          variant="outline"
+          onClick={() => navigate('/giros')}
+          className="border-gray-300 text-gray-700 hover:bg-gray-50"
+        >
+          Volver a Solicitudes
+        </Button>
+      </div>
     </div>
   )
 }
