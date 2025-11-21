@@ -4,12 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
   Users as UsersIcon,
-  Mail,
   Wallet,
   Search,
   X,
-  CheckCircle2,
-  AlertCircle,
   Plus,
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
@@ -180,28 +177,22 @@ export function UsersPage() {
               Se encontraron {filteredUsers.length} resultado(s) para "{searchQuery}"
             </div>
           )}
-          <div className="grid gap-4 grid-cols-1">
+          <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
             {filteredUsers.map((user) => {
               return (
-                <Card key={user.id}>
+                <Card
+                  key={user.id}
+                  className="cursor-pointer hover:shadow-lg hover:bg-muted/50 transition-all"
+                  onClick={() => {
+                    if (user.minoristaId) {
+                      handleRechargeMinorista(user.minoristaId, user.fullName, user.email, user.availableCredit || 0)
+                    }
+                  }}
+                >
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <CardTitle className="text-lg">{user.fullName}</CardTitle>
-                        <div className="flex items-center gap-2 mt-2 min-w-0">
-                          <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                          <p className="text-sm text-muted-foreground truncate">{user.email}</p>
-                          <span
-                            title={user.emailVerified ? 'Email verificado' : 'Email no verificado'}
-                            className="flex-shrink-0"
-                          >
-                            {user.emailVerified ? (
-                              <CheckCircle2 className="h-4 w-4 text-green-600" />
-                            ) : (
-                              <AlertCircle className="h-4 w-4 text-amber-600" />
-                            )}
-                          </span>
-                        </div>
                       </div>
                       {!user.isActive && (
                         <div>
@@ -239,33 +230,19 @@ export function UsersPage() {
                   </CardHeader>
                   {user.minoristaId && (
                     <CardContent className="pt-4">
-                      <div className="space-y-2">
-                        {/* Balance Display */}
-                        <div className="flex items-center justify-between p-3 rounded-md bg-muted">
-                          <div className="flex items-center gap-2">
-                            <Wallet className="h-4 w-4 text-green-600" />
-                            <span className="text-sm text-muted-foreground">Saldo Disponible:</span>
-                          </div>
-                          <span className="font-bold text-green-600">
-                            {new Intl.NumberFormat('es-CO', {
-                              style: 'currency',
-                              currency: 'COP',
-                              minimumFractionDigits: 0,
-                            }).format(user.availableCredit || 0)}
-                          </span>
+                      {/* Balance Display */}
+                      <div className="flex items-center justify-between p-3 rounded-md bg-muted">
+                        <div className="flex items-center gap-2">
+                          <Wallet className="h-4 w-4 text-green-600" />
+                          <span className="text-sm text-muted-foreground">Saldo Disponible:</span>
                         </div>
-                        {/* Recharge Button */}
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full"
-                          onClick={() =>
-                            handleRechargeMinorista(user.minoristaId!, user.fullName, user.email, user.availableCredit || 0)
-                          }
-                        >
-                          <Wallet className="h-4 w-4 mr-2" />
-                          Gestión de Credito
-                        </Button>
+                        <span className="font-bold text-green-600">
+                          {new Intl.NumberFormat('es-CO', {
+                            style: 'currency',
+                            currency: 'COP',
+                            minimumFractionDigits: 0,
+                          }).format(user.availableCredit || 0)}
+                        </span>
                       </div>
                     </CardContent>
                   )}
