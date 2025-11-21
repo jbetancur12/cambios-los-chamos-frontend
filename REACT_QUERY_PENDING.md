@@ -55,15 +55,17 @@ This document tracks the pending work for the React Query integration. **Phase 1
 ## Phase 2 - COMPONENT MIGRATIONS (Pending)
 
 ### GirosPage.tsx
-**Status:** ⏳ Pending
-**Current:** Uses multiple `useEffect` hooks and manual state management
-**Migration Plan:**
-- Replace `useEffect` for fetching giros list with `useGirosList()`
-- Replace `useEffect` for status filter with filtered query
-- Replace `useEffect` for date range filter with filtered query
-- Remove manual loading/error states (React Query handles these)
-- Remove `setGiros` state management (React Query handles caching)
-- Connect WebSocket listener using `setupGiroSync()` from `websocketSync.ts`
+**Status:** ✅ COMPLETED (Phase 2.3)
+**Changes Made:**
+- ✅ Replaced fetchGiros() with useGirosList() hook with dynamic parameters
+- ✅ Removed manual loading state (React Query handles isLoading)
+- ✅ Removed manual giros state (React Query handles caching)
+- ✅ Removed useGiroWebSocket subscription (global setupWebSocketSync handles it)
+- ✅ Filters (status, date range, custom dates) work with React Query parameters
+- ✅ Removed 2 useEffect hooks and 40+ lines of WebSocket boilerplate
+- ✅ Client-side pagination and search filtering still working
+- ✅ All loading/error states use React Query
+- ✅ TypeScript compiles cleanly
 
 **Expected Changes:**
 ```typescript
@@ -331,8 +333,14 @@ Each component migration should follow this checklist:
   - [x] Update TypeScript types if needed
   - [x] Run `npm run ts-check`
 
-- [ ] **GiroPage.tsx**
-- [ ] **ExchangeRatePage.tsx**
+- [x] **GirosPage.tsx (DONE)**
+  - [x] Replace fetchGiros() with useGirosList() hook
+  - [x] Remove manual loading state
+  - [x] Update filter state to work with React Query
+  - [x] Remove WebSocket subscription (global handler)
+  - [x] Run `npm run ts-check`
+
+- [ ] **ExchangeRatePage.tsx (NEXT)**
 - [ ] **CreateGiroSheet.tsx**
 - [ ] **Other components**
 
@@ -342,7 +350,7 @@ Each component migration should follow this checklist:
 
 1. **✅ COMPLETED (Phase 2.1)** - GiroDetailSheet.tsx
 2. **✅ COMPLETED (Phase 2.2)** - DashboardPage.tsx
-3. **GirosPage.tsx (Phase 2.3)** - Most used, biggest impact
+3. **✅ COMPLETED (Phase 2.3)** - GirosPage.tsx
 4. **ExchangeRatePage.tsx (Phase 2.4)** - Business critical data
 5. **CreateGiroSheet.tsx (Phase 2.5)** - Mutation testing
 6. **Other components** - Following same pattern
