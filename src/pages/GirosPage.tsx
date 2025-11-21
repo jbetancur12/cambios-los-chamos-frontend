@@ -483,7 +483,9 @@ export function GirosPage() {
                 <thead>
                   <tr className="border-b bg-muted/50">
                     {user?.role !== 'MINORISTA' && (
-                      <th className="px-3 py-2 text-left font-semibold w-28">Minorista</th>
+                      <th className="px-3 py-2 text-left font-semibold w-28">
+                        {filterUserType === 'TRANSFERENCISTA' ? 'Trasferencista' : 'Minorista'}
+                      </th>
                     )}
                     <th className="px-3 py-2 text-right font-semibold w-24">COP</th>
                     <th className="px-3 py-2 text-right font-semibold w-20">Bs</th>
@@ -497,7 +499,9 @@ export function GirosPage() {
                     const statusBadge = getStatusBadge(giro.status)
                     const executionTypeBadge = getExecutionTypeBadge(giro.executionType)
                     const copAmount = giro.currencyInput === 'COP' ? giro.amountInput : 0
-                    const minoristaName = user?.role === 'TRANSFERENCISTA' ? (giro.createdBy?.fullName || '—') : (giro.minorista?.user?.fullName || giro.createdBy?.fullName || '—')
+                    const userName = filterUserType === 'TRANSFERENCISTA'
+                      ? (giro.transferencista?.user?.fullName || '—')
+                      : user?.role === 'TRANSFERENCISTA' ? (giro.createdBy?.fullName || '—') : (giro.minorista?.user?.fullName || giro.createdBy?.fullName || '—')
 
                     return (
                       <tr
@@ -507,7 +511,7 @@ export function GirosPage() {
                       >
                         {user?.role !== 'MINORISTA' && (
                           <td className="px-3 py-2 truncate text-sm w-28">
-                            <div className="font-medium text-foreground truncate">{minoristaName}</div>
+                            <div className="font-medium text-foreground truncate">{userName}</div>
                           </td>
                         )}
                         <td className="px-3 py-2 text-right whitespace-nowrap font-semibold w-24">
@@ -553,7 +557,9 @@ export function GirosPage() {
               const statusBadge = getStatusBadge(giro.status)
               const executionTypeBadge = getExecutionTypeBadge(giro.executionType)
               const copAmount = giro.currencyInput === 'COP' ? giro.amountInput : 0
-              const minoristaName = user?.role === 'TRANSFERENCISTA' ? (giro.createdBy?.fullName || '—') : (giro.minorista?.user?.fullName || giro.createdBy?.fullName || '—')
+              const userName = filterUserType === 'TRANSFERENCISTA'
+                ? (giro.transferencista?.user?.fullName || '—')
+                : user?.role === 'TRANSFERENCISTA' ? (giro.createdBy?.fullName || '—') : (giro.minorista?.user?.fullName || giro.createdBy?.fullName || '—')
 
               return (
                 <div
@@ -564,8 +570,10 @@ export function GirosPage() {
                   <div className={`grid ${user?.role === 'MINORISTA' ? 'grid-cols-2' : 'grid-cols-2'} gap-2 text-xs`}>
                     {user?.role !== 'MINORISTA' && (
                       <div>
-                        <p className="text-muted-foreground font-semibold">Minorista</p>
-                        <p className="font-medium truncate">{minoristaName}</p>
+                        <p className="text-muted-foreground font-semibold">
+                          {filterUserType === 'TRANSFERENCISTA' ? 'Trasferencista' : 'Minorista'}
+                        </p>
+                        <p className="font-medium truncate">{userName}</p>
                       </div>
                     )}
                     <div className={user?.role === 'MINORISTA' ? 'col-span-1' : ''}>
