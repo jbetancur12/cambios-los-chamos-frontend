@@ -179,7 +179,7 @@ export function UsersPage() {
               Se encontraron {filteredUsers.length} resultado(s) para "{searchQuery}"
             </div>
           )}
-          <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+          <div className="grid gap-4 grid-cols-2">
             {filteredUsers.map((user) => {
               return (
                 <Card
@@ -236,7 +236,7 @@ export function UsersPage() {
                       <div className="flex items-center justify-between p-3 rounded-md bg-muted">
                         <div className="flex items-center gap-2">
                           <Wallet className="h-4 w-4 text-green-600" />
-                          <span className="text-sm text-muted-foreground">Saldo Disponible:</span>
+                          <span className="text-sm text-muted-foreground hidden md:inline">Saldo Disponible:</span>
                         </div>
                         <span className="font-bold text-green-600">
                           {new Intl.NumberFormat('es-CO', {
