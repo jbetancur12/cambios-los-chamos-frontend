@@ -93,13 +93,18 @@ const { data: giros = [], isLoading } = useGirosList({ status, dateFrom, dateTo 
 - ✅ TypeScript compiles cleanly
 
 ### DashboardPage.tsx
-**Status:** ⏳ Pending
-**Current:** Multiple data fetches in `useEffect`, no caching
-**Migration Plan:**
-- Replace `useEffect` for dashboard stats with `useDashboardStats()`
-- Replace `useEffect` for balance with `useMinoristaBalance()`
-- Replace `useEffect` for recent giros with `useRecentGiros(limit)`
-- Set appropriate stale times based on dashboard refresh requirements
+**Status:** ✅ COMPLETED (Phase 2.2)
+**Changes Made:**
+- ✅ Replaced all `useEffect` hooks with React Query query hooks
+- ✅ Used `useDashboardStats()` for dashboard statistics (girosCount, volumes, earnings)
+- ✅ Used `useMinoristaBalance()` for minorista balance and credit
+- ✅ Used `useRecentGiros(5)` for recent giros with automatic caching
+- ✅ Used `useBankAccountsList()` for transferencista bank accounts
+- ✅ Removed all manual `fetchMinoristaBalance()` and `fetchBankAccounts()` functions
+- ✅ Removed manual loading/error states (React Query handles these)
+- ✅ Removed 2 useEffect hooks and 50+ lines of boilerplate
+- ✅ TypeScript compiles cleanly
+- ✅ Balance card now properly uses `minoristaBalanceData?.balance` and `minoristaBalanceData?.credit`
 
 ### ExchangeRatePage.tsx
 **Status:** ⏳ Pending
@@ -319,12 +324,12 @@ Each component migration should follow this checklist:
   - [x] Update TypeScript types if needed
   - [x] Run `npm run ts-check`
 
-- [ ] **DashboardPage.tsx (NEXT)**
-  - [ ] Identify all `useEffect` hooks used for data fetching
-  - [ ] Replace with appropriate React Query hooks
-  - [ ] Remove manual `useState` for data/loading/error
-  - [ ] Update TypeScript types if needed
-  - [ ] Run `npm run ts-check`
+- [x] **DashboardPage.tsx (DONE)**
+  - [x] Identify all `useEffect` hooks used for data fetching
+  - [x] Replace with appropriate React Query hooks
+  - [x] Remove manual `useState` for data/loading/error
+  - [x] Update TypeScript types if needed
+  - [x] Run `npm run ts-check`
 
 - [ ] **GiroPage.tsx**
 - [ ] **ExchangeRatePage.tsx**
@@ -335,11 +340,11 @@ Each component migration should follow this checklist:
 
 ## Priority Order (Recommended)
 
-1. **GirosPage.tsx** - Most used, biggest impact
-2. **DashboardPage.tsx** - Frequently accessed, good test of multiple hooks
-3. **GiroDetailSheet.tsx** - Reduces manual state management
-4. **ExchangeRatePage.tsx** - Business critical data
-5. **CreateGiroSheet.tsx** - Mutation testing
+1. **✅ COMPLETED (Phase 2.1)** - GiroDetailSheet.tsx
+2. **✅ COMPLETED (Phase 2.2)** - DashboardPage.tsx
+3. **GirosPage.tsx (Phase 2.3)** - Most used, biggest impact
+4. **ExchangeRatePage.tsx (Phase 2.4)** - Business critical data
+5. **CreateGiroSheet.tsx (Phase 2.5)** - Mutation testing
 6. **Other components** - Following same pattern
 
 ---
