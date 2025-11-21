@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
 import { useAuth } from '@/contexts/AuthContext'
+import { NumericFormat } from 'react-number-format'
 import type { Bank, ExchangeRate, Currency, Minorista } from '@/types/api'
 import { BalanceInfo } from './BalanceInfo'
 import { BeneficiaryAutocomplete } from './BeneficiaryAutocomplete'
@@ -419,26 +420,22 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label htmlFor="amount">Monto</Label>
-                <div className="relative">
-                  <Input
-                    id="amount"
-                    type="number"
-                    step="0.01"
-                    min="0.01"
-                    value={amountInput}
-                    onChange={(e) => setAmountInput(e.target.value)}
-                    placeholder="1500000"
-                    required
-                  />
-                  {amountInput && (
-                    <div className="absolute right-3 top-2.5 text-xs text-muted-foreground pointer-events-none">
-                      {parseFloat(amountInput).toLocaleString('es-CO', {
-                        minimumFractionDigits: 0,
-                        maximumFractionDigits: 2,
-                      })}
-                    </div>
-                  )}
-                </div>
+                <NumericFormat
+                  id="amount"
+                  customInput={Input}
+                  thousandSeparator="."
+                  decimalSeparator=","
+                  decimalScale={2}
+                  fixedDecimalScale={false}
+                  prefix=""
+                  value={amountInput}
+                  onValueChange={(values) => {
+                    setAmountInput(values.floatValue ? values.floatValue.toString() : '')
+                  }}
+                  placeholder="1.500.000,00"
+                  allowNegative={false}
+                  required
+                />
               </div>
 
               <div className="space-y-2">
