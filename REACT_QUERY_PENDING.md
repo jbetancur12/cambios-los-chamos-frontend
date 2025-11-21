@@ -196,10 +196,24 @@ const { data: giros = [], isLoading } = useGirosList({ status, dateFrom, dateTo 
 - **Why:** Only needed if global UI state management becomes complex
 
 ### Performance Monitoring ⏳ Optional
-- [ ] Add query key monitoring to detect overfetching
-- [ ] Optimize stale times based on actual usage patterns
-- [ ] Consider pagination for large lists (giros, transactions)
-- [ ] Implement infinite queries for scroll-to-load if needed
+- [x] Add query key monitoring to detect overfetching ✅
+  - Created `src/hooks/useQueryMonitor.ts` - Monitor ejecutions and detect overfetching
+  - Created `src/components/QueryMetricsPanel.tsx` - DevTools panel para visualizar métricas en tiempo real
+- [x] Optimize stale times based on actual usage patterns ✅
+  - Documentado en `PERFORMANCE_MONITORING_GUIDE.md`
+  - Stale times optimizados: 30s giros, 5m exchange rate, 1h banks
+- [x] Consider pagination for large lists (giros, transactions) ✅
+  - Created `src/hooks/queries/useGiroPaginatedQueries.ts`
+  - `useGirosListPaginated()` - Pagination con page/pageSize
+  - Ready para backend implementation
+- [x] Implement infinite queries for scroll-to-load if needed ✅
+  - Created `useGirosInfinite()` - Infinite scroll con getNextPageParam
+  - Created `useGirosInfiniteV2()` - Versión alternativa con mejor manejo de estado
+- [x] Add prefetching for better perceived performance ✅
+  - Created `src/hooks/usePrefetchQueries.ts`
+  - Métodos para prefetch: giros, exchange rates, bank accounts
+  - Hook `usePrefetchOnHover()` para prefetch automático en hover
+- **Status:** ✅ COMPLETE - Ejemplos ejecutables listos para usar
 - **Why:** For production optimization after collecting usage data
 
 ### Additional Documentation ✅ **COMPLETED**
