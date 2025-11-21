@@ -421,11 +421,22 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
                 <Label htmlFor="amount">Monto</Label>
                 <Input
                   id="amount"
-                  type="number"
-                  step="0.01"
-                  value={amountInput}
-                  onChange={(e) => setAmountInput(e.target.value)}
-                  placeholder="1000"
+                  type="text"
+                  inputMode="decimal"
+                  value={
+                    amountInput
+                      ? new Intl.NumberFormat('es-CO', {
+                          minimumFractionDigits: 0,
+                          maximumFractionDigits: 2,
+                        }).format(parseFloat(amountInput) || 0)
+                      : ''
+                  }
+                  onChange={(e) => {
+                    // Remover separadores de miles y espacios
+                    const cleanValue = e.target.value.replace(/[^\d.,]/g, '').replace(/\./g, '').replace(',', '.')
+                    setAmountInput(cleanValue)
+                  }}
+                  placeholder="1.000,00"
                   required
                 />
               </div>
