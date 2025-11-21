@@ -11,6 +11,7 @@ import { useAllUsers } from '@/hooks/queries/useUserQueries'
 import { useQueryClient } from '@tanstack/react-query'
 import { Switch } from '@/components/ui/switch'
 import { api } from '@/lib/api'
+import { CreateUserSheet } from '@/components/CreateUserSheet'
 import { cn } from '@/lib/utils'
 
 export function BankAccountsPage() {
@@ -20,6 +21,7 @@ export function BankAccountsPage() {
   const [activeTab, setActiveTab] = useState<'cuentas' | 'trasferencistas'>('cuentas')
   const [searchTerm, setSearchTerm] = useState('')
   const [searchTransferencistasTerm, setSearchTransferencistasTerm] = useState('')
+  const [createTrasferencistaSheetOpen, setCreateTrasferencistaSheetOpen] = useState(false)
 
   // React Query hook for bank accounts
   const accountsQuery = useBankAccountsList(user?.role)
@@ -95,6 +97,12 @@ export function BankAccountsPage() {
       toast.error(error.message || 'Error al cambiar disponibilidad')
       console.error(error)
     }
+  }
+
+  const handleTrasferencistaCreated = () => {
+    setCreateTrasferencistaSheetOpen(false)
+    queryClient.invalidateQueries({ queryKey: ['users'] })
+    toast.success('Trasferencista creado exitosamente')
   }
 
   return (
@@ -305,8 +313,18 @@ export function BankAccountsPage() {
 
         {/* Trasferencistas List - Tab Trasferencistas */}
         {activeTab === 'trasferencistas' && (
-        <div className="grid gap-4 grid-cols-1">
-          {isLoadingTrasferencistas ? (
+        <div className="space-y-6">
+          {/* Header with Create Button */}
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Trasferencistas</h3>
+            <Button onClick={() => setCreateTrasferencistaSheetOpen(true)} className="bg-[linear-gradient(to_right,#136BBC,#274565)] text-white">
+              <Briefcase className="h-4 w-4 mr-2" />
+              Crear Trasferencista
+            </Button>
+          </div>
+
+          <div className="grid gap-4 grid-cols-1">
+            {isLoadingTrasferencistas ? (
             <div className="text-center py-12">
               <p className="text-muted-foreground">Cargando trasferencistas...</p>
             </div>
@@ -377,8 +395,17 @@ export function BankAccountsPage() {
               </Card>
             ))
           )}
+          </div>
         </div>
         )}
+
+      {/* Create Trasferencista Sheet */}
+      <CreateUserSheet
+        open={createTrasferencistaSheetOpen}
+        onOpenChange={setCreateTrasferencistaSheetOpen}
+        onUserCreated={handleTrasferencistaCreated}
+        role="TRANSFERENCISTA"
+      />
       </div>
     </div>
   )

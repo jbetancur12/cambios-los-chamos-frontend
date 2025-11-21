@@ -10,6 +10,7 @@ import {
   X,
   CheckCircle2,
   AlertCircle,
+  Plus,
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { api } from '@/lib/api'
@@ -136,9 +137,15 @@ export function UsersPage() {
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-foreground">Minoristas</h1>
-        <p className="text-sm md:text-base text-muted-foreground mt-1">Gestiona minoristas y sus saldos</p>
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground">Minoristas</h1>
+          <p className="text-sm md:text-base text-muted-foreground mt-1">Gestiona minoristas y sus saldos</p>
+        </div>
+        <Button onClick={() => setSheetOpen(true)} className="bg-[linear-gradient(to_right,#136BBC,#274565)] text-white hidden md:flex">
+          <Plus className="h-4 w-4 mr-2" />
+          Crear Minorista
+        </Button>
       </div>
 
       {/* Search Bar */}
@@ -283,6 +290,13 @@ export function UsersPage() {
         </>
       )}
 
+      {/* FAB Button - Mobile Only */}
+      <button
+        onClick={() => setSheetOpen(true)}
+        className="fixed bottom-20 md:bottom-8 right-4 md:hidden z-50 bg-[linear-gradient(to_right,#136BBC,#274565)] text-white rounded-full p-4 shadow-lg hover:shadow-xl transition-all active:scale-95"
+      >
+        <Plus className="h-6 w-6" />
+      </button>
 
       {/* Create User Sheet */}
       <CreateUserSheet

@@ -13,6 +13,7 @@ import { OperatorAmountsManager } from '@/components/OperatorAmountsManager'
 import { useAllUsers } from '@/hooks/queries/useUserQueries'
 import { useQueryClient } from '@tanstack/react-query'
 import { Switch } from '@/components/ui/switch'
+import { CreateUserSheet } from '@/components/CreateUserSheet'
 import { cn } from '@/lib/utils'
 
 export function ConfigPage() {
@@ -24,6 +25,7 @@ export function ConfigPage() {
   const [printerType, setPrinterType] = useState<'thermal' | 'injection'>('thermal')
   const [detectionDialogOpen, setDetectionDialogOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [createAdminSheetOpen, setCreateAdminSheetOpen] = useState(false)
 
   // React Query hook for fetching admins
   const adminsQuery = useAllUsers(user?.role === 'SUPER_ADMIN' ? 'ADMIN' : null)
@@ -85,6 +87,12 @@ export function ConfigPage() {
       toast.error('Error al cambiar estado del admin')
       console.error(error)
     }
+  }
+
+  const handleAdminCreated = () => {
+    setCreateAdminSheetOpen(false)
+    queryClient.invalidateQueries({ queryKey: ['users'] })
+    toast.success('Admin creado exitosamente')
   }
 
   const filteredAdmins = admins.filter((admin) => {
@@ -159,6 +167,15 @@ export function ConfigPage() {
         {/* Admins Configuration Tab */}
         {activeTab === 'admins' && (
           <div className="space-y-6">
+            {/* Header with Create Button */}
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Administradores</h3>
+              <Button onClick={() => setCreateAdminSheetOpen(true)} className="bg-[linear-gradient(to_right,#136BBC,#274565)] text-white">
+                <Settings className="h-4 w-4 mr-2" />
+                Crear Admin
+              </Button>
+            </div>
+
             {/* Search Bar */}
             <Card>
               <CardContent className="pt-6">
@@ -336,6 +353,14 @@ export function ConfigPage() {
           </Card>
         )}
       </div>
+
+      {/* Create Admin Sheet */}
+      <CreateUserSheet
+        open={createAdminSheetOpen}
+        onOpenChange={setCreateAdminSheetOpen}
+        onUserCreated={handleAdminCreated}
+        role="ADMIN"
+      />
 
       {/* Printer Detection Dialog */}
       <PrinterDetectionDialog
