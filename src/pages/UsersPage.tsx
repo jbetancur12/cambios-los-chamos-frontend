@@ -115,11 +115,13 @@ export function UsersPage() {
     )
   }
 
-  // Filter users based on search query
-  const filteredUsers = users.filter((user) => {
-    const searchLower = searchQuery.toLowerCase()
-    return user.fullName.toLowerCase().includes(searchLower) || user.email.toLowerCase().includes(searchLower)
-  })
+  // Filter and sort users based on search query
+  const filteredUsers = users
+    .filter((user) => {
+      const searchLower = searchQuery.toLowerCase()
+      return user.fullName.toLowerCase().includes(searchLower) || user.email.toLowerCase().includes(searchLower)
+    })
+    .sort((a, b) => a.fullName.localeCompare(b.fullName))
 
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
