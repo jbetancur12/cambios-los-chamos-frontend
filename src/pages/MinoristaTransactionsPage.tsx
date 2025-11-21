@@ -2,16 +2,43 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
-import { api } from '@/lib/api'
-import type { Minorista, MinoristaTransaction, MinoristaTransactionType } from '@/types/api'
+import type { MinoristaTransactionType } from '@/types/api'
 import { ArrowLeft, CreditCard, DollarSign, TrendingDown, TrendingUp, User } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { DateRangeFilter, type DateRange } from '@/components/DateRangeFilter'
+import { useMinoristaBalance, useMinoristaTransactions } from '@/hooks/queries/useMinoristaQueries'
+import type { DateRange } from '@/components/DateRangeFilter'
+import { DateRangeFilter } from '@/components/DateRangeFilter'
+import { useAuth } from '@/contexts/AuthContext'
 
 export function MinoristaTransactionsPage() {
   const navigate = useNavigate()
+  const { user } = useAuth()
+  const [page, setPage] = useState(1)
+  const [dateRange, setDateRange] = useState<DateRange>({ startDate: null, endDate: null })
+
+  // React Query hooks
+  const minoristaQuery = useMinoristaBalance(user?.role)
+  const transactionsQuery = useMinoristaTransactions({
+    minoristaId: minoristaQuery.data?.id || '',
+    page,
+    limit: 50,
+    startDate: dateRange.startDate,
+    endDate: dateRange.endDate,
+  })
+
+  const minorista = minoristaQuery.data
+  const transactionsResponse = transactionsQuery.data
+  const transactions = transactionsResponse?.transactions || []
+  const totalPages = transactionsResponse?.pagination.totalPages || 1
+  const isLoading = transactionsQuery.isLoading
+
+  // Handle errors
+  if (minoristaQuery.error) {
+    toast.error('Error al cargar información del minorista')
+    navigate('/')
+  }
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-CO', {
@@ -32,58 +59,6 @@ export function MinoristaTransactionsPage() {
       minute: '2-digit',
     })
   }
-
-  const [minorista, setMinorista] = useState<Minorista | null>(null)
-  const [transactions, setTransactions] = useState<MinoristaTransaction[]>([])
-  const [loading, setLoading] = useState(true)
-  const [page, setPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-  const [dateRange, setDateRange] = useState<DateRange>({ startDate: null, endDate: null })
-
-  const fetchMinorista = useCallback(async () => {
-    try {
-      const response = await api.get<{ minorista: Minorista }>(`/minorista/me`)
-      setMinorista(response.minorista)
-    } catch (error: any) {
-      toast.error(error.message || 'Error al cargar información del minorista')
-      navigate('/')
-    }
-  }, [navigate])
-
-  const fetchTransactions = useCallback(async () => {
-    if (!minorista?.id) return
-
-    try {
-      setLoading(true)
-      let url = `/minorista/${minorista.id}/transactions?page=${page}&limit=50`
-
-      if (dateRange.startDate && dateRange.endDate) {
-        url += `&startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`
-      }
-
-      const response = await api.get<{
-        transactions: MinoristaTransaction[]
-        pagination: { total: number; page: number; limit: number; totalPages: number }
-      }>(url)
-
-      setTransactions(response.transactions)
-      setTotalPages(response.pagination.totalPages)
-    } catch (error: any) {
-      toast.error(error.message || 'Error al cargar transacciones')
-    } finally {
-      setLoading(false)
-    }
-  }, [page, minorista?.id, dateRange])
-
-  useEffect(() => {
-    fetchMinorista()
-  }, [fetchMinorista])
-
-  useEffect(() => {
-    if (minorista?.id) {
-      fetchTransactions()
-    }
-  }, [page, minorista?.id, fetchTransactions])
 
   const getTransactionTypeLabel = (type: MinoristaTransactionType) => {
     switch (type) {
@@ -230,7 +205,7 @@ export function MinoristaTransactionsPage() {
             <CardTitle>Historial de Transacciones</CardTitle>
           </CardHeader>
           <CardContent>
-            {loading ? (
+            {isLoading ? (
               <div className="text-center py-8 text-muted-foreground">Cargando transacciones...</div>
             ) : transactions.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">No hay transacciones registradas</div>

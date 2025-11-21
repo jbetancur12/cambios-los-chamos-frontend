@@ -1,19 +1,20 @@
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
-import { api } from '@/lib/api'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-
-interface ExchangeRate {
-  buyRate: number
-  sellRate: number
-  usd: number
-}
+import { useCurrentExchangeRate } from '@/hooks/queries/useExchangeRateQueries'
 
 export function CalculadoraPage() {
   const [activeTab, setActiveTab] = useState<'bcv' | 'manual' | 'ves'>('bcv')
-  const [, setLoading] = useState(false)
-  const [rate, setRate] = useState<ExchangeRate | null>(null)
+
+  // React Query hook
+  const rateQuery = useCurrentExchangeRate()
+  const rate = rateQuery.data
+
+  // Handle errors
+  if (rateQuery.error) {
+    toast.error('Error al obtener tasas de cambio')
+  }
 
   // Tab 1: BCV (Tasa oficial)
   const [usdBCV, setUsdBCV] = useState('')
@@ -27,27 +28,6 @@ export function CalculadoraPage() {
   // Tab 3: VES a COP
   const [vesAmount, setVesAmount] = useState('')
   const [resultVES, setResultVES] = useState<number | null>(null)
-
-  // Fetch tasas al cargar
-  const fetchRates = async () => {
-    try {
-      setLoading(true)
-      const response = await api.get<{ rate: ExchangeRate }>('/exchange-rate/current')
-      if (response?.rate) {
-        setRate(response.rate)
-      } else {
-        toast.error('No se encontró tasa de cambio.')
-      }
-    } catch (error: any) {
-      toast.error(error.message || 'Error al obtener tasas.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchRates()
-  }, [])
 
   // Cálculo BCV en tiempo real
   useEffect(() => {

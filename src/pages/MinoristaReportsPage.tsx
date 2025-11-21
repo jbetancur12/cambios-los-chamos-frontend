@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { api } from '@/lib/api'
 import { toast } from 'sonner'
 import {
   LineChart,
@@ -15,35 +14,7 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import { DollarSign, TrendingUp, CheckCircle, Activity, ChevronDown, ChevronUp } from 'lucide-react'
-
-interface MinoristaGiroReport {
-  totalMoneyTransferred: number
-  totalProfit: number
-  totalGiros: number
-  completedGiros: number
-  averageProfitPerGiro: number
-  moneyTransferredByStatus: {
-    status: string
-    count: number
-    totalAmount: number
-    totalProfit: number
-  }[]
-}
-
-interface MinoristaGiroTrendData {
-  date: string
-  moneyTransferred: number
-  profit: number
-}
-
-interface MinoristaGiroTrendReport {
-  trendData: MinoristaGiroTrendData[]
-  totalMoneyTransferred: number
-  totalProfit: number
-  totalGiros: number
-  completedGiros: number
-  averageProfitPerGiro: number
-}
+import { useMinoristaGiroReport, useMinoristaGiroTrendReport } from '@/hooks/queries/useReportQueries'
 
 // Helper function to format a Date as YYYY-MM-DD in local timezone (not UTC)
 const formatLocalDate = (date: Date): string => {
@@ -106,41 +77,28 @@ const formatCurrency = (amount: number) => {
 export function MinoristaReportsPage() {
   const [dateFrom, setDateFrom] = useState<string>('')
   const [dateTo, setDateTo] = useState<string>('')
-  const [loading, setLoading] = useState(false)
-  const [report, setReport] = useState<MinoristaGiroReport | null>(null)
-  const [trendReport, setTrendReport] = useState<MinoristaGiroTrendReport | null>(null)
   const [filterOpen, setFilterOpen] = useState(false)
+
+  // React Query hooks
+  const reportQuery = useMinoristaGiroReport(dateFrom, dateTo)
+  const trendReportQuery = useMinoristaGiroTrendReport(dateFrom, dateTo)
+
+  const report = reportQuery.data
+  const trendReport = trendReportQuery.data
+  const isLoading = reportQuery.isLoading || trendReportQuery.isLoading
+
+  // Handle errors
+  if (reportQuery.error) {
+    toast.error('Error al cargar reporte de giros')
+  }
+  if (trendReportQuery.error) {
+    toast.error('Error al cargar tendencia de giros')
+  }
 
   const handleQuickDateRange = (range: 'today' | 'yesterday' | 'week' | 'lastWeek' | 'month' | 'lastMonth' | 'year') => {
     const dates = getDateRange(range)
     setDateFrom(dates.from)
     setDateTo(dates.to)
-  }
-
-  const handleLoadReports = async () => {
-    if (!dateFrom || !dateTo) {
-      toast.error('Por favor selecciona un rango de fechas')
-      return
-    }
-
-    setLoading(true)
-
-    try {
-      // Send dates as YYYY-MM-DD format (local timezone, backend will convert to UTC)
-      const [reportData, trendData] = await Promise.all([
-        api.get<MinoristaGiroReport>(`/reports/minorista/giros?dateFrom=${dateFrom}&dateTo=${dateTo}`),
-        api.get<MinoristaGiroTrendReport>(`/reports/minorista/giros-trend?dateFrom=${dateFrom}&dateTo=${dateTo}`),
-      ])
-
-      setReport(reportData)
-      setTrendReport(trendData)
-      toast.success('Reporte cargado exitosamente')
-    } catch (err: any) {
-      toast.error(err.message || 'Error al cargar reporte')
-      console.error(err)
-    } finally {
-      setLoading(false)
-    }
   }
 
   return (
@@ -200,8 +158,8 @@ export function MinoristaReportsPage() {
               <label className="block text-sm font-medium mb-2">Hasta</label>
               <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-full" />
             </div>
-            <Button onClick={handleLoadReports} disabled={loading} className="w-full bg-[linear-gradient(to_right,#136BBC,#274565)]">
-              {loading ? 'Cargando...' : 'Cargar Reporte'}
+            <Button disabled={isLoading || !dateFrom || !dateTo} className="w-full bg-[linear-gradient(to_right,#136BBC,#274565)]">
+              {isLoading ? 'Cargando...' : 'Cargar Reporte'}
             </Button>
           </div>
         </CardContent>
@@ -319,7 +277,7 @@ export function MinoristaReportsPage() {
       )}
 
       {/* Empty State */}
-      {!report && !loading && (
+      {!report && !isLoading && (
         <Card>
           <CardContent className="text-center py-12">
             <p className="text-muted-foreground">Selecciona un rango de fechas y haz clic en "Cargar Reporte"</p>

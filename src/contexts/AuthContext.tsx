@@ -41,12 +41,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (response.token) {
       localStorage.setItem('authToken', response.token)
     }
+    // Store user data in localStorage for WebSocket initialization and offline support
+    localStorage.setItem('user', JSON.stringify(response.user))
   }
 
   const logout = async () => {
     await api.post('/user/logout')
     setUser(null)
     localStorage.removeItem('authToken')
+    localStorage.removeItem('user')
   }
 
   const refetch = async () => {

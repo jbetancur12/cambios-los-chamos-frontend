@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -17,25 +17,24 @@ import {
   Signal,
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
-import { api } from '@/lib/api'
-import { toast } from 'sonner'
 import { GiroDetailSheet } from '@/components/GiroDetailSheet'
-import { useGiroWebSocket } from '@/hooks/useGiroWebSocket'
-import type { Giro, GiroStatus, Currency, ExecutionType } from '@/types/api'
+import { useGirosList } from '@/hooks/queries/useGiroQueries'
+import type { GiroStatus, Currency, ExecutionType } from '@/types/api'
 
 type DateFilterType = 'TODAY' | 'YESTERDAY' | 'THIS_WEEK' | 'LAST_WEEK' | 'THIS_MONTH' | 'LAST_MONTH' | 'CUSTOM' | 'ALL'
 
 export function GirosPage() {
   const { user } = useAuth()
-  const { subscribe } = useGiroWebSocket()
-  const [giros, setGiros] = useState<Giro[]>([])
-  const [loading, setLoading] = useState(true)
+
+  // Filter states
   const [filterStatus, setFilterStatus] = useState<GiroStatus | 'ALL'>('ASIGNADO')
   const [filterDate, setFilterDate] = useState<DateFilterType>('TODAY')
   const [customDateRange, setCustomDateRange] = useState<{ from: string; to: string }>({
     from: new Date().toISOString().split('T')[0],
     to: new Date().toISOString().split('T')[0],
   })
+
+  // UI states
   const [customDateModalOpen, setCustomDateModalOpen] = useState(false)
   const [dateFiltersExpanded, setDateFiltersExpanded] = useState(false)
   const [detailSheetOpen, setDetailSheetOpen] = useState(false)
@@ -44,70 +43,19 @@ export function GirosPage() {
   const [page, setPage] = useState(1)
   const itemsPerPage = 15
 
-  useEffect(() => {
-    fetchGiros()
-  }, [filterStatus, filterDate, customDateRange])
-
-  // WebSocket event listeners
-  useEffect(() => {
-    // Escuchar evento de giro creado
-    const unsubscribeCreated = subscribe('giro:created', (event) => {
-      console.log('[Page] Giro creado recibido:', event.giro.id)
-      setGiros((prev) => [event.giro as unknown as Giro, ...prev])
-      toast.success(`Giro creado: ${event.giro.beneficiaryName}`)
-    })
-
-    // Escuchar evento de giro actualizado
-    const unsubscribeUpdated = subscribe('giro:updated', (event) => {
-      console.log('[Page] Giro actualizado recibido:', event.giro.id, 'Tipo:', event.changeType)
-      setGiros((prev) => prev.map((g) => (g.id === event.giro.id ? (event.giro as unknown as Giro) : g)))
-      toast.info(`Giro actualizado: ${event.changeType}`)
-    })
-
-    // Escuchar evento de giro procesando
-    const unsubscribeProcessing = subscribe('giro:processing', (event) => {
-      console.log('[Page] Giro procesando:', event.giro.id)
-      setGiros((prev) => prev.map((g) => (g.id === event.giro.id ? (event.giro as unknown as Giro) : g)))
-      toast.info('Giro marcado como procesando')
-    })
-
-    // Escuchar evento de giro ejecutado
-    const unsubscribeExecuted = subscribe('giro:executed', (event) => {
-      console.log('[Page] Giro ejecutado:', event.giro.id)
-      setGiros((prev) => prev.map((g) => (g.id === event.giro.id ? (event.giro as unknown as Giro) : g)))
-      toast.success('Giro ejecutado correctamente')
-    })
-
-    // Escuchar evento de giro devuelto
-    const unsubscribeReturned = subscribe('giro:returned', (event) => {
-      console.log('[Page] Giro devuelto:', event.giro.id, 'Razón:', event.reason)
-      setGiros((prev) => prev.map((g) => (g.id === event.giro.id ? (event.giro as unknown as Giro) : g)))
-      toast.warning(`Giro devuelto: ${event.reason}`)
-    })
-
-    return () => {
-      unsubscribeCreated()
-      unsubscribeUpdated()
-      unsubscribeProcessing()
-      unsubscribeExecuted()
-      unsubscribeReturned()
-    }
-  }, [subscribe])
-
-  // Helper function to format a Date as YYYY-MM-DD in local timezone (not UTC)
-  const formatLocalDate = (date: Date): string => {
-    const year = date.getFullYear()
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    const day = String(date.getDate()).padStart(2, '0')
-    return `${year}-${month}-${day}`
-  }
-
+  // Calculate date range based on filter
   const getDateRange = (filterType: DateFilterType) => {
-    // Use local timezone dates. Backend will convert to UTC for database comparison.
     const today = new Date()
     const year = today.getFullYear()
     const month = String(today.getMonth() + 1).padStart(2, '0')
     const day = String(today.getDate()).padStart(2, '0')
+
+    const formatLocalDate = (date: Date): string => {
+      const y = date.getFullYear()
+      const m = String(date.getMonth() + 1).padStart(2, '0')
+      const d = String(date.getDate()).padStart(2, '0')
+      return `${y}-${m}-${d}`
+    }
 
     let fromDate: string, toDate: string
 
@@ -155,42 +103,22 @@ export function GirosPage() {
         toDate = customDateRange.to
         break
       default:
-        fromDate = '1970-01-01'
-        toDate = '2099-12-31'
+        return undefined
     }
 
     return { from: fromDate, to: toDate }
   }
 
-  const fetchGiros = async () => {
-    try {
-      setLoading(true)
-      const params = new URLSearchParams()
-      if (filterStatus !== 'ALL') {
-        params.append('status', filterStatus)
-      }
-
-      if (filterDate !== 'ALL') {
-        const dateRange = getDateRange(filterDate)
-        // Send local dates as-is (YYYY-MM-DD format)
-        // Backend will convert from local timezone to UTC
-        params.append('dateFrom', dateRange.from)
-        params.append('dateTo', dateRange.to)
-      }
-
-      const response = await api.get<{
-        giros: Giro[]
-        pagination: { total: number; page: number; limit: number; totalPages: number }
-      }>(`/giro/list?${params.toString()}`)
-
-      setGiros(response.giros)
-    } catch (error: any) {
-      toast.error(error.message || 'Error al cargar giros')
-      console.error(error)
-    } finally {
-      setLoading(false)
-    }
+  // Build query params
+  const dateRange = getDateRange(filterDate)
+  const queryParams = {
+    status: filterStatus !== 'ALL' ? filterStatus : undefined,
+    dateFrom: dateRange?.from,
+    dateTo: dateRange?.to,
   }
+
+  // React Query hook
+  const { data: giros = [], isLoading, error } = useGirosList(queryParams)
 
   const getStatusBadge = (status: GiroStatus) => {
     const statusMap = {
@@ -455,10 +383,18 @@ export function GirosPage() {
       </div>
 
       {/* Giros List */}
-      {loading ? (
+      {isLoading ? (
         <div className="text-center py-8">
           <p className="text-sm text-muted-foreground">Cargando giros...</p>
         </div>
+      ) : error ? (
+        <Card>
+          <CardContent className="p-8 text-center">
+            <p className="text-sm text-destructive">
+              {error instanceof Error ? error.message : 'Error al cargar giros'}
+            </p>
+          </CardContent>
+        </Card>
       ) : giros.length === 0 ? (
         <Card>
           <CardContent className="p-8 text-center">
@@ -697,13 +633,12 @@ export function GirosPage() {
         </>
       )}
 
-
       {/* Giro Detail Sheet */}
       <GiroDetailSheet
         open={detailSheetOpen}
         onOpenChange={setDetailSheetOpen}
         giroId={selectedGiroId}
-        onUpdate={fetchGiros}
+        onUpdate={() => {}}
       />
 
       {/* Custom Date Range Modal */}

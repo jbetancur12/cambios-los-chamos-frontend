@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label'
 import { Settings, Search } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/contexts/AuthContext'
-import { usePrinterConfigAPI } from '@/hooks/usePrinterConfigAPI'
+import { usePrinterConfig, useSetPrinterConfig, useClearPrinterConfig } from '@/hooks/queries/usePrinterConfigQueries'
 import { PrinterDetectionDialog } from '@/components/PrinterDetectionDialog'
 import { RechargeOperatorsManager } from '@/components/RechargeOperatorsManager'
 import { OperatorAmountsManager } from '@/components/OperatorAmountsManager'
@@ -18,27 +18,20 @@ export function ConfigPage() {
   const [activeTab, setActiveTab] = useState<'operador' | 'impresora'>(canAccessOperatorTab ? 'operador' : 'impresora')
   const [printerName, setPrinterName] = useState('')
   const [printerType, setPrinterType] = useState<'thermal' | 'injection'>('thermal')
-  const [autoSavePrinter, setAutoSavePrinter] = useState(false)
-  const [loading, setLoading] = useState(false)
   const [detectionDialogOpen, setDetectionDialogOpen] = useState(false)
-  const { getPrinterConfig, setPrinterConfig, clearPrinterConfig } = usePrinterConfigAPI()
 
-  // Cargar configuración al montar
-  useEffect(() => {
-    loadPrinterConfig()
-  }, [])
+  // React Query hooks
+  const printerConfigQuery = usePrinterConfig()
+  const setPrinterConfigMutation = useSetPrinterConfig()
+  const clearPrinterConfigMutation = useClearPrinterConfig()
 
-  const loadPrinterConfig = async () => {
-    try {
-      const config = await getPrinterConfig()
-      if (config) {
-        setPrinterName(config.name)
-        setPrinterType(config.type)
-        setAutoSavePrinter(true)
-      }
-    } catch (error) {
-      console.error('Error loading printer config:', error)
-    }
+  const printerConfig = printerConfigQuery.data
+  const isLoading = setPrinterConfigMutation.isPending || clearPrinterConfigMutation.isPending
+
+  // Update form when config loads
+  if (printerConfig && (!printerName || !printerType)) {
+    if (!printerName) setPrinterName(printerConfig.name)
+    if (printerType === 'thermal') setPrinterType(printerConfig.type)
   }
 
   const handleSavePrinterConfig = async () => {
@@ -47,32 +40,24 @@ export function ConfigPage() {
       return
     }
 
-    setLoading(true)
     try {
-      await setPrinterConfig({
+      await setPrinterConfigMutation.mutateAsync({
         name: printerName,
         type: printerType,
       })
-      setAutoSavePrinter(true)
       toast.success('Configuración de impresora guardada')
     } catch (error) {
       toast.error('Error al guardar la configuración')
-    } finally {
-      setLoading(false)
     }
   }
 
   const handleClearPrinterConfig = async () => {
-    setLoading(true)
     try {
-      await clearPrinterConfig()
+      await clearPrinterConfigMutation.mutateAsync()
       setPrinterName('')
-      setAutoSavePrinter(false)
       toast.success('Configuración de impresora eliminada')
     } catch (error) {
       toast.error('Error al eliminar la configuración')
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -142,10 +127,10 @@ export function ConfigPage() {
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Current Status */}
-              {autoSavePrinter && (
+              {printerConfig && (
                 <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
                   <p className="text-sm text-green-800">
-                    <strong>Impresora configurada:</strong> {printerName} ({printerType === 'thermal' ? 'Térmica 80mm' : 'Inyección Media Carta'})
+                    <strong>Impresora configurada:</strong> {printerConfig.name} ({printerConfig.type === 'thermal' ? 'Térmica 80mm' : 'Inyección Media Carta'})
                   </p>
                 </div>
               )}
@@ -210,12 +195,12 @@ export function ConfigPage() {
 
               {/* Action Buttons */}
               <div className="flex gap-3 pt-4">
-                <Button onClick={handleSavePrinterConfig} disabled={loading} className="flex-1">
-                  {loading ? 'Guardando...' : 'Guardar Configuración'}
+                <Button onClick={handleSavePrinterConfig} disabled={isLoading} className="flex-1">
+                  {isLoading ? 'Guardando...' : 'Guardar Configuración'}
                 </Button>
-                {autoSavePrinter && (
-                  <Button onClick={handleClearPrinterConfig} disabled={loading} variant="outline" className="flex-1">
-                    {loading ? 'Eliminando...' : 'Limpiar Configuración'}
+                {printerConfig && (
+                  <Button onClick={handleClearPrinterConfig} disabled={isLoading} variant="outline" className="flex-1">
+                    {isLoading ? 'Eliminando...' : 'Limpiar Configuración'}
                   </Button>
                 )}
               </div>

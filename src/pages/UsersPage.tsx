@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -19,29 +19,17 @@ import {
 import { Input } from '@/components/ui/input'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
+import { useQueryClient } from '@tanstack/react-query'
 import { CreateUserSheet } from '@/components/CreateUserSheet'
 import { TransferencistaAccountsSheet } from '@/components/TransferencistaAccountsSheet'
 import { RechargeMinoristaBalanceSheet } from '@/components/RechargeMinoristaBalanceSheet'
+import { useAllUsers } from '@/hooks/queries/useUserQueries'
 import type { UserRole, Minorista } from '@/types/api'
 import { Switch } from '@/components/ui/switch'
 
-interface UserData {
-  id: string
-  fullName: string
-  email: string
-  role: UserRole
-  isActive: boolean
-  emailVerified: boolean
-  available?: boolean
-  transferencistaId?: string // ID del transferencista si el usuario es TRANSFERENCISTA
-  minoristaId?: string // ID del minorista si el usuario es MINORISTA
-  balance?: number // Saldo del minorista si el usuario es MINORISTA
-}
-
 export function UsersPage() {
   const { user: currentUser } = useAuth()
-  const [users, setUsers] = useState<UserData[]>([])
-  const [loading, setLoading] = useState(true)
+  const queryClient = useQueryClient()
   const [sheetOpen, setSheetOpen] = useState(false)
   const [selectedRole, setSelectedRole] = useState<UserRole | 'ALL'>('ALL')
   const [createUserRole, setCreateUserRole] = useState<UserRole>('ADMIN')
@@ -57,113 +45,16 @@ export function UsersPage() {
 
   const isSuperAdmin = currentUser?.role === 'SUPER_ADMIN'
 
-  const fetchUsers = async (role?: UserRole | 'ALL') => {
-    try {
-      setLoading(true)
-      let usersData: UserData[] = []
-
-      if (role && role !== 'ALL') {
-        const response = await api.get<{ users: any[] }>(`/user/by-role/${role}`)
-        usersData = response.users
-
-        // Si es TRANSFERENCISTA, obtener los IDs de transferencista y disponibilidad
-        if (role === 'TRANSFERENCISTA') {
-          const transferencistaResponse = await api.get<{
-            transferencistas: { id: string; available: boolean; user: { id: string } }[]
-          }>('/transferencista/list')
-          const transferencistaMap = new Map(
-            transferencistaResponse.transferencistas.map((t: any) => [t.user.id, { id: t.id, available: t.available }])
-          )
-          usersData = usersData.map((user) => {
-            const transferencistaData = transferencistaMap.get(user.id)
-            return {
-              ...user,
-              available: transferencistaData?.available,
-              transferencistaId: transferencistaData?.id,
-            }
-          })
-        }
-
-        // Si es MINORISTA, obtener los IDs de minorista y saldo
-        if (role === 'MINORISTA') {
-          const minoristaResponse = await api.get<{
-            minoristas: { id: string; balance: number; user: { id: string } }[]
-          }>('/minorista/list')
-          const minoristaMap = new Map(
-            minoristaResponse.minoristas.map((m: any) => [m.user.id, { id: m.id, balance: m.balance }])
-          )
-          usersData = usersData.map((user) => {
-            const minoristaData = minoristaMap.get(user.id)
-            return {
-              ...user,
-              minoristaId: minoristaData?.id,
-              balance: minoristaData?.balance,
-            }
-          })
-        }
-      } else {
-        // Fetch all roles
-        const [admins, transferencistasUsers, minoristasUsers, transferencistasList, minoristasList] =
-          await Promise.all([
-            api.get<{ users: any[] }>('/user/by-role/ADMIN'),
-            api.get<{ users: any[] }>('/user/by-role/TRANSFERENCISTA'),
-            api.get<{ users: any[] }>('/user/by-role/MINORISTA'),
-            api.get<{ transferencistas: { id: string; available: boolean; user: { id: string } }[] }>(
-              '/transferencista/list'
-            ),
-            api.get<{ minoristas: { id: string; balance: number; user: { id: string } }[] }>('/minorista/list'),
-          ])
-
-        // Map transferencista IDs and availability
-        const transferencistaMap = new Map(
-          transferencistasList.transferencistas.map((t: any) => [t.user.id, { id: t.id, available: t.available }])
-        )
-
-        const transferencistaData = transferencistasUsers.users.map((user) => {
-          const transferencista = transferencistaMap.get(user.id)
-          return {
-            ...user,
-            available: transferencista?.available,
-            transferencistaId: transferencista?.id,
-          }
-        })
-
-        // Map minorista IDs and balances
-        const minoristaMap = new Map(
-          minoristasList.minoristas.map((m: any) => [m.user.id, { id: m.id, balance: m.balance }])
-        )
-
-        const minoristaData = minoristasUsers.users.map((user) => {
-          const minorista = minoristaMap.get(user.id)
-          return {
-            ...user,
-            minoristaId: minorista?.id,
-            balance: minorista?.balance,
-          }
-        })
-
-        usersData = [...admins.users, ...transferencistaData, ...minoristaData]
-      }
-
-      setUsers(usersData)
-    } catch (error) {
-      toast.error('Error al cargar usuarios')
-      console.error(error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    if (isSuperAdmin) {
-      fetchUsers(selectedRole === 'ALL' ? undefined : selectedRole)
-    }
-  }, [selectedRole, isSuperAdmin])
+  // React Query hook for fetching users
+  const usersQuery = useAllUsers(isSuperAdmin ? (selectedRole === 'ALL' ? 'ALL' : selectedRole) : null)
+  const users = usersQuery.data || []
+  const isLoading = usersQuery.isLoading
 
   const handleUserCreated = () => {
     setSheetOpen(false)
     setMenuOpen(false)
-    fetchUsers(selectedRole === 'ALL' ? undefined : selectedRole)
+    // Invalidate users query to refetch
+    queryClient.invalidateQueries({ queryKey: ['users'] })
     toast.success('Usuario creado exitosamente')
   }
 
@@ -199,13 +90,15 @@ export function UsersPage() {
   const handleMinoristaBalanceUpdated = () => {
     setRechargeMinoristaSheetOpen(false)
     setSelectedMinorista(null)
-    fetchUsers(selectedRole === 'ALL' ? undefined : selectedRole)
+    // Invalidate users query to refetch updated balance
+    queryClient.invalidateQueries({ queryKey: ['users'] })
   }
 
   const handleToggleActive = async (userId: string, newValue: boolean) => {
     try {
       await api.put(`/user/${userId}/toggle-active`, { isActive: newValue })
-      setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, isActive: newValue } : u)))
+      // Invalidate users query to refetch updated state
+      queryClient.invalidateQueries({ queryKey: ['users'] })
       toast.success(newValue ? 'Usuario activado' : 'Usuario desactivado')
     } catch (error) {
       toast.error('Error al cambiar estado del usuario')
@@ -227,10 +120,8 @@ export function UsersPage() {
         isAvailable: newValue,
       })
 
-      // Actualizar estado local
-      setUsers((prev) =>
-        prev.map((u) => (u.transferencistaId === transferencistaId ? { ...u, available: newValue } : u))
-      )
+      // Invalidate users query to refetch updated availability
+      queryClient.invalidateQueries({ queryKey: ['users'] })
 
       // Mostrar mensaje de éxito
       toast.success(response.message || (newValue ? 'Transferencista disponible' : 'Transferencista no disponible'))
@@ -335,7 +226,7 @@ export function UsersPage() {
       </div>
 
       {/* Users List */}
-      {loading ? (
+      {isLoading ? (
         <div className="text-center py-12">
           <p className="text-muted-foreground">Cargando usuarios...</p>
         </div>

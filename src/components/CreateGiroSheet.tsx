@@ -1,16 +1,19 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetBody } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { api } from '@/lib/api'
 import { toast } from 'sonner'
 import { useAuth } from '@/contexts/AuthContext'
 import { NumericFormat } from 'react-number-format'
-import type { Bank, ExchangeRate, Currency, Minorista } from '@/types/api'
+import type { Currency } from '@/types/api'
 import { BalanceInfo } from './BalanceInfo'
 import { BeneficiaryAutocomplete } from './BeneficiaryAutocomplete'
 import { useBeneficiarySuggestions } from '@/hooks/useBeneficiarySuggestions'
+import { useBanksList } from '@/hooks/queries/useBankQueries'
+import { useCurrentExchangeRate } from '@/hooks/queries/useExchangeRateQueries'
+import { useMinoristaBalance } from '@/hooks/queries/useDashboardQueries'
+import { useCreateGiro } from '@/hooks/mutations/useGiroMutations'
 
 interface CreateGiroSheetProps {
   open: boolean
@@ -26,14 +29,11 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
     addSuggestion
   } = useBeneficiarySuggestions()
 
-  const [loading, setLoading] = useState(false)
-  const [banks, setBanks] = useState<Bank[]>([])
-  const [currentRate, setCurrentRate] = useState<ExchangeRate | null>(null)
-  const [loadingRate, setLoadingRate] = useState(true)
-  const [minoristaBalance, setMinoristaBalance] = useState<number | null>(null)
-  const [minoristaBalanceInFavor, setMinoristaBalanceInFavor] = useState<number | null>(null)
-  const [loadingBalance, setLoadingBalance] = useState(false)
-  const [creditLimit, setCreditLimit] = useState<number | null>(null)
+  // React Query hooks
+  const { data: banks = [] } = useBanksList()
+  const { data: currentRate } = useCurrentExchangeRate()
+  const { data: minoristaBalanceData } = useMinoristaBalance(user?.role)
+  const createGiroMutation = useCreateGiro()
 
   // Form fields
   const [beneficiaryName, setBeneficiaryName] = useState('')
@@ -50,62 +50,20 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
 
   // Custom rate override (solo SUPER_ADMIN)
   const [useCustomRate, setUseCustomRate] = useState(false)
-  const [customBuyRate, setCustomBuyRate] = useState('')
-  const [customSellRate, setCustomSellRate] = useState('')
-  const [customUsd, setCustomUsd] = useState('')
-  const [customBcv, setCustomBcv] = useState('')
+  const [customBuyRate, setCustomBuyRate] = useState(currentRate?.buyRate.toString() || '')
+  const [customSellRate, setCustomSellRate] = useState(currentRate?.sellRate.toString() || '')
+  const [customUsd, setCustomUsd] = useState(currentRate?.usd.toString() || '')
+  const [customBcv, setCustomBcv] = useState(currentRate?.bcv.toString() || '')
 
   const isSuperAdmin = user?.role === 'SUPER_ADMIN'
   const isMinorista = user?.role === 'MINORISTA'
 
-  useEffect(() => {
-    if (open) {
-      fetchBanks()
-      fetchCurrentRate()
-      if (isMinorista) {
-        fetchMinoristaBalance()
-      }
-    }
-  }, [open, isMinorista])
-
-  const fetchBanks = async () => {
-    try {
-      const response = await api.get<{ banks: Bank[] }>('/bank/all')
-      setBanks(response.banks)
-    } catch (error: any) {
-      toast.error(error.message || 'Error al cargar bancos')
-    }
-  }
-
-  const fetchCurrentRate = async () => {
-    try {
-      setLoadingRate(true)
-      const response = await api.get<{ rate: ExchangeRate }>('/exchange-rate/current')
-      setCurrentRate(response.rate)
-      // Pre-fill custom rate with current values
-      setCustomBuyRate(response.rate.buyRate.toString())
-      setCustomSellRate(response.rate.sellRate.toString())
-      setCustomUsd(response.rate.usd.toString())
-      setCustomBcv(response.rate.bcv.toString())
-    } catch (error: any) {
-      toast.error('No hay tasa de cambio configurada. Contacte al administrador.')
-    } finally {
-      setLoadingRate(false)
-    }
-  }
-
-  const fetchMinoristaBalance = async () => {
-    try {
-      setLoadingBalance(true)
-      const response = await api.get<{ minorista: Minorista }>('/minorista/me')
-      setMinoristaBalance(response.minorista.availableCredit)
-      setMinoristaBalanceInFavor(response.minorista.creditBalance || 0)
-      setCreditLimit(response.minorista.creditLimit)
-    } catch (error: any) {
-      toast.error(error.message || 'Error al cargar balance')
-    } finally {
-      setLoadingBalance(false)
-    }
+  // Update custom rate fields when currentRate changes
+  if (currentRate && !useCustomRate) {
+    if (customBuyRate === '') setCustomBuyRate(currentRate.buyRate.toString())
+    if (customSellRate === '') setCustomSellRate(currentRate.sellRate.toString())
+    if (customUsd === '') setCustomUsd(currentRate.usd.toString())
+    if (customBcv === '') setCustomBcv(currentRate.bcv.toString())
   }
 
   const resetForm = () => {
@@ -173,56 +131,60 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
       return
     }
 
-    try {
-      setLoading(true)
+    // Validate custom rate if SUPER_ADMIN enabled it
+    if (isSuperAdmin && useCustomRate) {
+      const buyRate = parseFloat(customBuyRate)
+      const sellRate = parseFloat(customSellRate)
+      const usd = parseFloat(customUsd)
+      const bcv = parseFloat(customBcv)
 
-      const payload: any = {
-        beneficiaryName,
-        beneficiaryId,
-        phone,
-        bankId,
-        accountNumber,
-        amountInput: amount,
-        currencyInput,
+      if (isNaN(buyRate) || isNaN(sellRate) || isNaN(usd) || isNaN(bcv)) {
+        toast.error('Valores de tasa personalizada inválidos')
+        return
       }
-
-      // Add custom rate if SUPER_ADMIN enabled it
-      if (isSuperAdmin && useCustomRate) {
-        const buyRate = parseFloat(customBuyRate)
-        const sellRate = parseFloat(customSellRate)
-        const usd = parseFloat(customUsd)
-        const bcv = parseFloat(customBcv)
-
-        if (isNaN(buyRate) || isNaN(sellRate) || isNaN(usd) || isNaN(bcv)) {
-          toast.error('Valores de tasa personalizada inválidos')
-          setLoading(false)
-          return
-        }
-
-        payload.customRate = { buyRate, sellRate, usd, bcv }
-      }
-
-      const response = await api.post<{ giro: any; message: string }>('/giro/create', payload)
-
-      // Save beneficiary suggestion for future use
-      addSuggestion({
-        name: beneficiaryName,
-        id: beneficiaryId,
-        phone,
-        bankId,
-        accountNumber,
-        executionType: 'TRANSFERENCIA',
-      })
-
-      toast.success(response.message || 'Giro creado exitosamente')
-      resetForm()
-      onSuccess()
-      onOpenChange(false)
-    } catch (error: any) {
-      toast.error(error.message || 'Error al crear giro')
-    } finally {
-      setLoading(false)
     }
+
+    const payload: any = {
+      beneficiaryName,
+      beneficiaryId,
+      phone,
+      bankId,
+      accountNumber,
+      amountInput: amount,
+      currencyInput,
+    }
+
+    // Add custom rate if SUPER_ADMIN enabled it
+    if (isSuperAdmin && useCustomRate) {
+      payload.customRate = {
+        buyRate: parseFloat(customBuyRate),
+        sellRate: parseFloat(customSellRate),
+        usd: parseFloat(customUsd),
+        bcv: parseFloat(customBcv),
+      }
+    }
+
+    createGiroMutation.mutate(payload, {
+      onSuccess: () => {
+        // Save beneficiary suggestion for future use
+        addSuggestion({
+          name: beneficiaryName,
+          id: beneficiaryId,
+          phone,
+          bankId,
+          accountNumber,
+          executionType: 'TRANSFERENCIA',
+        })
+
+        toast.success('Giro creado exitosamente')
+        resetForm()
+        onSuccess()
+        onOpenChange(false)
+      },
+      onError: (error: any) => {
+        toast.error(error.message || 'Error al crear giro')
+      },
+    })
   }
 
   const calculateAmountBs = () => {
@@ -250,20 +212,20 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
   }
 
   const getRemainingBalance = () => {
-    if (minoristaBalance === null || minoristaBalanceInFavor === null) return null
+    if (!minoristaBalanceData?.balance || !minoristaBalanceData?.credit) return null
 
     const amount = parseFloat(amountInput) || 0
     const profit = getEarnedProfit() || 0
 
     // Total balance = crédito + saldo a favor
-    const totalBalance = minoristaBalance + minoristaBalanceInFavor
+    const totalBalance = minoristaBalanceData.balance + minoristaBalanceData.credit
 
     // Balance after transaction = total balance - amount + profit
     return totalBalance - amount + profit
   }
 
   const getEarnedProfit = () => {
-    if (!currentRate || minoristaBalance === null || !amountInput) return null
+    if (!currentRate || !minoristaBalanceData?.balance || !amountInput) return null
 
     const amount = parseFloat(amountInput)
     if (isNaN(amount)) return null
@@ -272,12 +234,12 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
   }
 
   const hasInsufficientBalance = () => {
-    if (!isMinorista || minoristaBalance === null || minoristaBalanceInFavor === null || creditLimit === null)
+    if (!isMinorista || !minoristaBalanceData?.balance || !minoristaBalanceData?.credit)
       return false
 
     const amount = parseFloat(amountInput) || 0
-    const balanceInFavor = minoristaBalanceInFavor
-    const availableCredit = minoristaBalance
+    const balanceInFavor = minoristaBalanceData.credit
+    const availableCredit = minoristaBalanceData.balance
 
     // Apply processTransfer logic to calculate final balances
     const profit = amount * 0.05
@@ -516,10 +478,10 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
               </div>
             )} */}
 
-            {isMinorista && !loadingBalance && minoristaBalance !== null && (
+            {isMinorista && minoristaBalanceData && (
               <BalanceInfo
-                minoristaBalance={minoristaBalance}
-                minoristaBalanceInFavor={minoristaBalanceInFavor}
+                minoristaBalance={minoristaBalanceData.balance}
+                minoristaBalanceInFavor={minoristaBalanceData.credit || 0}
                 amountInput={amountInput}
                 getEarnedProfit={getEarnedProfit}
                 getRemainingBalance={getRemainingBalance}
@@ -528,7 +490,7 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
             )}
 
             {/* Exchange Rate Info */}
-            {!loadingRate && currentRate && (
+            {currentRate && (
               <div className="p-3 bg-muted rounded-lg space-y-2">
                 <p className="text-sm font-medium">Tasa de Cambio Actual</p>
 
@@ -654,8 +616,8 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="flex-1">
                 Cancelar
               </Button>
-              <Button type="submit" disabled={loading || hasInsufficientBalance()} className="flex-1 bg-[linear-gradient(to_right,#136BBC,#274565)]">
-                {loading ? 'Creando...' : 'Crear Giro'}
+              <Button type="submit" disabled={createGiroMutation.isPending || hasInsufficientBalance()} className="flex-1 bg-[linear-gradient(to_right,#136BBC,#274565)]">
+                {createGiroMutation.isPending ? 'Creando...' : 'Crear Giro'}
               </Button>
             </div>
           </form>
