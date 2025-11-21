@@ -13,14 +13,22 @@ export function useBanksList() {
   })
 }
 
-export function useBankAccountsList() {
+export function useBankAccountsList(userRole?: string) {
   return useQuery({
-    queryKey: ['bankAccounts', 'my-accounts'],
+    queryKey: ['bankAccounts', userRole === 'TRANSFERENCISTA' ? 'my-accounts' : 'all'],
     queryFn: async () => {
-      const response = await api.get<{ accounts: BankAccount[] }>('/bank-account/my-accounts')
-      return response.accounts
+      // SUPER_ADMIN/ADMIN: obtener todas las cuentas
+      if (userRole === 'SUPER_ADMIN' || userRole === 'ADMIN') {
+        const response = await api.get<{ bankAccounts: BankAccount[] }>('/bank-account/all')
+        return response.bankAccounts
+      }
+
+      // TRANSFERENCISTA: obtener sus propias cuentas
+      const response = await api.get<{ bankAccounts: BankAccount[] }>('/bank-account/my-accounts')
+      return response.bankAccounts
     },
     staleTime: 1000 * 60 * 5, // 5 minutos
+    enabled: userRole === 'TRANSFERENCISTA' || userRole === 'SUPER_ADMIN' || userRole === 'ADMIN',
   })
 }
 
@@ -29,7 +37,8 @@ export function useBankAccountDetail(accountId: string | null) {
     queryKey: ['bankAccount', accountId],
     queryFn: async () => {
       if (!accountId) return null
-      return await api.get<BankAccount>(`/bank-account/${accountId}`)
+      const response = await api.get<{ bankAccount: BankAccount }>(`/bank-account/${accountId}`)
+      return response.bankAccount
     },
     enabled: !!accountId,
   })

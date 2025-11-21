@@ -67,6 +67,36 @@ export interface MinoristaTransactionReport {
   totalProfitAmount: number
 }
 
+// Minorista Giro Report Types
+export interface MinoristaGiroTrendData {
+  date: string
+  moneyTransferred: number
+  profit: number
+}
+
+export interface MinoristaGiroReport {
+  totalMoneyTransferred: number
+  totalProfit: number
+  totalGiros: number
+  completedGiros: number
+  averageProfitPerGiro: number
+  moneyTransferredByStatus: {
+    status: string
+    count: number
+    totalAmount: number
+    totalProfit: number
+  }[]
+}
+
+export interface MinoristaGiroTrendReport {
+  trendData: MinoristaGiroTrendData[]
+  totalMoneyTransferred: number
+  totalProfit: number
+  totalGiros: number
+  completedGiros: number
+  averageProfitPerGiro: number
+}
+
 // Query hook for system profit report
 export function useSystemProfitReport(
   dateFrom: string | null,
@@ -149,6 +179,42 @@ export function useMinoristaTransactionReport(
     queryFn: async () => {
       const response = await api.get<MinoristaTransactionReport>(
         `/reports/minorista-transactions?dateFrom=${dateFrom}&dateTo=${dateTo}`
+      )
+      return response
+    },
+    enabled: !!dateFrom && !!dateTo,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  })
+}
+
+// Query hook for minorista giro report
+export function useMinoristaGiroReport(
+  dateFrom: string | null,
+  dateTo: string | null
+) {
+  return useQuery({
+    queryKey: ['reports', 'minorista-giros', { dateFrom, dateTo }],
+    queryFn: async () => {
+      const response = await api.get<MinoristaGiroReport>(
+        `/reports/minorista/giros?dateFrom=${dateFrom}&dateTo=${dateTo}`
+      )
+      return response
+    },
+    enabled: !!dateFrom && !!dateTo,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  })
+}
+
+// Query hook for minorista giro trend report
+export function useMinoristaGiroTrendReport(
+  dateFrom: string | null,
+  dateTo: string | null
+) {
+  return useQuery({
+    queryKey: ['reports', 'minorista-giros-trend', { dateFrom, dateTo }],
+    queryFn: async () => {
+      const response = await api.get<MinoristaGiroTrendReport>(
+        `/reports/minorista/giros-trend?dateFrom=${dateFrom}&dateTo=${dateTo}`
       )
       return response
     },

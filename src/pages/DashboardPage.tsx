@@ -16,8 +16,8 @@ export function DashboardPage() {
   // React Query hooks
   const { data: stats, isLoading, error } = useDashboardStats()
   const { data: giros = [] } = useRecentGiros(5)
-  const { data: minoristaBalanceData } = useMinoristaBalance()
-  const { data: bankAccounts = [] } = useBankAccountsList()
+  const { data: minoristaBalanceData } = useMinoristaBalance(user?.role)
+  const { data: bankAccounts = [] } = useBankAccountsList(user?.role)
 
   // Local UI state
   const [selectedGiro, setSelectedGiro] = useState<Giro | null>(null)

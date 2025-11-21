@@ -63,7 +63,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
 
   // React Query hooks
   const { data: giro, isLoading } = useGiroDetail(open ? giroId : null)
-  const { data: bankAccounts = [] } = useBankAccountsList()
+  const { data: bankAccounts = [] } = useBankAccountsList(user?.role)
   const { data: banks = [] } = useBanksList()
   const { data: minoristaTransaction } = useMinoristaTransaction(open && isMinorista ? giroId : null)
 

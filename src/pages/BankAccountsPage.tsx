@@ -1,51 +1,35 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Building, Eye, Search } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
-import { api } from '@/lib/api'
-import type { BankAccount } from '@/types/api'
+import { useBankAccountsList } from '@/hooks/queries/useBankQueries'
+import { useAuth } from '@/contexts/AuthContext'
 
 export function BankAccountsPage() {
   const navigate = useNavigate()
-  const [accounts, setAccounts] = useState<BankAccount[]>([])
-  const [filteredAccounts, setFilteredAccounts] = useState<BankAccount[]>([])
-  const [loading, setLoading] = useState(true)
+  const { user } = useAuth()
   const [searchTerm, setSearchTerm] = useState('')
 
-  useEffect(() => {
-    fetchAccounts()
-  }, [])
+  // React Query hook
+  const accountsQuery = useBankAccountsList(user?.role)
+  const accounts = accountsQuery.data || []
+  const isLoading = accountsQuery.isLoading
 
-  useEffect(() => {
-    // Filtrar cuentas por búsqueda
-    if (searchTerm.trim() === '') {
-      setFilteredAccounts(accounts)
-    } else {
-      const filtered = accounts.filter(
-        (account) =>
-          account.bank.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          account.accountNumber.includes(searchTerm) ||
-          account.accountHolder.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          account.transferencista?.user.fullName.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-      setFilteredAccounts(filtered)
-    }
-  }, [searchTerm, accounts])
+  // Client-side filtering
+  const filteredAccounts = searchTerm.trim() === '' ? accounts : accounts.filter(
+    (account) =>
+      account.bank.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      account.accountNumber.includes(searchTerm) ||
+      account.accountHolder.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      account.transferencista?.user.fullName.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
-  const fetchAccounts = async () => {
-    try {
-      setLoading(true)
-      const response = await api.get<{ bankAccounts: BankAccount[] }>('/bank-account/all')
-      setAccounts(response.bankAccounts)
-      setFilteredAccounts(response.bankAccounts)
-    } catch (error: any) {
-      toast.error(error.message || 'Error al cargar cuentas bancarias')
-    } finally {
-      setLoading(false)
-    }
+  // Handle errors
+  if (accountsQuery.error) {
+    toast.error('Error al cargar cuentas bancarias')
   }
 
   const formatCurrency = (amount: number) => {
@@ -94,7 +78,7 @@ export function BankAccountsPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {loading ? (
+            {isLoading ? (
               <div className="text-center py-8">
                 <p className="text-muted-foreground">Cargando cuentas...</p>
               </div>

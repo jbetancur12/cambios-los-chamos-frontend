@@ -9,20 +9,21 @@ export function useCurrentExchangeRate() {
       const response = await api.get<{ rate: ExchangeRate }>('/exchange-rate/current')
       return response.rate
     },
-    staleTime: 1000 * 60, // 1 minuto
+    staleTime: 1000 * 60 * 5, // 5 minutes
   })
 }
 
-export function useExchangeRateHistory(limit: number = 20) {
+export function useExchangeRateHistory(limit?: number) {
   return useQuery({
-    queryKey: ['exchangeRate', 'history', limit],
+    queryKey: ['exchangeRate', 'history', { limit }],
     queryFn: async () => {
-      const response = await api.get<{
-        rates: ExchangeRate[]
-        pagination: { total: number; page: number; limit: number; totalPages: number }
-      }>(`/exchange-rate/list?limit=${limit}`)
+      let url = '/exchange-rate/history'
+      if (limit) {
+        url += `?limit=${limit}`
+      }
+      const response = await api.get<{ rates: ExchangeRate[] }>(url)
       return response.rates
     },
-    staleTime: 1000 * 60 * 5, // 5 minutos
+    staleTime: 1000 * 60 * 60, // 1 hour
   })
 }

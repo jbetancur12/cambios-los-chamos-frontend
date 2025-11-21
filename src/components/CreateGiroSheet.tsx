@@ -32,7 +32,7 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
   // React Query hooks
   const { data: banks = [] } = useBanksList()
   const { data: currentRate } = useCurrentExchangeRate()
-  const { data: minoristaBalanceData } = useMinoristaBalance()
+  const { data: minoristaBalanceData } = useMinoristaBalance(user?.role)
   const createGiroMutation = useCreateGiro()
 
   // Form fields

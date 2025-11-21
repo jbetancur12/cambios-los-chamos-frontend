@@ -26,7 +26,7 @@ export function useDashboardStats() {
   })
 }
 
-export function useMinoristaBalance() {
+export function useMinoristaBalance(userRole?: string) {
   return useQuery({
     queryKey: ['minorista', 'balance'],
     queryFn: async () => {
@@ -34,5 +34,6 @@ export function useMinoristaBalance() {
       return response
     },
     staleTime: 1000 * 60, // 1 minuto
+    enabled: userRole === 'MINORISTA',
   })
 }
