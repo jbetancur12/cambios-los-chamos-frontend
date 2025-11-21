@@ -29,6 +29,7 @@ export function GirosPage() {
   // Filter states
   const [filterStatus, setFilterStatus] = useState<GiroStatus | 'ALL'>('ASIGNADO')
   const [filterDate, setFilterDate] = useState<DateFilterType>('TODAY')
+  const [filterUserType, setFilterUserType] = useState<'MINORISTA' | 'TRANSFERENCISTA' | 'ALL'>('ALL')
   const [customDateRange, setCustomDateRange] = useState<{ from: string; to: string }>({
     from: new Date().toISOString().split('T')[0],
     to: new Date().toISOString().split('T')[0],
@@ -37,6 +38,7 @@ export function GirosPage() {
   // UI states
   const [customDateModalOpen, setCustomDateModalOpen] = useState(false)
   const [dateFiltersExpanded, setDateFiltersExpanded] = useState(false)
+  const [userFiltersExpanded, setUserFiltersExpanded] = useState(false)
   const [detailSheetOpen, setDetailSheetOpen] = useState(false)
   const [selectedGiroId, setSelectedGiroId] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
@@ -189,16 +191,28 @@ export function GirosPage() {
     setDetailSheetOpen(true)
   }
 
-  // Filter giros based on search query
+  // Filter giros based on search query and user type
   const filteredGiros = giros.filter((giro) => {
     const searchLower = searchQuery.toLowerCase()
-    return (
+
+    // Search filter
+    const matchesSearch =
       giro.beneficiaryName.toLowerCase().includes(searchLower) ||
       giro.beneficiaryId.toLowerCase().includes(searchLower) ||
       giro.bankName.toLowerCase().includes(searchLower) ||
       giro.accountNumber.includes(searchLower) ||
-      (giro.transferencista?.user.fullName.toLowerCase().includes(searchLower) ?? false)
-    )
+      (giro.transferencista?.user.fullName.toLowerCase().includes(searchLower) ?? false) ||
+      (giro.minorista?.user.fullName.toLowerCase().includes(searchLower) ?? false)
+
+    // User type filter
+    let matchesUserType = true
+    if (filterUserType === 'MINORISTA') {
+      matchesUserType = !!giro.minorista
+    } else if (filterUserType === 'TRANSFERENCISTA') {
+      matchesUserType = !!giro.transferencista
+    }
+
+    return matchesSearch && matchesUserType
   })
 
   // Pagination
@@ -286,6 +300,57 @@ export function GirosPage() {
           </Button>
         </div>
       </div>
+
+      {/* User Type Filters - Only for Admin/SuperAdmin */}
+      {(user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN') && (
+        <div className="mb-4 border rounded-lg bg-card">
+          <button
+            onClick={() => setUserFiltersExpanded(!userFiltersExpanded)}
+            className="w-full flex items-center justify-between p-3 hover:bg-muted/50 transition-colors"
+          >
+            <p className="text-xs font-semibold text-muted-foreground">Tipo de Usuario</p>
+            <ChevronDown
+              className={`h-4 w-4 text-muted-foreground transition-transform ${
+                userFiltersExpanded ? 'rotate-180' : ''
+              }`}
+            />
+          </button>
+
+          {userFiltersExpanded && (
+            <div className="border-t p-3">
+              <div className="flex gap-2 overflow-x-auto pb-2">
+                <Button
+                  variant={filterUserType === 'ALL' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setFilterUserType('ALL')}
+                  className={filterUserType === 'ALL' ? 'text-white' : ''}
+                  style={filterUserType === 'ALL' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+                >
+                  Todos
+                </Button>
+                <Button
+                  variant={filterUserType === 'MINORISTA' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setFilterUserType('MINORISTA')}
+                  className={filterUserType === 'MINORISTA' ? 'text-white' : ''}
+                  style={filterUserType === 'MINORISTA' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+                >
+                  Minoristas
+                </Button>
+                <Button
+                  variant={filterUserType === 'TRANSFERENCISTA' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setFilterUserType('TRANSFERENCISTA')}
+                  className={filterUserType === 'TRANSFERENCISTA' ? 'text-white' : ''}
+                  style={filterUserType === 'TRANSFERENCISTA' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+                >
+                  Trasferencistas
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Collapsible Date Filters */}
       <div className="mb-6 border rounded-lg bg-card">
