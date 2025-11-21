@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
   Users as UsersIcon,
-  Wallet,
   Search,
   X,
   Plus,
@@ -234,10 +233,7 @@ export function UsersPage() {
                     <CardContent className="pt-4">
                       {/* Balance Display */}
                       <div className="flex items-center justify-between p-3 rounded-md bg-muted">
-                        <div className="flex items-center gap-2">
-                          <Wallet className="h-4 w-4 text-green-600" />
-                          <span className="text-sm text-muted-foreground hidden md:inline">Saldo Disponible:</span>
-                        </div>
+                        <span className="text-sm text-muted-foreground hidden md:inline">Saldo Disponible:</span>
                         <span className="font-bold text-green-600">
                           {new Intl.NumberFormat('es-CO', {
                             style: 'currency',
