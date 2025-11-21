@@ -204,7 +204,7 @@ export function UsersPage() {
                     </div>
                     <div className="flex items-center gap-6 mt-3 flex-wrap">
                       {/* Switch activar/desactivar */}
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                         <Switch
                           checked={user.isActive}
                           onCheckedChange={(checked) => handleToggleActive(user.id, checked)}
@@ -216,7 +216,7 @@ export function UsersPage() {
                       </div>
                       {/* Switch disponibilidad transferencista */}
                       {user.role === 'TRANSFERENCISTA' && user.transferencistaId && (
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                           <Switch
                             checked={user.available ?? true}
                             onCheckedChange={(checked) => handleToggleAvailable(user.transferencistaId!, checked)}
