@@ -190,7 +190,7 @@ export function UsersPage() {
                     }
                   }}
                 >
-                  <CardHeader className="pb-0">
+                  <CardHeader className="px-4 py-1">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <CardTitle className="text-lg">{user.fullName}</CardTitle>
@@ -230,7 +230,7 @@ export function UsersPage() {
                     </div>
                   </CardHeader>
                   {user.minoristaId && (
-                    <CardContent className="pt-1">
+                    <CardContent className="px-4 py-1">
                       {/* Balance Display */}
                       <div className="flex items-center justify-between p-1 rounded-md bg-muted">
                         <span className="text-sm text-muted-foreground hidden md:inline">Saldo Disponible:</span>
