@@ -1,30 +1,50 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Building, Eye, Search } from 'lucide-react'
+import { Building, Eye, Search, X, CheckCircle2, AlertCircle, Briefcase } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
 import { useBankAccountsList } from '@/hooks/queries/useBankQueries'
 import { useAuth } from '@/contexts/AuthContext'
+import { useAllUsers } from '@/hooks/queries/useUserQueries'
+import { useQueryClient } from '@tanstack/react-query'
+import { Switch } from '@/components/ui/switch'
+import { api } from '@/lib/api'
+import { cn } from '@/lib/utils'
 
 export function BankAccountsPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
+  const queryClient = useQueryClient()
+  const [activeTab, setActiveTab] = useState<'cuentas' | 'trasferencistas'>('cuentas')
   const [searchTerm, setSearchTerm] = useState('')
+  const [searchTransferencistasTerm, setSearchTransferencistasTerm] = useState('')
 
-  // React Query hook
+  // React Query hook for bank accounts
   const accountsQuery = useBankAccountsList(user?.role)
   const accounts = accountsQuery.data || []
   const isLoading = accountsQuery.isLoading
 
-  // Client-side filtering
+  // React Query hook for trasferencistas
+  const transferencistaQuery = useAllUsers(user?.role === 'SUPER_ADMIN' ? 'TRANSFERENCISTA' : null)
+  const trasferencistas = transferencistaQuery.data || []
+  const isLoadingTrasferencistas = transferencistaQuery.isLoading
+
+  // Client-side filtering for accounts
   const filteredAccounts = searchTerm.trim() === '' ? accounts : accounts.filter(
     (account) =>
       account.bank.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       account.accountNumber.includes(searchTerm) ||
       account.accountHolder.toLowerCase().includes(searchTerm.toLowerCase()) ||
       account.transferencista?.user.fullName.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
+  // Client-side filtering for trasferencistas
+  const filteredTrasferencistas = searchTransferencistasTerm.trim() === '' ? trasferencistas : trasferencistas.filter(
+    (t) =>
+      t.fullName.toLowerCase().includes(searchTransferencistasTerm.toLowerCase()) ||
+      t.email.toLowerCase().includes(searchTransferencistasTerm.toLowerCase())
   )
 
   // Handle errors
@@ -45,31 +65,127 @@ export function BankAccountsPage() {
     navigate(`/bank-account/${accountId}/transactions`)
   }
 
+  const handleToggleTrasferencistaActive = async (userId: string, newValue: boolean) => {
+    try {
+      await api.put(`/user/${userId}/toggle-active`, { isActive: newValue })
+      queryClient.invalidateQueries({ queryKey: ['users'] })
+      toast.success(newValue ? 'Trasferencista activado' : 'Trasferencista desactivado')
+    } catch (error) {
+      toast.error('Error al cambiar estado del trasferencista')
+      console.error(error)
+    }
+  }
+
+  const handleToggleTrasferencistaAvailable = async (transferencistaId: string, newValue: boolean) => {
+    try {
+      const response = await api.put<{
+        data: {
+          success: boolean
+          available: boolean
+          girosRedistributed?: number
+          redistributionErrors?: number
+        }
+        message: string
+      }>(`/transferencista/${transferencistaId}/toggle-availability`, {
+        isAvailable: newValue,
+      })
+      queryClient.invalidateQueries({ queryKey: ['users'] })
+      toast.success(response.message || (newValue ? 'Trasferencista disponible' : 'Trasferencista no disponible'))
+    } catch (error: any) {
+      toast.error(error.message || 'Error al cambiar disponibilidad')
+      console.error(error)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-background p-4 md:p-6 pb-20">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold mb-2">Cuentas Bancarias</h1>
-          <p className="text-muted-foreground">Gestiona todas las cuentas bancarias del sistema</p>
+          <h1 className="text-2xl md:text-3xl font-bold mb-2">Cuentas</h1>
+          <p className="text-muted-foreground">Gestiona cuentas bancarias y trasferencistas</p>
         </div>
 
-        {/* Search Bar */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar por banco, número de cuenta, titular o transferencista..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9"
-              />
-            </div>
-          </CardContent>
-        </Card>
+        {/* Tab Navigation - Only for SuperAdmin */}
+        {user?.role === 'SUPER_ADMIN' && (
+          <div className="flex gap-2 border-b">
+            <button
+              onClick={() => setActiveTab('cuentas')}
+              className={cn(
+                'px-4 py-2 text-sm font-medium transition-all border-b-2',
+                activeTab === 'cuentas'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
+              )}
+            >
+              Cuentas Bancarias
+            </button>
+            <button
+              onClick={() => setActiveTab('trasferencistas')}
+              className={cn(
+                'px-4 py-2 text-sm font-medium transition-all border-b-2',
+                activeTab === 'trasferencistas'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
+              )}
+            >
+              Trasferencistas
+            </button>
+          </div>
+        )}
 
-        {/* Accounts List */}
+        {/* Search Bar - Cuentas */}
+        {activeTab === 'cuentas' && (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar por banco, número de cuenta, titular o transferencista..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9 pr-10"
+                />
+                {searchTerm && (
+                  <button
+                    onClick={() => setSearchTerm('')}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Search Bar - Trasferencistas */}
+        {activeTab === 'trasferencistas' && (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar por nombre o email..."
+                  value={searchTransferencistasTerm}
+                  onChange={(e) => setSearchTransferencistasTerm(e.target.value)}
+                  className="pl-9 pr-10"
+                />
+                {searchTransferencistasTerm && (
+                  <button
+                    onClick={() => setSearchTransferencistasTerm('')}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Accounts List - Tab Cuentas */}
+        {activeTab === 'cuentas' && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -185,6 +301,84 @@ export function BankAccountsPage() {
             )}
           </CardContent>
         </Card>
+        )}
+
+        {/* Trasferencistas List - Tab Trasferencistas */}
+        {activeTab === 'trasferencistas' && (
+        <div className="grid gap-4 grid-cols-1">
+          {isLoadingTrasferencistas ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">Cargando trasferencistas...</p>
+            </div>
+          ) : filteredTrasferencistas.length === 0 ? (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <Briefcase className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                <p className="text-muted-foreground">
+                  {searchTransferencistasTerm
+                    ? 'No se encontraron trasferencistas con ese criterio'
+                    : 'No hay trasferencistas registrados'}
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            filteredTrasferencistas.map((t) => (
+              <Card key={t.id}>
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <CardTitle className="text-lg">{t.fullName}</CardTitle>
+                      <div className="flex items-center gap-2 mt-2 min-w-0">
+                        <Search className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                        <p className="text-sm text-muted-foreground truncate">{t.email}</p>
+                        <span title={t.emailVerified ? 'Email verificado' : 'Email no verificado'} className="flex-shrink-0">
+                          {t.emailVerified ? (
+                            <CheckCircle2 className="h-4 w-4 text-green-600" />
+                          ) : (
+                            <AlertCircle className="h-4 w-4 text-amber-600" />
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        Trasferencista
+                      </span>
+                      {!t.isActive && (
+                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                          Inactivo
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-6 mt-3 flex-wrap">
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={t.isActive}
+                        onCheckedChange={(checked) => handleToggleTrasferencistaActive(t.id, checked)}
+                      />
+                      <span className="text-sm text-muted-foreground">
+                        {t.isActive ? 'Activo' : 'Desactivado'}
+                      </span>
+                    </div>
+                    {t.transferencistaId && (
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          checked={t.available ?? true}
+                          onCheckedChange={(checked) => handleToggleTrasferencistaAvailable(t.transferencistaId!, checked)}
+                        />
+                        <span className="text-sm text-muted-foreground">
+                          {t.available ? 'Disponible' : 'No disponible'}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </CardHeader>
+              </Card>
+            ))
+          )}
+        </div>
+        )}
       </div>
     </div>
   )
