@@ -656,18 +656,10 @@ export function GirosPage() {
               </div>
             </div>
 
-            {/* Additional info when viewing completed giros */}
-            {filterStatus === 'COMPLETADO' && (
+            {/* Additional info when viewing completed giros - only for Admin/SuperAdmin */}
+            {filterStatus === 'COMPLETADO' && (user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN') && (
               <div className="border-t border-white border-opacity-30 px-3 py-2">
-                {user?.role === 'MINORISTA' ? (
-                  // MINORISTA: COP, BS, Ganancia Minorista
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                    <div className="text-left">
-                      <p className="text-xs opacity-80">Ganancia</p>
-                      <p className="font-semibold">{formatCurrency(totals.minoristaProfit, 'COP')}</p>
-                    </div>
-                  </div>
-                ) : user?.role === 'SUPER_ADMIN' ? (
+                {user?.role === 'SUPER_ADMIN' ? (
                   // SUPER_ADMIN: COP, BS, Ganancia Minoristas, Comisión Banco, Ganancias Sitio
                   <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
                     <div className="text-left">
@@ -688,7 +680,7 @@ export function GirosPage() {
                     </div>
                   </div>
                 ) : (
-                  // TRASFERENCISTA / ADMIN: COP, BS, Ganancia Minoristas, Comisión Banco
+                  // ADMIN: COP, BS, Ganancia Minoristas, Comisión Banco
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                     <div className="text-left">
                       <p className="text-xs opacity-80">Ganancia Minoristas</p>
