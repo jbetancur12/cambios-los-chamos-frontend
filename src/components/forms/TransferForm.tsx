@@ -335,12 +335,12 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="beneficiaryId">Cédula del Beneficiario</Label>
+        <Label htmlFor="beneficiaryId" className="hidden md:block">Cédula del Beneficiario</Label>
         <Input
           id="beneficiaryId"
           value={beneficiaryId}
           onChange={(e) => setBeneficiaryId(e.target.value)}
-          placeholder="V-12345678"
+          placeholder="Cédula del Beneficiario"
           required
         />
       </div>
@@ -359,7 +359,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
 
       {/* Bank Info */}
       <div className="space-y-2">
-        <Label htmlFor="bank">Banco Destino</Label>
+        <Label htmlFor="bank" className="hidden md:block">Banco Destino</Label>
         <select
           id="bank"
           value={bankId}
@@ -367,7 +367,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
           className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           required
         >
-          <option value="">Seleccione un banco</option>
+          <option value="">Banco Destino</option>
           {banks.map((bank) => (
             <option key={bank.id} value={bank.id}>
               {bank.name}
@@ -377,12 +377,12 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="accountNumber">Número de Cuenta</Label>
+        <Label htmlFor="accountNumber" className="hidden md:block">Número de Cuenta</Label>
         <Input
           id="accountNumber"
           value={accountNumber}
           onChange={(e) => setAccountNumber(e.target.value)}
-          placeholder="01020123456789012345"
+          placeholder="Número de Cuenta"
           required
         />
       </div>
@@ -390,7 +390,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
       {/* Amount & Currency */}
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
-          <Label htmlFor="amount">Monto</Label>
+          <Label htmlFor="amount" className="hidden md:block">Monto</Label>
           <NumericFormat
             id="amount"
             customInput={Input}
@@ -403,14 +403,14 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
             onValueChange={(values) => {
               setAmountInput(values.floatValue ? values.floatValue.toString() : '')
             }}
-            placeholder="1.500.000,00"
+            placeholder="Monto"
             allowNegative={false}
             required
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="currency">Moneda</Label>
+          <Label htmlFor="currency" className="hidden md:block">Moneda</Label>
           <select
             id="currency"
             value={currencyInput}
@@ -418,7 +418,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             required
           >
-            <option value="">Selecciona moneda</option>
+            <option value="">Moneda</option>
             <option value="COP">COP</option>
             <option value="VES">VES</option>
             {isSuperAdmin && <option value="USD">USD</option>}
