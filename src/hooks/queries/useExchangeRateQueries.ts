@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { applyDedupConfig } from '@/lib/deduplication'
 import type { ExchangeRate } from '@/types/api'
 
 export function useCurrentExchangeRate() {
@@ -9,7 +10,7 @@ export function useCurrentExchangeRate() {
       const response = await api.get<{ rate: ExchangeRate }>('/exchange-rate/current')
       return response.rate
     },
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    ...applyDedupConfig('NORMAL'), // 5 min - tasa cambia regularmente
   })
 }
 
@@ -24,6 +25,6 @@ export function useExchangeRateHistory(limit?: number) {
       const response = await api.get<{ rates: ExchangeRate[] }>(url)
       return response.rates
     },
-    staleTime: 1000 * 60 * 60, // 1 hour
+    ...applyDedupConfig('LOW_PRIORITY'), // 24 horas - historial casi no cambia
   })
 }

@@ -2,6 +2,8 @@ import { useQueryMonitor } from '@/hooks/useQueryMonitor'
 import { useState } from 'react'
 import './QueryMetricsPanel.css'
 
+declare const process: { env: { NODE_ENV: string } }
+
 /**
  * Panel DevTools para visualizar métricas de queries en tiempo real
  * Solo aparece en desarrollo (NODE_ENV === 'development')

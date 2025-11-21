@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { applyDedupConfig } from '@/lib/deduplication'
 
 interface DashboardStats {
   girosCount?: number
@@ -22,7 +23,7 @@ export function useDashboardStats() {
       const response = await api.get<DashboardStats>('/dashboard/stats')
       return response
     },
-    staleTime: 1000 * 60 * 5, // 5 minutos
+    ...applyDedupConfig('NORMAL'), // 5 min - stats cambian moderadamente
   })
 }
 
@@ -33,7 +34,7 @@ export function useMinoristaBalance(userRole?: string) {
       const response = await api.get<{ balance: number; credit: any }>('/minorista/me')
       return response
     },
-    staleTime: 1000 * 60, // 1 minuto
+    ...applyDedupConfig('NORMAL'), // 5 min - balance actualiza regularmente
     enabled: userRole === 'MINORISTA',
   })
 }

@@ -1,6 +1,8 @@
 import { useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 
+declare const process: { env: { NODE_ENV: string } }
+
 interface QueryMetrics {
   queryKey: string
   callCount: number
@@ -24,39 +26,45 @@ export function useQueryMonitor() {
   const queryClient = useQueryClient()
 
   useEffect(() => {
-    // Escuchar cambios en el cache
-    const unsubscribe = queryClient.getQueryCache().subscribe(() => {
-      const queries = queryClient.getQueryCache().getAll()
+    // Escuchar cambios en el cache, pero SOLO cuando una query termina
+    const unsubscribe = queryClient.getQueryCache().subscribe((event) => {
+      // Solo contar cuando la query se completa exitosamente
+      if (event.type !== 'updated') {
+        return
+      }
 
-      queries.forEach(query => {
-        const keyString = JSON.stringify(query.queryKey)
-        const existing = queryMetrics.get(keyString) || {
-          queryKey: keyString,
-          callCount: 0,
-          lastCallTime: new Date(),
-          dataSize: 0,
-          executionTime: 0,
-        }
+      const query = event.query
+      const keyString = JSON.stringify(query.queryKey)
 
-        existing.callCount += 1
-        existing.lastCallTime = new Date()
+      // Solo contar si la query tiene datos (completada)
+      if (!query.state.data) {
+        return
+      }
 
-        // Calcular tamaño aproximado de datos
-        if (query.state.data) {
-          existing.dataSize = JSON.stringify(query.state.data).length
-        }
+      const existing = queryMetrics.get(keyString) || {
+        queryKey: keyString,
+        callCount: 0,
+        lastCallTime: new Date(),
+        dataSize: 0,
+        executionTime: 0,
+      }
 
-        queryMetrics.set(keyString, existing)
+      existing.callCount += 1
+      existing.lastCallTime = new Date()
 
-        // Log en desarrollo si se ejecuta muchas veces
-        if (existing.callCount > 5 && process.env.NODE_ENV === 'development') {
-          console.warn(
-            `⚠️ Query executed ${existing.callCount} times:`,
-            keyString,
-            `(${(existing.dataSize || 0) / 1024}KB)`
-          )
-        }
-      })
+      // Calcular tamaño aproximado de datos
+      existing.dataSize = JSON.stringify(query.state.data).length
+
+      queryMetrics.set(keyString, existing)
+
+      // Log en desarrollo si se ejecuta muchas veces
+      if (existing.callCount > 5 && process.env.NODE_ENV === 'development') {
+        console.warn(
+          `⚠️ Query executed ${existing.callCount} times:`,
+          keyString,
+          `(${(existing.dataSize || 0) / 1024}KB)`
+        )
+      }
     })
 
     return () => unsubscribe()

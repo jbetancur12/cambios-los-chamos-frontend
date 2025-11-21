@@ -1,6 +1,6 @@
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
-import { Giro } from '@/types/Giro'
+import type { Giro } from '@/types/api'
 
 interface PaginationParams {
   page: number
@@ -77,10 +77,11 @@ export function useGirosInfinite(params?: {
 }) {
   return useInfiniteQuery({
     queryKey: ['giros', 'infinite', params],
-    queryFn: async ({ pageParam = 1 }) => {
+    initialPageParam: 1,
+    queryFn: async ({ pageParam }) => {
       const response = await api.get<GirosResponse>('/giros', {
         params: {
-          page: pageParam,
+          page: pageParam as number,
           limit: 20,
           status: params?.status,
           dateFrom: params?.dateFrom,
@@ -106,10 +107,11 @@ export function useGirosInfiniteV2(params?: {
 }) {
   return useInfiniteQuery({
     queryKey: ['giros', 'infinite-v2', params],
-    queryFn: async ({ pageParam = 0 }) => {
+    initialPageParam: 0,
+    queryFn: async ({ pageParam }) => {
       const response = await api.get<GirosResponse>('/giros', {
         params: {
-          page: pageParam + 1, // Convertir de 0-indexed a 1-indexed
+          page: (pageParam as number) + 1, // Convertir de 0-indexed a 1-indexed
           limit: 20,
           status: params?.status,
           dateFrom: params?.dateFrom,

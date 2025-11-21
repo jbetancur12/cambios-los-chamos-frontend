@@ -57,8 +57,21 @@ async function handleResponse<T>(response: Response): Promise<T> {
 }
 
 export const api = {
-  async get<T>(endpoint: string): Promise<T> {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+  async get<T>(endpoint: string, config?: { params?: Record<string, unknown> }): Promise<T> {
+    let url = `${API_BASE_URL}${endpoint}`
+    if (config?.params) {
+      const params = new URLSearchParams()
+      for (const [key, value] of Object.entries(config.params)) {
+        if (value !== undefined && value !== null) {
+          params.append(key, String(value))
+        }
+      }
+      const queryString = params.toString()
+      if (queryString) {
+        url += `?${queryString}`
+      }
+    }
+    const response = await fetch(url, {
       method: 'GET',
       credentials: 'include', // Important for cookies
       headers: {

@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { applyDedupConfig } from '@/lib/deduplication'
 import type { Giro, MinoristaTransaction } from '@/types/api'
 
 interface GirosListParams {
@@ -30,6 +31,7 @@ export function useGirosList(params?: GirosListParams) {
       )
       return response.giros
     },
+    ...applyDedupConfig('HIGH_PRIORITY'), // 30s - giros cambian rápido
   })
 }
 
@@ -45,6 +47,7 @@ export function useGiroDetail(giroId: string | null) {
       }
       return response as Giro
     },
+    ...applyDedupConfig('HIGH_PRIORITY'), // 20s - detalles de giro
     enabled: !!giroId,
   })
 }
@@ -58,7 +61,7 @@ export function useRecentGiros(limit: number = 5) {
       )
       return response.giros
     },
-    staleTime: 1000 * 60, // 1 minuto
+    ...applyDedupConfig('HIGH_PRIORITY'), // 30s - giros recientes
   })
 }
 

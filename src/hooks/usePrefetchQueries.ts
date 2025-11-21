@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
-import { Giro } from '@/types/Giro'
-import { ExchangeRate } from '@/types/ExchangeRate'
+import type { Giro } from '@/types/api'
+import type { ExchangeRate } from '@/types/api'
 
 /**
  * Hook para prefetch de queries
@@ -189,13 +189,19 @@ export function usePrefetchQueries() {
  * </Link>
  */
 export function usePrefetchOnHover() {
-  const { prefetchGiros, prefetchCurrentExchangeRate, prefetchBankAccounts } =
-    usePrefetchQueries()
+  const {
+    prefetchGiros,
+    prefetchCurrentExchangeRate,
+    prefetchBankAccounts,
+    prefetchRecentGiros,
+    prefetchGiroDetail,
+  } = usePrefetchQueries()
 
   return {
     giros: () => prefetchGiros(),
     exchangeRate: () => prefetchCurrentExchangeRate(),
     bankAccounts: () => prefetchBankAccounts(),
+    giroDetail: (giroId: string) => prefetchGiroDetail(giroId),
 
     /**
      * Prefetch múltiples queries a la vez

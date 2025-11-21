@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { applyDedupConfig } from '@/lib/deduplication'
 
 // System Report Types
 export interface SystemProfitReport {
@@ -100,7 +101,8 @@ export interface MinoristaGiroTrendReport {
 // Query hook for system profit report
 export function useSystemProfitReport(
   dateFrom: string | null,
-  dateTo: string | null
+  dateTo: string | null,
+  enabled: boolean = true
 ) {
   return useQuery({
     queryKey: ['reports', 'system-profit', { dateFrom, dateTo }],
@@ -110,15 +112,16 @@ export function useSystemProfitReport(
       )
       return response
     },
-    enabled: !!dateFrom && !!dateTo,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    ...applyDedupConfig('NORMAL'),
+    enabled: !!dateFrom && !!dateTo && enabled,
   })
 }
 
 // Query hook for system profit trend report
 export function useSystemProfitTrendReport(
   dateFrom: string | null,
-  dateTo: string | null
+  dateTo: string | null,
+  enabled: boolean = true
 ) {
   return useQuery({
     queryKey: ['reports', 'system-profit-trend', { dateFrom, dateTo }],
@@ -128,15 +131,16 @@ export function useSystemProfitTrendReport(
       )
       return response
     },
-    enabled: !!dateFrom && !!dateTo,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    ...applyDedupConfig('NORMAL'),
+    enabled: !!dateFrom && !!dateTo && enabled,
   })
 }
 
 // Query hook for minorista profit report
 export function useMinoristaProfitReport(
   dateFrom: string | null,
-  dateTo: string | null
+  dateTo: string | null,
+  enabled: boolean = true
 ) {
   return useQuery({
     queryKey: ['reports', 'minorista-profit', { dateFrom, dateTo }],
@@ -146,15 +150,16 @@ export function useMinoristaProfitReport(
       )
       return response
     },
-    enabled: !!dateFrom && !!dateTo,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    ...applyDedupConfig('NORMAL'),
+    enabled: !!dateFrom && !!dateTo && enabled,
   })
 }
 
 // Query hook for bank transaction report
 export function useBankTransactionReport(
   dateFrom: string | null,
-  dateTo: string | null
+  dateTo: string | null,
+  enabled: boolean = true
 ) {
   return useQuery({
     queryKey: ['reports', 'bank-transactions', { dateFrom, dateTo }],
@@ -164,15 +169,16 @@ export function useBankTransactionReport(
       )
       return response
     },
-    enabled: !!dateFrom && !!dateTo,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    ...applyDedupConfig('NORMAL'),
+    enabled: !!dateFrom && !!dateTo && enabled,
   })
 }
 
 // Query hook for minorista transaction report
 export function useMinoristaTransactionReport(
   dateFrom: string | null,
-  dateTo: string | null
+  dateTo: string | null,
+  enabled: boolean = true
 ) {
   return useQuery({
     queryKey: ['reports', 'minorista-transactions', { dateFrom, dateTo }],
@@ -182,15 +188,16 @@ export function useMinoristaTransactionReport(
       )
       return response
     },
-    enabled: !!dateFrom && !!dateTo,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    ...applyDedupConfig('NORMAL'),
+    enabled: !!dateFrom && !!dateTo && enabled,
   })
 }
 
 // Query hook for minorista giro report
 export function useMinoristaGiroReport(
   dateFrom: string | null,
-  dateTo: string | null
+  dateTo: string | null,
+  enabled: boolean = true
 ) {
   return useQuery({
     queryKey: ['reports', 'minorista-giros', { dateFrom, dateTo }],
@@ -200,15 +207,16 @@ export function useMinoristaGiroReport(
       )
       return response
     },
-    enabled: !!dateFrom && !!dateTo,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    ...applyDedupConfig('NORMAL'),
+    enabled: !!dateFrom && !!dateTo && enabled,
   })
 }
 
 // Query hook for minorista giro trend report
 export function useMinoristaGiroTrendReport(
   dateFrom: string | null,
-  dateTo: string | null
+  dateTo: string | null,
+  enabled: boolean = true
 ) {
   return useQuery({
     queryKey: ['reports', 'minorista-giros-trend', { dateFrom, dateTo }],
@@ -218,7 +226,7 @@ export function useMinoristaGiroTrendReport(
       )
       return response
     },
-    enabled: !!dateFrom && !!dateTo,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    ...applyDedupConfig('NORMAL'),
+    enabled: !!dateFrom && !!dateTo && enabled,
   })
 }

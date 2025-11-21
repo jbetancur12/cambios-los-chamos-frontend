@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { applyDedupConfig } from '@/lib/deduplication'
 import type { Bank, BankAccount, BankAccountTransaction } from '@/types/api'
 
 export function useBanksList() {
@@ -9,7 +10,7 @@ export function useBanksList() {
       const response = await api.get<{ banks: Bank[] }>('/bank/all')
       return response.banks
     },
-    staleTime: 1000 * 60 * 60, // 1 hora
+    ...applyDedupConfig('LOW_PRIORITY'), // 24 horas - bancos casi nunca cambian
   })
 }
 
@@ -27,7 +28,7 @@ export function useBankAccountsList(userRole?: string) {
       const response = await api.get<{ bankAccounts: BankAccount[] }>('/bank-account/my-accounts')
       return response.bankAccounts
     },
-    staleTime: 1000 * 60 * 5, // 5 minutos
+    ...applyDedupConfig('NORMAL'), // 5 min - cuentas cambian moderadamente
     enabled: userRole === 'TRANSFERENCISTA' || userRole === 'SUPER_ADMIN' || userRole === 'ADMIN',
   })
 }
@@ -40,6 +41,7 @@ export function useBankAccountDetail(accountId: string | null) {
       const response = await api.get<{ bankAccount: BankAccount }>(`/bank-account/${accountId}`)
       return response.bankAccount
     },
+    ...applyDedupConfig('NORMAL'), // 5 min - detalles de cuenta
     enabled: !!accountId,
   })
 }
@@ -77,6 +79,7 @@ export function useBankAccountTransactions(params: BankAccountTransactionsParams
       const response = await api.get<BankAccountTransactionsResponse>(url)
       return response
     },
+    ...applyDedupConfig('HIGH_PRIORITY'), // 30s - transacciones que cambian rápido
     enabled: !!accountId,
   })
 }
