@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import {
   Users as UsersIcon,
   Mail,
+  Wallet,
   Search,
   X,
   CheckCircle2,
@@ -16,14 +17,17 @@ import { api } from '@/lib/api'
 import { toast } from 'sonner'
 import { useQueryClient } from '@tanstack/react-query'
 import { CreateUserSheet } from '@/components/CreateUserSheet'
+import { RechargeMinoristaBalanceSheet } from '@/components/RechargeMinoristaBalanceSheet'
 import { useAllUsers } from '@/hooks/queries/useUserQueries'
-import type { UserRole } from '@/types/api'
+import type { UserRole, Minorista } from '@/types/api'
 import { Switch } from '@/components/ui/switch'
 
 export function UsersPage() {
   const { user: currentUser } = useAuth()
   const queryClient = useQueryClient()
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [rechargeMinoristaSheetOpen, setRechargeMinoristaSheetOpen] = useState(false)
+  const [selectedMinorista, setSelectedMinorista] = useState<Minorista | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
 
   const isSuperAdmin = currentUser?.role === 'SUPER_ADMIN'
@@ -38,6 +42,31 @@ export function UsersPage() {
     // Invalidate users query to refetch
     queryClient.invalidateQueries({ queryKey: ['users'] })
     toast.success('Usuario creado exitosamente')
+  }
+
+  const handleRechargeMinorista = (minoristaId: string, fullName: string, email: string, balance: number) => {
+    setSelectedMinorista({
+      id: minoristaId,
+      balance,
+      creditLimit: 0,
+      availableCredit: 0,
+      creditBalance: 0,
+      user: {
+        id: minoristaId,
+        fullName,
+        email,
+        role: 'MINORISTA',
+        isActive: true,
+      },
+    })
+    setRechargeMinoristaSheetOpen(true)
+  }
+
+  const handleMinoristaBalanceUpdated = () => {
+    setRechargeMinoristaSheetOpen(false)
+    setSelectedMinorista(null)
+    // Invalidate users query to refetch updated balance
+    queryClient.invalidateQueries({ queryKey: ['users'] })
   }
 
   const handleToggleActive = async (userId: string, newValue: boolean) => {
@@ -222,6 +251,38 @@ export function UsersPage() {
                       )}
                     </div>
                   </CardHeader>
+                  {user.minoristaId && (
+                    <CardContent className="pt-4">
+                      <div className="space-y-2">
+                        {/* Balance Display */}
+                        <div className="flex items-center justify-between p-3 rounded-md bg-muted">
+                          <div className="flex items-center gap-2">
+                            <Wallet className="h-4 w-4 text-green-600" />
+                            <span className="text-sm text-muted-foreground">Saldo:</span>
+                          </div>
+                          <span className="font-bold text-green-600">
+                            {new Intl.NumberFormat('es-CO', {
+                              style: 'currency',
+                              currency: 'COP',
+                              minimumFractionDigits: 0,
+                            }).format(user.balance || 0)}
+                          </span>
+                        </div>
+                        {/* Recharge Button */}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full"
+                          onClick={() =>
+                            handleRechargeMinorista(user.minoristaId!, user.fullName, user.email, user.balance || 0)
+                          }
+                        >
+                          <Wallet className="h-4 w-4 mr-2" />
+                          Gestión de Credito
+                        </Button>
+                      </div>
+                    </CardContent>
+                  )}
                 </Card>
               )
             })}
@@ -243,6 +304,14 @@ export function UsersPage() {
         onOpenChange={setSheetOpen}
         onUserCreated={handleUserCreated}
         role="MINORISTA"
+      />
+
+      {/* Minorista Balance Recharge Sheet */}
+      <RechargeMinoristaBalanceSheet
+        open={rechargeMinoristaSheetOpen}
+        onOpenChange={setRechargeMinoristaSheetOpen}
+        minorista={selectedMinorista}
+        onBalanceUpdated={handleMinoristaBalanceUpdated}
       />
     </div>
   )
