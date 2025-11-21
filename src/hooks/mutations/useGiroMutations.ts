@@ -14,14 +14,38 @@ interface CreateGiroInput {
 
 interface ExecuteGiroInput {
   giroId: string
-  bankAccountId: string
-  fee: number
-  proofUrl?: string
+  data: {
+    bankAccountId: string
+    executionType: string
+    fee: number
+    proofUrl?: string
+  }
 }
 
 interface ReturnGiroInput {
   giroId: string
-  returnReason: string
+  reason: string
+}
+
+interface UpdateGiroInput {
+  giroId: string
+  data: {
+    beneficiaryName: string
+    beneficiaryId: string
+    phone: string
+    bankId: string
+    accountNumber: string
+  }
+}
+
+interface UpdateGiroRateInput {
+  giroId: string
+  data: {
+    buyRate: number
+    sellRate: number
+    usd: number
+    bcv: number
+  }
 }
 
 export function useCreateGiro() {
@@ -44,12 +68,8 @@ export function useExecuteGiro() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ giroId, bankAccountId, fee, proofUrl }: ExecuteGiroInput) => {
-      const response = await api.post<{ giro: Giro; message: string }>(`/giro/${giroId}/execute`, {
-        bankAccountId,
-        fee,
-        proofUrl,
-      })
+    mutationFn: async ({ giroId, data }: ExecuteGiroInput) => {
+      const response = await api.post<{ giro: Giro; message: string }>(`/giro/${giroId}/execute`, data)
       return response.giro
     },
     onSuccess: (giro) => {
@@ -82,9 +102,9 @@ export function useReturnGiro() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ giroId, returnReason }: ReturnGiroInput) => {
+    mutationFn: async ({ giroId, reason }: ReturnGiroInput) => {
       const response = await api.post<{ giro: Giro; message: string }>(`/giro/${giroId}/return`, {
-        returnReason,
+        reason,
       })
       return response.giro
     },
@@ -103,6 +123,36 @@ export function useDeleteGiro() {
       await api.delete(`/giro/${giroId}`)
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['giros'] })
+    },
+  })
+}
+
+export function useUpdateGiro() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ giroId, data }: UpdateGiroInput) => {
+      const response = await api.patch<{ giro: Giro; message: string }>(`/giro/${giroId}`, data)
+      return response.giro
+    },
+    onSuccess: (giro) => {
+      queryClient.invalidateQueries({ queryKey: ['giro', giro.id] })
+      queryClient.invalidateQueries({ queryKey: ['giros'] })
+    },
+  })
+}
+
+export function useUpdateGiroRate() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ giroId, data }: UpdateGiroRateInput) => {
+      const response = await api.patch<{ giro: Giro; message: string }>(`/giro/${giroId}/rate`, data)
+      return response.giro
+    },
+    onSuccess: (giro) => {
+      queryClient.invalidateQueries({ queryKey: ['giro', giro.id] })
       queryClient.invalidateQueries({ queryKey: ['giros'] })
     },
   })

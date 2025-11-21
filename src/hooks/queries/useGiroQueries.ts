@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
-import type { Giro } from '@/types/api'
+import type { Giro, MinoristaTransaction } from '@/types/api'
 
 interface GirosListParams {
   status?: string
@@ -54,5 +54,17 @@ export function useRecentGiros(limit: number = 5) {
       return response.giros
     },
     staleTime: 1000 * 60, // 1 minuto
+  })
+}
+
+export function useMinoristaTransaction(giroId: string | null) {
+  return useQuery({
+    queryKey: ['giro', giroId, 'minorista-transaction'],
+    queryFn: async () => {
+      if (!giroId) return null
+      return await api.get<MinoristaTransaction>(`/giro/${giroId}/minorista-transaction`)
+    },
+    enabled: !!giroId,
+    staleTime: 1000 * 60 * 5, // 5 minutos
   })
 }

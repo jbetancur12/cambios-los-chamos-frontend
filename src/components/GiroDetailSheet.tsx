@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetBody } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -6,8 +6,10 @@ import { Label } from '@/components/ui/label'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
 import { useAuth } from '@/contexts/AuthContext'
-import { useGiroWebSocket } from '@/hooks/useGiroWebSocket'
 import { useIsDesktop } from '@/hooks/useIsDesktop'
+import { useGiroDetail, useMinoristaTransaction } from '@/hooks/queries/useGiroQueries'
+import { useBankAccountsList, useBanksList } from '@/hooks/queries/useBankQueries'
+import { useExecuteGiro, useMarkGiroAsProcessing, useReturnGiro, useDeleteGiro, useUpdateGiro, useUpdateGiroRate } from '@/hooks/mutations/useGiroMutations'
 import { PaymentProofUpload } from './PaymentProofUpload'
 import { PrintTicketModal } from './PrintTicketModal'
 import {
@@ -26,7 +28,7 @@ import {
   Copy,
   Share2,
 } from 'lucide-react'
-import type { Giro, BankAccount, GiroStatus, Bank, MinoristaTransaction } from '@/types/api'
+import type { GiroStatus } from '@/types/api'
 
 interface GiroDetailSheetProps {
   open: boolean
@@ -44,32 +46,38 @@ const RETURN_REASON_OPTIONS = [
 
 export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDetailSheetProps) {
   const { user } = useAuth()
-  const { subscribe } = useGiroWebSocket()
   const isDesktop = useIsDesktop()
-  const [giro, setGiro] = useState<Giro | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [processing, setProcessing] = useState(false)
-  const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([])
 
+  const isTransferencista = user?.role === 'TRANSFERENCISTA'
+  const isMinorista = user?.role === 'MINORISTA'
+  const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN'
+
+  // React Query hooks
+  const { data: giro, isLoading } = useGiroDetail(open ? giroId : null)
+  const { data: bankAccounts = [] } = useBankAccountsList()
+  const { data: banks = [] } = useBanksList()
+  const { data: minoristaTransaction } = useMinoristaTransaction(open && isMinorista ? giroId : null)
+
+  // Mutations
+  const executeGiroMutation = useExecuteGiro()
+  const markProcessingMutation = useMarkGiroAsProcessing()
+  const returnGiroMutation = useReturnGiro()
+  const deleteGiroMutation = useDeleteGiro()
+  const updateGiroMutation = useUpdateGiro()
+  const updateGiroRateMutation = useUpdateGiroRate()
+
+  // Local state for UI
   const [isEditing, setIsEditing] = useState(false)
   const [editableBeneficiaryName, setEditableBeneficiaryName] = useState('')
   const [editableBeneficiaryId, setEditableBeneficiaryId] = useState('')
   const [editablePhone, setEditablePhone] = useState('')
-  const [editableBankName, setEditableBankName] = useState('')
   const [editableBankId, setEditableBankId] = useState('')
   const [editableAccountNumber, setEditableAccountNumber] = useState('')
-
-  // Execute form fields
   const [selectedBankAccountId, setSelectedBankAccountId] = useState('')
   const [proofUrl, setProofUrl] = useState('')
   const [fee, setFee] = useState(0)
-  const [banks, setBanks] = useState<Bank[]>([])
-
-  // NUEVOS ESTADOS PARA DEVOLUCIÓN
   const [showReturnForm, setShowReturnForm] = useState(false)
   const [returnReason, setReturnReason] = useState('')
-
-  // NUEVOS ESTADOS PARA EDICIÓN DE TASA
   const [isEditingRate, setIsEditingRate] = useState(false)
   const [editableRate, setEditableRate] = useState({
     buyRate: 0,
@@ -77,195 +85,58 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
     usd: 0,
     bcv: 0,
   })
-
-  // ESTADO PARA DETALLES DE TRANSACCIÓN DEL MINORISTA
-  const [minoristaTransaction, setMinoristaTransaction] = useState<MinoristaTransaction | null>(null)
-
-  // ESTADO PARA MODAL DE IMPRESIÓN
   const [showPrintModal, setShowPrintModal] = useState(false)
-
-  const isTransferencista = user?.role === 'TRANSFERENCISTA'
-  const isMinorista = user?.role === 'MINORISTA'
-  const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN'
 
   const isNotEditableStatus =
     giro?.status === 'PROCESANDO' || giro?.status === 'COMPLETADO' || giro?.status === 'CANCELADO'
-  const canEdit = isMinorista && giro && !isNotEditableStatus //
+  const canEdit = isMinorista && giro && !isNotEditableStatus
 
-  useEffect(() => {
-    if (open && giroId) {
-      // Resetear estados al abrir
-      setShowReturnForm(false)
-      setReturnReason('')
-      setFee(0)
-      setProofUrl('')
-
-      fetchGiroDetails()
-      if (isTransferencista) {
-        fetchBankAccounts()
-      }
-      if (isMinorista) {
-        fetchMinoristaTransactionDetails()
-      }
-    }
-  }, [open, giroId, isTransferencista, isMinorista])
-
-  // WebSocket listener para actualizaciones en tiempo real
-  useEffect(() => {
-    if (!giroId) return
-
-    // Escuchar cuando se crea un nuevo giro
-    const unsubscribeCreated = subscribe('giro:created', (event) => {
-      if (event.giro.id === giroId) {
-        console.log('[DetailSheet] Giro creado:', event.giro.id)
-        setGiro(event.giro as unknown as Giro)
-        setEditableRate({
-          buyRate: event.giro.rateApplied?.buyRate || 0,
-          sellRate: event.giro.rateApplied?.sellRate || 0,
-          usd: event.giro.rateApplied?.usd || 0,
-          bcv: event.giro.rateApplied?.bcv || 0,
-        })
-      }
+  // Initialize editable fields when giro data loads
+  if (giro && (editableBeneficiaryName === '' || editableRate.buyRate === 0)) {
+    setEditableBeneficiaryName(giro.beneficiaryName)
+    setEditableBeneficiaryId(giro.beneficiaryId)
+    setEditablePhone(giro.phone)
+    setEditableAccountNumber(giro.accountNumber)
+    setEditableRate({
+      buyRate: giro.rateApplied?.buyRate || 0,
+      sellRate: giro.rateApplied?.sellRate || 0,
+      usd: giro.rateApplied?.usd || 0,
+      bcv: giro.rateApplied?.bcv || 0,
     })
-
-    // Escuchar actualizaciones del giro específico
-    const unsubscribeUpdated = subscribe('giro:updated', (event) => {
-      if (event.giro.id === giroId) {
-        console.log('[DetailSheet] Giro actualizado:', event.giro.id, 'Tipo:', event.changeType)
-        setGiro(event.giro as unknown as Giro)
-        // Actualizar también los campos editables
-        setEditableRate({
-          buyRate: event.giro.rateApplied?.buyRate || 0,
-          sellRate: event.giro.rateApplied?.sellRate || 0,
-          usd: event.giro.rateApplied?.usd || 0,
-          bcv: event.giro.rateApplied?.bcv || 0,
-        })
-      }
-    })
-
-    const unsubscribeProcessing = subscribe('giro:processing', (event) => {
-      if (event.giro.id === giroId) {
-        console.log('[DetailSheet] Giro procesando:', event.giro.id)
-        setGiro(event.giro as unknown as Giro)
-        setProcessing(false)
-      }
-    })
-
-    const unsubscribeExecuted = subscribe('giro:executed', (event) => {
-      if (event.giro.id === giroId) {
-        console.log('[DetailSheet] Giro ejecutado:', event.giro.id)
-        setGiro(event.giro as unknown as Giro)
-        setProcessing(false)
-      }
-    })
-
-    const unsubscribeReturned = subscribe('giro:returned', (event) => {
-      if (event.giro.id === giroId) {
-        console.log('[DetailSheet] Giro devuelto:', event.giro.id)
-        setGiro(event.giro as unknown as Giro)
-        setProcessing(false)
-      }
-    })
-
-    return () => {
-      unsubscribeCreated()
-      unsubscribeUpdated()
-      unsubscribeProcessing()
-      unsubscribeExecuted()
-      unsubscribeReturned()
-    }
-  }, [giroId, subscribe])
-
-  const fetchGiroDetails = async () => {
-    if (!giroId) return
-
-    try {
-      setLoading(true)
-      const response = await api.get<{ giro: Giro }>(`/giro/${giroId}`)
-      setGiro(response.giro)
-
-      if (response.giro) {
-        setEditableBeneficiaryName(response.giro.beneficiaryName)
-        setEditableBeneficiaryId(response.giro.beneficiaryId)
-        setEditablePhone(response.giro.phone)
-        setEditableBankName(response.giro.bankName)
-        setEditableAccountNumber(response.giro.accountNumber)
-        // Inicializar tasa editable
-        setEditableRate({
-          buyRate: response.giro.rateApplied.buyRate,
-          sellRate: response.giro.rateApplied.sellRate,
-          usd: response.giro.rateApplied.usd,
-          bcv: response.giro.rateApplied.bcv,
-        })
-      }
-    } catch (error: any) {
-      toast.error(error.message || 'Error al cargar detalles del giro')
-    } finally {
-      setLoading(false)
+    if (bankAccounts.length > 0 && !selectedBankAccountId) {
+      setSelectedBankAccountId(bankAccounts[0].id)
     }
   }
 
-  const fetchMinoristaTransactionDetails = async () => {
-    if (!giroId || !isMinorista) return
-
-    try {
-      const response = await api.get<{ transaction: MinoristaTransaction }>(`/giro/${giroId}/minorista-transaction`)
-      setMinoristaTransaction(response.transaction)
-    } catch (error: any) {
-      // Silently fail if no transaction details available
-      setMinoristaTransaction(null)
-    }
+  // Reset form when opening
+  if (open && !giro) {
+    setShowReturnForm(false)
+    setReturnReason('')
+    setFee(0)
+    setProofUrl('')
   }
 
-  const fetchBankAccounts = async () => {
-    try {
-      const response = await api.get<{ bankAccounts: BankAccount[] }>('/bank-account/my-accounts')
-      setBankAccounts(response.bankAccounts)
-      if (response.bankAccounts.length > 0) {
-        setSelectedBankAccountId(response.bankAccounts[0].id)
-      }
-    } catch (error: any) {
-      toast.error(error.message || 'Error al cargar cuentas bancarias')
-    }
-  }
 
-  const fetchBanks = async () => {
-    try {
-      const response = await api.get<{ banks: Bank[] }>('/bank/all')
-      setBanks(response.banks)
-    } catch (error: any) {
-      toast.error(error.message || 'Error al cargar bancos')
-    }
-  }
-
-  const handleMarkAsProcessing = async () => {
+  const handleMarkAsProcessing = () => {
     if (!giro) return
-
-    try {
-      setProcessing(true)
-      await api.post(`/giro/${giro.id}/mark-processing`)
-      toast.success('Giro marcado como procesando')
-      // El WebSocket emitirá giro:processing y actualizará el estado automáticamente
-      // No llamamos a fetchGiroDetails ni onUpdate porque el WebSocket lo hará
-      onUpdate()
-    } catch (error: any) {
-      toast.error(error.message || 'Error al marcar giro como procesando')
-      setProcessing(false)
-    }
+    markProcessingMutation.mutate(giro.id, {
+      onSuccess: () => {
+        toast.success('Giro marcado como procesando')
+        onUpdate()
+      },
+      onError: (error: any) => {
+        toast.error(error.message || 'Error al marcar giro como procesando')
+      },
+    })
   }
 
   const handleStartEdit = () => {
-    // Solo cargamos los bancos si la lista está vacía
-    if (banks.length === 0) {
-      fetchBanks()
-    }
     setIsEditing(true)
   }
 
-  const handleSaveEdit = async () => {
+  const handleSaveEdit = () => {
     if (!giro) return
 
-    // Validación básica de campos
     if (
       !editableBeneficiaryName ||
       !editableBeneficiaryId ||
@@ -277,134 +148,132 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
       return
     }
 
-    try {
-      setProcessing(true)
-      // Endpoint que debe crearse en el backend para editar los datos
-      await api.patch(`/giro/${giro.id}`, {
-        beneficiaryName: editableBeneficiaryName,
-        beneficiaryId: editableBeneficiaryId,
-        phone: editablePhone,
-        bankId: editableBankId,
-        accountNumber: editableAccountNumber,
-      })
-
-      toast.success('Giro actualizado exitosamente.')
-      setIsEditing(false) // Sale del modo edición
-      fetchGiroDetails() // Refresca los datos
-      onUpdate()
-    } catch (error: any) {
-      toast.error(error.message || 'Error al actualizar el giro.')
-    } finally {
-      setProcessing(false)
-    }
+    updateGiroMutation.mutate(
+      {
+        giroId: giro.id,
+        data: {
+          beneficiaryName: editableBeneficiaryName,
+          beneficiaryId: editableBeneficiaryId,
+          phone: editablePhone,
+          bankId: editableBankId,
+          accountNumber: editableAccountNumber,
+        },
+      },
+      {
+        onSuccess: () => {
+          toast.success('Giro actualizado exitosamente.')
+          setIsEditing(false)
+          onUpdate()
+        },
+        onError: (error: any) => {
+          toast.error(error.message || 'Error al actualizar el giro.')
+        },
+      }
+    )
   }
 
-  const handleExecuteGiro = async () => {
+  const handleExecuteGiro = () => {
     if (!giro || !selectedBankAccountId || !giro.executionType) {
       toast.error('Por favor completa todos los campos requeridos')
       return
     }
 
-    try {
-      setProcessing(true)
-      await api.post(`/giro/${giro.id}/execute`, {
-        bankAccountId: selectedBankAccountId,
-        executionType: giro.executionType,
-        fee,
-        proofUrl: proofUrl || undefined,
-      })
-      toast.success('Giro ejecutado exitosamente')
-      // Mostrar modal de impresión solo en desktop
-      if (isDesktop) {
-        setShowPrintModal(true)
+    executeGiroMutation.mutate(
+      {
+        giroId: giro.id,
+        data: {
+          bankAccountId: selectedBankAccountId,
+          executionType: giro.executionType,
+          fee,
+          proofUrl: proofUrl || undefined,
+        },
+      },
+      {
+        onSuccess: () => {
+          toast.success('Giro ejecutado exitosamente')
+          if (isDesktop) {
+            setShowPrintModal(true)
+          }
+          onUpdate()
+        },
+        onError: (error: any) => {
+          toast.error(error.message || 'Error al ejecutar giro')
+        },
       }
-      onUpdate()
-    } catch (error: any) {
-      toast.error(error.message || 'Error al ejecutar giro')
-    } finally {
-      setProcessing(false)
-    }
+    )
   }
 
-  // NUEVA FUNCIÓN PARA DEVOLVER EL GIRO
-  const handleReturnGiro = async () => {
+  const handleReturnGiro = () => {
     if (!giro || !returnReason.trim()) {
       toast.error('Debes especificar un motivo para la devolución.')
       return
     }
 
-    try {
-      setProcessing(true)
-      // Endpoint para la devolución del giro (el backend manejará el cambio de estado)
-      await api.post(`/giro/${giro.id}/return`, {
-        reason: returnReason,
-      })
-
-      toast.success('Giro devuelto exitosamente.')
-
-      // Resetear estados locales y refrescar datos
-      setReturnReason('')
-      setShowReturnForm(false)
-      fetchGiroDetails()
-      onUpdate()
-      onOpenChange(false)
-    } catch (error: any) {
-      toast.error(error.message || 'Error al devolver el giro')
-    } finally {
-      setProcessing(false)
-    }
+    returnGiroMutation.mutate(
+      { giroId: giro.id, reason: returnReason },
+      {
+        onSuccess: () => {
+          toast.success('Giro devuelto exitosamente.')
+          setReturnReason('')
+          setShowReturnForm(false)
+          onUpdate()
+          onOpenChange(false)
+        },
+        onError: (error: any) => {
+          toast.error(error.message || 'Error al devolver el giro')
+        },
+      }
+    )
   }
 
-  // NUEVA FUNCIÓN PARA ELIMINAR EL GIRO
-  const handleDeleteGiro = async () => {
+  const handleDeleteGiro = () => {
     if (!giro) return
 
     if (!confirm('¿Estás seguro de que deseas eliminar este giro? Esta acción no se puede deshacer.')) {
       return
     }
 
-    try {
-      setProcessing(true)
-      await api.delete(`/giro/${giro.id}`)
-
-      toast.success('Giro eliminado exitosamente.')
-      onUpdate()
-      onOpenChange(false)
-    } catch (error: any) {
-      toast.error(error.message || 'Error al eliminar el giro')
-    } finally {
-      setProcessing(false)
-    }
+    deleteGiroMutation.mutate(giro.id, {
+      onSuccess: () => {
+        toast.success('Giro eliminado exitosamente.')
+        onUpdate()
+        onOpenChange(false)
+      },
+      onError: (error: any) => {
+        toast.error(error.message || 'Error al eliminar el giro')
+      },
+    })
   }
 
-  // NUEVA FUNCIÓN PARA GUARDAR CAMBIOS DE TASA
-  const handleSaveRateEdit = async () => {
+  const handleSaveRateEdit = () => {
     if (!giro) return
 
-    // Validación básica
     if (!editableRate.buyRate || !editableRate.sellRate || !editableRate.usd || !editableRate.bcv) {
       toast.error('Todos los campos de la tasa son obligatorios.')
       return
     }
 
-    try {
-      setProcessing(true)
-      await api.patch(`/giro/${giro.id}/rate`, {
-        buyRate: editableRate.buyRate,
-        sellRate: editableRate.sellRate,
-        usd: editableRate.usd,
-        bcv: editableRate.bcv,
-      })
-
-      toast.success('Tasa del giro actualizada exitosamente. Se recalcularon los montos y ganancias.')
-      setIsEditingRate(false)
-      fetchGiroDetails()
-      onUpdate()
-    } catch (error: any) {
-      toast.error(error.message || 'Error al actualizar la tasa del giro.')
-    } finally {
-      setProcessing(false)
-    }
+    updateGiroRateMutation.mutate(
+      {
+        giroId: giro.id,
+        data: {
+          buyRate: editableRate.buyRate,
+          sellRate: editableRate.sellRate,
+          usd: editableRate.usd,
+          bcv: editableRate.bcv,
+        },
+      },
+      {
+        onSuccess: () => {
+          toast.success('Tasa del giro actualizada exitosamente. Se recalcularon los montos y ganancias.')
+          setIsEditingRate(false)
+          onUpdate()
+        },
+        onError: (error: any) => {
+          toast.error(error.message || 'Error al actualizar la tasa del giro.')
+        },
+      }
+    )
   }
 
   const getStatusBadge = (status: GiroStatus) => {
@@ -453,7 +322,15 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
     toast.success(`${label} copiado`)
   }
 
-  if (!giro && !loading) {
+  const isProcessing =
+    executeGiroMutation.isPending ||
+    markProcessingMutation.isPending ||
+    returnGiroMutation.isPending ||
+    deleteGiroMutation.isPending ||
+    updateGiroMutation.isPending ||
+    updateGiroRateMutation.isPending
+
+  if (!giro && !isLoading) {
     return null
   }
 
@@ -468,7 +345,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
         </SheetHeader>
 
         <SheetBody>
-          {loading ? (
+          {isLoading ? (
             <div className="text-center py-8">
               <p className="text-xs text-muted-foreground">Cargando...</p>
             </div>
@@ -598,10 +475,10 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                     // Formulario de edición
                     <div className="space-y-3">
                       <div className="space-y-1">
-                        <Label htmlFor="editBankName">Banco</Label>
+                        <Label htmlFor="editBankId">Banco</Label>
                         <select
-                          id="editBankName"
-                          value={editableBankName}
+                          id="editBankId"
+                          value={editableBankId}
                           onChange={(e) => setEditableBankId(e.target.value)}
                           className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                           required
@@ -778,12 +655,12 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                       </div>
                     </div>
                     <div className="flex gap-2 pt-2">
-                      <Button onClick={handleSaveRateEdit} disabled={processing} size="sm" className="flex-1">
-                        {processing ? 'Guardando...' : 'Guardar Tasa'}
+                      <Button onClick={handleSaveRateEdit} disabled={isProcessing} size="sm" className="flex-1">
+                        {isProcessing ? 'Guardando...' : 'Guardar Tasa'}
                       </Button>
                       <Button
                         onClick={() => setIsEditingRate(false)}
-                        disabled={processing}
+                        disabled={isProcessing}
                         variant="outline"
                         size="sm"
                         className="flex-1"
@@ -816,7 +693,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                     {!isNotEditableStatus && (
                       <Button
                         onClick={() => setIsEditingRate(true)}
-                        disabled={processing}
+                        disabled={isProcessing}
                         variant="outline"
                         size="sm"
                         className="w-full mt-1"
@@ -832,17 +709,17 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
               {canEdit && (
                 <div className="flex gap-2 text-xs">
                   {!isEditing ? (
-                    <Button onClick={handleStartEdit} disabled={processing} variant="outline" className="w-full" size="sm">
+                    <Button onClick={handleStartEdit} disabled={isProcessing} variant="outline" className="w-full" size="sm">
                       Editar
                     </Button>
                   ) : (
                     <>
-                      <Button onClick={handleSaveEdit} disabled={processing} className="flex-1" size="sm">
-                        {processing ? 'Guardando...' : 'Guardar'}
+                      <Button onClick={handleSaveEdit} disabled={isProcessing} className="flex-1" size="sm">
+                        {isProcessing ? 'Guardando...' : 'Guardar'}
                       </Button>
                       <Button
                         onClick={() => setIsEditing(false)}
-                        disabled={processing}
+                        disabled={isProcessing}
                         variant="outline"
                         className="flex-1"
                         size="sm"
@@ -931,7 +808,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
               {giro.status === 'COMPLETADO' && isDesktop && (
                 <Button
                   onClick={() => setShowPrintModal(true)}
-                  disabled={processing}
+                  disabled={isProcessing}
                   variant="outline"
                   className="w-full gap-1 text-xs"
                   size="sm"
@@ -943,8 +820,8 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
 
               {/* Actions for Transferencista */}
               {isTransferencista && giro.status === 'ASIGNADO' && (
-                <Button onClick={handleMarkAsProcessing} disabled={processing} className="w-full text-xs" size="sm">
-                  {processing ? 'Procesando...' : 'Marcar Procesando'}
+                <Button onClick={handleMarkAsProcessing} disabled={isProcessing} className="w-full text-xs" size="sm">
+                  {isProcessing ? 'Procesando...' : 'Marcar Procesando'}
                 </Button>
               )}
 
@@ -1018,16 +895,16 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                           setProofUrl(url)
                           toast.success('Comprobante de pago actualizado')
                         }}
-                        disabled={processing}
+                        disabled={isProcessing}
                       />
 
                       <Button
                         onClick={handleExecuteGiro}
-                        disabled={processing || !selectedBankAccountId || !proofUrl}
+                        disabled={isProcessing || !selectedBankAccountId || !proofUrl}
                         className="w-full"
                         title={!proofUrl ? 'Debes cargar un comprobante de pago antes de ejecutar' : ''}
                       >
-                        {processing ? 'Ejecutando...' : 'Ejecutar Giro'}
+                        {isProcessing ? 'Ejecutando...' : 'Ejecutar Giro'}
                       </Button>
                     </div>
                   ) : (
@@ -1062,10 +939,10 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
 
                       <Button
                         onClick={handleReturnGiro}
-                        disabled={processing || !returnReason.trim()}
+                        disabled={isProcessing || !returnReason.trim()}
                         className="w-full bg-red-600 hover:bg-red-700"
                       >
-                        {processing ? 'Devolviendo...' : 'Confirmar Devolución'}
+                        {isProcessing ? 'Devolviendo...' : 'Confirmar Devolución'}
                       </Button>
                     </div>
                   )}
@@ -1076,8 +953,8 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
               {isMinorista &&
                 giro &&
                 (giro.status === 'PENDIENTE' || giro.status === 'ASIGNADO' || giro.status === 'DEVUELTO') && (
-                  <Button onClick={handleDeleteGiro} disabled={processing} variant="destructive" className="w-full text-xs" size="sm">
-                    {processing ? 'Eliminando...' : 'Eliminar'}
+                  <Button onClick={handleDeleteGiro} disabled={isProcessing} variant="destructive" className="w-full text-xs" size="sm">
+                    {isProcessing ? 'Eliminando...' : 'Eliminar'}
                   </Button>
                 )}
             </div>
