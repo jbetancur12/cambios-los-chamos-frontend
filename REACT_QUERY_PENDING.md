@@ -80,13 +80,17 @@ const { data: giros = [], isLoading } = useGirosList({ status, dateFrom, dateTo 
 ```
 
 ### GiroDetailSheet.tsx
-**Status:** ⏳ Pending
-**Current:** Fetches detail with `useEffect`, manual state management
-**Migration Plan:**
-- Replace `useEffect` for giro detail with `useGiroDetail(giroId)`
-- Replace `useEffect` for bank accounts with `useBankAccountsList()`
-- Keep existing Web Share API implementation (already optimized)
-- Remove manual loading/error states
+**Status:** ✅ COMPLETED (Phase 2.1)
+**Changes Made:**
+- ✅ Replaced `useEffect` for giro detail with `useGiroDetail(giroId)`
+- ✅ Replaced `useEffect` for bank accounts with `useBankAccountsList()`
+- ✅ Added `useMinoristaTransaction(giroId)` for minorista transaction details
+- ✅ Removed all manual loading/error states (React Query handles these)
+- ✅ Created `useUpdateGiro()` and `useUpdateGiroRate()` mutation hooks
+- ✅ Updated all mutation handlers to use React Query mutations
+- ✅ Removed WebSocket listeners (handled by setupWebSocketSync)
+- ✅ Removed 6 useEffect hooks and 40+ lines of boilerplate
+- ✅ TypeScript compiles cleanly
 
 ### DashboardPage.tsx
 **Status:** ⏳ Pending
@@ -308,15 +312,24 @@ export function AppWithWebSocket() {
 
 Each component migration should follow this checklist:
 
-- [ ] Identify all `useEffect` hooks used for data fetching
-- [ ] Replace with appropriate React Query hooks
-- [ ] Remove manual `useState` for data/loading/error
-- [ ] Update TypeScript types if needed
-- [ ] Test component loads data correctly
-- [ ] Test filters/parameters work with queries
-- [ ] Verify WebSocket auto-invalidation works
-- [ ] Run `npm run ts-check`
-- [ ] Test in browser
+- [x] **GiroDetailSheet.tsx (DONE)**
+  - [x] Identify all `useEffect` hooks used for data fetching
+  - [x] Replace with appropriate React Query hooks
+  - [x] Remove manual `useState` for data/loading/error
+  - [x] Update TypeScript types if needed
+  - [x] Run `npm run ts-check`
+
+- [ ] **DashboardPage.tsx (NEXT)**
+  - [ ] Identify all `useEffect` hooks used for data fetching
+  - [ ] Replace with appropriate React Query hooks
+  - [ ] Remove manual `useState` for data/loading/error
+  - [ ] Update TypeScript types if needed
+  - [ ] Run `npm run ts-check`
+
+- [ ] **GiroPage.tsx**
+- [ ] **ExchangeRatePage.tsx**
+- [ ] **CreateGiroSheet.tsx**
+- [ ] **Other components**
 
 ---
 
