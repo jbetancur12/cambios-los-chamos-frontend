@@ -421,12 +421,23 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
                 <Label htmlFor="amount">Monto</Label>
                 <Input
                   id="amount"
-                  type="number"
-                  step="0.01"
-                  min="0.01"
-                  value={amountInput}
-                  onChange={(e) => setAmountInput(e.target.value)}
-                  placeholder="1000.50"
+                  type="text"
+                  inputMode="decimal"
+                  value={
+                    amountInput
+                      ? parseFloat(amountInput).toLocaleString('es-CO', {
+                          minimumFractionDigits: 0,
+                          maximumFractionDigits: 2,
+                        })
+                      : ''
+                  }
+                  onChange={(e) => {
+                    // Solo permitir números y punto/coma decimal
+                    const cleaned = e.target.value.replace(/[^\d,]/g, '')
+                    // Reemplazar coma por punto para mantener internamente como número
+                    setAmountInput(cleaned.replace(',', '.'))
+                  }}
+                  placeholder="1.500.000,00"
                   required
                 />
               </div>
