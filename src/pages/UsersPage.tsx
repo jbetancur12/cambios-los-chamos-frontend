@@ -3,13 +3,8 @@ import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
-  Plus,
   Users as UsersIcon,
   Mail,
-  ShieldCheck,
-  User,
-  Briefcase,
-  Building2,
   Wallet,
   Search,
   X,
@@ -21,7 +16,6 @@ import { api } from '@/lib/api'
 import { toast } from 'sonner'
 import { useQueryClient } from '@tanstack/react-query'
 import { CreateUserSheet } from '@/components/CreateUserSheet'
-import { TransferencistaAccountsSheet } from '@/components/TransferencistaAccountsSheet'
 import { RechargeMinoristaBalanceSheet } from '@/components/RechargeMinoristaBalanceSheet'
 import { useAllUsers } from '@/hooks/queries/useUserQueries'
 import type { UserRole, Minorista } from '@/types/api'
@@ -31,42 +25,22 @@ export function UsersPage() {
   const { user: currentUser } = useAuth()
   const queryClient = useQueryClient()
   const [sheetOpen, setSheetOpen] = useState(false)
-  const [selectedRole, setSelectedRole] = useState<UserRole | 'ALL'>('ALL')
-  const [createUserRole, setCreateUserRole] = useState<UserRole>('ADMIN')
-  const [menuOpen, setMenuOpen] = useState(false)
-  const [accountsSheetOpen, setAccountsSheetOpen] = useState(false)
-  const [selectedTransferencista, setSelectedTransferencista] = useState<{
-    id: string
-    name: string
-  } | null>(null)
   const [rechargeMinoristaSheetOpen, setRechargeMinoristaSheetOpen] = useState(false)
   const [selectedMinorista, setSelectedMinorista] = useState<Minorista | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
 
   const isSuperAdmin = currentUser?.role === 'SUPER_ADMIN'
 
-  // React Query hook for fetching users
-  const usersQuery = useAllUsers(isSuperAdmin ? (selectedRole === 'ALL' ? 'ALL' : selectedRole) : null)
+  // React Query hook for fetching users - always fetch MINORISTA role
+  const usersQuery = useAllUsers(isSuperAdmin ? 'MINORISTA' : null)
   const users = usersQuery.data || []
   const isLoading = usersQuery.isLoading
 
   const handleUserCreated = () => {
     setSheetOpen(false)
-    setMenuOpen(false)
     // Invalidate users query to refetch
     queryClient.invalidateQueries({ queryKey: ['users'] })
     toast.success('Usuario creado exitosamente')
-  }
-
-  const handleCreateUser = (role: UserRole) => {
-    setCreateUserRole(role)
-    setSheetOpen(true)
-    setMenuOpen(false)
-  }
-
-  const handleViewAccounts = (transferencistaId: string, name: string) => {
-    setSelectedTransferencista({ id: transferencistaId, name })
-    setAccountsSheetOpen(true)
   }
 
   const handleRechargeMinorista = (minoristaId: string, fullName: string, email: string, balance: number) => {
@@ -163,8 +137,8 @@ export function UsersPage() {
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-foreground">Usuarios</h1>
-        <p className="text-sm md:text-base text-muted-foreground mt-1">Gestiona transferencistas y minoristas</p>
+        <h1 className="text-2xl md:text-3xl font-bold text-foreground">Minoristas</h1>
+        <p className="text-sm md:text-base text-muted-foreground mt-1">Gestiona minoristas y sus saldos</p>
       </div>
 
       {/* Search Bar */}
@@ -186,44 +160,6 @@ export function UsersPage() {
         )}
       </div>
 
-      {/* Filters */}
-      <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-        <Button
-          variant={selectedRole === 'ALL' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setSelectedRole('ALL')}
-          style={selectedRole == "ALL" ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
-        >
-          Todos
-        </Button>
-        <Button
-          variant={selectedRole === 'ADMIN' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setSelectedRole('ADMIN')}
-          style={selectedRole == "ADMIN" ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
-
-        >
-          Admins
-        </Button>
-        <Button
-          variant={selectedRole === 'TRANSFERENCISTA' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setSelectedRole('TRANSFERENCISTA')}
-          style={selectedRole == "TRANSFERENCISTA" ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
-
-        >
-          Transferencistas
-        </Button>
-        <Button
-          variant={selectedRole === 'MINORISTA' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setSelectedRole('MINORISTA')}
-          style={selectedRole == "MINORISTA" ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
-
-        >
-          Minoristas
-        </Button>
-      </div>
 
       {/* Users List */}
       {isLoading ? (
@@ -236,8 +172,7 @@ export function UsersPage() {
             <UsersIcon className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
             <p className="text-muted-foreground">No hay usuarios registrados</p>
             <Button className="mt-4" onClick={() => setSheetOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Crear primer usuario
+              Crear primer minorista
             </Button>
           </CardContent>
         </Card>
@@ -309,20 +244,7 @@ export function UsersPage() {
                       )}
                     </div>
                   </CardHeader>
-                  {user.role === 'TRANSFERENCISTA' && user.transferencistaId && (
-                    <CardContent className="pt-0">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full"
-                        onClick={() => handleViewAccounts(user.transferencistaId!, user.fullName)}
-                      >
-                        <Building2 className="h-4 w-4 mr-2" />
-                        Ver Cuentas Bancarias
-                      </Button>
-                    </CardContent>
-                  )}
-                  {user.role === 'MINORISTA' && user.minoristaId && (
+                  {user.minoristaId && (
                     <CardContent className="pt-4">
                       <div className="space-y-2">
                         {/* Balance Display */}
@@ -361,64 +283,13 @@ export function UsersPage() {
         </>
       )}
 
-      {/* FAB - Create User Menu */}
-      <div className="fixed bottom-20 md:bottom-8 right-4 md:right-8 z-50">
-        {/* Menu Options */}
-        {menuOpen && (
-          <div className="absolute bottom-16 right-0 bg-card border rounded-lg shadow-lg p-2 space-y-1 min-w-[200px] mb-2 z-50">
-            <button
-              onClick={() => handleCreateUser('ADMIN')}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-md hover:bg-accent transition-colors text-left"
-            >
-              <ShieldCheck className="h-5 w-5 text-blue-600" />
-              <span className="font-medium">Crear Admin</span>
-            </button>
-            <button
-              onClick={() => handleCreateUser('TRANSFERENCISTA')}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-md hover:bg-accent transition-colors text-left"
-            >
-              <Briefcase className="h-5 w-5 text-green-600" />
-              <span className="font-medium">Crear Transferencista</span>
-            </button>
-            <button
-              onClick={() => handleCreateUser('MINORISTA')}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-md hover:bg-accent transition-colors text-left"
-            >
-              <User className="h-5 w-5 text-orange-600" />
-              <span className="font-medium">Crear Minorista</span>
-            </button>
-          </div>
-        )}
-
-        {/* FAB Button */}
-        <button
-          onClick={() => setMenuOpen(!menuOpen)}
-          className={`bg-[linear-gradient(to_right,#136BBC,#274565)] bg-primary text-primary-foreground rounded-full p-4 shadow-lg hover:shadow-xl transition-all active:scale-95 ${menuOpen ? 'rotate-45' : ''
-            }`}
-        >
-          <Plus className="h-6 w-6 " />
-        </button>
-      </div>
-
-      {/* Backdrop */}
-      {menuOpen && (
-        <div onClick={() => setMenuOpen(false)} className="fixed inset-0 bg-black/20 z-40" style={{ bottom: 0 }} />
-      )}
 
       {/* Create User Sheet */}
       <CreateUserSheet
         open={sheetOpen}
         onOpenChange={setSheetOpen}
         onUserCreated={handleUserCreated}
-        role={createUserRole}
-      />
-
-      {/* Transferencista Bank Accounts Sheet */}
-      <TransferencistaAccountsSheet
-        open={accountsSheetOpen}
-        onOpenChange={setAccountsSheetOpen}
-        transferencistaId={selectedTransferencista?.id || null}
-        transferencistaName={selectedTransferencista?.name || ''}
+        role="MINORISTA"
       />
 
       {/* Minorista Balance Recharge Sheet */}
