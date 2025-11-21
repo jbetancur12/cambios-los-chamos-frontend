@@ -123,12 +123,18 @@ const { data: giros = [], isLoading } = useGirosList({ status, dateFrom, dateTo 
 - ✅ TypeScript compiles cleanly
 
 ### CreateGiroSheet.tsx
-**Status:** ⏳ Pending
-**Current:** Uses `useBankAccountsList()` indirectly
-**Migration Plan:**
-- Ensure using `useBankAccountsList()` from React Query hooks
-- Use `useCreateGiro()` mutation instead of direct API call
-- Implement optimistic updates for better UX
+**Status:** ✅ COMPLETED (Phase 2.5)
+**Changes Made:**
+- ✅ Replaced fetchBanks with useBanksList() hook
+- ✅ Replaced fetchCurrentRate with useCurrentExchangeRate() hook
+- ✅ Replaced fetchMinoristaBalance with useMinoristaBalance() hook
+- ✅ Updated handleSubmit() to use useCreateGiro() mutation
+- ✅ Custom rate fields auto-populate from currentRate
+- ✅ All balance calculations now use minoristaBalanceData
+- ✅ Removed all manual loading state (React Query handles it)
+- ✅ Button disabled state uses mutation.isPending
+- ✅ Form validation and beneficiary suggestions preserved
+- ✅ TypeScript compiles cleanly
 
 ### Other Pages/Components
 **Status:** ⏳ Pending
@@ -352,8 +358,14 @@ Each component migration should follow this checklist:
   - [x] Update form submission to use mutation
   - [x] Run `npm run ts-check`
 
-- [ ] **CreateGiroSheet.tsx (NEXT)**
-- [ ] **Other components**
+- [x] **CreateGiroSheet.tsx (DONE)**
+  - [x] Replace fetchBanks with useBanksList() hook
+  - [x] Replace fetchCurrentRate with useCurrentExchangeRate()
+  - [x] Replace fetchMinoristaBalance with useMinoristaBalance()
+  - [x] Update form submission to use createGiro mutation
+  - [x] Run `npm run ts-check`
+
+- [ ] **Other components** - Following same pattern
 
 ---
 
@@ -363,8 +375,8 @@ Each component migration should follow this checklist:
 2. **✅ COMPLETED (Phase 2.2)** - DashboardPage.tsx
 3. **✅ COMPLETED (Phase 2.3)** - GirosPage.tsx
 4. **✅ COMPLETED (Phase 2.4)** - ExchangeRatePage.tsx
-5. **CreateGiroSheet.tsx (Phase 2.5)** - Mutation testing
-6. **Other components** - Following same pattern
+5. **✅ COMPLETED (Phase 2.5)** - CreateGiroSheet.tsx
+6. **Phase 2.6+** - Other components (ReportsPage, AdminPanel, etc.)
 
 ---
 
