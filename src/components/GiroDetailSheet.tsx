@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetBody } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -92,29 +92,33 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
   const canEdit = isMinorista && giro && !isNotEditableStatus
 
   // Initialize editable fields when giro data loads
-  if (giro && (editableBeneficiaryName === '' || editableRate.buyRate === 0)) {
-    setEditableBeneficiaryName(giro.beneficiaryName)
-    setEditableBeneficiaryId(giro.beneficiaryId)
-    setEditablePhone(giro.phone)
-    setEditableAccountNumber(giro.accountNumber)
-    setEditableRate({
-      buyRate: giro.rateApplied?.buyRate || 0,
-      sellRate: giro.rateApplied?.sellRate || 0,
-      usd: giro.rateApplied?.usd || 0,
-      bcv: giro.rateApplied?.bcv || 0,
-    })
-    if (bankAccounts.length > 0 && !selectedBankAccountId) {
-      setSelectedBankAccountId(bankAccounts[0].id)
+  useEffect(() => {
+    if (giro) {
+      setEditableBeneficiaryName(giro.beneficiaryName)
+      setEditableBeneficiaryId(giro.beneficiaryId)
+      setEditablePhone(giro.phone)
+      setEditableAccountNumber(giro.accountNumber)
+      setEditableRate({
+        buyRate: giro.rateApplied?.buyRate || 0,
+        sellRate: giro.rateApplied?.sellRate || 0,
+        usd: giro.rateApplied?.usd || 0,
+        bcv: giro.rateApplied?.bcv || 0,
+      })
+      if (bankAccounts.length > 0 && !selectedBankAccountId) {
+        setSelectedBankAccountId(bankAccounts[0].id)
+      }
     }
-  }
+  }, [giro?.id, bankAccounts.length])
 
   // Reset form when opening
-  if (open && !giro) {
-    setShowReturnForm(false)
-    setReturnReason('')
-    setFee(0)
-    setProofUrl('')
-  }
+  useEffect(() => {
+    if (open && !giro) {
+      setShowReturnForm(false)
+      setReturnReason('')
+      setFee(0)
+      setProofUrl('')
+    }
+  }, [open, giro])
 
 
   const handleMarkAsProcessing = () => {
@@ -309,12 +313,18 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
     }
   }
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return new Intl.DateTimeFormat('es-ES', {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    }).format(date)
+  const formatDate = (dateString: string | undefined) => {
+    if (!dateString) return '—'
+    try {
+      const date = new Date(dateString)
+      if (isNaN(date.getTime())) return '—'
+      return new Intl.DateTimeFormat('es-ES', {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      }).format(date)
+    } catch {
+      return '—'
+    }
   }
 
   const copyToClipboard = (text: string, label: string) => {
