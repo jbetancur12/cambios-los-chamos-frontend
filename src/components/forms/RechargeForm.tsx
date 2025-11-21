@@ -175,7 +175,7 @@ export function RechargeForm({ onSuccess }: RechargeFormProps) {
   return (
     <form onSubmit={handleSubmit} className="p-6 space-y-4">
       <div>
-        <Label htmlFor="operator">Operador</Label>
+        <Label htmlFor="operator" className="hidden md:block">Operador</Label>
         <Select value={selectedOperator} onValueChange={setSelectedOperator}>
           <SelectTrigger id="operator">
             <SelectValue placeholder="Selecciona un operador" />
@@ -191,7 +191,7 @@ export function RechargeForm({ onSuccess }: RechargeFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="amount">Monto en Bs</Label>
+        <Label htmlFor="amount" className="hidden md:block">Monto en Bs</Label>
         <Select value={selectedAmount} onValueChange={setSelectedAmount}>
           <SelectTrigger id="amount">
             <SelectValue placeholder="Selecciona un monto" />
@@ -207,7 +207,7 @@ export function RechargeForm({ onSuccess }: RechargeFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="phone">Teléfono</Label>
+        <Label htmlFor="phone" className="hidden md:block">Teléfono</Label>
         <Input
           id="phone"
           placeholder="04141234567"
@@ -218,7 +218,7 @@ export function RechargeForm({ onSuccess }: RechargeFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="senderName">Contacto que Envía</Label>
+        <Label htmlFor="senderName" className="hidden md:block">Contacto que Envía</Label>
         <Input
           id="senderName"
           placeholder="Nombre del remitente"

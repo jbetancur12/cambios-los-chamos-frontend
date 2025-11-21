@@ -163,11 +163,11 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
         <p className="text-xs font-semibold text-blue-900 mb-3">Datos del Beneficiario</p>
 
         <div>
-          <Label htmlFor="phone">Teléfono del Beneficiario</Label>
+          <Label htmlFor="phone" className="hidden md:block">Teléfono del Beneficiario</Label>
           <div className="relative">
             <Input
               id="phone"
-              placeholder="04141234567"
+              placeholder="Teléfono del Beneficiario"
               value={phone}
               onChange={handlePhoneChange}
               onFocus={() => phone && setShowSuggestions(true)}
@@ -193,10 +193,10 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
         </div>
 
         <div className="space-y-2 mt-3">
-          <Label htmlFor="cedula">Cédula del Beneficiario</Label>
+          <Label htmlFor="cedula" className="hidden md:block">Cédula del Beneficiario</Label>
           <Input
             id="cedula"
-            placeholder="V-12345678"
+            placeholder="Cédula del Beneficiario"
             value={cedula}
             onChange={(e) => setCedula(e.target.value)}
             required
@@ -204,10 +204,10 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
         </div>
 
         <div className="space-y-2 mt-3">
-          <Label htmlFor="senderName">Contacto que Envía</Label>
+          <Label htmlFor="senderName" className="hidden md:block">Contacto que Envía</Label>
           <Input
             id="senderName"
-            placeholder="Nombre o teléfono del que envía"
+            placeholder="Contacto que Envía"
             value={senderName}
             onChange={(e) => setSenderName(e.target.value)}
             required
@@ -217,7 +217,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
 
       {/* Bank and Amount Info */}
       <div className="space-y-2">
-        <Label htmlFor="bank">Banco Origen</Label>
+        <Label htmlFor="bank" className="hidden md:block">Banco Origen</Label>
         <select
           id="bank"
           value={selectedBank}
@@ -225,7 +225,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
           className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           required
         >
-          <option value="">Selecciona un banco</option>
+          <option value="">Banco Origen</option>
           {banks.map((bank) => (
             <option key={bank.id} value={bank.id}>
               {bank.name}
@@ -235,11 +235,11 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="amount">Monto (COP)</Label>
+        <Label htmlFor="amount" className="hidden md:block">Monto (COP)</Label>
         <Input
           id="amount"
           type="number"
-          placeholder="100.000"
+          placeholder="Monto (COP)"
           value={amountCop}
           onChange={(e) => setAmountCop(e.target.value)}
           required

@@ -19,7 +19,6 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
   const { user } = useAuth()
   const {
     getSuggestionsByName,
-    getSuggestionsByPhone,
     addSuggestion,
   } = useBeneficiarySuggestions()
 
@@ -43,7 +42,6 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
 
   // Suggestions
   const [nameSuggestions, setNameSuggestions] = useState<any[]>([])
-  const [phoneSuggestions, setPhoneSuggestions] = useState<any[]>([])
 
   // Custom rate override (solo SUPER_ADMIN)
   const [useCustomRate, setUseCustomRate] = useState(false)
@@ -112,7 +110,6 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
     setCurrencyInput('COP')
     setUseCustomRate(false)
     setNameSuggestions([])
-    setPhoneSuggestions([])
   }
 
   const handleNameChange = (value: string) => {
@@ -125,32 +122,12 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
     }
   }
 
-  const handlePhoneChange = (value: string) => {
-    setPhone(value)
-    if (value.trim()) {
-      const suggestions = getSuggestionsByPhone(value)
-      setPhoneSuggestions(suggestions)
-    } else {
-      setPhoneSuggestions([])
-    }
-  }
-
   const handleSelectBeneficiaryFromName = (suggestion: any) => {
     setBeneficiaryName(suggestion.name)
     setBeneficiaryId(suggestion.id)
-    setPhone(suggestion.phone)
     setBankId(suggestion.bankId)
     setAccountNumber(suggestion.accountNumber)
     setNameSuggestions([])
-  }
-
-  const handleSelectBeneficiaryFromPhone = (suggestion: any) => {
-    setBeneficiaryName(suggestion.name)
-    setBeneficiaryId(suggestion.id)
-    setPhone(suggestion.phone)
-    setBankId(suggestion.bankId)
-    setAccountNumber(suggestion.accountNumber)
-    setPhoneSuggestions([])
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -342,18 +319,6 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
           onChange={(e) => setBeneficiaryId(e.target.value)}
           placeholder="Cédula del Beneficiario"
           required
-        />
-      </div>
-
-      <div className="space-y-2">
-        <BeneficiaryAutocomplete
-          value={phone}
-          onChange={handlePhoneChange}
-          onSelectSuggestion={handleSelectBeneficiaryFromPhone}
-          suggestions={phoneSuggestions}
-          label="Teléfono (Opcional)"
-          placeholder="+58 424 1234567"
-          displayField="phone"
         />
       </div>
 
