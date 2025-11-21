@@ -1,63 +1,40 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, TrendingUp, TrendingDown, DollarSign } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
-import { api } from '@/lib/api'
-import type { BankAccount, BankAccountTransaction, BankAccountTransactionType } from '@/types/api'
+import { useBankAccountDetail, useBankAccountTransactions } from '@/hooks/queries/useBankQueries'
+import type { BankAccountTransactionType } from '@/types/api'
 import { DateRangeFilter, type DateRange } from '@/components/DateRangeFilter'
 
 export function BankTransactionsPage() {
   const { bankAccountId } = useParams<{ bankAccountId: string }>()
   const navigate = useNavigate()
-  const [bankAccount, setBankAccount] = useState<BankAccount | null>(null)
-  const [transactions, setTransactions] = useState<BankAccountTransaction[]>([])
-  const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
   const [dateRange, setDateRange] = useState<DateRange>({ startDate: null, endDate: null })
 
-  useEffect(() => {
-    if (bankAccountId) {
-      fetchBankAccount()
-      fetchTransactions()
-    }
-  }, [bankAccountId, page, dateRange])
+  // React Query hooks for bank account and transactions
+  const bankAccountQuery = useBankAccountDetail(bankAccountId || null)
+  const transactionsQuery = useBankAccountTransactions({
+    accountId: bankAccountId || '',
+    page,
+    limit: 50,
+    startDate: dateRange.startDate,
+    endDate: dateRange.endDate,
+  })
 
-  const fetchBankAccount = async () => {
-    try {
-      const response = await api.get<{ bankAccount: BankAccount }>(`/bank-account/${bankAccountId}`)
-      setBankAccount(response.bankAccount)
-    } catch (error: any) {
-      toast.error(error.message || 'Error al cargar cuenta bancaria')
-      navigate('/')
-    }
-  }
+  const bankAccount = bankAccountQuery.data
+  const transactionsResponse = transactionsQuery.data
+  const transactions = transactionsResponse?.transactions || []
+  const totalPages = transactionsResponse?.pagination.totalPages || 1
+  const isLoading = transactionsQuery.isLoading
 
-  const fetchTransactions = async () => {
-    try {
-      setLoading(true)
-      let url = `/bank-account/${bankAccountId}/transactions?page=${page}&limit=50`
-
-      if (dateRange.startDate && dateRange.endDate) {
-        url += `&startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`
-      }
-
-      const response = await api.get<{
-        transactions: BankAccountTransaction[]
-        pagination: { total: number; page: number; limit: number; totalPages: number }
-      }>(url)
-
-      setTransactions(response.transactions)
-      setTotalPages(response.pagination.totalPages)
-      setPage(1) // Reset a la página 1 cuando cambia el filtro
-    } catch (error: any) {
-      toast.error(error.message || 'Error al cargar transacciones')
-    } finally {
-      setLoading(false)
-    }
+  // Handle errors
+  if (bankAccountQuery.error) {
+    toast.error('Error al cargar cuenta bancaria')
+    navigate('/')
   }
 
   const formatCurrency = (amount: number) => {
@@ -165,7 +142,7 @@ export function BankTransactionsPage() {
             <CardTitle>Historial de Transacciones</CardTitle>
           </CardHeader>
           <CardContent>
-            {loading ? (
+            {isLoading ? (
               <div className="text-center py-8 text-muted-foreground">Cargando transacciones...</div>
             ) : transactions.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">No hay transacciones registradas</div>

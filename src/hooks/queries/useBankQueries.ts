@@ -35,23 +35,38 @@ export function useBankAccountDetail(accountId: string | null) {
   })
 }
 
-interface BankAccountTransactionsParams {
+export interface BankAccountTransactionsParams {
   accountId: string
   page?: number
   limit?: number
+  startDate?: string | null
+  endDate?: string | null
+}
+
+export interface BankAccountTransactionsResponse {
+  transactions: BankAccountTransaction[]
+  pagination: {
+    total: number
+    page: number
+    limit: number
+    totalPages: number
+  }
 }
 
 export function useBankAccountTransactions(params: BankAccountTransactionsParams) {
-  const { accountId, page = 1, limit = 50 } = params
+  const { accountId, page = 1, limit = 50, startDate = null, endDate = null } = params
 
   return useQuery({
-    queryKey: ['bankAccountTransactions', accountId, page, limit],
+    queryKey: ['bankAccountTransactions', accountId, page, limit, startDate, endDate],
     queryFn: async () => {
-      const response = await api.get<{
-        transactions: BankAccountTransaction[]
-        pagination: any
-      }>(`/bank-account/${accountId}/transactions?page=${page}&limit=${limit}`)
-      return response.transactions
+      let url = `/bank-account/${accountId}/transactions?page=${page}&limit=${limit}`
+
+      if (startDate && endDate) {
+        url += `&startDate=${startDate}&endDate=${endDate}`
+      }
+
+      const response = await api.get<BankAccountTransactionsResponse>(url)
+      return response
     },
     enabled: !!accountId,
   })
