@@ -183,7 +183,7 @@ export function UsersPage() {
               return (
                 <Card
                   key={user.id}
-                  className="cursor-pointer hover:shadow-lg hover:bg-muted/50 transition-all"
+                  className="cursor-pointer hover:shadow-lg hover:bg-muted/50 transition-all py-0"
                   onClick={() => {
                     if (user.minoristaId) {
                       handleRechargeMinorista(user.minoristaId, user.fullName, user.email, user.availableCredit || 0)
