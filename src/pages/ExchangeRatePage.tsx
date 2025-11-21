@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -6,19 +6,21 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetBody } from '@/components/ui/sheet'
 import { Plus, TrendingUp, Calendar, Download, Eye, Share2 } from 'lucide-react'
-import { api } from '@/lib/api'
 import { toast } from 'sonner'
 import { useSiaRateImage } from '@/hooks/useSiaRateImage'
-import type { ExchangeRate } from '@/types/api'
+import { useCurrentExchangeRate, useExchangeRateHistory } from '@/hooks/queries/useExchangeRateQueries'
+import { useCreateExchangeRate } from '@/hooks/mutations/useExchangeRateMutations'
 
 export function ExchangeRatePage() {
   const { user } = useAuth()
-  const [rates, setRates] = useState<ExchangeRate[]>([])
-  const [currentRate, setCurrentRate] = useState<ExchangeRate | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [createSheetOpen, setCreateSheetOpen] = useState(false)
 
-  // Estados para modal de preview en desktop
+  // React Query hooks
+  const { data: currentRate } = useCurrentExchangeRate()
+  const { data: rates = [], isLoading, error } = useExchangeRateHistory(20)
+  const createExchangeRateMutation = useCreateExchangeRate()
+
+  // UI state
+  const [createSheetOpen, setCreateSheetOpen] = useState(false)
   const [showImagePreview, setShowImagePreview] = useState(false)
   const [imagePreviewBlob, setImagePreviewBlob] = useState<Blob | null>(null)
   const [imagePreviewFilename, setImagePreviewFilename] = useState('')
@@ -28,40 +30,9 @@ export function ExchangeRatePage() {
   const [sellRate, setSellRate] = useState('')
   const [usd, setUsd] = useState('')
   const [bcv, setBcv] = useState('')
-  const [submitting, setSubmitting] = useState(false)
 
   const canCreateRate = user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN'
   const { generatePreviewImage } = useSiaRateImage()
-
-  useEffect(() => {
-    fetchRates()
-    fetchCurrentRate()
-  }, [])
-
-  const fetchCurrentRate = async () => {
-    try {
-      const response = await api.get<{ rate: ExchangeRate }>('/exchange-rate/current')
-      setCurrentRate(response.rate)
-    } catch (error: any) {
-      console.error('Error fetching current rate:', error)
-    }
-  }
-
-  const fetchRates = async () => {
-    try {
-      setLoading(true)
-      const response = await api.get<{
-        rates: ExchangeRate[]
-        pagination: { total: number; page: number; limit: number; totalPages: number }
-      }>('/exchange-rate/list?limit=20')
-
-      setRates(response.rates)
-    } catch (error: any) {
-      toast.error(error.message || 'Error al cargar tasas de cambio')
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const resetForm = () => {
     setBuyRate('')
@@ -88,25 +59,24 @@ export function ExchangeRatePage() {
       return
     }
 
-    try {
-      setSubmitting(true)
-      const response = await api.post<{ data: ExchangeRate; message: string }>('/exchange-rate/create', {
+    createExchangeRateMutation.mutate(
+      {
         buyRate: buyRateNum,
         sellRate: sellRateNum,
         usd: usdNum,
         bcv: bcvNum,
-      })
-
-      toast.success(response.message || 'Tasa de cambio creada exitosamente')
-      resetForm()
-      fetchRates()
-      fetchCurrentRate()
-      setCreateSheetOpen(false)
-    } catch (error: any) {
-      toast.error(error.message || 'Error al crear tasa de cambio')
-    } finally {
-      setSubmitting(false)
-    }
+      },
+      {
+        onSuccess: (data) => {
+          toast.success(data.message || 'Tasa de cambio creada exitosamente')
+          resetForm()
+          setCreateSheetOpen(false)
+        },
+        onError: (error: any) => {
+          toast.error(error.message || 'Error al crear tasa de cambio')
+        },
+      }
+    )
   }
 
   const formatDate = (dateString: string) => {
@@ -258,10 +228,18 @@ export function ExchangeRatePage() {
       <div className="space-y-4">
         <h2 className="text-lg font-semibold">Historial de Tasas</h2>
 
-        {loading ? (
+        {isLoading ? (
           <div className="text-center py-12">
             <p className="text-muted-foreground">Cargando tasas...</p>
           </div>
+        ) : error ? (
+          <Card>
+            <CardContent className="p-8 text-center">
+              <p className="text-sm text-destructive">
+                {error instanceof Error ? error.message : 'Error al cargar tasas de cambio'}
+              </p>
+            </CardContent>
+          </Card>
         ) : rates.length === 0 ? (
           <Card>
             <CardContent className="p-12 text-center">
@@ -394,8 +372,8 @@ export function ExchangeRatePage() {
                 <Button type="button" variant="outline" onClick={() => setCreateSheetOpen(false)} className="flex-1">
                   Cancelar
                 </Button>
-                <Button type="submit" disabled={submitting} className="flex-1">
-                  {submitting ? 'Creando...' : 'Crear Tasa'}
+                <Button type="submit" disabled={createExchangeRateMutation.isPending} className="flex-1">
+                  {createExchangeRateMutation.isPending ? 'Creando...' : 'Crear Tasa'}
                 </Button>
               </div>
             </form>
