@@ -109,13 +109,18 @@ const { data: giros = [], isLoading } = useGirosList({ status, dateFrom, dateTo 
 - ✅ Balance card now properly uses `minoristaBalanceData?.balance` and `minoristaBalanceData?.credit`
 
 ### ExchangeRatePage.tsx
-**Status:** ⏳ Pending
-**Current:** Manual state management for exchange rates
-**Migration Plan:**
-- Replace current rate fetch with `useCurrentExchangeRate()`
-- Replace history fetch with `useExchangeRateHistory(limit)`
-- Consider shorter staleTime for exchange rates (business critical)
-- Keep existing preview modal implementation
+**Status:** ✅ COMPLETED (Phase 2.4)
+**Changes Made:**
+- ✅ Created useCreateExchangeRate() mutation hook
+- ✅ Replaced current rate fetch with useCurrentExchangeRate()
+- ✅ Replaced history fetch with useExchangeRateHistory(20)
+- ✅ Removed fetchRates() and fetchCurrentRate() functions
+- ✅ Removed manual loading state (React Query handles isLoading)
+- ✅ handleSubmit() now uses mutation.mutate()
+- ✅ Form button disabled state uses mutation.isPending
+- ✅ Mutation auto-invalidates current rate and history on success
+- ✅ Kept image preview modal functionality unchanged
+- ✅ TypeScript compiles cleanly
 
 ### CreateGiroSheet.tsx
 **Status:** ⏳ Pending
@@ -340,8 +345,14 @@ Each component migration should follow this checklist:
   - [x] Remove WebSocket subscription (global handler)
   - [x] Run `npm run ts-check`
 
-- [ ] **ExchangeRatePage.tsx (NEXT)**
-- [ ] **CreateGiroSheet.tsx**
+- [x] **ExchangeRatePage.tsx (DONE)**
+  - [x] Create useCreateExchangeRate() mutation hook
+  - [x] Replace current rate fetch with useCurrentExchangeRate()
+  - [x] Replace history fetch with useExchangeRateHistory()
+  - [x] Update form submission to use mutation
+  - [x] Run `npm run ts-check`
+
+- [ ] **CreateGiroSheet.tsx (NEXT)**
 - [ ] **Other components**
 
 ---
@@ -351,7 +362,7 @@ Each component migration should follow this checklist:
 1. **✅ COMPLETED (Phase 2.1)** - GiroDetailSheet.tsx
 2. **✅ COMPLETED (Phase 2.2)** - DashboardPage.tsx
 3. **✅ COMPLETED (Phase 2.3)** - GirosPage.tsx
-4. **ExchangeRatePage.tsx (Phase 2.4)** - Business critical data
+4. **✅ COMPLETED (Phase 2.4)** - ExchangeRatePage.tsx
 5. **CreateGiroSheet.tsx (Phase 2.5)** - Mutation testing
 6. **Other components** - Following same pattern
 
