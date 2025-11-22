@@ -88,8 +88,8 @@ export function MinoristaSimpleTransactionTable({
               <th className="pb-3 font-medium">Tipo</th>
               <th className="pb-3 font-medium text-right">Monto</th>
               <th className="pb-3 font-medium text-right">Ganancia</th>
-              <th className="pb-3 font-medium text-right pr-6">De</th>
-              <th className="pb-3 font-medium text-right pr-6">Ahora</th>
+              <th className="pb-3 font-medium text-right pr-6 hidden">De</th>
+              <th className="pb-3 font-medium text-right pr-6">Saldo</th>
             </tr>
           </thead>
           <tbody>
@@ -118,7 +118,7 @@ export function MinoristaSimpleTransactionTable({
                   <td className="py-3 text-right text-sm font-semibold text-blue-600 whitespace-nowrap">
                     {transaction.profitEarned ? `+${formatCurrency(transaction.profitEarned)}` : '$ 0,00'}
                   </td>
-                  <td className="py-3 text-right text-sm text-muted-foreground pr-6 whitespace-nowrap">
+                  <td className="py-3 text-right text-sm text-muted-foreground pr-6 whitespace-nowrap hidden">
                     {formatCurrency(creditLimit - transaction.previousAvailableCredit)}
                   </td>
                   <td
@@ -172,14 +172,14 @@ export function MinoristaSimpleTransactionTable({
                     {transaction.profitEarned ? `+${formatCurrency(transaction.profitEarned)}` : '$ 0,00'}
                   </span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between hidden">
                   <span className="text-muted-foreground">De</span>
                   <span>{formatCurrency(creditLimit - transaction.previousAvailableCredit)}</span>
                 </div>
                 <div
                   className={`flex justify-between font-semibold ${isBalanceInFavor ? 'text-green-600' : 'text-red-600'}`}
                 >
-                  <span>Ahora</span>
+                  <span>Saldo</span>
                   <span>{formatCurrency(creditLimit - transaction.availableCredit)}</span>
                 </div>
               </div>
