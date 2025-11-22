@@ -760,7 +760,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                   </div>
 
                   {!isEditingCompletedProof ? (
-                    <div className="flex gap-2">
+                    <div className={`flex gap-2 ${isTransferencista && giro.transferencista?.user?.id === user?.id ? '' : 'flex-col'}`}>
                       <Button
                         type="button"
                         size="sm"
@@ -775,21 +775,23 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                             toast.error('Error al cargar el comprobante')
                           }
                         }}
-                        className="flex-1 gap-1"
+                        className={isTransferencista && giro.transferencista?.user?.id === user?.id ? 'flex-1 gap-1' : 'w-full gap-1'}
                       >
                         <Share2 className="h-3 w-3" />
                         Ver
                       </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setIsEditingCompletedProof(true)}
-                        className="flex-1 gap-1"
-                      >
-                        <Upload className="h-3 w-3" />
-                        Cambiar
-                      </Button>
+                      {isTransferencista && giro.transferencista?.user?.id === user?.id && (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setIsEditingCompletedProof(true)}
+                          className="flex-1 gap-1"
+                        >
+                          <Upload className="h-3 w-3" />
+                          Cambiar
+                        </Button>
+                      )}
                     </div>
                   ) : (
                     <>
