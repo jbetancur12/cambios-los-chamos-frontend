@@ -141,8 +141,9 @@ export function DateRangeFilter({ onDateRangeChange, onClear }: DateRangeFilterP
 
         {/* Filter Content - Collapsible on Mobile */}
         <div
-          className={`space-y-4 overflow-hidden transition-all duration-200 ${isExpanded ? 'md:block' : 'hidden md:block'
-            }`}
+          className={`space-y-4 overflow-hidden transition-all duration-200 ${
+            isExpanded ? 'md:block' : 'hidden md:block'
+          }`}
         >
           {/* Predefined Buttons */}
           <div>
@@ -152,7 +153,10 @@ export function DateRangeFilter({ onDateRangeChange, onClear }: DateRangeFilterP
                 variant={activePredefined === 'today' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => handlePredefined('today')}
-                className={cn("text-xs", activePredefined === 'today' ? 'bg-[linear-gradient(to_right,#136BBC,#274565)]' : '')}
+                className={cn(
+                  'text-xs',
+                  activePredefined === 'today' ? 'bg-[linear-gradient(to_right,#136BBC,#274565)]' : ''
+                )}
               >
                 Hoy
               </Button>
@@ -160,7 +164,10 @@ export function DateRangeFilter({ onDateRangeChange, onClear }: DateRangeFilterP
                 variant={activePredefined === 'yesterday' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => handlePredefined('yesterday')}
-                className={cn("text-xs", activePredefined === 'yesterday' ? 'bg-[linear-gradient(to_right,#136BBC,#274565)]' : '')}
+                className={cn(
+                  'text-xs',
+                  activePredefined === 'yesterday' ? 'bg-[linear-gradient(to_right,#136BBC,#274565)]' : ''
+                )}
               >
                 Ayer
               </Button>
@@ -168,7 +175,10 @@ export function DateRangeFilter({ onDateRangeChange, onClear }: DateRangeFilterP
                 variant={activePredefined === 'thisWeek' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => handlePredefined('thisWeek')}
-                className={cn("text-xs", activePredefined === 'thisWeek' ? 'bg-[linear-gradient(to_right,#136BBC,#274565)]' : '')}
+                className={cn(
+                  'text-xs',
+                  activePredefined === 'thisWeek' ? 'bg-[linear-gradient(to_right,#136BBC,#274565)]' : ''
+                )}
               >
                 Esta Semana
               </Button>
@@ -176,14 +186,21 @@ export function DateRangeFilter({ onDateRangeChange, onClear }: DateRangeFilterP
                 variant={activePredefined === 'lastWeek' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => handlePredefined('lastWeek')}
-                className={cn("text-xs", activePredefined === 'lastWeek' ? 'bg-[linear-gradient(to_right,#136BBC,#274565)]' : '')}              >
+                className={cn(
+                  'text-xs',
+                  activePredefined === 'lastWeek' ? 'bg-[linear-gradient(to_right,#136BBC,#274565)]' : ''
+                )}
+              >
                 Sem. Pasada
               </Button>
               <Button
                 variant={activePredefined === 'thisMonth' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => handlePredefined('thisMonth')}
-                className={cn("text-xs", activePredefined === 'thisMonth' ? 'bg-[linear-gradient(to_right,#136BBC,#274565)]': '')}
+                className={cn(
+                  'text-xs',
+                  activePredefined === 'thisMonth' ? 'bg-[linear-gradient(to_right,#136BBC,#274565)]' : ''
+                )}
               >
                 Este Mes
               </Button>
@@ -191,7 +208,10 @@ export function DateRangeFilter({ onDateRangeChange, onClear }: DateRangeFilterP
                 variant={activePredefined === 'lastMonth' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => handlePredefined('lastMonth')}
-                className={cn("text-xs", activePredefined === 'lastMonth' ? 'bg-[linear-gradient(to_right,#136BBC,#274565)]': '')}
+                className={cn(
+                  'text-xs',
+                  activePredefined === 'lastMonth' ? 'bg-[linear-gradient(to_right,#136BBC,#274565)]' : ''
+                )}
               >
                 Mes Pasado
               </Button>
@@ -199,7 +219,10 @@ export function DateRangeFilter({ onDateRangeChange, onClear }: DateRangeFilterP
                 variant={activePredefined === 'thisYear' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => handlePredefined('thisYear')}
-                className={cn("text-xs", activePredefined === 'thisYear' ? 'bg-[linear-gradient(to_right,#136BBC,#274565)]': '')}
+                className={cn(
+                  'text-xs',
+                  activePredefined === 'thisYear' ? 'bg-[linear-gradient(to_right,#136BBC,#274565)]' : ''
+                )}
               >
                 Este Año
               </Button>
@@ -207,7 +230,10 @@ export function DateRangeFilter({ onDateRangeChange, onClear }: DateRangeFilterP
                 variant={showCustomRange ? 'default' : 'outline'}
                 size="sm"
                 onClick={handleCustomRange}
-                className={cn("text-xs", showCustomRange === true ? 'bg-[linear-gradient(to_right,#136BBC,#274565)]': '')}
+                className={cn(
+                  'text-xs',
+                  showCustomRange === true ? 'bg-[linear-gradient(to_right,#136BBC,#274565)]' : ''
+                )}
               >
                 <Calendar className="h-3 w-3 mr-1" />
                 Personalizado

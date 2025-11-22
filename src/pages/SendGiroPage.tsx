@@ -60,9 +60,7 @@ export function SendGiroPage() {
             className="w-full justify-between rounded-none border-0 bg-white px-6 py-4 text-left font-semibold text-gray-900 hover:bg-gray-50"
           >
             <span>{currentTypeLabel}</span>
-            <ChevronDown
-              className={`h-5 w-5 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`}
-            />
+            <ChevronDown className={`h-5 w-5 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
           </Button>
 
           {dropdownOpen && (
@@ -78,9 +76,7 @@ export function SendGiroPage() {
                     selectedType === type.value ? 'bg-blue-50' : 'hover:bg-gray-50'
                   }`}
                 >
-                  <span
-                    className={`font-medium ${selectedType === type.value ? 'text-blue-600' : 'text-gray-900'}`}
-                  >
+                  <span className={`font-medium ${selectedType === type.value ? 'text-blue-600' : 'text-gray-900'}`}>
                     {type.label}
                   </span>
                   <span className="text-sm text-gray-500">{type.description}</span>

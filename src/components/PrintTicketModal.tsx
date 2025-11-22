@@ -240,12 +240,16 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
                 <span class="label">Creado:</span>
                 <span class="value">${data.createdAt}</span>
             </div>
-            ${data.completedAt ? `
+            ${
+              data.completedAt
+                ? `
             <div class="row">
                 <span class="label">Ejecutado:</span>
                 <span class="value">${data.completedAt}</span>
             </div>
-            ` : ''}
+            `
+                : ''
+            }
         </div>
 
         <!-- DATOS DEL BENEFICIARIO -->
@@ -292,12 +296,16 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
                 <span class="label">Creado por:</span>
                 <span class="value">${data.createdByName}</span>
             </div>
-            ${data.executedByName ? `
+            ${
+              data.executedByName
+                ? `
             <div class="row">
                 <span class="label">Ejecutado por:</span>
                 <span class="value">${data.executedByName}</span>
             </div>
-            ` : ''}
+            `
+                : ''
+            }
         </div>
 
         <div class="status-completed">✓ GIRO COMPLETADO</div>
@@ -477,12 +485,16 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
                 <span class="label">Creado:</span>
                 <span class="value">${data.createdAt}</span>
             </div>
-            ${data.completedAt ? `
+            ${
+              data.completedAt
+                ? `
             <div class="row">
                 <span class="label">Ejecutado:</span>
                 <span class="value">${data.completedAt}</span>
             </div>
-            ` : ''}
+            `
+                : ''
+            }
         </div>
 
         <!-- DATOS DEL BENEFICIARIO -->
@@ -527,12 +539,16 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
         <!-- OPERADORES -->
         <div class="section">
            
-            ${data.executedByName ? `
+            ${
+              data.executedByName
+                ? `
             <div class="row">
                 <span class="label">Ejecutado por:</span>
                 <span class="value">${data.executedByName}</span>
             </div>
-            ` : ''}
+            `
+                : ''
+            }
         </div>
 
         <div class="status-completed">✓ GIRO COMPLETADO</div>
@@ -548,7 +564,6 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
 </html>
     `
   }
-
 
   const handlePrint = () => {
     if (!ticketData) return
@@ -583,9 +598,10 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
       } else {
         // Sin impresora configurada, abrir diálogo normal
         iframe.contentWindow?.print()
-        const printerMsg = printerType === 'thermal'
-          ? 'Se abrió la ventana de impresión. Selecciona tu impresora térmica de 80mm.'
-          : 'Se abrió la ventana de impresión. Selecciona tu impresora de inyección (media carta).'
+        const printerMsg =
+          printerType === 'thermal'
+            ? 'Se abrió la ventana de impresión. Selecciona tu impresora térmica de 80mm.'
+            : 'Se abrió la ventana de impresión. Selecciona tu impresora de inyección (media carta).'
         toast.success(printerMsg)
       }
     }, 500)
@@ -611,7 +627,9 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
               <Settings className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
               <div>
                 <p className="text-sm font-medium text-green-900">Impresora configurada</p>
-                <p className="text-xs text-green-700">{printerName} ({printerType === 'thermal' ? 'Térmica 80mm' : 'Inyección Media Carta'})</p>
+                <p className="text-xs text-green-700">
+                  {printerName} ({printerType === 'thermal' ? 'Térmica 80mm' : 'Inyección Media Carta'})
+                </p>
               </div>
             </div>
           )}
@@ -641,9 +659,7 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
                   <div style={{ textAlign: 'center', fontSize: '10px', marginBottom: '10px' }}>
                     {ticketData.companyPhone}
                   </div>
-                  <div style={{ textAlign: 'center', marginBottom: '10px' }}>
-                    ================================
-                  </div>
+                  <div style={{ textAlign: 'center', marginBottom: '10px' }}>================================</div>
 
                   <div style={{ marginBottom: '10px' }}>
                     <strong>GIRO #{ticketData.giroId}</strong>
@@ -723,11 +739,7 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
         </SheetBody>
 
         {/* iframe invisible para impresión */}
-        <iframe
-          ref={printFrameRef}
-          style={{ display: 'none' }}
-          title="print-frame"
-        />
+        <iframe ref={printFrameRef} style={{ display: 'none' }} title="print-frame" />
       </SheetContent>
     </Sheet>
   )

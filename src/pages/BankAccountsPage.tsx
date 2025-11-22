@@ -34,20 +34,26 @@ export function BankAccountsPage() {
   const isLoadingTrasferencistas = transferencistaQuery.isLoading
 
   // Client-side filtering for accounts
-  const filteredAccounts = searchTerm.trim() === '' ? accounts : accounts.filter(
-    (account) =>
-      account.bank.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      account.accountNumber.includes(searchTerm) ||
-      account.accountHolder.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      account.transferencista?.user.fullName.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const filteredAccounts =
+    searchTerm.trim() === ''
+      ? accounts
+      : accounts.filter(
+          (account) =>
+            account.bank.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            account.accountNumber.includes(searchTerm) ||
+            account.accountHolder.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            account.transferencista?.user.fullName.toLowerCase().includes(searchTerm.toLowerCase())
+        )
 
   // Client-side filtering for trasferencistas
-  const filteredTrasferencistas = searchTransferencistasTerm.trim() === '' ? trasferencistas : trasferencistas.filter(
-    (t) =>
-      t.fullName.toLowerCase().includes(searchTransferencistasTerm.toLowerCase()) ||
-      t.email.toLowerCase().includes(searchTransferencistasTerm.toLowerCase())
-  )
+  const filteredTrasferencistas =
+    searchTransferencistasTerm.trim() === ''
+      ? trasferencistas
+      : trasferencistas.filter(
+          (t) =>
+            t.fullName.toLowerCase().includes(searchTransferencistasTerm.toLowerCase()) ||
+            t.email.toLowerCase().includes(searchTransferencistasTerm.toLowerCase())
+        )
 
   // Handle errors
   if (accountsQuery.error) {
@@ -194,218 +200,224 @@ export function BankAccountsPage() {
 
         {/* Accounts List - Tab Cuentas */}
         {activeTab === 'cuentas' && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Building className="h-5 w-5" />
-              Cuentas Bancarias ({filteredAccounts.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">Cargando cuentas...</p>
-              </div>
-            ) : filteredAccounts.length === 0 ? (
-              <div className="text-center py-8">
-                <Building className="h-12 w-12 mx-auto text-muted-foreground mb-2" />
-                <p className="text-muted-foreground">
-                  {searchTerm
-                    ? 'No se encontraron cuentas con ese criterio de búsqueda'
-                    : 'No hay cuentas bancarias registradas'}
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {/* Desktop Table */}
-                <div className="hidden md:block overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="border-b">
-                      <tr className="text-left text-sm text-muted-foreground">
-                        <th className="pb-3 font-medium">Banco</th>
-                        <th className="pb-3 font-medium">Número de Cuenta</th>
-                        <th className="pb-3 font-medium">Titular</th>
-                        <th className="pb-3 font-medium">Transferencista</th>
-                        <th className="pb-3 font-medium text-right">Saldo</th>
-                        <th className="pb-3 font-medium text-right">Acciones</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredAccounts.map((account) => (
-                        <tr key={account.id} className="border-b last:border-0 hover:bg-muted/50">
-                          <td className="py-4">
-                            <div className="flex items-center gap-2">
-                              <Building className="h-4 w-4 text-muted-foreground" />
-                              <span className="font-medium">{account.bank.name}</span>
-                            </div>
-                          </td>
-                          <td className="py-4 text-sm">{account.accountNumber}</td>
-                          <td className="py-4 text-sm">{account.accountHolder}</td>
-                          <td className="py-4 text-sm">{account.transferencista?.user.fullName}</td>
-                          <td className="py-4 text-right font-semibold text-green-600">
-                            {formatCurrency(account.balance)}
-                          </td>
-                          <td className="py-4 text-right">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleViewTransactions(account.id)}
-                              className="gap-1"
-                            >
-                              <Eye className="h-4 w-4" />
-                              Ver Transacciones
-                            </Button>
-                          </td>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building className="h-5 w-5" />
+                Cuentas Bancarias ({filteredAccounts.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">Cargando cuentas...</p>
+                </div>
+              ) : filteredAccounts.length === 0 ? (
+                <div className="text-center py-8">
+                  <Building className="h-12 w-12 mx-auto text-muted-foreground mb-2" />
+                  <p className="text-muted-foreground">
+                    {searchTerm
+                      ? 'No se encontraron cuentas con ese criterio de búsqueda'
+                      : 'No hay cuentas bancarias registradas'}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {/* Desktop Table */}
+                  <div className="hidden md:block overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="border-b">
+                        <tr className="text-left text-sm text-muted-foreground">
+                          <th className="pb-3 font-medium">Banco</th>
+                          <th className="pb-3 font-medium">Número de Cuenta</th>
+                          <th className="pb-3 font-medium">Titular</th>
+                          <th className="pb-3 font-medium">Transferencista</th>
+                          <th className="pb-3 font-medium text-right">Saldo</th>
+                          <th className="pb-3 font-medium text-right">Acciones</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody>
+                        {filteredAccounts.map((account) => (
+                          <tr key={account.id} className="border-b last:border-0 hover:bg-muted/50">
+                            <td className="py-4">
+                              <div className="flex items-center gap-2">
+                                <Building className="h-4 w-4 text-muted-foreground" />
+                                <span className="font-medium">{account.bank.name}</span>
+                              </div>
+                            </td>
+                            <td className="py-4 text-sm">{account.accountNumber}</td>
+                            <td className="py-4 text-sm">{account.accountHolder}</td>
+                            <td className="py-4 text-sm">{account.transferencista?.user.fullName}</td>
+                            <td className="py-4 text-right font-semibold text-green-600">
+                              {formatCurrency(account.balance)}
+                            </td>
+                            <td className="py-4 text-right">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleViewTransactions(account.id)}
+                                className="gap-1"
+                              >
+                                <Eye className="h-4 w-4" />
+                                Ver Transacciones
+                              </Button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
 
-                {/* Mobile Cards */}
-                <div className="md:hidden space-y-3">
-                  {filteredAccounts.map((account) => (
-                    <Card key={account.id} className="p-4">
-                      <div className="space-y-3">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <Building className="h-4 w-4 text-muted-foreground" />
-                              <span className="font-semibold">{account.bank.name}</span>
+                  {/* Mobile Cards */}
+                  <div className="md:hidden space-y-3">
+                    {filteredAccounts.map((account) => (
+                      <Card key={account.id} className="p-4">
+                        <div className="space-y-3">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <Building className="h-4 w-4 text-muted-foreground" />
+                                <span className="font-semibold">{account.bank.name}</span>
+                              </div>
+                              <p className="text-sm text-muted-foreground">{account.accountNumber}</p>
                             </div>
-                            <p className="text-sm text-muted-foreground">{account.accountNumber}</p>
+                            <div className="text-right">
+                              <p className="text-xs text-muted-foreground">Saldo</p>
+                              <p className="text-lg font-bold text-green-600">{formatCurrency(account.balance)}</p>
+                            </div>
                           </div>
-                          <div className="text-right">
-                            <p className="text-xs text-muted-foreground">Saldo</p>
-                            <p className="text-lg font-bold text-green-600">{formatCurrency(account.balance)}</p>
-                          </div>
-                        </div>
 
-                        <div className="space-y-1 text-sm">
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Titular</span>
-                            <span>{account.accountHolder}</span>
+                          <div className="space-y-1 text-sm">
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Titular</span>
+                              <span>{account.accountHolder}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Transferencista</span>
+                              <span>{account.transferencista?.user.fullName}</span>
+                            </div>
                           </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Transferencista</span>
-                            <span>{account.transferencista?.user.fullName}</span>
-                          </div>
-                        </div>
 
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleViewTransactions(account.id)}
-                          className="w-full gap-1"
-                        >
-                          <Eye className="h-4 w-4" />
-                          Ver Transacciones
-                        </Button>
-                      </div>
-                    </Card>
-                  ))}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleViewTransactions(account.id)}
+                            className="w-full gap-1"
+                          >
+                            <Eye className="h-4 w-4" />
+                            Ver Transacciones
+                          </Button>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              )}
+            </CardContent>
+          </Card>
         )}
 
         {/* Trasferencistas List - Tab Trasferencistas */}
         {activeTab === 'trasferencistas' && (
-        <div className="space-y-6">
-          {/* Header with Create Button */}
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold">Trasferencistas</h3>
-            <Button onClick={() => setCreateTrasferencistaSheetOpen(true)} className="bg-[linear-gradient(to_right,#136BBC,#274565)] text-white">
-              <Briefcase className="h-4 w-4 mr-2" />
-              Crear Trasferencista
-            </Button>
-          </div>
-
-          <div className="grid gap-4 grid-cols-1">
-            {isLoadingTrasferencistas ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">Cargando trasferencistas...</p>
+          <div className="space-y-6">
+            {/* Header with Create Button */}
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Trasferencistas</h3>
+              <Button
+                onClick={() => setCreateTrasferencistaSheetOpen(true)}
+                className="bg-[linear-gradient(to_right,#136BBC,#274565)] text-white"
+              >
+                <Briefcase className="h-4 w-4 mr-2" />
+                Crear Trasferencista
+              </Button>
             </div>
-          ) : filteredTrasferencistas.length === 0 ? (
-            <Card>
-              <CardContent className="p-12 text-center">
-                <Briefcase className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground">
-                  {searchTransferencistasTerm
-                    ? 'No se encontraron trasferencistas con ese criterio'
-                    : 'No hay trasferencistas registrados'}
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            filteredTrasferencistas.map((t) => (
-              <Card key={t.id}>
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="text-lg">{t.fullName}</CardTitle>
-                      <div className="flex items-center gap-2 mt-2 min-w-0">
-                        <Search className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                        <p className="text-sm text-muted-foreground truncate">{t.email}</p>
-                        <span title={t.emailVerified ? 'Email verificado' : 'Email no verificado'} className="flex-shrink-0">
-                          {t.emailVerified ? (
-                            <CheckCircle2 className="h-4 w-4 text-green-600" />
-                          ) : (
-                            <AlertCircle className="h-4 w-4 text-amber-600" />
+
+            <div className="grid gap-4 grid-cols-1">
+              {isLoadingTrasferencistas ? (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground">Cargando trasferencistas...</p>
+                </div>
+              ) : filteredTrasferencistas.length === 0 ? (
+                <Card>
+                  <CardContent className="p-12 text-center">
+                    <Briefcase className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                    <p className="text-muted-foreground">
+                      {searchTransferencistasTerm
+                        ? 'No se encontraron trasferencistas con ese criterio'
+                        : 'No hay trasferencistas registrados'}
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                filteredTrasferencistas.map((t) => (
+                  <Card key={t.id}>
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <CardTitle className="text-lg">{t.fullName}</CardTitle>
+                          <div className="flex items-center gap-2 mt-2 min-w-0">
+                            <Search className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                            <p className="text-sm text-muted-foreground truncate">{t.email}</p>
+                            <span
+                              title={t.emailVerified ? 'Email verificado' : 'Email no verificado'}
+                              className="flex-shrink-0"
+                            >
+                              {t.emailVerified ? (
+                                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                              ) : (
+                                <AlertCircle className="h-4 w-4 text-amber-600" />
+                              )}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex flex-col items-end gap-2">
+                          <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            Trasferencista
+                          </span>
+                          {!t.isActive && (
+                            <span className="px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                              Inactivo
+                            </span>
                           )}
-                        </span>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex flex-col items-end gap-2">
-                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        Trasferencista
-                      </span>
-                      {!t.isActive && (
-                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                          Inactivo
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-6 mt-3 flex-wrap">
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        checked={t.isActive}
-                        onCheckedChange={(checked) => handleToggleTrasferencistaActive(t.id, checked)}
-                      />
-                      <span className="text-sm text-muted-foreground">
-                        {t.isActive ? 'Activo' : 'Desactivado'}
-                      </span>
-                    </div>
-                    {t.transferencistaId && (
-                      <div className="flex items-center gap-2">
-                        <Switch
-                          checked={t.available ?? true}
-                          onCheckedChange={(checked) => handleToggleTrasferencistaAvailable(t.transferencistaId!, checked)}
-                        />
-                        <span className="text-sm text-muted-foreground">
-                          {t.available ? 'Disponible' : 'No disponible'}
-                        </span>
+                      <div className="flex items-center gap-6 mt-3 flex-wrap">
+                        <div className="flex items-center gap-2">
+                          <Switch
+                            checked={t.isActive}
+                            onCheckedChange={(checked) => handleToggleTrasferencistaActive(t.id, checked)}
+                          />
+                          <span className="text-sm text-muted-foreground">{t.isActive ? 'Activo' : 'Desactivado'}</span>
+                        </div>
+                        {t.transferencistaId && (
+                          <div className="flex items-center gap-2">
+                            <Switch
+                              checked={t.available ?? true}
+                              onCheckedChange={(checked) =>
+                                handleToggleTrasferencistaAvailable(t.transferencistaId!, checked)
+                              }
+                            />
+                            <span className="text-sm text-muted-foreground">
+                              {t.available ? 'Disponible' : 'No disponible'}
+                            </span>
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                </CardHeader>
-              </Card>
-            ))
-          )}
+                    </CardHeader>
+                  </Card>
+                ))
+              )}
+            </div>
           </div>
-        </div>
         )}
 
-      {/* Create Trasferencista Sheet */}
-      <CreateUserSheet
-        open={createTrasferencistaSheetOpen}
-        onOpenChange={setCreateTrasferencistaSheetOpen}
-        onUserCreated={handleTrasferencistaCreated}
-        role="TRANSFERENCISTA"
-      />
+        {/* Create Trasferencista Sheet */}
+        <CreateUserSheet
+          open={createTrasferencistaSheetOpen}
+          onOpenChange={setCreateTrasferencistaSheetOpen}
+          onUserCreated={handleTrasferencistaCreated}
+          role="TRANSFERENCISTA"
+        />
       </div>
     </div>
   )

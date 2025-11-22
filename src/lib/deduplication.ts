@@ -20,7 +20,6 @@ export function setupDeduplication(_queryClient: QueryClient) {
   // El dedupeInterval por defecto es 0ms
   // Esto significa que si dos requests exactamente iguales se disparan
   // en el mismo "tick" de JavaScript, solo uno se ejecuta
-
   // Opcional: Aumentar el intervalo si necesitas más agresivo deduping
   // _queryClient.setDefaultOptions({
   //   queries: {
@@ -40,8 +39,8 @@ export function useRequestMonitoring(queryClient: QueryClient) {
     const queries = cache.getAll()
 
     return queries
-      .filter(query => query.getObserversCount() > 0)
-      .map(query => ({
+      .filter((query) => query.getObserversCount() > 0)
+      .map((query) => ({
         queryKey: JSON.stringify(query.queryKey),
         state: query.state.status,
         observers: query.getObserversCount(),

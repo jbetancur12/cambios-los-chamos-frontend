@@ -2,12 +2,7 @@ import { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import {
-  Users as UsersIcon,
-  Search,
-  X,
-  Plus,
-} from 'lucide-react'
+import { Users as UsersIcon, Search, X, Plus } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
@@ -130,7 +125,10 @@ export function UsersPage() {
           <h1 className="text-2xl md:text-3xl font-bold text-foreground">Minoristas</h1>
           <p className="text-sm md:text-base text-muted-foreground mt-1">Gestiona minoristas y sus saldos</p>
         </div>
-        <Button onClick={() => setSheetOpen(true)} className="bg-[linear-gradient(to_right,#136BBC,#274565)] text-white hidden md:flex">
+        <Button
+          onClick={() => setSheetOpen(true)}
+          className="bg-[linear-gradient(to_right,#136BBC,#274565)] text-white hidden md:flex"
+        >
           <Plus className="h-4 w-4 mr-2" />
           Crear Minorista
         </Button>
@@ -154,7 +152,6 @@ export function UsersPage() {
           </button>
         )}
       </div>
-
 
       {/* Users List */}
       {isLoading ? (
@@ -209,7 +206,6 @@ export function UsersPage() {
                         <Switch
                           checked={user.isActive}
                           onCheckedChange={(checked) => handleToggleActive(user.id, checked)}
-
                         />
                         <span className="text-sm text-muted-foreground">
                           {user.isActive ? 'Activo' : 'Desactivado'}

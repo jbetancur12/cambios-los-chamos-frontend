@@ -61,13 +61,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
 /**
  * Default fallback UI para errores
  */
-function DefaultErrorFallback({
-  error,
-  retry,
-}: {
-  error: Error
-  retry: () => void
-}) {
+function DefaultErrorFallback({ error, retry }: { error: Error; retry: () => void }) {
   const navigate = useNavigate()
 
   return (
@@ -76,9 +70,7 @@ function DefaultErrorFallback({
         <AlertCircle className="error-boundary-icon" />
 
         <h1>Algo salió mal</h1>
-        <p className="error-boundary-message">
-          Disculpa, hemos encontrado un error inesperado.
-        </p>
+        <p className="error-boundary-message">Disculpa, hemos encontrado un error inesperado.</p>
 
         {process.env.NODE_ENV === 'development' && (
           <details className="error-boundary-details">
@@ -94,18 +86,13 @@ function DefaultErrorFallback({
             Reintentar
           </button>
 
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="error-boundary-btn secondary"
-          >
+          <button onClick={() => navigate('/dashboard')} className="error-boundary-btn secondary">
             <Home size={18} />
             Ir a inicio
           </button>
         </div>
 
-        <p className="error-boundary-footer">
-          Si el problema persiste, contacta con soporte
-        </p>
+        <p className="error-boundary-footer">Si el problema persiste, contacta con soporte</p>
       </div>
     </div>
   )

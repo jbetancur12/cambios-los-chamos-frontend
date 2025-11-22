@@ -87,10 +87,7 @@ export function useMarkGiroAsProcessing() {
 
   return useMutation({
     mutationFn: async (giroId: string) => {
-      const response = await api.post<{ giro: Giro; message: string }>(
-        `/giro/${giroId}/mark-processing`,
-        {}
-      )
+      const response = await api.post<{ giro: Giro; message: string }>(`/giro/${giroId}/mark-processing`, {})
       return response.giro
     },
     onSuccess: (giro) => {

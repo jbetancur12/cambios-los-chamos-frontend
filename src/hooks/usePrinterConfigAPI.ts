@@ -9,9 +9,7 @@ export interface PrinterConfig {
 export function usePrinterConfigAPI() {
   const getPrinterConfig = useCallback(async (): Promise<PrinterConfig | null> => {
     try {
-      const response = await api.get<{ config: PrinterConfig | null }>(
-        '/printer/config'
-      )
+      const response = await api.get<{ config: PrinterConfig | null }>('/printer/config')
       return response.config
     } catch (error) {
       console.error('Error reading printer config:', error)

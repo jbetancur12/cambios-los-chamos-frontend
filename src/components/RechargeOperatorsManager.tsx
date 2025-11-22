@@ -120,20 +120,20 @@ export function RechargeOperatorsManager() {
       </CardHeader>
       <CardContent className="space-y-6 pt-6">
         {/* Form */}
-        <form onSubmit={handleAdd} className={`space-y-4 p-6 rounded-lg border-2 transition-all ${
-          editingId
-            ? 'border-blue-200'
-            : 'border-blue-200'
-        }`} style={{ backgroundColor: editingId ? 'rgba(19, 107, 188, 0.05)' : 'rgba(19, 107, 188, 0.05)' }}>
+        <form
+          onSubmit={handleAdd}
+          className={`space-y-4 p-6 rounded-lg border-2 transition-all ${
+            editingId ? 'border-blue-200' : 'border-blue-200'
+          }`}
+          style={{ backgroundColor: editingId ? 'rgba(19, 107, 188, 0.05)' : 'rgba(19, 107, 188, 0.05)' }}
+        >
           <div className="flex items-center gap-2">
             {editingId ? (
               <Edit2 className="h-5 w-5" style={{ color: '#136BBC' }} />
             ) : (
               <Plus className="h-5 w-5" style={{ color: '#136BBC' }} />
             )}
-            <h3 className="font-bold text-sm">
-              {editingId ? 'Editar Operador' : 'Nuevo Operador'}
-            </h3>
+            <h3 className="font-bold text-sm">{editingId ? 'Editar Operador' : 'Nuevo Operador'}</h3>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -208,9 +208,7 @@ export function RechargeOperatorsManager() {
 
         {/* List */}
         <div>
-          <h3 className="font-bold text-sm mb-4 text-gray-800">
-            Operadores Registrados ({operators.length})
-          </h3>
+          <h3 className="font-bold text-sm mb-4 text-gray-800">Operadores Registrados ({operators.length})</h3>
 
           {loading ? (
             <div className="text-center py-8 text-gray-500">

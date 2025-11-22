@@ -161,7 +161,7 @@ export function ExchangeRatePage() {
       {/* Create Button */}
       {canCreateRate && (
         <div className="mb-6">
-          <Button onClick={() => setCreateSheetOpen(true)} className='bg-[linear-gradient(to_right,#136BBC,#274565)]'>
+          <Button onClick={() => setCreateSheetOpen(true)} className="bg-[linear-gradient(to_right,#136BBC,#274565)]">
             <Plus className="h-4 w-4 mr-2" />
             Crear Nueva Tasa
           </Button>
@@ -351,17 +351,15 @@ export function ExchangeRatePage() {
 
             {/* Footer */}
             <div className="flex gap-2 p-4 border-t dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
-              <Button
-                variant="outline"
-                onClick={() => setShowImagePreview(false)}
-                className="flex-1"
-              >
+              <Button variant="outline" onClick={() => setShowImagePreview(false)} className="flex-1">
                 Cerrar
               </Button>
               <Button
                 onClick={async () => {
                   try {
-                    const isMobileOrTablet = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+                    const isMobileOrTablet = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+                      navigator.userAgent
+                    )
 
                     if (isMobileOrTablet && navigator.share) {
                       // Mobile: Use Web Share API
@@ -369,7 +367,7 @@ export function ExchangeRatePage() {
                       await navigator.share({
                         files: [file],
                         title: 'Tasa de Cambio',
-                        text: 'Compartir tasa de cambio'
+                        text: 'Compartir tasa de cambio',
                       })
                     } else {
                       // Desktop: Download normally

@@ -43,10 +43,7 @@ export function invalidateGiroQueries(queryClient: QueryClient, giroId: string) 
 /**
  * Invalida queries de una cuenta bancaria específica
  */
-export function invalidateBankAccountQueries(
-  queryClient: QueryClient,
-  accountId: string
-) {
+export function invalidateBankAccountQueries(queryClient: QueryClient, accountId: string) {
   return Promise.all([
     queryClient.invalidateQueries({
       queryKey: ['bankAccount', accountId],
@@ -71,10 +68,7 @@ export function invalidateReportQueries(queryClient: QueryClient) {
  * Invalida dashboard pero mantiene datos previos
  * Útil después de crear un giro
  */
-export function invalidateDashboardQueries(
-  queryClient: QueryClient,
-  keepPreviousData = true
-) {
+export function invalidateDashboardQueries(queryClient: QueryClient, keepPreviousData = true) {
   const opts = keepPreviousData ? {} : undefined
 
   return Promise.all([
@@ -116,10 +110,7 @@ export function invalidateExchangeRateQueries(queryClient: QueryClient) {
  * Invalida una query específica
  * Con validación de parámetros básica
  */
-export async function smartInvalidateQuery(
-  queryClient: QueryClient,
-  queryKey: any[]
-) {
+export async function smartInvalidateQuery(queryClient: QueryClient, queryKey: any[]) {
   // Valida que queryKey no esté vacío
   if (!queryKey || queryKey.length === 0) {
     console.warn('smartInvalidateQuery: queryKey is empty')
@@ -133,10 +124,7 @@ export async function smartInvalidateQuery(
 /**
  * Invalida múltiples queries con un patrón, útil para limpiar cache
  */
-export function invalidateQueriesByPattern(
-  queryClient: QueryClient,
-  patterns: string[][]
-) {
+export function invalidateQueriesByPattern(queryClient: QueryClient, patterns: string[][]) {
   return Promise.all(
     patterns.map((pattern) =>
       queryClient.invalidateQueries({

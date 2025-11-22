@@ -14,10 +14,7 @@ export function useCreateExchangeRate() {
 
   return useMutation({
     mutationFn: async (data: CreateExchangeRateInput) => {
-      const response = await api.post<{ data: ExchangeRate; message: string }>(
-        '/exchange-rate/create',
-        data
-      )
+      const response = await api.post<{ data: ExchangeRate; message: string }>('/exchange-rate/create', data)
       return { rate: response.data, message: response.message }
     },
     onSuccess: () => {

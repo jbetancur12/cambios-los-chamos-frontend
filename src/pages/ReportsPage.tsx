@@ -32,17 +32,12 @@ import { ChevronDown, ChevronUp } from 'lucide-react'
 type TabType = 'system' | 'minoristas' | 'bank' | 'minoristaTransactions'
 
 const formatDateForInput = (date: Date) =>
-  new Date(date.getFullYear(), date.getMonth(), date.getDate())
-    .toISOString()
-    .slice(0, 10);
-
+  new Date(date.getFullYear(), date.getMonth(), date.getDate()).toISOString().slice(0, 10)
 
 const getDateRange = (range: 'today' | 'yesterday' | 'week' | 'lastWeek' | 'month' | 'lastMonth' | 'year') => {
   const today = new Date()
   let dateFrom = new Date(today.setHours(0, 0, 0, 0))
   let dateTo = new Date(today.setHours(23, 59, 59, 999))
-
-
 
   switch (range) {
     case 'today':
@@ -73,7 +68,7 @@ const getDateRange = (range: 'today' | 'yesterday' | 'week' | 'lastWeek' | 'mont
       break
   }
 
-  console.log("🚀 ~ getDateRange ~ dateFrom:", dateFrom)
+  console.log('🚀 ~ getDateRange ~ dateFrom:', dateFrom)
 
   return {
     from: dateFrom.toISOString(),
@@ -124,7 +119,9 @@ export function ReportsPage() {
     setDateTo(dates.to)
   }, [])
 
-  const handleQuickDateRange = (range: 'today' | 'yesterday' | 'week' | 'lastWeek' | 'month' | 'lastMonth' | 'year') => {
+  const handleQuickDateRange = (
+    range: 'today' | 'yesterday' | 'week' | 'lastWeek' | 'month' | 'lastMonth' | 'year'
+  ) => {
     const dates = getDateRange(range)
     setDateFrom(dates.from)
     setDateTo(dates.to)
@@ -159,144 +156,179 @@ export function ReportsPage() {
               {filterOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
             </div>
           </CardHeader>
-          {filterOpen && <CardContent className="space-y-4">
-            {/* Quick Date Range Buttons */}
-            <div className="flex gap-2 flex-wrap">
-              <Button
-                size="sm"
-                onClick={() => handleQuickDateRange('today')}
-                className={selectedDateRange === 'today' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}
-                style={selectedDateRange === 'today' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
-              >
-                Hoy
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => handleQuickDateRange('yesterday')}
-                variant={selectedDateRange === 'yesterday' ? undefined : 'outline'}
-                className={selectedDateRange === 'yesterday' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}
-                style={selectedDateRange === 'yesterday' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
-              >
-                Ayer
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => handleQuickDateRange('week')}
-                variant={selectedDateRange === 'week' ? undefined : 'outline'}
-                className={selectedDateRange === 'week' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}
-                style={selectedDateRange === 'week' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
-              >
-                Esta Semana
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => handleQuickDateRange('lastWeek')}
-                variant={selectedDateRange === 'lastWeek' ? undefined : 'outline'}
-                className={selectedDateRange === 'lastWeek' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}
-                style={selectedDateRange === 'lastWeek' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
-              >
-                Semana Pasada
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => handleQuickDateRange('month')}
-                variant={selectedDateRange === 'month' ? undefined : 'outline'}
-                className={selectedDateRange === 'month' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}
-                style={selectedDateRange === 'month' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
-              >
-                Este Mes
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => handleQuickDateRange('lastMonth')}
-                variant={selectedDateRange === 'lastMonth' ? undefined : 'outline'}
-                className={selectedDateRange === 'lastMonth' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}
-                style={selectedDateRange === 'lastMonth' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
-              >
-                Mes Pasado
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => handleQuickDateRange('year')}
-                variant={selectedDateRange === 'year' ? undefined : 'outline'}
-                className={selectedDateRange === 'year' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}
-                style={selectedDateRange === 'year' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
-              >
-                Este Año
-              </Button>
-            </div>
+          {filterOpen && (
+            <CardContent className="space-y-4">
+              {/* Quick Date Range Buttons */}
+              <div className="flex gap-2 flex-wrap">
+                <Button
+                  size="sm"
+                  onClick={() => handleQuickDateRange('today')}
+                  className={selectedDateRange === 'today' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}
+                  style={
+                    selectedDateRange === 'today' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}
+                  }
+                >
+                  Hoy
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => handleQuickDateRange('yesterday')}
+                  variant={selectedDateRange === 'yesterday' ? undefined : 'outline'}
+                  className={
+                    selectedDateRange === 'yesterday' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+                  }
+                  style={
+                    selectedDateRange === 'yesterday'
+                      ? { background: 'linear-gradient(to right, #136BBC, #274565)' }
+                      : {}
+                  }
+                >
+                  Ayer
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => handleQuickDateRange('week')}
+                  variant={selectedDateRange === 'week' ? undefined : 'outline'}
+                  className={selectedDateRange === 'week' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}
+                  style={
+                    selectedDateRange === 'week' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}
+                  }
+                >
+                  Esta Semana
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => handleQuickDateRange('lastWeek')}
+                  variant={selectedDateRange === 'lastWeek' ? undefined : 'outline'}
+                  className={
+                    selectedDateRange === 'lastWeek' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+                  }
+                  style={
+                    selectedDateRange === 'lastWeek'
+                      ? { background: 'linear-gradient(to right, #136BBC, #274565)' }
+                      : {}
+                  }
+                >
+                  Semana Pasada
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => handleQuickDateRange('month')}
+                  variant={selectedDateRange === 'month' ? undefined : 'outline'}
+                  className={selectedDateRange === 'month' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}
+                  style={
+                    selectedDateRange === 'month' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}
+                  }
+                >
+                  Este Mes
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => handleQuickDateRange('lastMonth')}
+                  variant={selectedDateRange === 'lastMonth' ? undefined : 'outline'}
+                  className={
+                    selectedDateRange === 'lastMonth' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+                  }
+                  style={
+                    selectedDateRange === 'lastMonth'
+                      ? { background: 'linear-gradient(to right, #136BBC, #274565)' }
+                      : {}
+                  }
+                >
+                  Mes Pasado
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => handleQuickDateRange('year')}
+                  variant={selectedDateRange === 'year' ? undefined : 'outline'}
+                  className={selectedDateRange === 'year' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}
+                  style={
+                    selectedDateRange === 'year' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}
+                  }
+                >
+                  Este Año
+                </Button>
+              </div>
 
-            {/* Manual Date Range */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-              <div>
-                <label className="block text-sm font-medium mb-2">Desde</label>
-                <Input
-                  type="date"
-                  value={formatDateForInput(new Date(dateFrom))}
-                  onChange={(e) => {
-                    const [year, month, day] = e.target.value.split('-').map(Number);
-                    const localDate = new Date(year, month - 1, day, 0, 0, 0);                    
-                    setDateFrom( localDate.toISOString())
-                    setSelectedDateRange(null)
-                  }}
-                  className="w-full"
-                />
+              {/* Manual Date Range */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Desde</label>
+                  <Input
+                    type="date"
+                    value={formatDateForInput(new Date(dateFrom))}
+                    onChange={(e) => {
+                      const [year, month, day] = e.target.value.split('-').map(Number)
+                      const localDate = new Date(year, month - 1, day, 0, 0, 0)
+                      setDateFrom(localDate.toISOString())
+                      setSelectedDateRange(null)
+                    }}
+                    className="w-full"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Hasta</label>
+                  <Input
+                    type="date"
+                    value={formatDateForInput(new Date(dateTo))}
+                    onChange={(e) => {
+                      const [year, month, day] = e.target.value.split('-').map(Number)
+                      const localDate = new Date(year, month - 1, day, 23, 59, 59)
+                      setDateTo(localDate.toISOString())
+                      setSelectedDateRange(null)
+                    }}
+                    className="w-full"
+                  />
+                </div>
+                <Button
+                  onClick={handleLoadReports}
+                  disabled={isLoading}
+                  className="w-full bg-[linear-gradient(to_right,#136BBC,#274565)]"
+                >
+                  {isLoading ? 'Cargando...' : 'Cargar Reporte'}
+                </Button>
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Hasta</label>
-                <Input
-                  type="date"
-                  value={formatDateForInput(new Date(dateTo))}
-                  onChange={(e) => {
-                     const [year, month, day] = e.target.value.split('-').map(Number);
-                    const localDate = new Date(year, month - 1, day, 23, 59, 59);                    
-                    setDateTo( localDate.toISOString())
-                    setSelectedDateRange(null)
-                  }}
-                  className="w-full"
-                />
-              </div>
-              <Button onClick={handleLoadReports} disabled={isLoading} className="w-full bg-[linear-gradient(to_right,#136BBC,#274565)]">
-                {isLoading ? 'Cargando...' : 'Cargar Reporte'}
-              </Button>
-            </div>
-          </CardContent>
-          }
+            </CardContent>
+          )}
         </Card>
 
         {/* Tabs */}
         <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
           <button
             onClick={() => handleTabChange('system')}
-            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${activeTab === 'system' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
-              }`}
+            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${
+              activeTab === 'system' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+            }`}
             style={activeTab === 'system' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             Ganancias del Sistema
           </button>
           <button
             onClick={() => handleTabChange('minoristas')}
-            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${activeTab === 'minoristas' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
-              }`}
+            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${
+              activeTab === 'minoristas' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+            }`}
             style={activeTab === 'minoristas' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             Top Minoristas
           </button>
           <button
             onClick={() => handleTabChange('bank')}
-            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${activeTab === 'bank' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
-              }`}
+            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${
+              activeTab === 'bank' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+            }`}
             style={activeTab === 'bank' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             Transacciones Bancarias
           </button>
           <button
             onClick={() => handleTabChange('minoristaTransactions')}
-            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${activeTab === 'minoristaTransactions'
-                ? 'text-white'
-                : 'bg-white text-gray-700 hover:bg-gray-100'
-              }`}
-            style={activeTab === 'minoristaTransactions' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${
+              activeTab === 'minoristaTransactions' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+            }`}
+            style={
+              activeTab === 'minoristaTransactions' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}
+            }
           >
             Transacciones Minoristas
           </button>
@@ -311,7 +343,11 @@ export function ReportsPage() {
               color="bg-green-100"
             />
             <StatCard label="Giros Totales" value={systemReportQuery.data.totalGiros.toString()} color="bg-blue-100" />
-            <StatCard label="Giros Completados" value={systemReportQuery.data.completedGiros.toString()} color="bg-purple-100" />
+            <StatCard
+              label="Giros Completados"
+              value={systemReportQuery.data.completedGiros.toString()}
+              color="bg-purple-100"
+            />
             <StatCard
               label="Ganancia Promedio"
               value={`$${systemReportQuery.data.averageProfitPerGiro.toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
@@ -387,7 +423,8 @@ export function ReportsPage() {
             <Card className="mb-4">
               <CardContent className="pt-6">
                 <p className="text-gray-600">
-                  Total de minoristas registrados: <span className="font-bold">{minoristaReportQuery.data.totalMinoristas}</span>
+                  Total de minoristas registrados:{' '}
+                  <span className="font-bold">{minoristaReportQuery.data.totalMinoristas}</span>
                 </p>
               </CardContent>
             </Card>
@@ -556,10 +593,26 @@ export function ReportsPage() {
                   <PieChart>
                     <Pie
                       data={[
-                        { name: 'Recargas', value: minoristaTransactionReportQuery.data.recharges, fill: CHART_COLORS[0] },
-                        { name: 'Descuentos', value: minoristaTransactionReportQuery.data.discounts, fill: CHART_COLORS[1] },
-                        { name: 'Ganancias', value: minoristaTransactionReportQuery.data.profits, fill: CHART_COLORS[2] },
-                        { name: 'Ajustes', value: minoristaTransactionReportQuery.data.adjustments, fill: CHART_COLORS[3] },
+                        {
+                          name: 'Recargas',
+                          value: minoristaTransactionReportQuery.data.recharges,
+                          fill: CHART_COLORS[0],
+                        },
+                        {
+                          name: 'Descuentos',
+                          value: minoristaTransactionReportQuery.data.discounts,
+                          fill: CHART_COLORS[1],
+                        },
+                        {
+                          name: 'Ganancias',
+                          value: minoristaTransactionReportQuery.data.profits,
+                          fill: CHART_COLORS[2],
+                        },
+                        {
+                          name: 'Ajustes',
+                          value: minoristaTransactionReportQuery.data.adjustments,
+                          fill: CHART_COLORS[3],
+                        },
                       ]}
                       dataKey="value"
                       label
@@ -595,13 +648,17 @@ export function ReportsPage() {
           </>
         )}
 
-        {!systemReportQuery.data && !minoristaReportQuery.data && !bankReportQuery.data && !minoristaTransactionReportQuery.data && !isLoading && (
-          <Card>
-            <CardContent className="text-center py-8">
-              <p className="text-gray-500">Selecciona un rango de fechas y haz clic en "Cargar Reporte"</p>
-            </CardContent>
-          </Card>
-        )}
+        {!systemReportQuery.data &&
+          !minoristaReportQuery.data &&
+          !bankReportQuery.data &&
+          !minoristaTransactionReportQuery.data &&
+          !isLoading && (
+            <Card>
+              <CardContent className="text-center py-8">
+                <p className="text-gray-500">Selecciona un rango de fechas y haz clic en "Cargar Reporte"</p>
+              </CardContent>
+            </Card>
+          )}
       </div>
     </div>
   )

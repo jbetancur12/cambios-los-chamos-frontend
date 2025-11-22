@@ -94,7 +94,12 @@ export function useGiroWebSocket() {
         // Notificar al servidor que el usuario se conectó
         const user = JSON.parse(localStorage.getItem('user') || '{}')
         if (user.id) {
-          console.log('[WS] 📤 Emitiendo user:connected -', { userId: user.id, role: user.role, minoristaId: user.minoristaId, transferencistaId: user.transferencistaId })
+          console.log('[WS] 📤 Emitiendo user:connected -', {
+            userId: user.id,
+            role: user.role,
+            minoristaId: user.minoristaId,
+            transferencistaId: user.transferencistaId,
+          })
           socket.emit('user:connected', {
             userId: user.id,
             role: user.role,
@@ -116,7 +121,11 @@ export function useGiroWebSocket() {
 
       // Registrar listeners para eventos de giro
       socket.on('giro:created', (event: GiroEvent) => {
-        console.log('[WS] 📨 Evento recibido: giro:created', { giroId: event.giro.id, minoristaId: event.giro.minorista?.id, transferencistaId: event.giro.transferencista?.id })
+        console.log('[WS] 📨 Evento recibido: giro:created', {
+          giroId: event.giro.id,
+          minoristaId: event.giro.minorista?.id,
+          transferencistaId: event.giro.transferencista?.id,
+        })
         emitEvent('giro:created', event)
       })
 

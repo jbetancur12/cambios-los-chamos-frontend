@@ -44,7 +44,7 @@ export function setupWebSocketSync(queryClient: QueryClient) {
         // Invalidate transferencista bank accounts when giro is executed
         if (event.giro.transferencista?.id) {
           queryClient.invalidateQueries({
-            queryKey: ['transferencista', event.giro.transferencista.id, 'bankAccounts']
+            queryKey: ['transferencista', event.giro.transferencista.id, 'bankAccounts'],
           })
         }
       })

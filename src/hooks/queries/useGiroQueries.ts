@@ -14,12 +14,15 @@ interface GirosListParams {
 export function useGirosList(params?: GirosListParams) {
   const queryString = params
     ? new URLSearchParams(
-        Object.entries(params).reduce((acc, [key, value]) => {
-          if (value !== undefined && value !== null && value !== '') {
-            acc[key] = String(value)
-          }
-          return acc
-        }, {} as Record<string, string>)
+        Object.entries(params).reduce(
+          (acc, [key, value]) => {
+            if (value !== undefined && value !== null && value !== '') {
+              acc[key] = String(value)
+            }
+            return acc
+          },
+          {} as Record<string, string>
+        )
       ).toString()
     : ''
 
@@ -56,9 +59,7 @@ export function useRecentGiros(limit: number = 5) {
   return useQuery({
     queryKey: ['giros', 'recent'],
     queryFn: async () => {
-      const response = await api.get<{ giros: Giro[] }>(
-        `/dashboard/recent-giros?limit=${limit}`
-      )
+      const response = await api.get<{ giros: Giro[] }>(`/dashboard/recent-giros?limit=${limit}`)
       return response.giros
     },
     ...applyDedupConfig('HIGH_PRIORITY'), // 30s - giros recientes

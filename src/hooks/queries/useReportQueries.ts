@@ -99,17 +99,11 @@ export interface MinoristaGiroTrendReport {
 }
 
 // Query hook for system profit report
-export function useSystemProfitReport(
-  dateFrom: string | null,
-  dateTo: string | null,
-  enabled: boolean = true
-) {
+export function useSystemProfitReport(dateFrom: string | null, dateTo: string | null, enabled: boolean = true) {
   return useQuery({
     queryKey: ['reports', 'system-profit', { dateFrom, dateTo }],
     queryFn: async () => {
-      const response = await api.get<SystemProfitReport>(
-        `/reports/system-profit?dateFrom=${dateFrom}&dateTo=${dateTo}`
-      )
+      const response = await api.get<SystemProfitReport>(`/reports/system-profit?dateFrom=${dateFrom}&dateTo=${dateTo}`)
       return response
     },
     ...applyDedupConfig('NORMAL'),
@@ -118,11 +112,7 @@ export function useSystemProfitReport(
 }
 
 // Query hook for system profit trend report
-export function useSystemProfitTrendReport(
-  dateFrom: string | null,
-  dateTo: string | null,
-  enabled: boolean = true
-) {
+export function useSystemProfitTrendReport(dateFrom: string | null, dateTo: string | null, enabled: boolean = true) {
   return useQuery({
     queryKey: ['reports', 'system-profit-trend', { dateFrom, dateTo }],
     queryFn: async () => {
@@ -137,11 +127,7 @@ export function useSystemProfitTrendReport(
 }
 
 // Query hook for minorista profit report
-export function useMinoristaProfitReport(
-  dateFrom: string | null,
-  dateTo: string | null,
-  enabled: boolean = true
-) {
+export function useMinoristaProfitReport(dateFrom: string | null, dateTo: string | null, enabled: boolean = true) {
   return useQuery({
     queryKey: ['reports', 'minorista-profit', { dateFrom, dateTo }],
     queryFn: async () => {
@@ -156,11 +142,7 @@ export function useMinoristaProfitReport(
 }
 
 // Query hook for bank transaction report
-export function useBankTransactionReport(
-  dateFrom: string | null,
-  dateTo: string | null,
-  enabled: boolean = true
-) {
+export function useBankTransactionReport(dateFrom: string | null, dateTo: string | null, enabled: boolean = true) {
   return useQuery({
     queryKey: ['reports', 'bank-transactions', { dateFrom, dateTo }],
     queryFn: async () => {
@@ -175,11 +157,7 @@ export function useBankTransactionReport(
 }
 
 // Query hook for minorista transaction report
-export function useMinoristaTransactionReport(
-  dateFrom: string | null,
-  dateTo: string | null,
-  enabled: boolean = true
-) {
+export function useMinoristaTransactionReport(dateFrom: string | null, dateTo: string | null, enabled: boolean = true) {
   return useQuery({
     queryKey: ['reports', 'minorista-transactions', { dateFrom, dateTo }],
     queryFn: async () => {
@@ -194,11 +172,7 @@ export function useMinoristaTransactionReport(
 }
 
 // Query hook for minorista giro report
-export function useMinoristaGiroReport(
-  dateFrom: string | null,
-  dateTo: string | null,
-  enabled: boolean = true
-) {
+export function useMinoristaGiroReport(dateFrom: string | null, dateTo: string | null, enabled: boolean = true) {
   return useQuery({
     queryKey: ['reports', 'minorista-giros', { dateFrom, dateTo }],
     queryFn: async () => {
@@ -213,11 +187,7 @@ export function useMinoristaGiroReport(
 }
 
 // Query hook for minorista giro trend report
-export function useMinoristaGiroTrendReport(
-  dateFrom: string | null,
-  dateTo: string | null,
-  enabled: boolean = true
-) {
+export function useMinoristaGiroTrendReport(dateFrom: string | null, dateTo: string | null, enabled: boolean = true) {
   return useQuery({
     queryKey: ['reports', 'minorista-giros-trend', { dateFrom, dateTo }],
     queryFn: async () => {

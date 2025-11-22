@@ -20,7 +20,9 @@ export function ConfigPage() {
   const { user } = useAuth()
   const queryClient = useQueryClient()
   const canAccessOperatorTab = user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN'
-  const [activeTab, setActiveTab] = useState<'operador' | 'admins' | 'impresora'>(canAccessOperatorTab ? 'operador' : 'impresora')
+  const [activeTab, setActiveTab] = useState<'operador' | 'admins' | 'impresora'>(
+    canAccessOperatorTab ? 'operador' : 'impresora'
+  )
   const [printerName, setPrinterName] = useState('')
   const [printerType, setPrinterType] = useState<'thermal' | 'injection'>('thermal')
   const [detectionDialogOpen, setDetectionDialogOpen] = useState(false)
@@ -170,7 +172,10 @@ export function ConfigPage() {
             {/* Header with Create Button */}
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Administradores</h3>
-              <Button onClick={() => setCreateAdminSheetOpen(true)} className="bg-[linear-gradient(to_right,#136BBC,#274565)] text-white">
+              <Button
+                onClick={() => setCreateAdminSheetOpen(true)}
+                className="bg-[linear-gradient(to_right,#136BBC,#274565)] text-white"
+              >
                 <Settings className="h-4 w-4 mr-2" />
                 Crear Admin
               </Button>
@@ -222,7 +227,10 @@ export function ConfigPage() {
                           <div className="flex items-center gap-2 mt-2 min-w-0">
                             <Search className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                             <p className="text-sm text-muted-foreground truncate">{admin.email}</p>
-                            <span title={admin.emailVerified ? 'Email verificado' : 'Email no verificado'} className="flex-shrink-0">
+                            <span
+                              title={admin.emailVerified ? 'Email verificado' : 'Email no verificado'}
+                              className="flex-shrink-0"
+                            >
                               {admin.emailVerified ? (
                                 <CheckCircle2 className="h-4 w-4 text-green-600" />
                               ) : (
@@ -275,7 +283,8 @@ export function ConfigPage() {
               {printerConfig && (
                 <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
                   <p className="text-sm text-green-800">
-                    <strong>Impresora configurada:</strong> {printerConfig.name} ({printerConfig.type === 'thermal' ? 'Térmica 80mm' : 'Inyección Media Carta'})
+                    <strong>Impresora configurada:</strong> {printerConfig.name} (
+                    {printerConfig.type === 'thermal' ? 'Térmica 80mm' : 'Inyección Media Carta'})
                   </p>
                 </div>
               )}
@@ -283,7 +292,9 @@ export function ConfigPage() {
               {/* Printer Name */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="printerName" className="font-medium">Nombre de la impresora</Label>
+                  <Label htmlFor="printerName" className="font-medium">
+                    Nombre de la impresora
+                  </Label>
                   <button
                     onClick={() => setDetectionDialogOpen(true)}
                     className="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
@@ -300,7 +311,9 @@ export function ConfigPage() {
                   placeholder="Ej: Printer-Office-1, HP LaserJet, etc."
                   className="w-full"
                 />
-                <p className="text-xs text-muted-foreground">Nombre o modelo de la impresora que deseas configurar como predeterminada</p>
+                <p className="text-xs text-muted-foreground">
+                  Nombre o modelo de la impresora que deseas configurar como predeterminada
+                </p>
               </div>
 
               {/* Printer Type Selection */}
@@ -328,13 +341,17 @@ export function ConfigPage() {
                     Inyección (Media Carta)
                   </button>
                 </div>
-                <p className="text-xs text-muted-foreground">Selecciona el tipo de impresora que utilizarás para imprimir los tiquetes</p>
+                <p className="text-xs text-muted-foreground">
+                  Selecciona el tipo de impresora que utilizarás para imprimir los tiquetes
+                </p>
               </div>
 
               {/* Info Box */}
               <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                 <p className="text-sm text-blue-800">
-                  <strong>Nota:</strong> Una vez configurada, la impresora será utilizada automáticamente al imprimir tiquetes de giro. Si la impresora no está disponible, podrás seleccionar otra desde el diálogo de impresión.
+                  <strong>Nota:</strong> Una vez configurada, la impresora será utilizada automáticamente al imprimir
+                  tiquetes de giro. Si la impresora no está disponible, podrás seleccionar otra desde el diálogo de
+                  impresión.
                 </p>
               </div>
 

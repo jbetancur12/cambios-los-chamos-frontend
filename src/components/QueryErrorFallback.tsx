@@ -17,11 +17,7 @@ interface QueryErrorFallbackProps {
  *   return <QueryErrorFallback error={error} onRetry={refetch} isLoading={isLoading} />
  * }
  */
-export function QueryErrorFallback({
-  error,
-  onRetry,
-  isLoading,
-}: QueryErrorFallbackProps) {
+export function QueryErrorFallback({ error, onRetry, isLoading }: QueryErrorFallbackProps) {
   return (
     <div className="query-error-fallback">
       <div className="query-error-content">
@@ -30,11 +26,7 @@ export function QueryErrorFallback({
         <h3>Error en la carga de datos</h3>
         <p>{error?.message || 'Ocurrió un error inesperado'}</p>
 
-        <button
-          onClick={onRetry}
-          disabled={isLoading}
-          className="query-error-retry-btn"
-        >
+        <button onClick={onRetry} disabled={isLoading} className="query-error-retry-btn">
           <RefreshCw size={16} />
           {isLoading ? 'Reintentando...' : 'Reintentar'}
         </button>
@@ -46,13 +38,7 @@ export function QueryErrorFallback({
 /**
  * Componente para mostrar error en contexto de página
  */
-export function PageErrorFallback({
-  error,
-  onRetry,
-}: {
-  error: Error | null
-  onRetry: () => void
-}) {
+export function PageErrorFallback({ error, onRetry }: { error: Error | null; onRetry: () => void }) {
   return (
     <div className="page-error-fallback">
       <div className="page-error-content">
@@ -60,8 +46,7 @@ export function PageErrorFallback({
 
         <h2>No pudimos cargar esta página</h2>
         <p className="page-error-message">
-          {error?.message ||
-            'Parece que hay un problema. Intenta recargar la página.'}
+          {error?.message || 'Parece que hay un problema. Intenta recargar la página.'}
         </p>
 
         <button onClick={onRetry} className="page-error-retry-btn">

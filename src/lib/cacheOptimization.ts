@@ -15,10 +15,7 @@ import { QueryClient, type InvalidateQueryFilters } from '@tanstack/react-query'
  * invalidateQueryByPattern(queryClient, ['giros'])
  * // Invalida: ['giros', { status: 'pending' }], ['giros', { page: 1 }], etc.
  */
-export function invalidateQueryByPattern(
-  queryClient: QueryClient,
-  queryKey: (string | number)[]
-) {
+export function invalidateQueryByPattern(queryClient: QueryClient, queryKey: (string | number)[]) {
   return queryClient.invalidateQueries({
     queryKey,
     exact: false,
@@ -30,10 +27,7 @@ export function invalidateQueryByPattern(
  *
  * Útil para refetch selectivo sin bombardear con requests
  */
-export function refetchIfStale(
-  queryClient: QueryClient,
-  queryKey: unknown[]
-) {
+export function refetchIfStale(queryClient: QueryClient, queryKey: unknown[]) {
   const query = queryClient.getQueryCache().find({ queryKey, exact: true })
 
   if (query && query.isStale()) {
@@ -48,10 +42,7 @@ export function refetchIfStale(
  *
  * Elimina data de una query sin afectar otras
  */
-export function clearQueryData(
-  queryClient: QueryClient,
-  queryKey: unknown[]
-) {
+export function clearQueryData(queryClient: QueryClient, queryKey: unknown[]) {
   queryClient.setQueryData(queryKey, undefined)
 }
 
@@ -60,14 +51,11 @@ export function clearQueryData(
  *
  * Limpia múltiples queries
  */
-export function clearQueryDataByPattern(
-  queryClient: QueryClient,
-  queryKeyPrefix: (string | number)[]
-) {
+export function clearQueryDataByPattern(queryClient: QueryClient, queryKeyPrefix: (string | number)[]) {
   const cache = queryClient.getQueryCache()
   const queries = cache.findAll({ queryKey: queryKeyPrefix, exact: false })
 
-  queries.forEach(query => {
+  queries.forEach((query) => {
     queryClient.setQueryData(query.queryKey, undefined)
   })
 }
@@ -108,13 +96,8 @@ export function updateQueryDataOptimistic<T>(
  * Esto invalidará todas a la vez pero ejecutará
  * los refetches en paralelo
  */
-export async function batchInvalidateQueries(
-  queryClient: QueryClient,
-  queryKeys: (unknown[])[]
-) {
-  const promises = queryKeys.map(queryKey =>
-    invalidateQueryByPattern(queryClient, queryKey as any)
-  )
+export async function batchInvalidateQueries(queryClient: QueryClient, queryKeys: unknown[][]) {
+  const promises = queryKeys.map((queryKey) => invalidateQueryByPattern(queryClient, queryKey as any))
 
   return Promise.all(promises)
 }
@@ -131,7 +114,7 @@ export function garbageCollectCache(queryClient: QueryClient) {
 
   let removed = 0
 
-  queries.forEach(query => {
+  queries.forEach((query) => {
     // Remover queries sin observadores (no se están usando)
     if (query.getObserversCount() === 0) {
       const now = Date.now()
@@ -199,10 +182,8 @@ export class CacheStorage {
 
   clear() {
     try {
-      const keys = Object.keys(localStorage).filter(key =>
-        key.startsWith(this.prefix)
-      )
-      keys.forEach(key => localStorage.removeItem(key))
+      const keys = Object.keys(localStorage).filter((key) => key.startsWith(this.prefix))
+      keys.forEach((key) => localStorage.removeItem(key))
     } catch (e) {
       console.warn('Failed to clear localStorage cache', e)
     }

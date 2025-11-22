@@ -189,7 +189,6 @@ export function GirosPage() {
     }
   }
 
-
   const handleGiroClick = (giroId: string) => {
     setSelectedGiroId(giroId)
     setDetailSheetOpen(true)
@@ -337,7 +336,9 @@ export function GirosPage() {
                   size="sm"
                   onClick={() => setFilterUserType('MINORISTA')}
                   className={filterUserType === 'MINORISTA' ? 'text-white' : ''}
-                  style={filterUserType === 'MINORISTA' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+                  style={
+                    filterUserType === 'MINORISTA' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}
+                  }
                 >
                   Minoristas
                 </Button>
@@ -346,7 +347,11 @@ export function GirosPage() {
                   size="sm"
                   onClick={() => setFilterUserType('TRANSFERENCISTA')}
                   className={filterUserType === 'TRANSFERENCISTA' ? 'text-white' : ''}
-                  style={filterUserType === 'TRANSFERENCISTA' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+                  style={
+                    filterUserType === 'TRANSFERENCISTA'
+                      ? { background: 'linear-gradient(to right, #136BBC, #274565)' }
+                      : {}
+                  }
                 >
                   Trasferencistas
                 </Button>
@@ -364,9 +369,7 @@ export function GirosPage() {
         >
           <p className="text-xs font-semibold text-muted-foreground">Fecha</p>
           <ChevronDown
-            className={`h-4 w-4 text-muted-foreground transition-transform ${
-              dateFiltersExpanded ? 'rotate-180' : ''
-            }`}
+            className={`h-4 w-4 text-muted-foreground transition-transform ${dateFiltersExpanded ? 'rotate-180' : ''}`}
           />
         </button>
 
@@ -504,9 +507,12 @@ export function GirosPage() {
                     const statusBadge = getStatusBadge(giro.status)
                     const executionTypeBadge = getExecutionTypeBadge(giro.executionType)
                     const copAmount = giro.currencyInput === 'COP' ? giro.amountInput : 0
-                    const userName = filterUserType === 'TRANSFERENCISTA'
-                      ? (giro.transferencista?.user?.fullName || '—')
-                      : user?.role === 'TRANSFERENCISTA' ? (giro.createdBy?.fullName || '—') : (giro.minorista?.user?.fullName || giro.createdBy?.fullName || '—')
+                    const userName =
+                      filterUserType === 'TRANSFERENCISTA'
+                        ? giro.transferencista?.user?.fullName || '—'
+                        : user?.role === 'TRANSFERENCISTA'
+                          ? giro.createdBy?.fullName || '—'
+                          : giro.minorista?.user?.fullName || giro.createdBy?.fullName || '—'
 
                     return (
                       <tr
@@ -579,9 +585,12 @@ export function GirosPage() {
               const statusBadge = getStatusBadge(giro.status)
               const executionTypeBadge = getExecutionTypeBadge(giro.executionType)
               const copAmount = giro.currencyInput === 'COP' ? giro.amountInput : 0
-              const userName = filterUserType === 'TRANSFERENCISTA'
-                ? (giro.transferencista?.user?.fullName || '—')
-                : user?.role === 'TRANSFERENCISTA' ? (giro.createdBy?.fullName || '—') : (giro.minorista?.user?.fullName || giro.createdBy?.fullName || '—')
+              const userName =
+                filterUserType === 'TRANSFERENCISTA'
+                  ? giro.transferencista?.user?.fullName || '—'
+                  : user?.role === 'TRANSFERENCISTA'
+                    ? giro.createdBy?.fullName || '—'
+                    : giro.minorista?.user?.fullName || giro.createdBy?.fullName || '—'
 
               return (
                 <div
@@ -662,7 +671,10 @@ export function GirosPage() {
           )}
 
           {/* Compact Summary Footer */}
-          <div className="mt-3 rounded border text-white text-xs" style={{ background: 'linear-gradient(to right, #136BBC, #274565)', borderColor: '#136BBC' }}>
+          <div
+            className="mt-3 rounded border text-white text-xs"
+            style={{ background: 'linear-gradient(to right, #136BBC, #274565)', borderColor: '#136BBC' }}
+          >
             <div className="p-3 flex justify-between items-center gap-4">
               <div>
                 <span className="font-semibold">{totals.count}</span>
@@ -698,7 +710,9 @@ export function GirosPage() {
                     </div>
                     <div className="text-left">
                       <p className="text-xs opacity-80">Total Ganancias</p>
-                      <p className="font-semibold">{formatCurrency(totals.minoristaProfit + totals.systemProfit, 'COP')}</p>
+                      <p className="font-semibold">
+                        {formatCurrency(totals.minoristaProfit + totals.systemProfit, 'COP')}
+                      </p>
                     </div>
                   </div>
                 ) : (
@@ -746,9 +760,7 @@ export function GirosPage() {
                 <Input
                   type="date"
                   value={customDateRange.from}
-                  onChange={(e) =>
-                    setCustomDateRange({ ...customDateRange, from: e.target.value })
-                  }
+                  onChange={(e) => setCustomDateRange({ ...customDateRange, from: e.target.value })}
                 />
               </div>
               <div className="space-y-2">
@@ -756,9 +768,7 @@ export function GirosPage() {
                 <Input
                   type="date"
                   value={customDateRange.to}
-                  onChange={(e) =>
-                    setCustomDateRange({ ...customDateRange, to: e.target.value })
-                  }
+                  onChange={(e) => setCustomDateRange({ ...customDateRange, to: e.target.value })}
                 />
               </div>
               <div className="flex gap-2 pt-4">
@@ -772,12 +782,7 @@ export function GirosPage() {
                 >
                   Aplicar
                 </Button>
-                <Button
-                  onClick={() => setCustomDateModalOpen(false)}
-                  variant="outline"
-                  className="flex-1"
-                  size="sm"
-                >
+                <Button onClick={() => setCustomDateModalOpen(false)} variant="outline" className="flex-1" size="sm">
                   Cancelar
                 </Button>
               </div>

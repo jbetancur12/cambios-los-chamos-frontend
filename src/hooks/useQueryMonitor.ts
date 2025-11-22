@@ -73,7 +73,6 @@ export function useQueryMonitor() {
   return {
     getMetrics: () => Array.from(queryMetrics.values()).sort((a, b) => b.callCount - a.callCount),
     resetMetrics: () => queryMetrics.clear(),
-    getOverfetchedQueries: () =>
-      Array.from(queryMetrics.values()).filter(m => m.callCount > 5),
+    getOverfetchedQueries: () => Array.from(queryMetrics.values()).filter((m) => m.callCount > 5),
   }
 }

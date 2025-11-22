@@ -66,9 +66,7 @@ export function usePrefetchQueries() {
       queryClient.prefetchQuery({
         queryKey: ['exchangeRate', 'current'],
         queryFn: async () => {
-          const response = await api.get<{ rate: ExchangeRate }>(
-            '/exchange-rate/current'
-          )
+          const response = await api.get<{ rate: ExchangeRate }>('/exchange-rate/current')
           return response.rate
         },
       })
@@ -81,12 +79,9 @@ export function usePrefetchQueries() {
       queryClient.prefetchQuery({
         queryKey: ['exchangeRate', 'history', limit],
         queryFn: async () => {
-          const response = await api.get<{ rates: ExchangeRate[] }>(
-            '/exchange-rate/history',
-            {
-              params: { limit },
-            }
-          )
+          const response = await api.get<{ rates: ExchangeRate[] }>('/exchange-rate/history', {
+            params: { limit },
+          })
           return response.rates
         },
       })
@@ -140,18 +135,14 @@ export function usePrefetchQueries() {
           'giros',
           {
             dateFrom: nextMonth.toISOString().split('T')[0],
-            dateTo: new Date(nextMonth.getFullYear(), nextMonth.getMonth() + 1, 0)
-              .toISOString()
-              .split('T')[0],
+            dateTo: new Date(nextMonth.getFullYear(), nextMonth.getMonth() + 1, 0).toISOString().split('T')[0],
           },
         ],
         queryFn: async () => {
           const response = await api.get<{ giros: Giro[] }>('/giros', {
             params: {
               dateFrom: nextMonth.toISOString().split('T')[0],
-              dateTo: new Date(nextMonth.getFullYear(), nextMonth.getMonth() + 1, 0)
-                .toISOString()
-                .split('T')[0],
+              dateTo: new Date(nextMonth.getFullYear(), nextMonth.getMonth() + 1, 0).toISOString().split('T')[0],
             },
           })
           return response.giros
@@ -189,13 +180,8 @@ export function usePrefetchQueries() {
  * </Link>
  */
 export function usePrefetchOnHover() {
-  const {
-    prefetchGiros,
-    prefetchCurrentExchangeRate,
-    prefetchBankAccounts,
-    prefetchRecentGiros,
-    prefetchGiroDetail,
-  } = usePrefetchQueries()
+  const { prefetchGiros, prefetchCurrentExchangeRate, prefetchBankAccounts, prefetchRecentGiros, prefetchGiroDetail } =
+    usePrefetchQueries()
 
   return {
     giros: () => prefetchGiros(),

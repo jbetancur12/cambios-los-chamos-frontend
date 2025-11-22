@@ -59,7 +59,10 @@ export function useBeneficiarySuggestions() {
 
   // Get suggestions based on search query
   const getSuggestions = useCallback(
-    (query: string, executionType?: 'TRANSFERENCIA' | 'PAGO_MOVIL' | 'RECARGA' | 'EFECTIVO' | 'ZELLE' | 'OTROS'): BeneficiaryData[] => {
+    (
+      query: string,
+      executionType?: 'TRANSFERENCIA' | 'PAGO_MOVIL' | 'RECARGA' | 'EFECTIVO' | 'ZELLE' | 'OTROS'
+    ): BeneficiaryData[] => {
       const searchLower = query.toLowerCase()
 
       return suggestions.filter((b) => {

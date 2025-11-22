@@ -178,7 +178,9 @@ export function RechargeForm({ onSuccess }: RechargeFormProps) {
   return (
     <form onSubmit={handleSubmit} className="p-6 space-y-4">
       <div>
-        <Label htmlFor="operator" className="hidden md:block">Operador</Label>
+        <Label htmlFor="operator" className="hidden md:block">
+          Operador
+        </Label>
         <Select value={selectedOperator} onValueChange={setSelectedOperator}>
           <SelectTrigger id="operator">
             <SelectValue placeholder="Selecciona un operador" />
@@ -194,7 +196,9 @@ export function RechargeForm({ onSuccess }: RechargeFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="amount" className="hidden md:block">Monto en Bs</Label>
+        <Label htmlFor="amount" className="hidden md:block">
+          Monto en Bs
+        </Label>
         <Select value={selectedAmount} onValueChange={setSelectedAmount}>
           <SelectTrigger id="amount">
             <SelectValue placeholder="Selecciona un monto" />
@@ -210,18 +214,16 @@ export function RechargeForm({ onSuccess }: RechargeFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="phone" className="hidden md:block">Teléfono</Label>
-        <Input
-          id="phone"
-          placeholder="04141234567"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          required
-        />
+        <Label htmlFor="phone" className="hidden md:block">
+          Teléfono
+        </Label>
+        <Input id="phone" placeholder="04141234567" value={phone} onChange={(e) => setPhone(e.target.value)} required />
       </div>
 
       <div>
-        <Label htmlFor="senderName" className="hidden md:block">Contacto que Envía</Label>
+        <Label htmlFor="senderName" className="hidden md:block">
+          Contacto que Envía
+        </Label>
         <Input
           id="senderName"
           placeholder="Nombre del remitente"
@@ -256,7 +258,11 @@ export function RechargeForm({ onSuccess }: RechargeFormProps) {
 
       {/* Submit */}
       <div className="flex gap-3 pt-4">
-        <Button type="submit" disabled={loading || hasInsufficientBalance()} className="w-full bg-[linear-gradient(to_right,#136BBC,#274565)]">
+        <Button
+          type="submit"
+          disabled={loading || hasInsufficientBalance()}
+          className="w-full bg-[linear-gradient(to_right,#136BBC,#274565)]"
+        >
           {loading ? 'Procesando...' : 'Enviar Recarga'}
         </Button>
       </div>

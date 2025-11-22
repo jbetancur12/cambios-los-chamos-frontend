@@ -3,16 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { DollarSign, TrendingUp, CheckCircle, Activity, ChevronDown, ChevronUp } from 'lucide-react'
 import { useMinoristaGiroReport, useMinoristaGiroTrendReport } from '@/hooks/queries/useReportQueries'
 
@@ -95,7 +86,9 @@ export function MinoristaReportsPage() {
     toast.error('Error al cargar tendencia de giros')
   }
 
-  const handleQuickDateRange = (range: 'today' | 'yesterday' | 'week' | 'lastWeek' | 'month' | 'lastMonth' | 'year') => {
+  const handleQuickDateRange = (
+    range: 'today' | 'yesterday' | 'week' | 'lastWeek' | 'month' | 'lastMonth' | 'year'
+  ) => {
     const dates = getDateRange(range)
     setDateFrom(dates.from)
     setDateTo(dates.to)
@@ -122,48 +115,52 @@ export function MinoristaReportsPage() {
             {filterOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
           </div>
         </CardHeader>
-        {filterOpen && <CardContent className="space-y-4">
-          {/* Quick Date Range Buttons */}
-          <div className="flex gap-2 flex-wrap">
-            <Button variant="outline" size="sm" onClick={() => handleQuickDateRange('today')}>
-              Hoy
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => handleQuickDateRange('yesterday')}>
-              Ayer
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => handleQuickDateRange('week')}>
-              Esta Semana
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => handleQuickDateRange('lastWeek')}>
-              Semana Pasada
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => handleQuickDateRange('month')}>
-              Este Mes
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => handleQuickDateRange('lastMonth')}>
-              Mes Pasado
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => handleQuickDateRange('year')}>
-              Este Año
-            </Button>
-          </div>
+        {filterOpen && (
+          <CardContent className="space-y-4">
+            {/* Quick Date Range Buttons */}
+            <div className="flex gap-2 flex-wrap">
+              <Button variant="outline" size="sm" onClick={() => handleQuickDateRange('today')}>
+                Hoy
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => handleQuickDateRange('yesterday')}>
+                Ayer
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => handleQuickDateRange('week')}>
+                Esta Semana
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => handleQuickDateRange('lastWeek')}>
+                Semana Pasada
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => handleQuickDateRange('month')}>
+                Este Mes
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => handleQuickDateRange('lastMonth')}>
+                Mes Pasado
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => handleQuickDateRange('year')}>
+                Este Año
+              </Button>
+            </div>
 
-          {/* Manual Date Range */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-            <div>
-              <label className="block text-sm font-medium mb-2">Desde</label>
-              <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="w-full" />
+            {/* Manual Date Range */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+              <div>
+                <label className="block text-sm font-medium mb-2">Desde</label>
+                <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="w-full" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Hasta</label>
+                <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-full" />
+              </div>
+              <Button
+                disabled={isLoading || !dateFrom || !dateTo}
+                className="w-full bg-[linear-gradient(to_right,#136BBC,#274565)]"
+              >
+                {isLoading ? 'Cargando...' : 'Cargar Reporte'}
+              </Button>
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Hasta</label>
-              <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-full" />
-            </div>
-            <Button disabled={isLoading || !dateFrom || !dateTo} className="w-full bg-[linear-gradient(to_right,#136BBC,#274565)]">
-              {isLoading ? 'Cargando...' : 'Cargar Reporte'}
-            </Button>
-          </div>
-        </CardContent>
-        }
+          </CardContent>
+        )}
       </Card>
 
       {/* Stats Cards */}
@@ -181,12 +178,7 @@ export function MinoristaReportsPage() {
             value={formatCurrency(report.totalProfit)}
             color="bg-green-100"
           />
-          <StatCard
-            icon={Activity}
-            label="Total de Giros"
-            value={report.totalGiros.toString()}
-            color="bg-purple-100"
-          />
+          <StatCard icon={Activity} label="Total de Giros" value={report.totalGiros.toString()} color="bg-purple-100" />
           <StatCard
             icon={CheckCircle}
             label="Giros Completados"

@@ -17,9 +17,7 @@ interface AxiosErrorResponse {
  * Uso:
  * const { data, isError, errorMessage } = useQueryWithErrorHandling(useGirosList())
  */
-export function useQueryError<T>(
-  query: UseQueryResult<T> | UseInfiniteQueryResult<T>
-) {
+export function useQueryError<T>(query: UseQueryResult<T> | UseInfiniteQueryResult<T>) {
   const isError = 'isError' in query ? query.isError : false
   const error = 'error' in query ? query.error : null
 
@@ -29,10 +27,7 @@ export function useQueryError<T>(
   if (error && typeof error === 'object' && 'response' in error) {
     const axiosError = error as AxiosErrorResponse
     errorStatus = axiosError.response?.status
-    errorMessage =
-      axiosError.response?.data?.message ||
-      axiosError.message ||
-      'Error en la solicitud'
+    errorMessage = axiosError.response?.data?.message || axiosError.message || 'Error en la solicitud'
   } else if (error instanceof Error) {
     errorMessage = error.message
   } else {

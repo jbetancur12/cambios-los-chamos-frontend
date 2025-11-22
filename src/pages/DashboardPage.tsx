@@ -84,7 +84,9 @@ export function DashboardPage() {
       <div className="p-4 md:p-6 max-w-7xl mx-auto">
         <Card className="border-destructive">
           <CardContent className="p-6">
-            <p className="text-sm text-destructive">{error instanceof Error ? error.message : 'Error al cargar estadísticas'}</p>
+            <p className="text-sm text-destructive">
+              {error instanceof Error ? error.message : 'Error al cargar estadísticas'}
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -111,8 +113,12 @@ export function DashboardPage() {
             <div className="text-xl md:text-2xl font-bold">{stats?.girosCount ?? 0}</div>
             {isTransferencista && (stats?.processingToday !== undefined || stats?.completedToday !== undefined) ? (
               <div className="text-xs text-muted-foreground space-y-1 mt-2">
-                <p>Procesando hoy: <span className="font-semibold text-blue-600">{stats?.processingToday ?? 0}</span></p>
-                <p>Completados hoy: <span className="font-semibold text-green-600">{stats?.completedToday ?? 0}</span></p>
+                <p>
+                  Procesando hoy: <span className="font-semibold text-blue-600">{stats?.processingToday ?? 0}</span>
+                </p>
+                <p>
+                  Completados hoy: <span className="font-semibold text-green-600">{stats?.completedToday ?? 0}</span>
+                </p>
               </div>
             ) : (
               <p className="text-xs text-muted-foreground">{isTransferencista ? 'Asignados' : 'Pendientes'}</p>

@@ -30,9 +30,19 @@ interface NavItem {
 // Main items for bottom navigation (5 total including hamburger)
 const bottomNavItems: NavItem[] = [
   { icon: Home, label: 'Inicio', href: '/dashboard', roles: ['SUPER_ADMIN', 'ADMIN', 'TRANSFERENCISTA', 'MINORISTA'] },
-  { icon: FileText, label: 'Solicitudes', href: '/giros', roles: ['SUPER_ADMIN', 'ADMIN', 'TRANSFERENCISTA', 'MINORISTA'] },
+  {
+    icon: FileText,
+    label: 'Solicitudes',
+    href: '/giros',
+    roles: ['SUPER_ADMIN', 'ADMIN', 'TRANSFERENCISTA', 'MINORISTA'],
+  },
   { icon: Building, label: 'Cuentas', href: '/cuentas-bancarias', roles: ['SUPER_ADMIN', 'ADMIN'] },
-  { icon: Send, label: 'Enviar giro', href: '/enviar-giro', roles: ['SUPER_ADMIN', 'ADMIN', 'TRANSFERENCISTA', 'MINORISTA'] },
+  {
+    icon: Send,
+    label: 'Enviar giro',
+    href: '/enviar-giro',
+    roles: ['SUPER_ADMIN', 'ADMIN', 'TRANSFERENCISTA', 'MINORISTA'],
+  },
   { icon: Users, label: 'Usuarios', href: '/usuarios', roles: ['SUPER_ADMIN'] },
 ]
 
@@ -102,9 +112,15 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-background">
       {/* Desktop Sidebar */}
       <aside className="hidden md:fixed md:inset-y-0 md:flex md:w-64 md:flex-col">
-        <div className="flex flex-col flex-1 min-h-0 border-r" style={{ background: 'linear-gradient(to bottom, #136BBC, #274565)' }}>
+        <div
+          className="flex flex-col flex-1 min-h-0 border-r"
+          style={{ background: 'linear-gradient(to bottom, #136BBC, #274565)' }}
+        >
           {/* Header */}
-          <div className="flex items-center gap-3 h-40 px-6 border-b" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+          <div
+            className="flex items-center gap-3 h-40 px-6 border-b"
+            style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}
+          >
             <img src="/LogoLosChamos.avif" alt="Logo" className="h-30 w-30" />
           </div>
 
@@ -119,11 +135,11 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
                   to={item.href}
                   className={cn(
                     'flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors',
-                    isActive
-                      ? 'text-white'
-                      : 'text-blue-100 hover:text-white'
+                    isActive ? 'text-white' : 'text-blue-100 hover:text-white'
                   )}
-                  style={isActive ? { backgroundColor: 'rgba(255, 255, 255, 0.15)' } : { backgroundColor: 'transparent' }}
+                  style={
+                    isActive ? { backgroundColor: 'rgba(255, 255, 255, 0.15)' } : { backgroundColor: 'transparent' }
+                  }
                 >
                   <Icon className="w-5 h-5" />
                   <span>{item.label}</span>
@@ -138,7 +154,11 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
               <p className="text-sm font-medium text-white">{user?.fullName}</p>
               <p className="text-xs text-blue-100">{user?.email}</p>
             </div>
-            <Button className="w-full justify-start gap-2 text-white hover:text-white" style={{ backgroundColor: '#37B6FF', border: 'none' }} onClick={handleLogout}>
+            <Button
+              className="w-full justify-start gap-2 text-white hover:text-white"
+              style={{ backgroundColor: '#37B6FF', border: 'none' }}
+              onClick={handleLogout}
+            >
               <LogOut className="w-4 h-4" />
               Cerrar Sesión
             </Button>
@@ -148,10 +168,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
 
       {/* Mobile Side Menu */}
       {sideMenuOpen && (
-        <div
-          className="fixed inset-0 z-40 md:hidden bg-black/50"
-          onClick={() => setSideMenuOpen(false)}
-        />
+        <div className="fixed inset-0 z-40 md:hidden bg-black/50" onClick={() => setSideMenuOpen(false)} />
       )}
       <aside
         className={cn(
@@ -162,12 +179,12 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
       >
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex items-center justify-between h-16 px-4 border-b" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+          <div
+            className="flex items-center justify-between h-16 px-4 border-b"
+            style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}
+          >
             <img src="/LogoLosChamos.avif" alt="Logo" className="h-10 w-10" />
-            <button
-              onClick={() => setSideMenuOpen(false)}
-              className="text-white hover:text-blue-200"
-            >
+            <button onClick={() => setSideMenuOpen(false)} className="text-white hover:text-blue-200">
               <X className="w-6 h-6" />
             </button>
           </div>
@@ -184,11 +201,11 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
                   onClick={() => setSideMenuOpen(false)}
                   className={cn(
                     'flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors',
-                    isActive
-                      ? 'text-white'
-                      : 'text-blue-100 hover:text-white'
+                    isActive ? 'text-white' : 'text-blue-100 hover:text-white'
                   )}
-                  style={isActive ? { backgroundColor: 'rgba(255, 255, 255, 0.15)' } : { backgroundColor: 'transparent' }}
+                  style={
+                    isActive ? { backgroundColor: 'rgba(255, 255, 255, 0.15)' } : { backgroundColor: 'transparent' }
+                  }
                 >
                   <Icon className="w-5 h-5" />
                   <span>{item.label}</span>
@@ -203,7 +220,11 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
               <p className="text-sm font-medium text-white">{user?.fullName}</p>
               <p className="text-xs text-blue-100 truncate">{user?.email}</p>
             </div>
-            <Button className="w-full justify-start gap-2 text-white hover:text-white text-sm" style={{ backgroundColor: '#37B6FF', border: 'none' }} onClick={handleLogout}>
+            <Button
+              className="w-full justify-start gap-2 text-white hover:text-white text-sm"
+              style={{ backgroundColor: '#37B6FF', border: 'none' }}
+              onClick={handleLogout}
+            >
               <LogOut className="w-4 h-4" />
               Cerrar Sesión
             </Button>
@@ -214,7 +235,13 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
       {/* Main Content */}
       <div className="md:pl-64 flex flex-col min-h-screen">
         {/* Mobile Header */}
-        <header className="sticky top-0 z-40 flex h-16 items-center gap-3 px-4 md:hidden text-white" style={{ background: 'linear-gradient(to right, #136BBC, #274565)', borderBottomColor: 'rgba(255, 255, 255, 0.1)' }} >
+        <header
+          className="sticky top-0 z-40 flex h-16 items-center gap-3 px-4 md:hidden text-white"
+          style={{
+            background: 'linear-gradient(to right, #136BBC, #274565)',
+            borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+          }}
+        >
           <img src="/LogoLosChamos.avif" alt="Logo" className="h-20 w-20" />
           <h1 className="text-lg font-semibold">Cambios los Chamos</h1>
         </header>
@@ -223,10 +250,16 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         <main className="flex-1 pb-20 md:pb-6">{children}</main>
 
         {/* Mobile Bottom Navigation - 5 icons */}
-        <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden border-t text-white" style={{ background: 'linear-gradient(to right, #136BBC, #274565)', borderTopColor: 'rgba(255, 255, 255, 0.1)' }}>
+        <nav
+          className="fixed bottom-0 left-0 right-0 z-40 md:hidden border-t text-white"
+          style={{
+            background: 'linear-gradient(to right, #136BBC, #274565)',
+            borderTopColor: 'rgba(255, 255, 255, 0.1)',
+          }}
+        >
           <div className="flex h-16 items-center justify-around">
             {/* Solicitudes */}
-            {visibleBottomItems.find(item => item.href === '/giros') && (
+            {visibleBottomItems.find((item) => item.href === '/giros') && (
               <Link
                 to="/giros"
                 className={cn(
@@ -240,12 +273,14 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
             )}
 
             {/* Cuentas */}
-            {visibleBottomItems.find(item => item.href === '/cuentas-bancarias') && (
+            {visibleBottomItems.find((item) => item.href === '/cuentas-bancarias') && (
               <Link
                 to="/cuentas-bancarias"
                 className={cn(
                   'flex flex-col items-center justify-center gap-1 flex-1 h-16 transition-colors',
-                  location.pathname === '/cuentas-bancarias' ? 'text-white font-semibold' : 'text-blue-100 hover:text-white'
+                  location.pathname === '/cuentas-bancarias'
+                    ? 'text-white font-semibold'
+                    : 'text-blue-100 hover:text-white'
                 )}
               >
                 <Building className="w-6 h-6" />
@@ -254,7 +289,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
             )}
 
             {/* Enviar Giro */}
-            {visibleBottomItems.find(item => item.href === '/enviar-giro') && (
+            {visibleBottomItems.find((item) => item.href === '/enviar-giro') && (
               <Link
                 to="/enviar-giro"
                 className={cn(
@@ -268,7 +303,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
             )}
 
             {/* Usuarios */}
-            {visibleBottomItems.find(item => item.href === '/usuarios') && (
+            {visibleBottomItems.find((item) => item.href === '/usuarios') && (
               <Link
                 to="/usuarios"
                 className={cn(

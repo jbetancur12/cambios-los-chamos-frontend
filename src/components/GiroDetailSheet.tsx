@@ -8,7 +8,14 @@ import { toast } from 'sonner'
 import { useAuth } from '@/contexts/AuthContext'
 import { useGiroDetail, useMinoristaTransaction } from '@/hooks/queries/useGiroQueries'
 import { useBankAccountsList, useBanksList } from '@/hooks/queries/useBankQueries'
-import { useExecuteGiro, useMarkGiroAsProcessing, useReturnGiro, useDeleteGiro, useUpdateGiro, useUpdateGiroRate } from '@/hooks/mutations/useGiroMutations'
+import {
+  useExecuteGiro,
+  useMarkGiroAsProcessing,
+  useReturnGiro,
+  useDeleteGiro,
+  useUpdateGiro,
+  useUpdateGiroRate,
+} from '@/hooks/mutations/useGiroMutations'
 import { useQueryClient } from '@tanstack/react-query'
 import { PaymentProofUpload } from './PaymentProofUpload'
 import {
@@ -63,7 +70,6 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
   const { data: bankAccounts = [] } = useBankAccountsList(user?.role)
   const { data: banks = [] } = useBanksList()
   const { data: minoristaTransaction } = useMinoristaTransaction(open && isMinorista ? giroId : null)
-
 
   // Mutations
   const executeGiroMutation = useExecuteGiro()
@@ -129,7 +135,6 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
       setProofUrl('')
     }
   }, [open, giro])
-
 
   const handleMarkAsProcessing = () => {
     if (!giro) return
@@ -370,7 +375,9 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
             <div className="space-y-2">
               {/* Status Badge */}
               {statusBadge && StatusIcon && (
-                <div className={`flex items-center justify-center gap-1 py-1 px-3 rounded text-xs font-semibold ${statusBadge.className}`}>
+                <div
+                  className={`flex items-center justify-center gap-1 py-1 px-3 rounded text-xs font-semibold ${statusBadge.className}`}
+                >
                   <StatusIcon className="h-3 w-3" />
                   <span>{statusBadge.label}</span>
                 </div>
@@ -608,125 +615,131 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
 
               {/* Exchange Rate Applied - Only shown to Admins */}
               {isAdmin && (
-              <div className="p-2 bg-muted rounded text-xs space-y-1">
-                <h3 className="font-semibold flex items-center gap-1">
-                  <TrendingUp className="h-3 w-3" />
-                  Tasa
-                </h3>
+                <div className="p-2 bg-muted rounded text-xs space-y-1">
+                  <h3 className="font-semibold flex items-center gap-1">
+                    <TrendingUp className="h-3 w-3" />
+                    Tasa
+                  </h3>
 
-                {isEditingRate ? (
-                  // MODO EDICIÓN PARA ADMIN/SUPER_ADMIN
-                  <div className="space-y-3">
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="space-y-1">
-                        <Label htmlFor="editBuyRate" className="text-xs">
-                          Compra
-                        </Label>
-                        <Input
-                          id="editBuyRate"
-                          type="number"
-                          step="0.01"
-                          value={editableRate.buyRate}
-                          onChange={(e) =>
-                            setEditableRate({ ...editableRate, buyRate: parseFloat(e.target.value) || 0 })
-                          }
-                        />
+                  {isEditingRate ? (
+                    // MODO EDICIÓN PARA ADMIN/SUPER_ADMIN
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="space-y-1">
+                          <Label htmlFor="editBuyRate" className="text-xs">
+                            Compra
+                          </Label>
+                          <Input
+                            id="editBuyRate"
+                            type="number"
+                            step="0.01"
+                            value={editableRate.buyRate}
+                            onChange={(e) =>
+                              setEditableRate({ ...editableRate, buyRate: parseFloat(e.target.value) || 0 })
+                            }
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label htmlFor="editSellRate" className="text-xs">
+                            Venta
+                          </Label>
+                          <Input
+                            id="editSellRate"
+                            type="number"
+                            step="0.01"
+                            value={editableRate.sellRate}
+                            onChange={(e) =>
+                              setEditableRate({ ...editableRate, sellRate: parseFloat(e.target.value) || 0 })
+                            }
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label htmlFor="editUsd" className="text-xs">
+                            USD
+                          </Label>
+                          <Input
+                            id="editUsd"
+                            type="number"
+                            step="0.01"
+                            value={editableRate.usd}
+                            onChange={(e) => setEditableRate({ ...editableRate, usd: parseFloat(e.target.value) || 0 })}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label htmlFor="editBcv" className="text-xs">
+                            BCV
+                          </Label>
+                          <Input
+                            id="editBcv"
+                            type="number"
+                            step="0.01"
+                            value={editableRate.bcv}
+                            onChange={(e) => setEditableRate({ ...editableRate, bcv: parseFloat(e.target.value) || 0 })}
+                          />
+                        </div>
                       </div>
-                      <div className="space-y-1">
-                        <Label htmlFor="editSellRate" className="text-xs">
-                          Venta
-                        </Label>
-                        <Input
-                          id="editSellRate"
-                          type="number"
-                          step="0.01"
-                          value={editableRate.sellRate}
-                          onChange={(e) =>
-                            setEditableRate({ ...editableRate, sellRate: parseFloat(e.target.value) || 0 })
-                          }
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label htmlFor="editUsd" className="text-xs">
-                          USD
-                        </Label>
-                        <Input
-                          id="editUsd"
-                          type="number"
-                          step="0.01"
-                          value={editableRate.usd}
-                          onChange={(e) => setEditableRate({ ...editableRate, usd: parseFloat(e.target.value) || 0 })}
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label htmlFor="editBcv" className="text-xs">
-                          BCV
-                        </Label>
-                        <Input
-                          id="editBcv"
-                          type="number"
-                          step="0.01"
-                          value={editableRate.bcv}
-                          onChange={(e) => setEditableRate({ ...editableRate, bcv: parseFloat(e.target.value) || 0 })}
-                        />
-                      </div>
-                    </div>
-                    <div className="flex gap-2 pt-2">
-                      <Button onClick={handleSaveRateEdit} disabled={isProcessing} size="sm" className="flex-1">
-                        {isProcessing ? 'Guardando...' : 'Guardar Tasa'}
-                      </Button>
-                      <Button
-                        onClick={() => setIsEditingRate(false)}
-                        disabled={isProcessing}
-                        variant="outline"
-                        size="sm"
-                        className="flex-1"
-                      >
-                        Cancelar
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  // VISTA ESTÁTICA PARA ADMIN/SUPER_ADMIN
-                  <>
-                    <div className="space-y-0.5">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Compra:</span>
-                        <span className="font-medium">{giro.rateApplied?.buyRate?.toFixed(2) || '0.00'}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Venta:</span>
-                        <span className="font-medium">{giro.rateApplied?.sellRate?.toFixed(2) || '0.00'}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">USD:</span>
-                        <span className="font-medium">{giro.rateApplied?.usd?.toFixed(2) || '0.00'}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">BCV:</span>
-                        <span className="font-medium">{giro.rateApplied?.bcv?.toFixed(2) || '0.00'}</span>
+                      <div className="flex gap-2 pt-2">
+                        <Button onClick={handleSaveRateEdit} disabled={isProcessing} size="sm" className="flex-1">
+                          {isProcessing ? 'Guardando...' : 'Guardar Tasa'}
+                        </Button>
+                        <Button
+                          onClick={() => setIsEditingRate(false)}
+                          disabled={isProcessing}
+                          variant="outline"
+                          size="sm"
+                          className="flex-1"
+                        >
+                          Cancelar
+                        </Button>
                       </div>
                     </div>
-                    {!isNotEditableStatus && (
-                      <Button
-                        onClick={() => setIsEditingRate(true)}
-                        disabled={isProcessing}
-                        variant="outline"
-                        size="sm"
-                        className="w-full mt-1"
-                      >
-                        Editar
-                      </Button>
-                    )}
-                  </>
-                )}
-              </div>
+                  ) : (
+                    // VISTA ESTÁTICA PARA ADMIN/SUPER_ADMIN
+                    <>
+                      <div className="space-y-0.5">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Compra:</span>
+                          <span className="font-medium">{giro.rateApplied?.buyRate?.toFixed(2) || '0.00'}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Venta:</span>
+                          <span className="font-medium">{giro.rateApplied?.sellRate?.toFixed(2) || '0.00'}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">USD:</span>
+                          <span className="font-medium">{giro.rateApplied?.usd?.toFixed(2) || '0.00'}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">BCV:</span>
+                          <span className="font-medium">{giro.rateApplied?.bcv?.toFixed(2) || '0.00'}</span>
+                        </div>
+                      </div>
+                      {!isNotEditableStatus && (
+                        <Button
+                          onClick={() => setIsEditingRate(true)}
+                          disabled={isProcessing}
+                          variant="outline"
+                          size="sm"
+                          className="w-full mt-1"
+                        >
+                          Editar
+                        </Button>
+                      )}
+                    </>
+                  )}
+                </div>
               )}
 
               {canEdit && (
                 <div className="flex gap-2 text-xs">
                   {!isEditing ? (
-                    <Button onClick={handleStartEdit} disabled={isProcessing} variant="outline" className="w-full" size="sm">
+                    <Button
+                      onClick={handleStartEdit}
+                      disabled={isProcessing}
+                      variant="outline"
+                      className="w-full"
+                      size="sm"
+                    >
                       Editar
                     </Button>
                   ) : (
@@ -748,19 +761,18 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                 </div>
               )}
 
-
               {/* Payment Proof Display - Show for completed giros */}
               {giro.status === 'COMPLETADO' && (
                 <div className="p-2 rounded border border-green-200 bg-green-50 dark:bg-green-950 space-y-1 text-xs">
                   <div className="flex items-center gap-1">
                     <CheckCircle className="h-3 w-3 text-green-600" />
-                    <p className="font-semibold text-green-900 dark:text-green-100">
-                      Comprobante
-                    </p>
+                    <p className="font-semibold text-green-900 dark:text-green-100">Comprobante</p>
                   </div>
 
                   {!isEditingCompletedProof ? (
-                    <div className={`flex gap-2 ${isTransferencista && giro.transferencista?.user?.id === user?.id ? '' : 'flex-col'}`}>
+                    <div
+                      className={`flex gap-2 ${isTransferencista && giro.transferencista?.user?.id === user?.id ? '' : 'flex-col'}`}
+                    >
                       <Button
                         type="button"
                         size="sm"
@@ -775,7 +787,11 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                             toast.error('Error al cargar el comprobante')
                           }
                         }}
-                        className={isTransferencista && giro.transferencista?.user?.id === user?.id ? 'flex-1 gap-1' : 'w-full gap-1'}
+                        className={
+                          isTransferencista && giro.transferencista?.user?.id === user?.id
+                            ? 'flex-1 gap-1'
+                            : 'w-full gap-1'
+                        }
                       >
                         <Share2 className="h-3 w-3" />
                         Ver
@@ -837,7 +853,6 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                 )}
               </div>
 
-
               {/* Actions for Transferencista */}
               {isTransferencista && giro.status === 'ASIGNADO' && (
                 <Button onClick={handleMarkAsProcessing} disabled={isProcessing} className="w-full text-xs" size="sm">
@@ -885,7 +900,8 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                           <option value="">Selecciona una cuenta</option>
                           {bankAccounts.map((account) => (
                             <option key={account.id} value={account.id}>
-                              {account.bank.name} - ...{account.accountNumber.slice(-4)} ({formatCurrency(account.balance, 'VES')})
+                              {account.bank.name} - ...{account.accountNumber.slice(-4)} (
+                              {formatCurrency(account.balance, 'VES')})
                             </option>
                           ))}
                         </select>
@@ -973,7 +989,13 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
               {isMinorista &&
                 giro &&
                 (giro.status === 'PENDIENTE' || giro.status === 'ASIGNADO' || giro.status === 'DEVUELTO') && (
-                  <Button onClick={handleDeleteGiro} disabled={isProcessing} variant="destructive" className="w-full text-xs" size="sm">
+                  <Button
+                    onClick={handleDeleteGiro}
+                    disabled={isProcessing}
+                    variant="destructive"
+                    className="w-full text-xs"
+                    size="sm"
+                  >
                     {isProcessing ? 'Eliminando...' : 'Eliminar'}
                   </Button>
                 )}
@@ -1008,25 +1030,25 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
 
             {/* Footer */}
             <div className="flex gap-2 p-4 border-t dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
-              <Button
-                variant="outline"
-                onClick={() => setShowProofPreview(false)}
-                className="flex-1"
-              >
+              <Button variant="outline" onClick={() => setShowProofPreview(false)} className="flex-1">
                 Cerrar
               </Button>
               <Button
                 onClick={async () => {
                   try {
-                    const isMobileOrTablet = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+                    const isMobileOrTablet = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+                      navigator.userAgent
+                    )
 
                     if (isMobileOrTablet && navigator.share) {
                       // Mobile: Use Web Share API
-                      const file = new File([proofPreviewBlob], proofPreviewFilename, { type: 'application/octet-stream' })
+                      const file = new File([proofPreviewBlob], proofPreviewFilename, {
+                        type: 'application/octet-stream',
+                      })
                       await navigator.share({
                         files: [file],
                         title: 'Comprobante de Pago',
-                        text: 'Compartir comprobante de pago'
+                        text: 'Compartir comprobante de pago',
                       })
                     } else {
                       // Desktop: Download normally

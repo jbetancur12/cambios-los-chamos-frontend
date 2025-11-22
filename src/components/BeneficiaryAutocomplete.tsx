@@ -71,9 +71,7 @@ export function BeneficiaryAutocomplete({
 
   return (
     <div ref={containerRef} className="relative w-full">
-      {label && (
-        <label className="text-sm font-medium text-foreground mb-1 block hidden md:block">{label}</label>
-      )}
+      {label && <label className="text-sm font-medium text-foreground mb-1 block hidden md:block">{label}</label>}
       <div className="relative">
         <Input
           value={value}

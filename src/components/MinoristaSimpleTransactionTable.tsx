@@ -8,7 +8,10 @@ interface MinoristaSimpleTransactionTableProps {
   typeFilter?: MinoristaTransactionType | 'ALL'
 }
 
-export function MinoristaSimpleTransactionTable({ transactions, typeFilter = 'ALL' }: MinoristaSimpleTransactionTableProps) {
+export function MinoristaSimpleTransactionTable({
+  transactions,
+  typeFilter = 'ALL',
+}: MinoristaSimpleTransactionTableProps) {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-CO', {
       style: 'currency',
@@ -61,24 +64,17 @@ export function MinoristaSimpleTransactionTable({ transactions, typeFilter = 'AL
   }
 
   if (transactions.length === 0) {
-    return (
-      <div className="text-center py-8 text-muted-foreground">
-        No hay transacciones registradas
-      </div>
-    )
+    return <div className="text-center py-8 text-muted-foreground">No hay transacciones registradas</div>
   }
 
   // Filtrar por tipo si se especifica - excluir transacciones PROFIT
-  const filteredTransactions = typeFilter === 'ALL'
-    ? transactions.filter(t => t.type !== 'PROFIT')
-    : transactions.filter(t => t.type === typeFilter)
+  const filteredTransactions =
+    typeFilter === 'ALL'
+      ? transactions.filter((t) => t.type !== 'PROFIT')
+      : transactions.filter((t) => t.type === typeFilter)
 
   if (filteredTransactions.length === 0) {
-    return (
-      <div className="text-center py-8 text-muted-foreground">
-        No hay transacciones de este tipo
-      </div>
-    )
+    return <div className="text-center py-8 text-muted-foreground">No hay transacciones de este tipo</div>
   }
 
   // Ordenar transacciones de más reciente a más viejo
@@ -175,13 +171,17 @@ export function MinoristaSimpleTransactionTable({ transactions, typeFilter = 'AL
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Ganancia</span>
-                  <span className="text-blue-600 font-semibold">{transaction.profitEarned ? `+${formatCurrency(transaction.profitEarned)}` : '$ 0,00'}</span>
+                  <span className="text-blue-600 font-semibold">
+                    {transaction.profitEarned ? `+${formatCurrency(transaction.profitEarned)}` : '$ 0,00'}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">De</span>
                   <span>{formatCurrency(transaction.previousAvailableCredit)}</span>
                 </div>
-                <div className={`flex justify-between font-semibold ${isBalanceInFavor ? 'text-green-600' : 'text-red-600'}`}>
+                <div
+                  className={`flex justify-between font-semibold ${isBalanceInFavor ? 'text-green-600' : 'text-red-600'}`}
+                >
                   <span>Ahora</span>
                   <span>{formatCurrency(transaction.availableCredit)}</span>
                 </div>

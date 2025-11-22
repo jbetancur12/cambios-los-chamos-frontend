@@ -166,7 +166,9 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
         <p className="text-xs font-semibold text-blue-900 mb-3">Datos del Beneficiario</p>
 
         <div>
-          <Label htmlFor="phone" className="hidden md:block">Teléfono del Beneficiario</Label>
+          <Label htmlFor="phone" className="hidden md:block">
+            Teléfono del Beneficiario
+          </Label>
           <div className="relative">
             <Input
               id="phone"
@@ -196,7 +198,9 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
         </div>
 
         <div className="space-y-2 mt-3">
-          <Label htmlFor="cedula" className="hidden md:block">Cédula del Beneficiario</Label>
+          <Label htmlFor="cedula" className="hidden md:block">
+            Cédula del Beneficiario
+          </Label>
           <Input
             id="cedula"
             placeholder="Cédula del Beneficiario"
@@ -207,7 +211,9 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
         </div>
 
         <div className="space-y-2 mt-3">
-          <Label htmlFor="senderName" className="hidden md:block">Contacto que Envía</Label>
+          <Label htmlFor="senderName" className="hidden md:block">
+            Contacto que Envía
+          </Label>
           <Input
             id="senderName"
             placeholder="Contacto que Envía"
@@ -220,7 +226,9 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
 
       {/* Bank and Amount Info */}
       <div className="space-y-2">
-        <Label htmlFor="bank" className="hidden md:block">Banco Origen</Label>
+        <Label htmlFor="bank" className="hidden md:block">
+          Banco Origen
+        </Label>
         <select
           id="bank"
           value={selectedBank}
@@ -238,7 +246,9 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="amount" className="hidden md:block">Monto (COP)</Label>
+        <Label htmlFor="amount" className="hidden md:block">
+          Monto (COP)
+        </Label>
         <Input
           id="amount"
           type="number"
@@ -280,7 +290,11 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
 
       {/* Submit */}
       <div className="flex gap-3 pt-4">
-        <Button type="submit" disabled={loading || hasInsufficientBalance()} className="w-full bg-[linear-gradient(to_right,#136BBC,#274565)]">
+        <Button
+          type="submit"
+          disabled={loading || hasInsufficientBalance()}
+          className="w-full bg-[linear-gradient(to_right,#136BBC,#274565)]"
+        >
           {loading ? 'Procesando...' : 'Enviar Pago'}
         </Button>
       </div>

@@ -157,10 +157,10 @@ function App() {
                       <DashboardLayout>
                         <MinoristaTransactionsPage />
                       </DashboardLayout>
-                      </ErrorBoundary>
-                    </ProtectedRoute>
-                  }
-                />
+                    </ErrorBoundary>
+                  </ProtectedRoute>
+                }
+              />
 
               {/* Calculadora*/}
               <Route
@@ -267,13 +267,13 @@ function App() {
             </Routes>
           </ErrorBoundary>
 
-        <Toaster position="top-center" richColors />
-      </AuthProvider>
-    </BrowserRouter>
+          <Toaster position="top-center" richColors />
+        </AuthProvider>
+      </BrowserRouter>
 
-    {/* Development Tools - only visible in development */}
-    <QueryMetricsPanel />
-    <ReactQueryDevtools initialIsOpen={false} />
+      {/* Development Tools - only visible in development */}
+      <QueryMetricsPanel />
+      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   )
 }

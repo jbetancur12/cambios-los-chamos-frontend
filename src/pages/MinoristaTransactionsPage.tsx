@@ -50,7 +50,6 @@ export function MinoristaTransactionsPage() {
     }).format(amount)
   }
 
-
   if (!minorista) {
     return (
       <Card className="border-2 border-gray-300 shadow-md">

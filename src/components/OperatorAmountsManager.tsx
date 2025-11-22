@@ -74,7 +74,6 @@ export function OperatorAmountsManager() {
     }
   }
 
-
   const handleCreateNewAmount = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -183,7 +182,11 @@ export function OperatorAmountsManager() {
         {selectedOperatorId && currentOperator && (
           <>
             {/* Create New Amount Form */}
-            <form onSubmit={handleCreateNewAmount} className="space-y-4 p-6 rounded-lg border-2 border-blue-200" style={{ backgroundColor: 'rgba(19, 107, 188, 0.05)' }}>
+            <form
+              onSubmit={handleCreateNewAmount}
+              className="space-y-4 p-6 rounded-lg border-2 border-blue-200"
+              style={{ backgroundColor: 'rgba(19, 107, 188, 0.05)' }}
+            >
               <div className="flex items-center gap-2">
                 <Plus className="h-5 w-5" style={{ color: '#136BBC' }} />
                 <h3 className="font-bold text-sm">Crear Nuevo Monto para {currentOperator.name}</h3>
@@ -204,12 +207,16 @@ export function OperatorAmountsManager() {
                 />
               </div>
 
-              <Button type="submit" disabled={submitting} className="flex items-center gap-2 text-white w-full" style={{ background: 'linear-gradient(to right, #136BBC, #274565)' }}>
+              <Button
+                type="submit"
+                disabled={submitting}
+                className="flex items-center gap-2 text-white w-full"
+                style={{ background: 'linear-gradient(to right, #136BBC, #274565)' }}
+              >
                 <Plus className="h-4 w-4" />
                 Crear y Asignar Monto
               </Button>
             </form>
-
 
             {/* Operator Amounts List */}
             <div className="space-y-3">
@@ -276,7 +283,9 @@ export function OperatorAmountsManager() {
                       ) : (
                         <>
                           <div className="flex-1">
-                            <p className="font-bold text-lg text-gray-900">{oa.amount.amountBs.toLocaleString('es-VE')} Bs</p>
+                            <p className="font-bold text-lg text-gray-900">
+                              {oa.amount.amountBs.toLocaleString('es-VE')} Bs
+                            </p>
                             {!oa.isActive && (
                               <span className="inline-block mt-2 px-2 py-1 bg-gray-200 text-gray-700 text-xs font-semibold rounded">
                                 Inactivo

@@ -6,29 +6,31 @@ interface TabsProps extends HTMLAttributes<HTMLDivElement> {
   defaultValue?: string
 }
 
-export const Tabs = forwardRef<HTMLDivElement, TabsProps>(({ className, defaultValue = '', children, ...props }, ref) => {
-  const [activeTab, setActiveTab] = useState(defaultValue)
+export const Tabs = forwardRef<HTMLDivElement, TabsProps>(
+  ({ className, defaultValue = '', children, ...props }, ref) => {
+    const [activeTab, setActiveTab] = useState(defaultValue)
 
-  return (
-    <div ref={ref} className={cn('w-full', className)} {...props} data-active-tab={activeTab}>
-      {Array.isArray(children)
-        ? children.map((child) => {
-            if (typeof child === 'object' && child && 'props' in child) {
-              return {
-                ...child,
-                props: {
-                  ...child.props,
-                  activeTab,
-                  setActiveTab,
-                },
+    return (
+      <div ref={ref} className={cn('w-full', className)} {...props} data-active-tab={activeTab}>
+        {Array.isArray(children)
+          ? children.map((child) => {
+              if (typeof child === 'object' && child && 'props' in child) {
+                return {
+                  ...child,
+                  props: {
+                    ...child.props,
+                    activeTab,
+                    setActiveTab,
+                  },
+                }
               }
-            }
-            return child
-          })
-        : children}
-    </div>
-  )
-})
+              return child
+            })
+          : children}
+      </div>
+    )
+  }
+)
 Tabs.displayName = 'Tabs'
 
 interface TabsListProps extends HTMLAttributes<HTMLDivElement> {}
@@ -36,7 +38,10 @@ interface TabsListProps extends HTMLAttributes<HTMLDivElement> {}
 export const TabsList = forwardRef<HTMLDivElement, TabsListProps>(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn('inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground', className)}
+    className={cn(
+      'inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground',
+      className
+    )}
     {...props}
   />
 ))
@@ -68,11 +73,9 @@ interface TabsContentProps extends HTMLAttributes<HTMLDivElement> {
   activeTab?: string
 }
 
-export const TabsContent = forwardRef<HTMLDivElement, TabsContentProps>(({ className, value, activeTab, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn(activeTab !== value ? 'hidden' : '', className)}
-    {...props}
-  />
-))
+export const TabsContent = forwardRef<HTMLDivElement, TabsContentProps>(
+  ({ className, value, activeTab, ...props }, ref) => (
+    <div ref={ref} className={cn(activeTab !== value ? 'hidden' : '', className)} {...props} />
+  )
+)
 TabsContent.displayName = 'TabsContent'

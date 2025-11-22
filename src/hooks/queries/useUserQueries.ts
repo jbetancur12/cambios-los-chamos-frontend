@@ -63,10 +63,7 @@ export function useTransferencistas() {
       const transferencistaResponse = await api.get<TransferencistaResponse>('/transferencista/list')
 
       const transferencistaMap = new Map(
-        transferencistaResponse.transferencistas.map((t) => [
-          t.user.id,
-          { id: t.id, available: t.available },
-        ])
+        transferencistaResponse.transferencistas.map((t) => [t.user.id, { id: t.id, available: t.available }])
       )
 
       return response.users.map((user) => {
@@ -93,7 +90,13 @@ export function useMinoristas() {
       const minoristaMap = new Map(
         minoristaResponse.minoristas.map((m) => [
           m.user.id,
-          { id: m.id, balance: m.balance, creditLimit: m.creditLimit, availableCredit: m.availableCredit, creditBalance: m.creditBalance },
+          {
+            id: m.id,
+            balance: m.balance,
+            creditLimit: m.creditLimit,
+            availableCredit: m.availableCredit,
+            creditBalance: m.creditBalance,
+          },
         ])
       )
 
@@ -133,10 +136,7 @@ async function fetchUsersByRole(role?: UserRole | 'ALL' | null): Promise<UserDat
       const transferencistaResponse = await api.get<TransferencistaResponse>('/transferencista/list')
 
       const transferencistaMap = new Map(
-        transferencistaResponse.transferencistas.map((t) => [
-          t.user.id,
-          { id: t.id, available: t.available },
-        ])
+        transferencistaResponse.transferencistas.map((t) => [t.user.id, { id: t.id, available: t.available }])
       )
 
       return response.users.map((user) => {
@@ -154,7 +154,16 @@ async function fetchUsersByRole(role?: UserRole | 'ALL' | null): Promise<UserDat
       const minoristaResponse = await api.get<MinoristaResponse>('/minorista/list')
 
       const minoristaMap = new Map(
-        minoristaResponse.minoristas.map((m) => [m.user.id, { id: m.id, balance: m.balance, creditLimit: m.creditLimit, availableCredit: m.availableCredit, creditBalance: m.creditBalance }])
+        minoristaResponse.minoristas.map((m) => [
+          m.user.id,
+          {
+            id: m.id,
+            balance: m.balance,
+            creditLimit: m.creditLimit,
+            availableCredit: m.availableCredit,
+            creditBalance: m.creditBalance,
+          },
+        ])
       )
 
       return response.users.map((user) => {
@@ -176,24 +185,35 @@ async function fetchUsersByRole(role?: UserRole | 'ALL' | null): Promise<UserDat
   }
 
   // Fetch all roles
-  const [adminsResponse, transferencistasResponse, minoristasResponse, transferencistaListResponse, minoristaListResponse] =
-    await Promise.all([
-      api.get<AdminResponse>('/user/by-role/ADMIN'),
-      api.get<AdminResponse>('/user/by-role/TRANSFERENCISTA'),
-      api.get<AdminResponse>('/user/by-role/MINORISTA'),
-      api.get<TransferencistaResponse>('/transferencista/list'),
-      api.get<MinoristaResponse>('/minorista/list'),
-    ])
+  const [
+    adminsResponse,
+    transferencistasResponse,
+    minoristasResponse,
+    transferencistaListResponse,
+    minoristaListResponse,
+  ] = await Promise.all([
+    api.get<AdminResponse>('/user/by-role/ADMIN'),
+    api.get<AdminResponse>('/user/by-role/TRANSFERENCISTA'),
+    api.get<AdminResponse>('/user/by-role/MINORISTA'),
+    api.get<TransferencistaResponse>('/transferencista/list'),
+    api.get<MinoristaResponse>('/minorista/list'),
+  ])
 
   const transferencistaMap = new Map(
-    transferencistaListResponse.transferencistas.map((t) => [
-      t.user.id,
-      { id: t.id, available: t.available },
-    ])
+    transferencistaListResponse.transferencistas.map((t) => [t.user.id, { id: t.id, available: t.available }])
   )
 
   const minoristaMap = new Map(
-    minoristaListResponse.minoristas.map((m) => [m.user.id, { id: m.id, balance: m.balance, creditLimit: m.creditLimit, availableCredit: m.availableCredit, creditBalance: m.creditBalance }])
+    minoristaListResponse.minoristas.map((m) => [
+      m.user.id,
+      {
+        id: m.id,
+        balance: m.balance,
+        creditLimit: m.creditLimit,
+        availableCredit: m.availableCredit,
+        creditBalance: m.creditBalance,
+      },
+    ])
   )
 
   const transferencistasData = transferencistasResponse.users.map((user) => {

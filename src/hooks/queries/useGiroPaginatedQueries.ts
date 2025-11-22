@@ -70,11 +70,7 @@ export function useGirosListPaginated(params: GirosListParams) {
  * {data?.pages.flatMap(page => page.giros).map(giro => (...))}
  * {hasNextPage && <button onClick={() => fetchNextPage()}>Cargar más</button>}
  */
-export function useGirosInfinite(params?: {
-  status?: string
-  dateFrom?: string
-  dateTo?: string
-}) {
+export function useGirosInfinite(params?: { status?: string; dateFrom?: string; dateTo?: string }) {
   return useInfiniteQuery({
     queryKey: ['giros', 'infinite', params],
     initialPageParam: 1,
@@ -90,8 +86,7 @@ export function useGirosInfinite(params?: {
       })
       return response
     },
-    getNextPageParam: (lastPage) =>
-      lastPage.hasMore ? (lastPage.page ?? 0) + 1 : undefined,
+    getNextPageParam: (lastPage) => (lastPage.hasMore ? (lastPage.page ?? 0) + 1 : undefined),
     staleTime: STALE_TIMES.GIROS_LIST,
   })
 }
@@ -100,11 +95,7 @@ export function useGirosInfinite(params?: {
  * Hook alternativo a useGirosInfinite pero con mejor manejo de estado
  * Mantiene un contador de página interno
  */
-export function useGirosInfiniteV2(params?: {
-  status?: string
-  dateFrom?: string
-  dateTo?: string
-}) {
+export function useGirosInfiniteV2(params?: { status?: string; dateFrom?: string; dateTo?: string }) {
   return useInfiniteQuery({
     queryKey: ['giros', 'infinite-v2', params],
     initialPageParam: 0,
@@ -120,8 +111,7 @@ export function useGirosInfiniteV2(params?: {
       })
       return response
     },
-    getNextPageParam: (lastPage, pages) =>
-      lastPage.hasMore ? pages.length : undefined,
+    getNextPageParam: (lastPage, pages) => (lastPage.hasMore ? pages.length : undefined),
     staleTime: STALE_TIMES.GIROS_LIST,
   })
 }

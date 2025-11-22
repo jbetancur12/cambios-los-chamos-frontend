@@ -17,10 +17,7 @@ interface TransferFormProps {
 
 export function TransferForm({ onSuccess }: TransferFormProps) {
   const { user } = useAuth()
-  const {
-    getSuggestionsByName,
-    addSuggestion,
-  } = useBeneficiarySuggestions()
+  const { getSuggestionsByName, addSuggestion } = useBeneficiarySuggestions()
 
   const [loading, setLoading] = useState(false)
   const [banks, setBanks] = useState<Bank[]>([])
@@ -312,7 +309,9 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="beneficiaryId" className="hidden md:block">Cédula del Beneficiario</Label>
+        <Label htmlFor="beneficiaryId" className="hidden md:block">
+          Cédula del Beneficiario
+        </Label>
         <Input
           id="beneficiaryId"
           value={beneficiaryId}
@@ -324,7 +323,9 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
 
       {/* Bank Info */}
       <div className="space-y-2">
-        <Label htmlFor="bank" className="hidden md:block">Banco Destino</Label>
+        <Label htmlFor="bank" className="hidden md:block">
+          Banco Destino
+        </Label>
         <select
           id="bank"
           value={bankId}
@@ -342,7 +343,9 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="accountNumber" className="hidden md:block">Número de Cuenta</Label>
+        <Label htmlFor="accountNumber" className="hidden md:block">
+          Número de Cuenta
+        </Label>
         <Input
           id="accountNumber"
           value={accountNumber}
@@ -355,7 +358,9 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
       {/* Amount & Currency */}
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
-          <Label htmlFor="amount" className="hidden md:block">Monto</Label>
+          <Label htmlFor="amount" className="hidden md:block">
+            Monto
+          </Label>
           <NumericFormat
             id="amount"
             customInput={Input}
@@ -375,7 +380,9 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="currency" className="hidden md:block">Moneda</Label>
+          <Label htmlFor="currency" className="hidden md:block">
+            Moneda
+          </Label>
           <select
             id="currency"
             value={currencyInput}
@@ -525,7 +532,11 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
 
       {/* Submit */}
       <div className="flex gap-3 pt-4">
-        <Button type="submit" disabled={loading || hasInsufficientBalance()} className="w-full bg-[linear-gradient(to_right,#136BBC,#274565)]">
+        <Button
+          type="submit"
+          disabled={loading || hasInsufficientBalance()}
+          className="w-full bg-[linear-gradient(to_right,#136BBC,#274565)]"
+        >
           {loading ? 'Creando...' : 'Enviar Giro'}
         </Button>
       </div>

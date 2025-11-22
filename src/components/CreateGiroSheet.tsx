@@ -23,11 +23,7 @@ interface CreateGiroSheetProps {
 
 export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroSheetProps) {
   const { user } = useAuth()
-  const {
-    getSuggestionsByName,
-    getSuggestionsByPhone,
-    addSuggestion
-  } = useBeneficiarySuggestions()
+  const { getSuggestionsByName, getSuggestionsByPhone, addSuggestion } = useBeneficiarySuggestions()
 
   // React Query hooks
   const { data: banks = [] } = useBanksList()
@@ -234,8 +230,7 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
   }
 
   const hasInsufficientBalance = () => {
-    if (!isMinorista || !minoristaBalanceData?.balance || !minoristaBalanceData?.credit)
-      return false
+    if (!isMinorista || !minoristaBalanceData?.balance || !minoristaBalanceData?.credit) return false
 
     const amount = parseFloat(amountInput) || 0
     const balanceInFavor = minoristaBalanceData.credit
@@ -616,7 +611,11 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="flex-1">
                 Cancelar
               </Button>
-              <Button type="submit" disabled={createGiroMutation.isPending || hasInsufficientBalance()} className="flex-1 bg-[linear-gradient(to_right,#136BBC,#274565)]">
+              <Button
+                type="submit"
+                disabled={createGiroMutation.isPending || hasInsufficientBalance()}
+                className="flex-1 bg-[linear-gradient(to_right,#136BBC,#274565)]"
+              >
                 {createGiroMutation.isPending ? 'Creando...' : 'Crear Giro'}
               </Button>
             </div>
