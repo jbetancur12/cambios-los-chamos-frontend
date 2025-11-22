@@ -15,9 +15,11 @@ import {
   Banknote,
   Wallet,
   Signal,
+  Printer,
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { GiroDetailSheet } from '@/components/GiroDetailSheet'
+import { PrintTicketModal } from '@/components/PrintTicketModal'
 import { useGirosList } from '@/hooks/queries/useGiroQueries'
 import type { GiroStatus, Currency, ExecutionType } from '@/types/api'
 
@@ -43,6 +45,8 @@ export function GirosPage() {
   const [selectedGiroId, setSelectedGiroId] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [page, setPage] = useState(1)
+  const [showPrintModal, setShowPrintModal] = useState(false)
+  const [selectedGiroForPrint, setSelectedGiroForPrint] = useState<string | null>(null)
   const itemsPerPage = 15
 
   // Calculate date range based on filter
@@ -492,6 +496,7 @@ export function GirosPage() {
                     <th className="px-3 py-2 text-left font-semibold w-32">Banco</th>
                     <th className="px-3 py-2 text-center font-semibold w-20">Estado</th>
                     <th className="px-3 py-2 text-center font-semibold w-24">Tipo</th>
+                    <th className="px-3 py-2 text-center font-semibold w-16">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -541,6 +546,23 @@ export function GirosPage() {
                             >
                               {executionTypeBadge.label}
                             </span>
+                          </div>
+                        </td>
+                        <td className="px-3 py-2 w-16">
+                          <div className="flex justify-center">
+                            {giro.status === 'COMPLETADO' && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setSelectedGiroForPrint(giro.id)
+                                  setShowPrintModal(true)
+                                }}
+                                className="p-1 hover:bg-blue-100 dark:hover:bg-blue-900 rounded transition-colors"
+                                title="Imprimir"
+                              >
+                                <Printer className="h-4 w-4 text-blue-600" />
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -603,6 +625,21 @@ export function GirosPage() {
                       </span>
                     </div>
                   </div>
+                  {giro.status === 'COMPLETADO' && (
+                    <div className="mt-2 flex justify-end">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setSelectedGiroForPrint(giro.id)
+                          setShowPrintModal(true)
+                        }}
+                        className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 rounded hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors"
+                      >
+                        <Printer className="h-3 w-3" />
+                        Imprimir
+                      </button>
+                    </div>
+                  )}
                 </div>
               )
             })}
@@ -762,6 +799,27 @@ export function GirosPage() {
             </div>
           </Card>
         </div>
+      )}
+
+      {/* Giro Detail Sheet */}
+      {selectedGiroId && (
+        <GiroDetailSheet
+          open={detailSheetOpen}
+          onOpenChange={setDetailSheetOpen}
+          giroId={selectedGiroId}
+          onUpdate={() => {}}
+        />
+      )}
+
+      {/* Print Modal */}
+      {selectedGiroForPrint && (
+        <PrintTicketModal
+          giroId={selectedGiroForPrint}
+          open={showPrintModal}
+          onOpenChange={(open) => {
+            setShowPrintModal(open)
+          }}
+        />
       )}
     </div>
   )

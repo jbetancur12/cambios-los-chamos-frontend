@@ -12,7 +12,6 @@ import { useBankAccountsList, useBanksList } from '@/hooks/queries/useBankQuerie
 import { useExecuteGiro, useMarkGiroAsProcessing, useReturnGiro, useDeleteGiro, useUpdateGiro, useUpdateGiroRate } from '@/hooks/mutations/useGiroMutations'
 import { useQueryClient } from '@tanstack/react-query'
 import { PaymentProofUpload } from './PaymentProofUpload'
-import { PrintTicketModal } from './PrintTicketModal'
 import {
   Clock,
   CheckCircle,
@@ -25,7 +24,6 @@ import {
   TrendingUp,
   ArrowRight,
   CornerDownLeft, // Nuevo ícono para devolver
-  Printer,
   Copy,
   Share2,
 } from 'lucide-react'
@@ -95,7 +93,6 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
     usd: 0,
     bcv: 0,
   })
-  const [showPrintModal, setShowPrintModal] = useState(false)
 
   const isNotEditableStatus =
     giro?.status === 'PROCESANDO' || giro?.status === 'COMPLETADO' || giro?.status === 'CANCELADO'
@@ -824,19 +821,6 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                 )}
               </div>
 
-              {/* Botón de impresión para giros completados (solo desktop) */}
-              {giro.status === 'COMPLETADO' && isDesktop && (
-                <Button
-                  onClick={() => setShowPrintModal(true)}
-                  disabled={isProcessing}
-                  variant="outline"
-                  className="w-full gap-1 text-xs"
-                  size="sm"
-                >
-                  <Printer className="h-3 w-3" />
-                  Imprimir
-                </Button>
-              )}
 
               {/* Actions for Transferencista */}
               {isTransferencista && giro.status === 'ASIGNADO' && (
@@ -982,20 +966,6 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
         </SheetBody>
       </SheetContent>
 
-      {/* Modal de impresión de tiquete */}
-      {giro && (
-        <PrintTicketModal
-          giroId={giro.id}
-          open={showPrintModal}
-          onOpenChange={(open) => {
-            setShowPrintModal(open)
-            // Cerrar el sheet principal después de cerrar el modal de impresión
-            if (!open) {
-              onOpenChange(false)
-            }
-          }}
-        />
-      )}
     </Sheet>
   )
 }
