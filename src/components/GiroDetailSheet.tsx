@@ -25,6 +25,7 @@ import {
   CornerDownLeft, // Nuevo ícono para devolver
   Copy,
   Share2,
+  Upload,
 } from 'lucide-react'
 import type { GiroStatus } from '@/types/api'
 
@@ -91,6 +92,10 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
     usd: 0,
     bcv: 0,
   })
+  const [showProofPreview, setShowProofPreview] = useState(false)
+  const [proofPreviewBlob, setProofPreviewBlob] = useState<Blob | null>(null)
+  const [proofPreviewFilename, setProofPreviewFilename] = useState('')
+  const [isEditingCompletedProof, setIsEditingCompletedProof] = useState(false)
 
   const isNotEditableStatus =
     giro?.status === 'PROCESANDO' || giro?.status === 'COMPLETADO' || giro?.status === 'CANCELADO'
@@ -753,46 +758,60 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                       Comprobante
                     </p>
                   </div>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    onClick={async () => {
-                      try {
-                        const { blob, filename } = await api.downloadFile(`/giro/${giro.id}/payment-proof/download`)
-                        const file = new File([blob], filename, { type: blob.type })
 
-                        if (navigator.share && navigator.canShare?.({ files: [file] })) {
-                       
-                          await navigator.share({
-                            title: 'Comprobante de pago',
-                            text: 'Mi comprobante de pago',
-                            files: [file],
-                          })
-                        } else {
-                          // Fallback to direct download for unsupported browsers
-                          const url = window.URL.createObjectURL(blob)
-                          const a = document.createElement('a')
-                          a.href = url
-                          a.download = filename
-                          document.body.appendChild(a)
-                          a.click()
-                          window.URL.revokeObjectURL(url)
-                          document.body.removeChild(a)
-                        }
-                      } catch (error: any) {
-                        console.log(error)
-                        // Ignorar cancelaciones de usuario y permisos denegados
-                        if (error.name !== 'AbortError' && error.name !== 'NotAllowedError') {
-                          toast.error('Error al compartir el comprobante')
-                        }
-                      }
-                    }}
-                    className="w-full gap-1"
-                  >
-                    <Share2 className="h-3 w-3" />
-                    Guardar/Compartir
-                  </Button>
+                  {!isEditingCompletedProof ? (
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={async () => {
+                          try {
+                            const { blob, filename } = await api.downloadFile(`/giro/${giro.id}/payment-proof/download`)
+                            setProofPreviewBlob(blob)
+                            setProofPreviewFilename(filename)
+                            setShowProofPreview(true)
+                          } catch (error: any) {
+                            toast.error('Error al cargar el comprobante')
+                          }
+                        }}
+                        className="flex-1 gap-1"
+                      >
+                        <Share2 className="h-3 w-3" />
+                        Ver
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setIsEditingCompletedProof(true)}
+                        className="flex-1 gap-1"
+                      >
+                        <Upload className="h-3 w-3" />
+                        Cambiar
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      <PaymentProofUpload
+                        giroId={giro.id}
+                        onProofUploaded={() => {
+                          setIsEditingCompletedProof(false)
+                          onUpdate()
+                          toast.success('Comprobante actualizado exitosamente')
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setIsEditingCompletedProof(false)}
+                        className="w-full"
+                      >
+                        Cancelar
+                      </Button>
+                    </>
+                  )}
                 </div>
               )}
 
@@ -961,6 +980,79 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
         </SheetBody>
       </SheetContent>
 
+      {/* Modal de preview del comprobante */}
+      {showProofPreview && proofPreviewBlob && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-lg shadow-lg max-w-2xl w-full max-h-[90vh] flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b dark:border-slate-700">
+              <h2 className="text-lg font-semibold">Comprobante de Pago</h2>
+              <button
+                onClick={() => setShowProofPreview(false)}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 overflow-auto p-4">
+              <img
+                src={URL.createObjectURL(proofPreviewBlob)}
+                alt="Comprobante de pago"
+                className="w-full h-auto rounded border border-slate-200 dark:border-slate-700"
+              />
+            </div>
+
+            {/* Footer */}
+            <div className="flex gap-2 p-4 border-t dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+              <Button
+                variant="outline"
+                onClick={() => setShowProofPreview(false)}
+                className="flex-1"
+              >
+                Cerrar
+              </Button>
+              <Button
+                onClick={async () => {
+                  try {
+                    const isMobileOrTablet = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+
+                    if (isMobileOrTablet && navigator.share) {
+                      // Mobile: Use Web Share API
+                      const file = new File([proofPreviewBlob], proofPreviewFilename, { type: 'application/octet-stream' })
+                      await navigator.share({
+                        files: [file],
+                        title: 'Comprobante de Pago',
+                        text: 'Compartir comprobante de pago'
+                      })
+                    } else {
+                      // Desktop: Download normally
+                      const url = URL.createObjectURL(proofPreviewBlob)
+                      const a = document.createElement('a')
+                      a.href = url
+                      a.download = proofPreviewFilename
+                      document.body.appendChild(a)
+                      a.click()
+                      window.URL.revokeObjectURL(url)
+                      document.body.removeChild(a)
+                    }
+                    setShowProofPreview(false)
+                  } catch (error: any) {
+                    if (error.name !== 'AbortError') {
+                      toast.error('Error al procesar el comprobante')
+                    }
+                  }
+                }}
+                className="flex-1 gap-1"
+              >
+                <Share2 className="h-4 w-4" />
+                Guardar
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </Sheet>
   )
 }
