@@ -29,6 +29,7 @@ interface NavItem {
 
 // Main items for bottom navigation (5 total including hamburger)
 const bottomNavItems: NavItem[] = [
+  { icon: Home, label: 'Inicio', href: '/dashboard', roles: ['SUPER_ADMIN', 'ADMIN', 'TRANSFERENCISTA', 'MINORISTA'] },
   { icon: FileText, label: 'Solicitudes', href: '/giros', roles: ['SUPER_ADMIN', 'ADMIN', 'TRANSFERENCISTA', 'MINORISTA'] },
   { icon: Building, label: 'Cuentas', href: '/cuentas-bancarias', roles: ['SUPER_ADMIN', 'ADMIN'] },
   { icon: Send, label: 'Enviar giro', href: '/enviar-giro', roles: ['SUPER_ADMIN', 'ADMIN', 'TRANSFERENCISTA', 'MINORISTA'] },
@@ -37,7 +38,6 @@ const bottomNavItems: NavItem[] = [
 
 // Additional items for side menu
 const sideMenuItems: NavItem[] = [
-  { icon: Home, label: 'Inicio', href: '/dashboard', roles: ['SUPER_ADMIN', 'ADMIN', 'TRANSFERENCISTA', 'MINORISTA'] },
   { icon: BarChart3, label: 'Reportes', href: '/reportes', roles: ['SUPER_ADMIN'] },
   { icon: BarChart3, label: 'Mis Reportes', href: '/mis-reportes', roles: ['MINORISTA'] },
   { icon: Wallet, label: 'Transacciones', href: '/transacciones-minorista', roles: ['MINORISTA'] },
