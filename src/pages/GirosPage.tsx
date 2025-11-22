@@ -625,21 +625,6 @@ export function GirosPage() {
                       </span>
                     </div>
                   </div>
-                  {giro.status === 'COMPLETADO' && (
-                    <div className="mt-2 flex justify-end">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setSelectedGiroForPrint(giro.id)
-                          setShowPrintModal(true)
-                        }}
-                        className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 rounded hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors"
-                      >
-                        <Printer className="h-3 w-3" />
-                        Imprimir
-                      </button>
-                    </div>
-                  )}
                 </div>
               )
             })}
