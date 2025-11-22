@@ -6,11 +6,13 @@ import { Card } from '@/components/ui/card'
 interface MinoristaSimpleTransactionTableProps {
   transactions: MinoristaTransaction[]
   typeFilter?: MinoristaTransactionType | 'ALL'
+  creditLimit: number
 }
 
 export function MinoristaSimpleTransactionTable({
   transactions,
   typeFilter = 'ALL',
+  creditLimit,
 }: MinoristaSimpleTransactionTableProps) {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-CO', {
@@ -34,12 +36,12 @@ export function MinoristaSimpleTransactionTable({
 
   const getTransactionTypeLabel = (type: MinoristaTransactionType) => {
     switch (type) {
-      case 'PROFIT':
-        return 'Ganancia'
       case 'DISCOUNT':
         return 'Descuento'
       case 'RECHARGE':
-        return 'Recarga'
+        return 'Abono'
+      case 'ADJUSTMENT':
+        return 'Ajuste'
       default:
         return type
     }
@@ -47,8 +49,6 @@ export function MinoristaSimpleTransactionTable({
 
   const getTransactionTypeColor = (type: MinoristaTransactionType) => {
     switch (type) {
-      case 'PROFIT':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
       case 'DISCOUNT':
         return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
       case 'ADJUSTMENT':
@@ -60,18 +60,15 @@ export function MinoristaSimpleTransactionTable({
   }
 
   const isPositiveTransaction = (type: MinoristaTransactionType) => {
-    return type === 'PROFIT' || type === 'RECHARGE'
+    return type === 'RECHARGE'
   }
 
   if (transactions.length === 0) {
     return <div className="text-center py-8 text-muted-foreground">No hay transacciones registradas</div>
   }
 
-  // Filtrar por tipo si se especifica - excluir transacciones PROFIT
-  const filteredTransactions =
-    typeFilter === 'ALL'
-      ? transactions.filter((t) => t.type !== 'PROFIT')
-      : transactions.filter((t) => t.type === typeFilter)
+  // Filtrar por tipo si se especifica
+  const filteredTransactions = typeFilter === 'ALL' ? transactions : transactions.filter((t) => t.type === typeFilter)
 
   if (filteredTransactions.length === 0) {
     return <div className="text-center py-8 text-muted-foreground">No hay transacciones de este tipo</div>
@@ -122,14 +119,14 @@ export function MinoristaSimpleTransactionTable({
                     {transaction.profitEarned ? `+${formatCurrency(transaction.profitEarned)}` : '$ 0,00'}
                   </td>
                   <td className="py-3 text-right text-sm text-muted-foreground pr-6 whitespace-nowrap">
-                    {formatCurrency(transaction.previousAvailableCredit)}
+                    {formatCurrency(creditLimit - transaction.previousAvailableCredit)}
                   </td>
                   <td
                     className={`py-3 text-right font-semibold pr-6 whitespace-nowrap ${
                       isBalanceInFavor ? 'text-green-600' : 'text-red-600'
                     }`}
                   >
-                    {formatCurrency(transaction.availableCredit as number)}
+                    {formatCurrency(creditLimit - (transaction.availableCredit as number))}
                   </td>
                 </tr>
               )
@@ -177,13 +174,13 @@ export function MinoristaSimpleTransactionTable({
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">De</span>
-                  <span>{formatCurrency(transaction.previousAvailableCredit)}</span>
+                  <span>{formatCurrency(creditLimit - transaction.previousAvailableCredit)}</span>
                 </div>
                 <div
                   className={`flex justify-between font-semibold ${isBalanceInFavor ? 'text-green-600' : 'text-red-600'}`}
                 >
                   <span>Ahora</span>
-                  <span>{formatCurrency(transaction.availableCredit)}</span>
+                  <span>{formatCurrency(creditLimit - transaction.availableCredit)}</span>
                 </div>
               </div>
             </Card>

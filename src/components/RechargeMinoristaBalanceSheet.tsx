@@ -264,7 +264,7 @@ export function RechargeMinoristaBalanceSheet({
                     size="sm"
                     onClick={() => setTypeFilter('RECHARGE')}
                   >
-                    Recargas
+                    Abonos
                   </Button>
                 </div>
 
@@ -287,7 +287,11 @@ export function RechargeMinoristaBalanceSheet({
                   </div>
                 ) : (
                   <>
-                    <MinoristaSimpleTransactionTable transactions={transactions} typeFilter={typeFilter} />
+                    <MinoristaSimpleTransactionTable
+                      transactions={transactions}
+                      typeFilter={typeFilter}
+                      creditLimit={localMinorista?.creditLimit || 0}
+                    />
 
                     {/* Pagination Controls */}
                     {totalPages > 1 && (

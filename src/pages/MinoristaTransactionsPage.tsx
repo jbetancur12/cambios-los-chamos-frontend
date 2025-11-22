@@ -62,7 +62,7 @@ export function MinoristaTransactionsPage() {
 
   // Lógica UI/UX
   const creditUsed = minorista.creditLimit - minorista.availableCredit
-  const percentUsed = minorista.creditLimit > 0 ? Math.min(100, (creditUsed / minorista.creditLimit) * 100) : 0
+  const percentAvailable = minorista.creditLimit > 0 ? (minorista.availableCredit / minorista.creditLimit) * 100 : 0
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-6 pb-20">
@@ -90,10 +90,12 @@ export function MinoristaTransactionsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="flex flex-col space-y-1">
                 <span className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Crédito Disponible
+                  Saldo
                 </span>
-                <span className="text-4xl font-extrabold text-green-600 dark:text-green-400">
-                  {formatCurrency(minorista.availableCredit)}
+                <span
+                  className={`text-4xl font-extrabold ${creditUsed === 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}
+                >
+                  {formatCurrency(creditUsed)}
                 </span>
               </div>
 
@@ -112,14 +114,14 @@ export function MinoristaTransactionsPage() {
             <div className="space-y-3 pt-3 border-t border-dashed border-gray-200 dark:border-gray-800">
               <div className="flex justify-between items-center text-sm font-medium">
                 <span className="text-gray-700 dark:text-gray-300">
-                  Cupo Utilizado: <span className="font-semibold">{formatCurrency(creditUsed)}</span>
+                  Crédito Disponible: <span className="font-semibold">{formatCurrency(minorista.availableCredit)}</span>
                 </span>
-                <span className={`font-bold ${percentUsed > 75 ? 'text-red-500' : 'text-blue-500'}`}>
-                  {percentUsed.toFixed(1)}%
+                <span className={`font-bold ${percentAvailable < 25 ? 'text-red-500' : 'text-green-500'}`}>
+                  {percentAvailable.toFixed(1)}%
                 </span>
               </div>
 
-              <Progress value={percentUsed} className="h-2" />
+              <Progress value={percentAvailable} className="h-2" />
 
               <div className="flex justify-between items-center text-xs text-muted-foreground pt-1">
                 <span className="font-semibold flex items-center gap-1">
@@ -194,7 +196,11 @@ export function MinoristaTransactionsPage() {
               <div className="text-center py-8 text-muted-foreground">Cargando transacciones...</div>
             ) : (
               <>
-                <MinoristaSimpleTransactionTable transactions={transactions} typeFilter={typeFilter} />
+                <MinoristaSimpleTransactionTable
+                  transactions={transactions}
+                  typeFilter={typeFilter}
+                  creditLimit={minorista.creditLimit}
+                />
                 {/* Pagination */}
                 {totalPages > 1 && (
                   <div className="flex items-center justify-center gap-2 pt-4">
