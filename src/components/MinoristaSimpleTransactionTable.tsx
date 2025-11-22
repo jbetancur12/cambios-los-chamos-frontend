@@ -151,8 +151,8 @@ export function MinoristaSimpleTransactionTable({ transactions, typeFilter = 'AL
           const isBalanceInFavor = balanceQueda > 0
 
           return (
-            <Card key={transaction.id} className="p-4">
-              <div className="flex items-start justify-between mb-3">
+            <Card key={transaction.id} className="p-2">
+              <div className="flex items-start justify-between mb-1">
                 <div className="flex items-center gap-2">
                   {isPositive ? (
                     <TrendingUp className="h-5 w-5 text-green-600" />
@@ -168,7 +168,7 @@ export function MinoristaSimpleTransactionTable({ transactions, typeFilter = 'AL
                   {formatCurrency(displayAmount)}
                 </span>
               </div>
-              <div className="space-y-2 text-sm">
+              <div className="space-y-1 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Fecha</span>
                   <span>{formatDate(transaction.createdAt)}</span>
