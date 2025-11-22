@@ -16,7 +16,6 @@ function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, width: n
 }
 export function useSiaRateImage() {
   const generateImage = useCallback(async (rate: ExchangeRate): Promise<string> => {
-    console.log("🚀 ~ useSiaRateImage ~ rate:", rate)
     try {
       // Load main logo
       const mainLogo = new Image();
