@@ -5,9 +5,9 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
-import type { Minorista, MinoristaTransaction } from '@/types/api'
+import type { Minorista, MinoristaTransaction, MinoristaTransactionType } from '@/types/api'
 import { AlertCircle, Eye, DollarSign } from 'lucide-react'
-import { MinoristaTransactionHistory } from './MinoristaTransactionHistory'
+import { MinoristaSimpleTransactionTable } from './MinoristaSimpleTransactionTable'
 import { DateRangeFilter, type DateRange } from './DateRangeFilter'
 
 interface RechargeMinoristaBalanceSheetProps {
@@ -33,6 +33,7 @@ export function RechargeMinoristaBalanceSheet({
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [dateRange, setDateRange] = useState<DateRange>({ startDate: null, endDate: null })
+  const [typeFilter, setTypeFilter] = useState<MinoristaTransactionType | 'ALL'>('ALL')
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('es-CO', {
@@ -238,7 +239,34 @@ export function RechargeMinoristaBalanceSheet({
 
               {/* Historial de Transacciones */}
               <div className="mt-6 pt-6 border-t space-y-4">
-                <h3 className="font-semibold">Historial Detallado de Transacciones</h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold">Historial Detallado de Transacciones</h3>
+                </div>
+
+                {/* Filter Tabs */}
+                <div className="flex gap-2 flex-wrap">
+                  <Button
+                    variant={typeFilter === 'ALL' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setTypeFilter('ALL')}
+                  >
+                    Todas
+                  </Button>
+                  <Button
+                    variant={typeFilter === 'DISCOUNT' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setTypeFilter('DISCOUNT')}
+                  >
+                    Descuentos
+                  </Button>
+                  <Button
+                    variant={typeFilter === 'RECHARGE' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setTypeFilter('RECHARGE')}
+                  >
+                    Recargas
+                  </Button>
+                </div>
 
                 {/* Date Filter */}
                 <DateRangeFilter
@@ -259,7 +287,7 @@ export function RechargeMinoristaBalanceSheet({
                   </div>
                 ) : (
                   <>
-                    <MinoristaTransactionHistory transactions={transactions} creditLimit={localMinorista.creditLimit} />
+                    <MinoristaSimpleTransactionTable transactions={transactions} typeFilter={typeFilter} />
 
                     {/* Pagination Controls */}
                     {totalPages > 1 && (

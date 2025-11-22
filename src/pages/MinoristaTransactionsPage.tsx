@@ -1,9 +1,8 @@
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import type { MinoristaTransactionType } from '@/types/api'
-import { ArrowLeft, CreditCard, DollarSign, TrendingDown, TrendingUp, User } from 'lucide-react'
+import { ArrowLeft, CreditCard, DollarSign, User } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -11,12 +10,14 @@ import { useMinoristaBalance, useMinoristaTransactions } from '@/hooks/queries/u
 import type { DateRange } from '@/components/DateRangeFilter'
 import { DateRangeFilter } from '@/components/DateRangeFilter'
 import { useAuth } from '@/contexts/AuthContext'
+import { MinoristaSimpleTransactionTable } from '@/components/MinoristaSimpleTransactionTable'
 
 export function MinoristaTransactionsPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const [page, setPage] = useState(1)
   const [dateRange, setDateRange] = useState<DateRange>({ startDate: null, endDate: null })
+  const [typeFilter, setTypeFilter] = useState<MinoristaTransactionType | 'ALL'>('ALL')
 
   // React Query hooks
   const minoristaQuery = useMinoristaBalance(user?.role)
@@ -49,47 +50,6 @@ export function MinoristaTransactionsPage() {
     }).format(amount)
   }
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('es-VE', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  }
-
-  const getTransactionTypeLabel = (type: MinoristaTransactionType) => {
-    switch (type) {
-      case 'PROFIT':
-        return 'Ganancia'
-      case 'DISCOUNT':
-        return 'Descuento'
-      case 'RECHARGE':
-        return 'Recarga'
-      default:
-        return type
-    }
-  }
-
-  const getTransactionTypeColor = (type: MinoristaTransactionType) => {
-    switch (type) {
-      case 'PROFIT':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-      case 'DISCOUNT':
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-      case 'ADJUSTMENT':
-      case 'RECHARGE':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-      default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
-    }
-  }
-
-  const isPositiveTransaction = (type: MinoristaTransactionType) => {
-    return type === 'PROFIT' || type === 'RECHARGE'
-  }
 
   if (!minorista) {
     return (
@@ -202,121 +162,40 @@ export function MinoristaTransactionsPage() {
       <div className="max-w-5xl mx-auto mt-6">
         <Card>
           <CardHeader>
-            <CardTitle>Historial de Transacciones</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>Historial de Transacciones</CardTitle>
+            </div>
+            {/* Filter Tabs */}
+            <div className="flex gap-2 mt-4 flex-wrap">
+              <Button
+                variant={typeFilter === 'ALL' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setTypeFilter('ALL')}
+              >
+                Todas
+              </Button>
+              <Button
+                variant={typeFilter === 'DISCOUNT' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setTypeFilter('DISCOUNT')}
+              >
+                Descuentos
+              </Button>
+              <Button
+                variant={typeFilter === 'RECHARGE' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setTypeFilter('RECHARGE')}
+              >
+                Recargas
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             {isLoading ? (
               <div className="text-center py-8 text-muted-foreground">Cargando transacciones...</div>
-            ) : transactions.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">No hay transacciones registradas</div>
             ) : (
-              <div className="space-y-3">
-                <div className="hidden md:block overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead className="border-b">
-                      <tr className="text-left text-xs text-muted-foreground">
-                        <th className="pb-3 font-medium">Fecha</th>
-                        <th className="pb-3 font-medium">Tipo</th>
-                        <th className="pb-3 font-medium text-right">Monto</th>
-                        <th className="pb-3 font-medium text-right text-xs">Crédito Anterior</th>
-                        <th className="pb-3 font-medium text-right text-xs">Crédito Nuevo</th>
-                        <th className="pb-3 font-medium text-right text-xs">Saldo Favor Anterior</th>
-                        <th className="pb-3 font-medium text-right text-xs">Saldo Favor Nuevo</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {transactions.map((transaction) => {
-                        const isPositive = isPositiveTransaction(transaction.type)
-                        const displayAmount = isPositive ? transaction.amount : -transaction.amount
-
-                        return (
-                          <tr key={transaction.id} className="border-b last:border-0 hover:bg-muted/50 text-xs">
-                            <td className="py-3 whitespace-nowrap">{formatDate(transaction.createdAt)}</td>
-                            <td className="py-3">
-                              <Badge
-                                variant="outline"
-                                className={`text-xs ${getTransactionTypeColor(transaction.type)}`}
-                              >
-                                {getTransactionTypeLabel(transaction.type)}
-                              </Badge>
-                            </td>
-                            <td
-                              className={`py-3 text-right font-semibold whitespace-nowrap ${
-                                isPositive ? 'text-green-600' : 'text-red-600'
-                              }`}
-                            >
-                              {isPositive && '+'}
-                              {formatCurrency(displayAmount)}
-                            </td>
-                            <td className="py-3 text-right text-muted-foreground pr-4 whitespace-nowrap">
-                              {formatCurrency(transaction.previousAvailableCredit)}
-                            </td>
-                            <td className="py-3 text-right font-semibold pr-4 whitespace-nowrap">
-                              {formatCurrency(transaction.availableCredit as number)}
-                            </td>
-                            <td className="py-3 text-right text-muted-foreground pr-4 whitespace-nowrap">
-                              {formatCurrency(transaction.previousBalanceInFavor || 0)}
-                            </td>
-                            <td className="py-3 text-right font-semibold pr-4 whitespace-nowrap">
-                              {formatCurrency(transaction.currentBalanceInFavor || 0)}
-                            </td>
-                          </tr>
-                        )
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Mobile Cards */}
-                <div className="md:hidden space-y-3">
-                  {transactions.map((transaction) => {
-                    const isPositive = isPositiveTransaction(transaction.type)
-                    const displayAmount = isPositive ? transaction.amount : -transaction.amount
-
-                    return (
-                      <Card key={transaction.id} className="p-4">
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex items-center gap-2">
-                            {isPositive ? (
-                              <TrendingUp className="h-5 w-5 text-green-600" />
-                            ) : (
-                              <TrendingDown className="h-5 w-5 text-red-600" />
-                            )}
-                            <Badge variant="outline" className={getTransactionTypeColor(transaction.type)}>
-                              {getTransactionTypeLabel(transaction.type)}
-                            </Badge>
-                          </div>
-                          <span className={`text-lg font-bold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                            {isPositive && '+'}
-                            {formatCurrency(displayAmount)}
-                          </span>
-                        </div>
-                        <div className="space-y-2 text-xs">
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Fecha</span>
-                            <span>{formatDate(transaction.createdAt)}</span>
-                          </div>
-                          <div className="flex justify-between border-t pt-2">
-                            <span className="text-muted-foreground">Crédito Anterior</span>
-                            <span>{formatCurrency(transaction.previousAvailableCredit)}</span>
-                          </div>
-                          <div className="flex justify-between font-semibold">
-                            <span>Crédito Nuevo</span>
-                            <span>{formatCurrency(transaction.availableCredit)}</span>
-                          </div>
-                          <div className="flex justify-between border-t pt-2">
-                            <span className="text-muted-foreground">Saldo a Favor Anterior</span>
-                            <span>{formatCurrency(transaction.previousBalanceInFavor || 0)}</span>
-                          </div>
-                          <div className="flex justify-between font-semibold">
-                            <span>Saldo a Favor Nuevo</span>
-                            <span>{formatCurrency(transaction.currentBalanceInFavor || 0)}</span>
-                          </div>
-                        </div>
-                      </Card>
-                    )
-                  })}
-                </div>
+              <>
+                <MinoristaSimpleTransactionTable transactions={transactions} typeFilter={typeFilter} />
                 {/* Pagination */}
                 {totalPages > 1 && (
                   <div className="flex items-center justify-center gap-2 pt-4">
@@ -336,7 +215,7 @@ export function MinoristaTransactionsPage() {
                     </Button>
                   </div>
                 )}
-              </div>
+              </>
             )}
           </CardContent>
         </Card>
