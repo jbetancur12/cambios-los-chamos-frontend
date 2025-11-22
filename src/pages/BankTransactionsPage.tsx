@@ -92,7 +92,7 @@ export function BankTransactionsPage() {
       <div className="max-w-5xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/')}>
+          <Button variant="ghost" size="icon" onClick={() => navigate('/cuentas-bancarias')}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="text-2xl md:text-3xl font-bold">Transacciones Bancarias</h1>
