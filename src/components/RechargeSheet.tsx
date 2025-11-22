@@ -180,7 +180,7 @@ export function RechargeSheet({ open, onOpenChange }: RechargeSheetProps) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent>
-        <SheetHeader>
+        <SheetHeader onClose={() => onOpenChange(false)}>
           <SheetTitle>Recarga de Saldo</SheetTitle>
         </SheetHeader>
 

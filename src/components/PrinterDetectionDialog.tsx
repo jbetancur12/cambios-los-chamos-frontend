@@ -69,7 +69,7 @@ export function PrinterDetectionDialog({ open, onOpenChange, onSelectPrinter }: 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent>
-        <SheetHeader>
+        <SheetHeader onClose={() => onOpenChange(false)}>
           <SheetTitle>Detectar Impresoras Disponibles</SheetTitle>
         </SheetHeader>
 

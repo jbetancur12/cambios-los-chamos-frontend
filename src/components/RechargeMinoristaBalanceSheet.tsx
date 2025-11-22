@@ -148,7 +148,7 @@ export function RechargeMinoristaBalanceSheet({
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent>
-        <SheetHeader>
+        <SheetHeader onClose={() => onOpenChange(false)}>
           <SheetTitle>Gestión de Crédito</SheetTitle>
         </SheetHeader>
 

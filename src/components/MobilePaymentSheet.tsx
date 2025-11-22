@@ -165,7 +165,7 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent>
-        <SheetHeader>
+        <SheetHeader onClose={() => onOpenChange(false)}>
           <SheetTitle>Pago Móvil</SheetTitle>
         </SheetHeader>
 
