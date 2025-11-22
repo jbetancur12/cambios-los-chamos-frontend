@@ -6,7 +6,6 @@ import { Label } from '@/components/ui/label'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
 import { useAuth } from '@/contexts/AuthContext'
-import { useIsDesktop } from '@/hooks/useIsDesktop'
 import { useGiroDetail, useMinoristaTransaction } from '@/hooks/queries/useGiroQueries'
 import { useBankAccountsList, useBanksList } from '@/hooks/queries/useBankQueries'
 import { useExecuteGiro, useMarkGiroAsProcessing, useReturnGiro, useDeleteGiro, useUpdateGiro, useUpdateGiroRate } from '@/hooks/mutations/useGiroMutations'
@@ -45,7 +44,6 @@ const RETURN_REASON_OPTIONS = [
 
 export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDetailSheetProps) {
   const { user } = useAuth()
-  const isDesktop = useIsDesktop()
   const queryClient = useQueryClient()
 
   const isTransferencista = user?.role === 'TRANSFERENCISTA'
@@ -202,9 +200,6 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
       {
         onSuccess: () => {
           toast.success('Giro ejecutado exitosamente')
-          if (isDesktop) {
-            setShowPrintModal(true)
-          }
           onUpdate()
         },
         onError: (error: any) => {
