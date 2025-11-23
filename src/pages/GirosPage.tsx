@@ -52,67 +52,50 @@ export function GirosPage() {
   // Calculate date range based on filter
   const getDateRange = (filterType: DateFilterType) => {
     const today = new Date()
-    const year = today.getFullYear()
-    const month = String(today.getMonth() + 1).padStart(2, '0')
-    const day = String(today.getDate()).padStart(2, '0')
-
-    const formatLocalDate = (date: Date): string => {
-      const y = date.getFullYear()
-      const m = String(date.getMonth() + 1).padStart(2, '0')
-      const d = String(date.getDate()).padStart(2, '0')
-      return `${y}-${m}-${d}`
-    }
-
-    let fromDate: string, toDate: string
+    let dateFrom = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0, 0)
+    let dateTo = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999)
 
     switch (filterType) {
       case 'TODAY':
-        fromDate = `${year}-${month}-${day}`
-        toDate = `${year}-${month}-${day}`
         break
       case 'YESTERDAY':
-        const yesterday = new Date(today)
-        yesterday.setDate(yesterday.getDate() - 1)
-        fromDate = formatLocalDate(yesterday)
-        toDate = formatLocalDate(yesterday)
+        dateFrom.setDate(dateFrom.getDate() - 1)
+        dateTo.setDate(dateTo.getDate() - 1)
         break
       case 'THIS_WEEK':
-        const dayOfWeek = today.getDay()
-        const startOfWeek = new Date(today)
-        startOfWeek.setDate(today.getDate() - dayOfWeek)
-        fromDate = formatLocalDate(startOfWeek)
-        toDate = `${year}-${month}-${day}`
+        dateFrom.setDate(dateFrom.getDate() - dateFrom.getDay())
         break
       case 'LAST_WEEK':
         const dayOfWeekLast = today.getDay()
         const endOfLastWeek = new Date(today)
         endOfLastWeek.setDate(today.getDate() - dayOfWeekLast - 1)
+        endOfLastWeek.setHours(23, 59, 59, 999)
         const startOfLastWeek = new Date(endOfLastWeek)
         startOfLastWeek.setDate(endOfLastWeek.getDate() - 6)
-        fromDate = formatLocalDate(startOfLastWeek)
-        toDate = formatLocalDate(endOfLastWeek)
+        startOfLastWeek.setHours(0, 0, 0, 0)
+        dateFrom = startOfLastWeek
+        dateTo = endOfLastWeek
         break
       case 'THIS_MONTH':
-        fromDate = `${year}-${month}-01`
-        toDate = `${year}-${month}-${day}`
+        dateFrom.setDate(1)
         break
       case 'LAST_MONTH':
-        const lastMonth = new Date(year, parseInt(month) - 2, 1)
-        const lastMonthYear = lastMonth.getFullYear()
-        const lastMonthNum = String(lastMonth.getMonth() + 1).padStart(2, '0')
-        const lastDayOfLastMonth = new Date(lastMonthYear, parseInt(lastMonthNum), 0).getDate()
-        fromDate = `${lastMonthYear}-${lastMonthNum}-01`
-        toDate = `${lastMonthYear}-${lastMonthNum}-${String(lastDayOfLastMonth).padStart(2, '0')}`
+        dateFrom = new Date(today.getFullYear(), today.getMonth() - 1, 1)
+        dateTo = new Date(today.getFullYear(), today.getMonth(), 0)
+        dateTo.setHours(23, 59, 59, 999)
         break
       case 'CUSTOM':
-        fromDate = customDateRange.from
-        toDate = customDateRange.to
+        // Para fechas personalizadas, parseamos los strings YYYY-MM-DD
+        const [customFromYear, customFromMonth, customFromDay] = customDateRange.from.split('-').map(Number)
+        const [customToYear, customToMonth, customToDay] = customDateRange.to.split('-').map(Number)
+        dateFrom = new Date(customFromYear, customFromMonth - 1, customFromDay, 0, 0, 0, 0)
+        dateTo = new Date(customToYear, customToMonth - 1, customToDay, 23, 59, 59, 999)
         break
       default:
         return undefined
     }
 
-    return { from: fromDate, to: toDate }
+    return { from: dateFrom.toISOString(), to: dateTo.toISOString() }
   }
 
   // Build query params

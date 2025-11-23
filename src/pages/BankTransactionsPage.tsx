@@ -1,19 +1,77 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, TrendingUp, TrendingDown, DollarSign } from 'lucide-react'
+import { ArrowLeft, TrendingUp, TrendingDown, DollarSign, ChevronDown } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
 import { useBankAccountDetail, useBankAccountTransactions } from '@/hooks/queries/useBankQueries'
 import type { BankAccountTransactionType } from '@/types/api'
-import { DateRangeFilter, type DateRange } from '@/components/DateRangeFilter'
+
+type DateFilterType = 'TODAY' | 'YESTERDAY' | 'THIS_WEEK' | 'LAST_WEEK' | 'THIS_MONTH' | 'LAST_MONTH' | 'CUSTOM' | 'ALL'
 
 export function BankTransactionsPage() {
   const { bankAccountId } = useParams<{ bankAccountId: string }>()
   const navigate = useNavigate()
   const [page, setPage] = useState(1)
-  const [dateRange, setDateRange] = useState<DateRange>({ startDate: null, endDate: null })
+  const [filterDate, setFilterDate] = useState<DateFilterType>('ALL')
+  const [customDateRange, setCustomDateRange] = useState<{ from: string; to: string }>({
+    from: new Date().toISOString().split('T')[0],
+    to: new Date().toISOString().split('T')[0],
+  })
+  const [dateFiltersExpanded, setDateFiltersExpanded] = useState(false)
+
+  // Calculate date range based on filter
+  const getDateRange = (filterType: DateFilterType) => {
+    const today = new Date()
+    let dateFrom = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0, 0)
+    let dateTo = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999)
+
+    switch (filterType) {
+      case 'TODAY':
+        break
+      case 'YESTERDAY':
+        dateFrom.setDate(dateFrom.getDate() - 1)
+        dateTo.setDate(dateTo.getDate() - 1)
+        break
+      case 'THIS_WEEK':
+        dateFrom.setDate(dateFrom.getDate() - dateFrom.getDay())
+        break
+      case 'LAST_WEEK':
+        const dayOfWeekLast = today.getDay()
+        const endOfLastWeek = new Date(today)
+        endOfLastWeek.setDate(today.getDate() - dayOfWeekLast - 1)
+        endOfLastWeek.setHours(23, 59, 59, 999)
+        const startOfLastWeek = new Date(endOfLastWeek)
+        startOfLastWeek.setDate(endOfLastWeek.getDate() - 6)
+        startOfLastWeek.setHours(0, 0, 0, 0)
+        dateFrom = startOfLastWeek
+        dateTo = endOfLastWeek
+        break
+      case 'THIS_MONTH':
+        dateFrom.setDate(1)
+        break
+      case 'LAST_MONTH':
+        dateFrom = new Date(today.getFullYear(), today.getMonth() - 1, 1)
+        dateTo = new Date(today.getFullYear(), today.getMonth(), 0)
+        dateTo.setHours(23, 59, 59, 999)
+        break
+      case 'CUSTOM':
+        const [customFromYear, customFromMonth, customFromDay] = customDateRange.from.split('-').map(Number)
+        const [customToYear, customToMonth, customToDay] = customDateRange.to.split('-').map(Number)
+        dateFrom = new Date(customFromYear, customFromMonth - 1, customFromDay, 0, 0, 0, 0)
+        dateTo = new Date(customToYear, customToMonth - 1, customToDay, 23, 59, 59, 999)
+        break
+      default:
+        return undefined
+    }
+
+    return { from: dateFrom.toISOString(), to: dateTo.toISOString() }
+  }
+
+  // Build query params
+  const dateRange = filterDate !== 'ALL' ? getDateRange(filterDate) : undefined
 
   // React Query hooks for bank account and transactions
   const bankAccountQuery = useBankAccountDetail(bankAccountId || null)
@@ -21,8 +79,8 @@ export function BankTransactionsPage() {
     accountId: bankAccountId || '',
     page,
     limit: 50,
-    startDate: dateRange.startDate,
-    endDate: dateRange.endDate,
+    startDate: dateRange?.from || null,
+    endDate: dateRange?.to || null,
   })
 
   const bankAccount = bankAccountQuery.data
@@ -124,17 +182,148 @@ export function BankTransactionsPage() {
           </Card>
         )}
 
-        {/* Date Range Filter */}
-        <DateRangeFilter
-          onDateRangeChange={(range) => {
-            setDateRange(range)
-            setPage(1)
-          }}
-          onClear={() => {
-            setDateRange({ startDate: null, endDate: null })
-            setPage(1)
-          }}
-        />
+        {/* Date Filters */}
+        <div className="mb-6 border rounded-lg bg-card">
+          <button
+            onClick={() => setDateFiltersExpanded(!dateFiltersExpanded)}
+            className="w-full flex items-center justify-between p-3 hover:bg-muted/50 transition-colors"
+          >
+            <p className="text-xs font-semibold text-muted-foreground">Fecha</p>
+            <ChevronDown
+              className={`h-4 w-4 text-muted-foreground transition-transform ${dateFiltersExpanded ? 'rotate-180' : ''}`}
+            />
+          </button>
+
+          {dateFiltersExpanded && (
+            <div className="border-t p-3 space-y-3">
+              <div className="flex gap-2 overflow-x-auto pb-2 flex-wrap">
+                <Button
+                  variant={filterDate === 'TODAY' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => {
+                    setFilterDate('TODAY')
+                    setPage(1)
+                  }}
+                  className={filterDate === 'TODAY' ? 'text-white' : ''}
+                  style={filterDate === 'TODAY' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+                >
+                  Hoy
+                </Button>
+                <Button
+                  variant={filterDate === 'YESTERDAY' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => {
+                    setFilterDate('YESTERDAY')
+                    setPage(1)
+                  }}
+                  className={filterDate === 'YESTERDAY' ? 'text-white' : ''}
+                  style={filterDate === 'YESTERDAY' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+                >
+                  Ayer
+                </Button>
+                <Button
+                  variant={filterDate === 'THIS_WEEK' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => {
+                    setFilterDate('THIS_WEEK')
+                    setPage(1)
+                  }}
+                  className={filterDate === 'THIS_WEEK' ? 'text-white' : ''}
+                  style={filterDate === 'THIS_WEEK' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+                >
+                  Esta Semana
+                </Button>
+                <Button
+                  variant={filterDate === 'LAST_WEEK' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => {
+                    setFilterDate('LAST_WEEK')
+                    setPage(1)
+                  }}
+                  className={filterDate === 'LAST_WEEK' ? 'text-white' : ''}
+                  style={filterDate === 'LAST_WEEK' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+                >
+                  Semana Pasada
+                </Button>
+                <Button
+                  variant={filterDate === 'THIS_MONTH' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => {
+                    setFilterDate('THIS_MONTH')
+                    setPage(1)
+                  }}
+                  className={filterDate === 'THIS_MONTH' ? 'text-white' : ''}
+                  style={filterDate === 'THIS_MONTH' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+                >
+                  Este Mes
+                </Button>
+                <Button
+                  variant={filterDate === 'LAST_MONTH' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => {
+                    setFilterDate('LAST_MONTH')
+                    setPage(1)
+                  }}
+                  className={filterDate === 'LAST_MONTH' ? 'text-white' : ''}
+                  style={filterDate === 'LAST_MONTH' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+                >
+                  Mes Pasado
+                </Button>
+                <Button
+                  variant={filterDate === 'CUSTOM' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setFilterDate('CUSTOM')}
+                  className={filterDate === 'CUSTOM' ? 'text-white' : ''}
+                  style={filterDate === 'CUSTOM' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+                >
+                  Personalizado
+                </Button>
+                <Button
+                  variant={filterDate === 'ALL' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => {
+                    setFilterDate('ALL')
+                    setPage(1)
+                  }}
+                  className={filterDate === 'ALL' ? 'text-white' : ''}
+                  style={filterDate === 'ALL' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+                >
+                  Todos
+                </Button>
+              </div>
+
+              {filterDate === 'CUSTOM' && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end pt-2 border-t">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Desde</label>
+                    <Input
+                      type="date"
+                      value={customDateRange.from}
+                      onChange={(e) => setCustomDateRange({ ...customDateRange, from: e.target.value })}
+                      className="w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Hasta</label>
+                    <Input
+                      type="date"
+                      value={customDateRange.to}
+                      onChange={(e) => setCustomDateRange({ ...customDateRange, to: e.target.value })}
+                      className="w-full"
+                    />
+                  </div>
+                  <Button
+                    onClick={() => setPage(1)}
+                    className="w-full bg-[linear-gradient(to_right,#136BBC,#274565)]"
+                    size="sm"
+                  >
+                    Aplicar
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
 
         {/* Transactions Table */}
         <Card>
