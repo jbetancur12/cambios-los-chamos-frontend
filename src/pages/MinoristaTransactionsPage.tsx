@@ -16,7 +16,7 @@ export function MinoristaTransactionsPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const [page, setPage] = useState(1)
-  const [dateRange, setDateRange] = useState<DateRange>({ startDate: null, endDate: null })
+  const [dateRange, setDateRange] = useState<DateRange>({ from: null, to: null, startDate: null, endDate: null })
   const [typeFilter, setTypeFilter] = useState<MinoristaTransactionType | 'ALL'>('ALL')
 
   // React Query hooks
@@ -25,8 +25,8 @@ export function MinoristaTransactionsPage() {
     minoristaId: minoristaQuery.data?.id || '',
     page,
     limit: 50,
-    startDate: dateRange.startDate,
-    endDate: dateRange.endDate,
+    startDate: dateRange.from,
+    endDate: dateRange.to,
   })
 
   const minorista = minoristaQuery.data
@@ -153,7 +153,7 @@ export function MinoristaTransactionsPage() {
             setPage(1)
           }}
           onClear={() => {
-            setDateRange({ startDate: null, endDate: null })
+            setDateRange({ from: null, to: null, startDate: null, endDate: null })
             setPage(1)
           }}
         />

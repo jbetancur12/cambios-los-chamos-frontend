@@ -45,7 +45,7 @@ export function useMinoristaTransactions(params: MinoristaTransactionsParams) {
       let url = `/minorista/${minoristaId}/transactions?page=${page}&limit=${limit}`
 
       if (startDate && endDate) {
-        url += `&startDate=${startDate}&endDate=${endDate}`
+        url += `&startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`
       }
 
       const response = await api.get<MinoristaTransactionsResponse>(url)

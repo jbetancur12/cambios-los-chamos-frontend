@@ -32,7 +32,7 @@ export function RechargeMinoristaBalanceSheet({
   const [localMinorista, setLocalMinorista] = useState<Minorista | null>(minorista)
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
-  const [dateRange, setDateRange] = useState<DateRange>({ startDate: null, endDate: null })
+  const [dateRange, setDateRange] = useState<DateRange>({ from: null, to: null, startDate: null, endDate: null })
   const [typeFilter, setTypeFilter] = useState<MinoristaTransactionType | 'ALL'>('ALL')
 
   const formatCurrency = (value: number) => {
@@ -49,8 +49,8 @@ export function RechargeMinoristaBalanceSheet({
       setTransactionsLoading(true)
       let url = `/minorista/${localMinorista.id}/transactions?page=${page}&limit=10`
 
-      if (dateRange.startDate && dateRange.endDate) {
-        url += `&startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`
+      if (dateRange.from && dateRange.to) {
+        url += `&startDate=${encodeURIComponent(dateRange.from)}&endDate=${encodeURIComponent(dateRange.to)}`
       }
 
       const response = await api.get<{
@@ -275,7 +275,7 @@ export function RechargeMinoristaBalanceSheet({
                     setPage(1)
                   }}
                   onClear={() => {
-                    setDateRange({ startDate: null, endDate: null })
+                    setDateRange({ from: null, to: null, startDate: null, endDate: null })
                     setPage(1)
                   }}
                 />

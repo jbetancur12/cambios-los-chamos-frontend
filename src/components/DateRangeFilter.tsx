@@ -1,309 +1,241 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Calendar, X, ChevronDown } from 'lucide-react'
-import { Card } from '@/components/ui/card'
-import { cn } from '@/lib/utils'
+import { ChevronDown } from 'lucide-react'
 
 export interface DateRange {
-  startDate: string | null
-  endDate: string | null
+  from?: string | null
+  to?: string | null
+  startDate?: string | null
+  endDate?: string | null
 }
 
 interface DateRangeFilterProps {
   onDateRangeChange: (dateRange: DateRange) => void
-  onClear: () => void
+  onClear?: () => void
 }
 
-type PredefinedRange = 'today' | 'yesterday' | 'thisWeek' | 'lastWeek' | 'thisMonth' | 'lastMonth' | 'thisYear' | null
+type DateFilterType = 'TODAY' | 'YESTERDAY' | 'THIS_WEEK' | 'LAST_WEEK' | 'THIS_MONTH' | 'LAST_MONTH' | 'CUSTOM' | 'ALL'
 
 export function DateRangeFilter({ onDateRangeChange, onClear }: DateRangeFilterProps) {
-  const [dateRange, setDateRange] = useState<DateRange>({ startDate: null, endDate: null })
-  const [activePredefined, setActivePredefined] = useState<PredefinedRange>(null)
-  const [showCustomRange, setShowCustomRange] = useState(false)
+  const [filterDate, setFilterDate] = useState<DateFilterType>('ALL')
+  const [customDateRange, setCustomDateRange] = useState<{ from: string; to: string }>({
+    from: new Date().toISOString().split('T')[0],
+    to: new Date().toISOString().split('T')[0],
+  })
   const [isExpanded, setIsExpanded] = useState(false)
 
-  const today = new Date()
+  // Calculate date range based on filter - returns ISO strings with full hours
+  const getDateRange = (filterType: DateFilterType) => {
+    const today = new Date()
+    let dateFrom = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0, 0)
+    let dateTo = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999)
 
-  const getPredefinedRange = (type: PredefinedRange): DateRange => {
-    const start = new Date()
-    const end = new Date()
-
-    switch (type) {
-      case 'today':
-        start.setHours(0, 0, 0, 0)
-        end.setHours(23, 59, 59, 999)
+    switch (filterType) {
+      case 'TODAY':
         break
-      case 'yesterday':
-        start.setDate(start.getDate() - 1)
-        start.setHours(0, 0, 0, 0)
-        end.setDate(end.getDate() - 1)
-        end.setHours(23, 59, 59, 999)
+      case 'YESTERDAY':
+        dateFrom.setDate(dateFrom.getDate() - 1)
+        dateTo.setDate(dateTo.getDate() - 1)
         break
-      case 'thisWeek':
-        const firstDay = new Date(start)
-        firstDay.setDate(start.getDate() - start.getDay())
-        firstDay.setHours(0, 0, 0, 0)
-        start.setTime(firstDay.getTime())
-        end.setHours(23, 59, 59, 999)
+      case 'THIS_WEEK':
+        dateFrom.setDate(dateFrom.getDate() - dateFrom.getDay())
         break
-      case 'lastWeek':
-        const lastWeekStart = new Date(start)
-        lastWeekStart.setDate(start.getDate() - start.getDay() - 7)
-        lastWeekStart.setHours(0, 0, 0, 0)
-        start.setTime(lastWeekStart.getTime())
-        const lastWeekEnd = new Date(lastWeekStart)
-        lastWeekEnd.setDate(lastWeekStart.getDate() + 6)
-        lastWeekEnd.setHours(23, 59, 59, 999)
-        end.setTime(lastWeekEnd.getTime())
+      case 'LAST_WEEK':
+        const dayOfWeekLast = today.getDay()
+        const endOfLastWeek = new Date(today)
+        endOfLastWeek.setDate(today.getDate() - dayOfWeekLast - 1)
+        endOfLastWeek.setHours(23, 59, 59, 999)
+        const startOfLastWeek = new Date(endOfLastWeek)
+        startOfLastWeek.setDate(endOfLastWeek.getDate() - 6)
+        startOfLastWeek.setHours(0, 0, 0, 0)
+        dateFrom = startOfLastWeek
+        dateTo = endOfLastWeek
         break
-      case 'thisMonth':
-        start.setDate(1)
-        start.setHours(0, 0, 0, 0)
-        end.setHours(23, 59, 59, 999)
+      case 'THIS_MONTH':
+        dateFrom.setDate(1)
         break
-      case 'lastMonth':
-        start.setMonth(start.getMonth() - 1)
-        start.setDate(1)
-        start.setHours(0, 0, 0, 0)
-        const lastDay = new Date(end.getFullYear(), end.getMonth(), 0)
-        lastDay.setHours(23, 59, 59, 999)
-        end.setTime(lastDay.getTime())
-        break
-      case 'thisYear':
-        start.setMonth(0)
-        start.setDate(1)
-        start.setHours(0, 0, 0, 0)
-        end.setMonth(11)
-        end.setDate(31)
-        end.setHours(23, 59, 59, 999)
+      case 'LAST_MONTH':
+        dateFrom = new Date(today.getFullYear(), today.getMonth() - 1, 1)
+        dateTo = new Date(today.getFullYear(), today.getMonth(), 0)
+        dateTo.setHours(23, 59, 59, 999)
         break
       default:
-        return { startDate: null, endDate: null }
+        return undefined
     }
 
-    return {
-      startDate: start.toISOString().split('T')[0],
-      endDate: end.toISOString().split('T')[0],
-    }
+    return { from: dateFrom.toISOString(), to: dateTo.toISOString() }
   }
 
-  const handlePredefined = (type: PredefinedRange) => {
-    if (activePredefined === type) {
-      setActivePredefined(null)
-      setDateRange({ startDate: null, endDate: null })
-      onDateRangeChange({ startDate: null, endDate: null })
-      setShowCustomRange(false)
+  const handleDateRangeChange = (range: DateFilterType) => {
+    setFilterDate(range)
+    if (range === 'ALL') {
+      onDateRangeChange({ from: null, to: null, startDate: null, endDate: null })
+      onClear?.()
     } else {
-      const range = getPredefinedRange(type)
-      setDateRange(range)
-      setActivePredefined(type)
-      onDateRangeChange(range)
-      setShowCustomRange(false)
+      const calculated = getDateRange(range)
+      if (calculated) {
+        // Return both old and new format for compatibility
+        onDateRangeChange({
+          from: calculated.from,
+          to: calculated.to,
+          startDate: calculated.from.split('T')[0],
+          endDate: calculated.to.split('T')[0],
+        })
+      }
     }
   }
 
-  const handleCustomRange = () => {
-    setShowCustomRange(!showCustomRange)
-    if (!showCustomRange) {
-      setActivePredefined(null)
-    }
-  }
+  const handleCustomDateChange = (field: 'from' | 'to', value: string) => {
+    const newRange = { ...customDateRange, [field]: value }
+    setCustomDateRange(newRange)
 
-  const handleCustomDateChange = (field: 'startDate' | 'endDate', value: string) => {
-    const newRange = { ...dateRange, [field]: value || null }
-    setDateRange(newRange)
-
-    if (newRange.startDate && newRange.endDate) {
-      onDateRangeChange(newRange)
+    if (newRange.from && newRange.to) {
+      const [fromYear, fromMonth, fromDay] = newRange.from.split('-').map(Number)
+      const [toYear, toMonth, toDay] = newRange.to.split('-').map(Number)
+      const dateFrom = new Date(fromYear, fromMonth - 1, fromDay, 0, 0, 0, 0)
+      const dateTo = new Date(toYear, toMonth - 1, toDay, 23, 59, 59, 999)
+      const fromISO = dateFrom.toISOString()
+      const toISO = dateTo.toISOString()
+      onDateRangeChange({
+        from: fromISO,
+        to: toISO,
+        startDate: newRange.from,
+        endDate: newRange.to,
+      })
     }
   }
 
   const handleClearFilter = () => {
-    setDateRange({ startDate: null, endDate: null })
-    setActivePredefined(null)
-    setShowCustomRange(false)
-    onClear()
+    setFilterDate('ALL')
+    setCustomDateRange({
+      from: new Date().toISOString().split('T')[0],
+      to: new Date().toISOString().split('T')[0],
+    })
+    onDateRangeChange({ from: null, to: null, startDate: null, endDate: null })
+    onClear?.()
   }
 
-  const isFilterActive = activePredefined !== null || dateRange.startDate !== null || dateRange.endDate !== null
-
   return (
-    <Card className="p-4 bg-muted/40 border-dashed">
-      <div className="space-y-4">
-        {/* Mobile Collapse Toggle */}
-        <div className="md:hidden flex items-center justify-between">
-          <p className="text-sm font-medium text-foreground">Filtros</p>
-          <Button variant="ghost" size="sm" onClick={() => setIsExpanded(!isExpanded)} className="h-8 w-8 p-0">
-            <ChevronDown className={`h-5 w-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
-          </Button>
-        </div>
+    <div className="mb-6 border rounded-lg bg-card">
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full flex items-center justify-between p-3 hover:bg-muted/50 transition-colors"
+      >
+        <p className="text-xs font-semibold text-muted-foreground">Fecha</p>
+        <ChevronDown
+          className={`h-4 w-4 text-muted-foreground transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+        />
+      </button>
 
-        {/* Filter Content - Collapsible on Mobile */}
-        <div
-          className={`space-y-4 overflow-hidden transition-all duration-200 ${
-            isExpanded ? 'md:block' : 'hidden md:block'
-          }`}
-        >
-          {/* Predefined Buttons */}
-          <div>
-            <p className="hidden md:block text-sm font-medium mb-3 text-foreground ">Rango Rápido</p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
-              <Button
-                variant={activePredefined === 'today' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => handlePredefined('today')}
-                className={cn(
-                  'text-xs',
-                  activePredefined === 'today' ? 'bg-[linear-gradient(to_right,#136BBC,#274565)]' : ''
-                )}
-              >
-                Hoy
-              </Button>
-              <Button
-                variant={activePredefined === 'yesterday' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => handlePredefined('yesterday')}
-                className={cn(
-                  'text-xs',
-                  activePredefined === 'yesterday' ? 'bg-[linear-gradient(to_right,#136BBC,#274565)]' : ''
-                )}
-              >
-                Ayer
-              </Button>
-              <Button
-                variant={activePredefined === 'thisWeek' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => handlePredefined('thisWeek')}
-                className={cn(
-                  'text-xs',
-                  activePredefined === 'thisWeek' ? 'bg-[linear-gradient(to_right,#136BBC,#274565)]' : ''
-                )}
-              >
-                Esta Semana
-              </Button>
-              <Button
-                variant={activePredefined === 'lastWeek' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => handlePredefined('lastWeek')}
-                className={cn(
-                  'text-xs',
-                  activePredefined === 'lastWeek' ? 'bg-[linear-gradient(to_right,#136BBC,#274565)]' : ''
-                )}
-              >
-                Sem. Pasada
-              </Button>
-              <Button
-                variant={activePredefined === 'thisMonth' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => handlePredefined('thisMonth')}
-                className={cn(
-                  'text-xs',
-                  activePredefined === 'thisMonth' ? 'bg-[linear-gradient(to_right,#136BBC,#274565)]' : ''
-                )}
-              >
-                Este Mes
-              </Button>
-              <Button
-                variant={activePredefined === 'lastMonth' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => handlePredefined('lastMonth')}
-                className={cn(
-                  'text-xs',
-                  activePredefined === 'lastMonth' ? 'bg-[linear-gradient(to_right,#136BBC,#274565)]' : ''
-                )}
-              >
-                Mes Pasado
-              </Button>
-              <Button
-                variant={activePredefined === 'thisYear' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => handlePredefined('thisYear')}
-                className={cn(
-                  'text-xs',
-                  activePredefined === 'thisYear' ? 'bg-[linear-gradient(to_right,#136BBC,#274565)]' : ''
-                )}
-              >
-                Este Año
-              </Button>
-              <Button
-                variant={showCustomRange ? 'default' : 'outline'}
-                size="sm"
-                onClick={handleCustomRange}
-                className={cn(
-                  'text-xs',
-                  showCustomRange === true ? 'bg-[linear-gradient(to_right,#136BBC,#274565)]' : ''
-                )}
-              >
-                <Calendar className="h-3 w-3 mr-1" />
-                Personalizado
-              </Button>
-            </div>
+      {isExpanded && (
+        <div className="border-t p-3 space-y-3">
+          <div className="flex gap-2 overflow-x-auto pb-2 flex-wrap">
+            <Button
+              variant={filterDate === 'TODAY' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => handleDateRangeChange('TODAY')}
+              className={filterDate === 'TODAY' ? 'text-white' : ''}
+              style={filterDate === 'TODAY' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+            >
+              Hoy
+            </Button>
+            <Button
+              variant={filterDate === 'YESTERDAY' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => handleDateRangeChange('YESTERDAY')}
+              className={filterDate === 'YESTERDAY' ? 'text-white' : ''}
+              style={filterDate === 'YESTERDAY' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+            >
+              Ayer
+            </Button>
+            <Button
+              variant={filterDate === 'THIS_WEEK' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => handleDateRangeChange('THIS_WEEK')}
+              className={filterDate === 'THIS_WEEK' ? 'text-white' : ''}
+              style={filterDate === 'THIS_WEEK' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+            >
+              Esta Semana
+            </Button>
+            <Button
+              variant={filterDate === 'LAST_WEEK' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => handleDateRangeChange('LAST_WEEK')}
+              className={filterDate === 'LAST_WEEK' ? 'text-white' : ''}
+              style={filterDate === 'LAST_WEEK' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+            >
+              Semana Pasada
+            </Button>
+            <Button
+              variant={filterDate === 'THIS_MONTH' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => handleDateRangeChange('THIS_MONTH')}
+              className={filterDate === 'THIS_MONTH' ? 'text-white' : ''}
+              style={filterDate === 'THIS_MONTH' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+            >
+              Este Mes
+            </Button>
+            <Button
+              variant={filterDate === 'LAST_MONTH' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => handleDateRangeChange('LAST_MONTH')}
+              className={filterDate === 'LAST_MONTH' ? 'text-white' : ''}
+              style={filterDate === 'LAST_MONTH' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+            >
+              Mes Pasado
+            </Button>
+            <Button
+              variant={filterDate === 'CUSTOM' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setFilterDate('CUSTOM')}
+              className={filterDate === 'CUSTOM' ? 'text-white' : ''}
+              style={filterDate === 'CUSTOM' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+            >
+              Personalizado
+            </Button>
+            <Button
+              variant={filterDate === 'ALL' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => handleClearFilter()}
+              className={filterDate === 'ALL' ? 'text-white' : ''}
+              style={filterDate === 'ALL' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+            >
+              Todos
+            </Button>
           </div>
 
-          {/* Custom Date Range */}
-          {showCustomRange && (
-            <div className="space-y-3 pt-3 border-t">
-              <p className="text-sm font-medium text-foreground">Rango Personalizado</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground block mb-2">Desde</label>
-                  <Input
-                    type="date"
-                    value={dateRange.startDate || ''}
-                    onChange={(e) => handleCustomDateChange('startDate', e.target.value)}
-                    max={dateRange.endDate || today.toISOString().split('T')[0]}
-                    className="text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground block mb-2">Hasta</label>
-                  <Input
-                    type="date"
-                    value={dateRange.endDate || ''}
-                    onChange={(e) => handleCustomDateChange('endDate', e.target.value)}
-                    min={dateRange.startDate || ''}
-                    max={today.toISOString().split('T')[0]}
-                    className="text-sm"
-                  />
-                </div>
+          {filterDate === 'CUSTOM' && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end pt-2 border-t">
+              <div>
+                <label className="block text-sm font-medium mb-2">Desde</label>
+                <Input
+                  type="date"
+                  value={customDateRange.from}
+                  onChange={(e) => handleCustomDateChange('from', e.target.value)}
+                  className="w-full"
+                />
               </div>
-            </div>
-          )}
-
-          {/* Active Filter Info */}
-          {isFilterActive && (
-            <div className="flex items-center justify-between pt-3 border-t">
-              <div className="text-sm text-muted-foreground">
-                {activePredefined ? (
-                  <span>
-                    {activePredefined === 'today' && '📅 Mostrando: Hoy'}
-                    {activePredefined === 'yesterday' && '📅 Mostrando: Ayer'}
-                    {activePredefined === 'thisWeek' && '📅 Mostrando: Esta Semana'}
-                    {activePredefined === 'lastWeek' && '📅 Mostrando: Semana Pasada'}
-                    {activePredefined === 'thisMonth' && '📅 Mostrando: Este Mes'}
-                    {activePredefined === 'lastMonth' && '📅 Mostrando: Mes Pasado'}
-                    {activePredefined === 'thisYear' && '📅 Mostrando: Este Año'}
-                  </span>
-                ) : (
-                  <span>
-                    📅 {dateRange.startDate} a {dateRange.endDate}
-                  </span>
-                )}
+              <div>
+                <label className="block text-sm font-medium mb-2">Hasta</label>
+                <Input
+                  type="date"
+                  value={customDateRange.to}
+                  onChange={(e) => handleCustomDateChange('to', e.target.value)}
+                  className="w-full"
+                />
               </div>
               <Button
-                variant="ghost"
+                onClick={() => setFilterDate('CUSTOM')}
+                className="w-full bg-[linear-gradient(to_right,#136BBC,#274565)]"
                 size="sm"
-                onClick={handleClearFilter}
-                className="text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
               >
-                <X className="h-3 w-3 mr-1" />
-                Limpiar
+                Aplicar
               </Button>
             </div>
           )}
         </div>
-      </div>
-    </Card>
+      )}
+    </div>
   )
 }
