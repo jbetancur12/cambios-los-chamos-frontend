@@ -126,7 +126,7 @@ export function MinoristaSimpleTransactionTable({
                       isBalanceInFavor ? 'text-green-600' : 'text-red-600'
                     }`}
                   >
-                    {formatCurrency(creditLimit - (transaction.availableCredit as number))}
+                    {formatCurrency(transaction.accumulatedDebt as number)}
                   </td>
                 </tr>
               )
@@ -180,7 +180,7 @@ export function MinoristaSimpleTransactionTable({
                   className={`flex justify-between font-semibold ${isBalanceInFavor ? 'text-green-600' : 'text-red-600'}`}
                 >
                   <span>Saldo</span>
-                  <span>{formatCurrency(creditLimit - transaction.availableCredit)}</span>
+                  <span>{formatCurrency(transaction.accumulatedDebt as number)}</span>
                 </div>
               </div>
             </Card>
