@@ -41,7 +41,7 @@ const bottomNavItems: NavItem[] = [
     icon: Send,
     label: 'Enviar giro',
     href: '/enviar-giro',
-    roles: ['SUPER_ADMIN', 'ADMIN', 'TRANSFERENCISTA', 'MINORISTA'],
+    roles: ['SUPER_ADMIN', 'ADMIN', 'MINORISTA'],
   },
   { icon: Users, label: 'Usuarios', href: '/usuarios', roles: ['SUPER_ADMIN'] },
 ]
