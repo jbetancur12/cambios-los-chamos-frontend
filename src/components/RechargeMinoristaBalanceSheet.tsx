@@ -152,7 +152,7 @@ export function RechargeMinoristaBalanceSheet({
           <SheetTitle>Gestión de Crédito</SheetTitle>
         </SheetHeader>
 
-        <div className="w-full mt-6 space-y-4 px-4 sm:px-6 md:px-6">
+        <div className="w-full mt-6 space-y-4 px-4 sm:px-6 md:px-6 pb-5">
           {/* Tab Navigation */}
           <div className="flex gap-2 border-b">
             <button
