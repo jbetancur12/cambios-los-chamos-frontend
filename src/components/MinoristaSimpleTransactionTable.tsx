@@ -74,9 +74,6 @@ export function MinoristaSimpleTransactionTable({
     return <div className="text-center py-8 text-muted-foreground">No hay transacciones de este tipo</div>
   }
 
-  // Ordenar transacciones de más reciente a más viejo
-  const sortedTransactions = [...filteredTransactions].reverse()
-
   return (
     <div className="space-y-3">
       {/* Desktop Table */}
@@ -93,7 +90,7 @@ export function MinoristaSimpleTransactionTable({
             </tr>
           </thead>
           <tbody>
-            {sortedTransactions.map((transaction) => {
+            {filteredTransactions.map((transaction) => {
               const isPositive = isPositiveTransaction(transaction.type)
               const displayAmount = isPositive ? transaction.amount : -transaction.amount
               const balanceQueda = transaction.currentBalanceInFavor || 0
@@ -137,7 +134,7 @@ export function MinoristaSimpleTransactionTable({
 
       {/* Mobile Cards */}
       <div className="md:hidden space-y-3">
-        {sortedTransactions.map((transaction) => {
+        {filteredTransactions.map((transaction) => {
           const isPositive = isPositiveTransaction(transaction.type)
           const displayAmount = isPositive ? transaction.amount : -transaction.amount
           const balanceQueda = transaction.currentBalanceInFavor || 0
