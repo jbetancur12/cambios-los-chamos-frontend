@@ -7,6 +7,7 @@ import { api } from '@/lib/api'
 import { toast } from 'sonner'
 import type { ExchangeRate, Minorista } from '@/types/api'
 import { BalanceInfo } from '@/components/BalanceInfo'
+import { formatCurrency } from '@/lib/formatCurrency'
 
 interface RechargeOperator {
   id: string
@@ -237,11 +238,11 @@ export function RechargeForm({ onSuccess }: RechargeFormProps) {
         <div className="text-sm font-medium">Conversiones</div>
         <div className="flex justify-between items-center">
           <span className="text-gray-600 dark:text-gray-400">COP:</span>
-          <span className="font-semibold">${amountCop}</span>
+          <span className="font-semibold">{formatCurrency(Number(amountCop), 'COP')}</span>
         </div>
         <div className="flex justify-between items-center">
           <span className="text-gray-600 dark:text-gray-400">USD:</span>
-          <span className="font-semibold">${amountUsd}</span>
+          <span className="font-semibold">{formatCurrency(Number(amountUsd), 'USD')}</span>
         </div>
       </div>
 

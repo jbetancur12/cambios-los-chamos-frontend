@@ -406,7 +406,6 @@ export function CreateGiroSheet({ open, onOpenChange, onSuccess }: CreateGiroShe
                 >
                   <option value="">Selecciona moneda</option>
                   <option value="COP">COP</option>
-                  <option value="VES">VES</option>
                   {isSuperAdmin && <option value="USD">USD</option>}
                 </select>
               </div>

@@ -9,6 +9,7 @@ import type { Minorista, MinoristaTransaction, MinoristaTransactionType } from '
 import { AlertCircle, Eye, DollarSign } from 'lucide-react'
 import { MinoristaSimpleTransactionTable } from './MinoristaSimpleTransactionTable'
 import { DateRangeFilter, type DateRange } from './DateRangeFilter'
+import { NumericFormat } from 'react-number-format'
 
 interface RechargeMinoristaBalanceSheetProps {
   open: boolean
@@ -257,7 +258,7 @@ export function RechargeMinoristaBalanceSheet({
                     size="sm"
                     onClick={() => setTypeFilter('DISCOUNT')}
                   >
-                    Descuentos
+                    Giros
                   </Button>
                   <Button
                     variant={typeFilter === 'RECHARGE' ? 'default' : 'outline'}
@@ -333,16 +334,21 @@ export function RechargeMinoristaBalanceSheet({
               <form onSubmit={handleSetCreditLimit} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="credit-limit">Nuevo Cupo de Crédito (COP)</Label>
-                  <Input
+                  <NumericFormat
                     id="credit-limit"
-                    type="number"
-                    step="1"
-                    min="0"
-                    placeholder="0"
+                    customInput={Input}
+                    thousandSeparator="."
+                    decimalSeparator=","
+                    decimalScale={2}
+                    fixedDecimalScale={false}
+                    prefix=""
                     value={creditLimitAmount}
-                    onChange={(e) => setCreditLimitAmount(e.target.value)}
+                    onValueChange={(values) => {
+                      setCreditLimitAmount(values.floatValue ? values.floatValue.toString() : '')
+                    }}
+                    placeholder="0"
+                    allowNegative={false}
                     required
-                    autoFocus
                   />
                   <p className="text-xs text-muted-foreground">
                     Cupo actual: {formatCurrency(localMinorista.creditLimit)}
@@ -377,14 +383,20 @@ export function RechargeMinoristaBalanceSheet({
                 <div className="space-y-2">
                   <Label htmlFor="pay-amount">Monto a Pagar (COP)</Label>
                   <div className="flex gap-2">
-                    <Input
+                    <NumericFormat
                       id="pay-amount"
-                      type="number"
-                      step="1"
-                      min="1"
-                      placeholder="0"
+                      customInput={Input}
+                      thousandSeparator="."
+                      decimalSeparator=","
+                      decimalScale={2}
+                      fixedDecimalScale={false}
+                      prefix=""
                       value={payAmount}
-                      onChange={(e) => setPayAmount(e.target.value)}
+                      onValueChange={(values) => {
+                        setPayAmount(values.floatValue ? values.floatValue.toString() : '')
+                      }}
+                      placeholder="0"
+                      allowNegative={false}
                       required
                     />
                     <Button

@@ -37,7 +37,7 @@ export function MinoristaSimpleTransactionTable({
   const getTransactionTypeLabel = (type: MinoristaTransactionType) => {
     switch (type) {
       case 'DISCOUNT':
-        return 'Descuento'
+        return 'Giro'
       case 'RECHARGE':
         return 'Abono'
       case 'ADJUSTMENT':

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { NumericFormat } from 'react-number-format'
 
 export function CalculadoraVesCompraPage() {
   const [vesAmount, setVesAmount] = useState('')
@@ -37,24 +38,41 @@ export function CalculadoraVesCompraPage() {
           <CardContent className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-2">Bolivares (VES) a comprar</label>
-              <Input
-                type="number"
-                placeholder="Ej: 5000000"
+              <NumericFormat
+                id="amount"
+                customInput={Input}
+                thousandSeparator="."
+                decimalSeparator=","
+                decimalScale={2}
+                fixedDecimalScale={false}
+                prefix=""
                 value={vesAmount}
-                onChange={(e) => setVesAmount(e.target.value)}
-                className="w-full"
+                onValueChange={(values) => {
+                  setVesAmount(values.floatValue ? values.floatValue.toString() : '')
+                }}
+                placeholder="Ej: 5.000.000"
+                allowNegative={false}
+                required
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-2">Tasa de compra (COP por VES)</label>
-              <Input
-                type="number"
-                placeholder="Ej: 0.0004"
+              <NumericFormat
+                id="amount"
+                customInput={Input}
+                thousandSeparator="."
+                decimalSeparator=","
+                decimalScale={2}
+                fixedDecimalScale={false}
+                prefix=""
                 value={purchaseRate}
-                onChange={(e) => setPurchaseRate(e.target.value)}
-                step="0.0001"
-                className="w-full"
+                onValueChange={(values) => {
+                  setPurchaseRate(values.floatValue ? values.floatValue.toString() : '')
+                }}
+                placeholder="Ej: 0.0004"
+                allowNegative={false}
+                required
               />
             </div>
 

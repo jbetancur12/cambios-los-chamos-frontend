@@ -3,6 +3,7 @@ import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { useCurrentExchangeRate } from '@/hooks/queries/useExchangeRateQueries'
+import { NumericFormat } from 'react-number-format'
 
 export function CalculadoraPage() {
   const [activeTab, setActiveTab] = useState<'bcv' | 'manual' | 'ves'>('bcv')
@@ -180,23 +181,43 @@ export function CalculadoraPage() {
             <CardContent className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-2">USD a enviar</label>
-                <Input
-                  type="number"
-                  placeholder="Ej: 100"
+
+                <NumericFormat
+                  id="amount"
+                  customInput={Input}
+                  thousandSeparator="."
+                  decimalSeparator=","
+                  decimalScale={2}
+                  fixedDecimalScale={false}
+                  prefix=""
                   value={usdManual}
-                  onChange={(e) => setUsdManual(e.target.value)}
-                  className="w-full"
+                  onValueChange={(values) => {
+                    setUsdManual(values.floatValue ? values.floatValue.toString() : '')
+                  }}
+                  placeholder="Ej: 100"
+                  allowNegative={false}
+                  required
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium mb-2">Precio en VES por USD (manual)</label>
-                <Input
-                  type="number"
-                  placeholder="Ej: 2500000"
+
+                <NumericFormat
+                  id="amount"
+                  customInput={Input}
+                  thousandSeparator="."
+                  decimalSeparator=","
+                  decimalScale={2}
+                  fixedDecimalScale={false}
+                  prefix=""
                   value={priceVES}
-                  onChange={(e) => setPriceVES(e.target.value)}
-                  className="w-full"
+                  onValueChange={(values) => {
+                    setPriceVES(values.floatValue ? values.floatValue.toString() : '')
+                  }}
+                  placeholder="Monto"
+                  allowNegative={false}
+                  required
                 />
               </div>
 
@@ -227,12 +248,21 @@ export function CalculadoraPage() {
             <CardContent className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-2">Bolivares (VES)</label>
-                <Input
-                  type="number"
-                  placeholder="Ej: 2500000"
+                <NumericFormat
+                  id="amount"
+                  customInput={Input}
+                  thousandSeparator="."
+                  decimalSeparator=","
+                  decimalScale={2}
+                  fixedDecimalScale={false}
+                  prefix=""
                   value={vesAmount}
-                  onChange={(e) => setVesAmount(e.target.value)}
-                  className="w-full"
+                  onValueChange={(values) => {
+                    setVesAmount(values.floatValue ? values.floatValue.toString() : '')
+                  }}
+                  placeholder="Monto"
+                  allowNegative={false}
+                  required
                 />
               </div>
 

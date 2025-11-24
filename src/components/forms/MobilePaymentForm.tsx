@@ -7,6 +7,8 @@ import { toast } from 'sonner'
 import { useBeneficiarySuggestions, type BeneficiaryData } from '@/hooks/useBeneficiarySuggestions'
 import type { ExchangeRate, Minorista } from '@/types/api'
 import { BalanceInfo } from '@/components/BalanceInfo'
+import { NumericFormat } from 'react-number-format'
+import { formatDecimal } from '@/lib/formatCurrency'
 
 interface Bank {
   id: string
@@ -249,12 +251,21 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
         <Label htmlFor="amount" className="hidden md:block">
           Monto (COP)
         </Label>
-        <Input
+
+        <NumericFormat
           id="amount"
-          type="number"
-          placeholder="Monto (COP)"
+          customInput={Input}
+          thousandSeparator="."
+          decimalSeparator=","
+          decimalScale={2}
+          fixedDecimalScale={false}
+          prefix=""
           value={amountCop}
-          onChange={(e) => setAmountCop(e.target.value)}
+          onValueChange={(values) => {
+            setAmountCop(values.floatValue ? values.floatValue.toString() : '')
+          }}
+          placeholder="Monto"
+          allowNegative={false}
           required
         />
       </div>
@@ -278,11 +289,11 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
           <div className="space-y-1">
             <div className="text-xs">
               <span className="text-muted-foreground">En VES: </span>
-              <span className="font-semibold text-lg">{amountBs}</span>
+              <span className="font-semibold text-lg">{formatDecimal(Number(amountBs), 'VES')}</span>
             </div>
             <div className="text-xs">
               <span className="text-muted-foreground">En BCV: </span>
-              <span className="font-semibold">{amountBCV}</span>
+              <span className="font-semibold">{formatDecimal(Number(amountBCV), 'USD')}</span>
             </div>
           </div>
         </div>

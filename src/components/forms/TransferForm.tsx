@@ -392,7 +392,6 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
           >
             <option value="">Moneda</option>
             <option value="COP">COP</option>
-            <option value="VES">VES</option>
             {isSuperAdmin && <option value="USD">USD</option>}
           </select>
         </div>
