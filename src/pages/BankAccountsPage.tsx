@@ -13,7 +13,9 @@ import { Switch } from '@/components/ui/switch'
 import { api } from '@/lib/api'
 import { CreateUserSheet } from '@/components/CreateUserSheet'
 import { CreateBankAccountSheet } from '@/components/CreateBankAccountSheet'
+import { RechargeBalanceSheet } from '@/components/RechargeBalanceSheet'
 import { cn } from '@/lib/utils'
+import type { BankAccount } from '@/types/api'
 
 export function BankAccountsPage() {
   const navigate = useNavigate()
@@ -24,6 +26,8 @@ export function BankAccountsPage() {
   const [searchTransferencistasTerm, setSearchTransferencistasTerm] = useState('')
   const [createTrasferencistaSheetOpen, setCreateTrasferencistaSheetOpen] = useState(false)
   const [createAdminBankAccountSheetOpen, setCreateAdminBankAccountSheetOpen] = useState(false)
+  const [rechargeSheetOpen, setRechargeSheetOpen] = useState(false)
+  const [selectedAccount, setSelectedAccount] = useState<BankAccount | null>(null)
 
   // React Query hook for bank accounts
   const accountsQuery = useBankAccountsList(user?.role)
@@ -117,6 +121,17 @@ export function BankAccountsPage() {
     setCreateAdminBankAccountSheetOpen(false)
     queryClient.invalidateQueries({ queryKey: ['bankAccounts'] })
     toast.success('Cuenta bancaria compartida creada exitosamente')
+  }
+
+  const handleRechargeBalance = (account: BankAccount) => {
+    setSelectedAccount(account)
+    setRechargeSheetOpen(true)
+  }
+
+  const handleBalanceUpdated = () => {
+    queryClient.invalidateQueries({ queryKey: ['bankAccounts'] })
+    setRechargeSheetOpen(false)
+    setSelectedAccount(null)
   }
 
   return (
@@ -219,11 +234,12 @@ export function BankAccountsPage() {
                 {user?.role === 'SUPER_ADMIN' && (
                   <Button
                     onClick={() => setCreateAdminBankAccountSheetOpen(true)}
-                    className="gap-2"
+                    className="gap-2 bg-[linear-gradient(to_right,#136BBC,#274565)] text-white"
                     size="sm"
                   >
                     <Plus className="h-4 w-4" />
-                    Crear Cuenta Compartida
+                    <span className="hidden sm:inline">Crear Cuenta Compartida</span>
+                    <span className="sm:hidden">Nueva</span>
                   </Button>
                 )}
               </div>
@@ -273,15 +289,27 @@ export function BankAccountsPage() {
                               {formatCurrency(account.balance)}
                             </td>
                             <td className="py-4 text-right">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleViewTransactions(account.id)}
-                                className="gap-1"
-                              >
-                                <Eye className="h-4 w-4" />
-                                Ver Transacciones
-                              </Button>
+                              <div className="flex gap-2 justify-end">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleViewTransactions(account.id)}
+                                  className="gap-1"
+                                >
+                                  <Eye className="h-4 w-4" />
+                                  Ver Transacciones
+                                </Button>
+                                {user?.role === 'SUPER_ADMIN' && (
+                                  <Button
+                                    size="sm"
+                                    onClick={() => handleRechargeBalance(account)}
+                                    className="gap-1 bg-[linear-gradient(to_right,#136BBC,#274565)] text-white"
+                                  >
+                                    <Plus className="h-4 w-4" />
+                                    Recargar
+                                  </Button>
+                                )}
+                              </div>
                             </td>
                           </tr>
                         ))}
@@ -319,15 +347,27 @@ export function BankAccountsPage() {
                             </div>
                           </div>
 
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleViewTransactions(account.id)}
-                            className="w-full gap-1"
-                          >
-                            <Eye className="h-4 w-4" />
-                            Ver Transacciones
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleViewTransactions(account.id)}
+                              className="flex-1 gap-1"
+                            >
+                              <Eye className="h-4 w-4" />
+                              Ver Transacciones
+                            </Button>
+                            {user?.role === 'SUPER_ADMIN' && (
+                              <Button
+                                size="sm"
+                                onClick={() => handleRechargeBalance(account)}
+                                className="gap-1 bg-[linear-gradient(to_right,#136BBC,#274565)] text-white"
+                              >
+                                <Plus className="h-4 w-4" />
+                                Recargar
+                              </Button>
+                            )}
+                          </div>
                         </div>
                       </Card>
                     ))}
@@ -446,6 +486,14 @@ export function BankAccountsPage() {
           onOpenChange={setCreateAdminBankAccountSheetOpen}
           mode="admin"
           onAccountCreated={handleAdminBankAccountCreated}
+        />
+
+        {/* Recharge Balance Sheet */}
+        <RechargeBalanceSheet
+          open={rechargeSheetOpen}
+          onOpenChange={setRechargeSheetOpen}
+          account={selectedAccount}
+          onBalanceUpdated={handleBalanceUpdated}
         />
       </div>
     </div>

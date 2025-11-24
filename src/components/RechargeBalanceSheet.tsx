@@ -98,20 +98,22 @@ export function RechargeBalanceSheet({ open, onOpenChange, account, onBalanceUpd
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Amount */}
             <div className="space-y-2">
-              <Label htmlFor="amount">Monto de Recarga o Ajuste (Bs)</Label>
+              <Label htmlFor="amount" className="text-base">Monto de Recarga o Ajuste (Bs)</Label>
               <Input
                 id="amount"
                 type="number"
+                inputMode="decimal"
                 step="0.01"
                 // **IMPORTANTE: Se remueve el atributo min="0.01" para permitir números negativos**
-                placeholder="Ej: 15.00 (Recarga) o -5.00 (Ajuste de resta)"
+                placeholder="Ej: 15.00 o -5.00"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 required
                 autoFocus
+                className="text-lg h-12"
               />
               <p className="text-xs text-muted-foreground">
-                Ingresa un valor positivo para recargar, o un valor negativo para ajustar (restar) saldo.
+                💡 Positivo para recargar, negativo para restar saldo.
               </p>
             </div>
 
