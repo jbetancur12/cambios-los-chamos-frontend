@@ -98,7 +98,9 @@ export function RechargeBalanceSheet({ open, onOpenChange, account, onBalanceUpd
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Amount */}
             <div className="space-y-2">
-              <Label htmlFor="amount" className="text-base">Monto de Recarga o Ajuste (Bs)</Label>
+              <Label htmlFor="amount" className="text-base">
+                Monto de Recarga o Ajuste (Bs)
+              </Label>
               <Input
                 id="amount"
                 type="number"
@@ -112,9 +114,7 @@ export function RechargeBalanceSheet({ open, onOpenChange, account, onBalanceUpd
                 autoFocus
                 className="text-lg h-12"
               />
-              <p className="text-xs text-muted-foreground">
-                💡 Positivo para recargar, negativo para restar saldo.
-              </p>
+              <p className="text-xs text-muted-foreground">💡 Positivo para recargar, negativo para restar saldo.</p>
             </div>
 
             {/* Preview */}

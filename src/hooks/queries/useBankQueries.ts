@@ -16,7 +16,11 @@ export function useBanksList() {
 
 export function useBankAccountsList(userRole?: string, forExecution?: boolean) {
   return useQuery({
-    queryKey: ['bankAccounts', userRole === 'TRANSFERENCISTA' ? 'my-accounts' : 'all', forExecution ? 'execution' : 'all'],
+    queryKey: [
+      'bankAccounts',
+      userRole === 'TRANSFERENCISTA' ? 'my-accounts' : 'all',
+      forExecution ? 'execution' : 'all',
+    ],
     queryFn: async () => {
       // TRANSFERENCISTA: obtener sus propias cuentas
       if (userRole === 'TRANSFERENCISTA') {

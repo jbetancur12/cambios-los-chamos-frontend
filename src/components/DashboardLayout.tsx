@@ -31,39 +31,40 @@ interface NavItem {
 const bottomNavItems: NavItem[] = [
   { icon: Home, label: 'Inicio', href: '/dashboard', roles: ['SUPER_ADMIN', 'ADMIN', 'TRANSFERENCISTA', 'MINORISTA'] },
   {
-    icon: FileText,
-    label: 'Solicitudes',
-    href: '/giros',
-    roles: ['SUPER_ADMIN', 'ADMIN', 'TRANSFERENCISTA', 'MINORISTA'],
-  },
-  { icon: Building, label: 'Cuentas', href: '/cuentas-bancarias', roles: ['SUPER_ADMIN', 'ADMIN'] },
-  {
     icon: Send,
     label: 'Enviar giro',
     href: '/enviar-giro',
     roles: ['SUPER_ADMIN', 'ADMIN', 'MINORISTA'],
   },
+  {
+    icon: FileText,
+    label: 'Solicitudes',
+    href: '/giros',
+    roles: ['SUPER_ADMIN', 'ADMIN', 'TRANSFERENCISTA', 'MINORISTA'],
+  },
   { icon: Users, label: 'Usuarios', href: '/usuarios', roles: ['SUPER_ADMIN'] },
+  { icon: Building, label: 'Cuentas', href: '/cuentas-bancarias', roles: ['SUPER_ADMIN', 'ADMIN'] },
 ]
 
 // Additional items for side menu
 const sideMenuItems: NavItem[] = [
-  { icon: BarChart3, label: 'Reportes', href: '/reportes', roles: ['SUPER_ADMIN'] },
-  { icon: BarChart3, label: 'Mis Reportes', href: '/mis-reportes', roles: ['MINORISTA'] },
-  { icon: Wallet, label: 'Transacciones', href: '/transacciones-minorista', roles: ['MINORISTA'] },
+  { icon: DollarSign, label: 'Tasas', href: '/tasas', roles: ['SUPER_ADMIN'] },
   {
     icon: Calculator,
     label: 'Calculadora',
     href: '/calculadora',
     roles: ['SUPER_ADMIN', 'ADMIN', 'TRANSFERENCISTA', 'MINORISTA'],
   },
-  { icon: DollarSign, label: 'Tasas', href: '/tasas', roles: ['SUPER_ADMIN'] },
   {
     icon: Calculator,
     label: 'Calc. Compra VES',
     href: '/calculadora-ves-compra',
     roles: ['SUPER_ADMIN'],
   },
+  { icon: BarChart3, label: 'Reportes', href: '/reportes', roles: ['SUPER_ADMIN'] },
+  { icon: BarChart3, label: 'Mis Reportes', href: '/mis-reportes', roles: ['MINORISTA'] },
+  { icon: Wallet, label: 'Transacciones', href: '/transacciones-minorista', roles: ['MINORISTA'] },
+
   { icon: Settings, label: 'Config', href: '/configuracion', roles: ['SUPER_ADMIN', 'ADMIN', 'TRANSFERENCISTA'] },
 ]
 

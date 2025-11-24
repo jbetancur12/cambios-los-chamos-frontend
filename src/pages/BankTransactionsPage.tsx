@@ -217,7 +217,9 @@ export function BankTransactionsPage() {
                     setPage(1)
                   }}
                   className={filterDate === 'YESTERDAY' ? 'text-white' : ''}
-                  style={filterDate === 'YESTERDAY' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+                  style={
+                    filterDate === 'YESTERDAY' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}
+                  }
                 >
                   Ayer
                 </Button>
@@ -229,7 +231,9 @@ export function BankTransactionsPage() {
                     setPage(1)
                   }}
                   className={filterDate === 'THIS_WEEK' ? 'text-white' : ''}
-                  style={filterDate === 'THIS_WEEK' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+                  style={
+                    filterDate === 'THIS_WEEK' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}
+                  }
                 >
                   Esta Semana
                 </Button>
@@ -241,7 +245,9 @@ export function BankTransactionsPage() {
                     setPage(1)
                   }}
                   className={filterDate === 'LAST_WEEK' ? 'text-white' : ''}
-                  style={filterDate === 'LAST_WEEK' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+                  style={
+                    filterDate === 'LAST_WEEK' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}
+                  }
                 >
                   Semana Pasada
                 </Button>
@@ -253,7 +259,9 @@ export function BankTransactionsPage() {
                     setPage(1)
                   }}
                   className={filterDate === 'THIS_MONTH' ? 'text-white' : ''}
-                  style={filterDate === 'THIS_MONTH' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+                  style={
+                    filterDate === 'THIS_MONTH' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}
+                  }
                 >
                   Este Mes
                 </Button>
@@ -265,7 +273,9 @@ export function BankTransactionsPage() {
                     setPage(1)
                   }}
                   className={filterDate === 'LAST_MONTH' ? 'text-white' : ''}
-                  style={filterDate === 'LAST_MONTH' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+                  style={
+                    filterDate === 'LAST_MONTH' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}
+                  }
                 >
                   Mes Pasado
                 </Button>

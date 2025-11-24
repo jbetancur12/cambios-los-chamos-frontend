@@ -103,9 +103,8 @@ export function CreateBankAccountSheet({
   }
 
   const title = mode === 'admin' ? 'Crear Cuenta Bancaria Compartida' : 'Agregar Cuenta Bancaria'
-  const description = mode === 'admin'
-    ? 'Esta cuenta será compartida entre Admin y SuperAdmin'
-    : `Cuenta para ${transferencistaName}`
+  const description =
+    mode === 'admin' ? 'Esta cuenta será compartida entre Admin y SuperAdmin' : `Cuenta para ${transferencistaName}`
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
