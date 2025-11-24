@@ -16,271 +16,264 @@ function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, width: n
 }
 export function useSiaRateImage() {
   const generateImage = useCallback(async (rate: ExchangeRate): Promise<string> => {
-    console.log("🚀 ~ useSiaRateImage ~ rate:", rate)
     try {
       // Load main logo
-      const mainLogo = new Image();
-      mainLogo.src = '/LogoLosChamos.avif';
+      const mainLogo = new Image()
+      mainLogo.src = '/LogoLosChamos.avif'
 
       await new Promise((resolve, reject) => {
-        mainLogo.onload = resolve;
-        mainLogo.onerror = reject;
-      });
+        mainLogo.onload = resolve
+        mainLogo.onerror = reject
+      })
 
       // Load background image
-      const img = new Image();
-      img.src = '/rates-background.avif';
+      const img = new Image()
+      img.src = '/rates-background.avif'
 
       await new Promise((resolve, reject) => {
-        img.onload = resolve;
-        img.onerror = reject;
-      });
+        img.onload = resolve
+        img.onerror = reject
+      })
 
       // Load BCV logo
-      const bcvLogo = new Image();
-      bcvLogo.src = '/bcv.png'; // Ensure this path is correct
+      const bcvLogo = new Image()
+      bcvLogo.src = '/bcv.png' // Ensure this path is correct
 
       await new Promise((resolve, reject) => {
-        bcvLogo.onload = resolve;
-        bcvLogo.onerror = reject;
-      });
+        bcvLogo.onload = resolve
+        bcvLogo.onerror = reject
+      })
 
       // Canvas setup
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
+      const canvas = document.createElement('canvas')
+      canvas.width = img.width
+      canvas.height = img.height
 
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return '';
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return ''
 
       // Draw background
-      ctx.drawImage(img, 0, 0, img.width, img.height);
+      ctx.drawImage(img, 0, 0, img.width, img.height)
 
-      const offsetX = 30;
-      const offsetY = 250;
+      const offsetX = 30
+      const offsetY = 250
 
-      const cardWidth = img.width - 60;
-      const cardHeight = 1040;
+      const cardWidth = img.width - 60
+      const cardHeight = 1040
 
       // Draw main logo
-      const mainLogoHeight = 600;
-      const mainLogoWidth = (mainLogo.width / mainLogo.height) * mainLogoHeight;
+      const mainLogoHeight = 600
+      const mainLogoWidth = (mainLogo.width / mainLogo.height) * mainLogoHeight
 
-      const mainLogoX = offsetX + (cardWidth / 2) - (mainLogoWidth / 2);
-      const mainLogoY = offsetY - 400;
+      const mainLogoX = offsetX + cardWidth / 2 - mainLogoWidth / 2
+      const mainLogoY = offsetY - 400
 
-      ctx.drawImage(mainLogo, mainLogoX, mainLogoY, mainLogoWidth, mainLogoHeight);
+      ctx.drawImage(mainLogo, mainLogoX, mainLogoY, mainLogoWidth, mainLogoHeight)
 
       // ---- HEADER RED GRADIENT (INVERTED) ----
-      const headerHeight = 50;
-      const headerRadius = 8;
-      const grad = ctx.createLinearGradient(offsetX, offsetY, offsetX + cardWidth, offsetY);
-      grad.addColorStop(1, '#f80000');   // Dark Red (now at start/left)
-      grad.addColorStop(0, '#510200');   // Light Red (now at end/right)
+      const headerHeight = 50
+      const headerRadius = 8
+      const grad = ctx.createLinearGradient(offsetX, offsetY, offsetX + cardWidth, offsetY)
+      grad.addColorStop(1, '#f80000') // Dark Red (now at start/left)
+      grad.addColorStop(0, '#510200') // Light Red (now at end/right)
 
-      ctx.fillStyle = grad;
-      roundRect(ctx, offsetX, offsetY, cardWidth, headerHeight, headerRadius);
+      ctx.fillStyle = grad
+      roundRect(ctx, offsetX, offsetY, cardWidth, headerHeight, headerRadius)
       ctx.fill()
 
       // Date
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 28px Arial';
-      ctx.textAlign = 'left';
+      ctx.fillStyle = '#ffffff'
+      ctx.font = 'bold 28px Arial'
+      ctx.textAlign = 'left'
 
       const dateStr = new Date().toLocaleDateString('es-ES', {
         year: 'numeric',
         month: 'short',
-        day: 'numeric'
-      });
+        day: 'numeric',
+      })
 
-      ctx.fillText(dateStr, offsetX + 30, offsetY + 35);
+      ctx.fillText(dateStr, offsetX + 30, offsetY + 35)
 
       // Sell Rate
-      ctx.textAlign = 'right';
-      ctx.fillText(
-        'TASA ' + rate.sellRate.toFixed(1),
-        offsetX + cardWidth - 30,
-        offsetY + 35
-      );
+      ctx.textAlign = 'right'
+      ctx.fillText('TASA ' + rate.sellRate.toFixed(1), offsetX + cardWidth - 30, offsetY + 35)
 
       // ---- TABLE HEADER (TEXT ONLY) ----
-      const innerWidth = cardWidth - 60;
-      const headerX = offsetX + 30;
+      const innerWidth = cardWidth - 60
+      const headerX = offsetX + 30
 
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 40px Arial';
-      ctx.textAlign = 'center';
+      ctx.fillStyle = '#ffffff'
+      ctx.font = 'bold 40px Arial'
+      ctx.textAlign = 'center'
 
-      const colGap = 20;
-      const colWidth = (innerWidth - colGap * 2) / 3;
+      const colGap = 20
+      const colWidth = (innerWidth - colGap * 2) / 3
 
-      const col1X = headerX;
-      const col2X = col1X + colWidth + colGap;
-      const col3X = col2X + colWidth + colGap;
+      const col1X = headerX
+      const col2X = col1X + colWidth + colGap
+      const col3X = col2X + colWidth + colGap
 
       // Column Titles (COP, BS, BCV Logo)
-      ctx.fillText('COP', col1X + colWidth / 2, offsetY + 88);
-      ctx.fillText('BS', col2X + colWidth / 2, offsetY + 88);
+      ctx.fillText('COP', col1X + colWidth / 2, offsetY + 88)
+      ctx.fillText('BS', col2X + colWidth / 2, offsetY + 88)
 
-      const bcvLogoHeight = 45;
-      const bcvLogoWidth = (bcvLogo.width / bcvLogo.height) * bcvLogoHeight;
+      const bcvLogoHeight = 45
+      const bcvLogoWidth = (bcvLogo.width / bcvLogo.height) * bcvLogoHeight
 
       // Center logo horizontally and vertically in the column
-      const bcvLogoX = col3X + (colWidth / 2) - (bcvLogoWidth / 2);
-      const bcvLogoY = offsetY + 88 - (bcvLogoHeight / 2) - 5;
+      const bcvLogoX = col3X + colWidth / 2 - bcvLogoWidth / 2
+      const bcvLogoY = offsetY + 88 - bcvLogoHeight / 2 - 5
 
-      const headerCircleRadius = bcvLogoHeight / 2; // Radio del círculo
-      const headerCircleX = bcvLogoX + bcvLogoWidth / 2;
-      const headerCircleY = bcvLogoY + bcvLogoHeight / 2;
+      const headerCircleRadius = bcvLogoHeight / 2 // Radio del círculo
+      const headerCircleX = bcvLogoX + bcvLogoWidth / 2
+      const headerCircleY = bcvLogoY + bcvLogoHeight / 2
 
-      ctx.beginPath();
-      ctx.arc(headerCircleX, headerCircleY, headerCircleRadius, 0, Math.PI * 2, false);
-      ctx.fillStyle = '#ffffff'; // Color blanco
-      ctx.fill();
+      ctx.beginPath()
+      ctx.arc(headerCircleX, headerCircleY, headerCircleRadius, 0, Math.PI * 2, false)
+      ctx.fillStyle = '#ffffff' // Color blanco
+      ctx.fill()
 
-      ctx.drawImage(bcvLogo, bcvLogoX, bcvLogoY, bcvLogoWidth, bcvLogoHeight);
+      ctx.drawImage(bcvLogo, bcvLogoX, bcvLogoY, bcvLogoWidth, bcvLogoHeight)
 
       // ---- DATA TABLE ----
-      const amounts = [
-        10000, 20000, 30000, 40000, 50000,
-        60000, 70000, 80000, 90000, 100000,
-        200000, 300000
-      ];
+      const amounts = [10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000, 200000, 300000]
 
-      const rowHeight = 55;
-      const rowGap = 10;
-      const startY = offsetY + 150;
+      const rowHeight = 55
+      const rowGap = 10
+      const startY = offsetY + 150
 
       amounts.forEach((amount, index) => {
-        const y = startY + index * (rowHeight + rowGap);
+        const y = startY + index * (rowHeight + rowGap)
 
         // Draw cell background
-        ctx.fillStyle = '#260000';
-        roundRect(ctx, col1X, y - 38, colWidth, rowHeight, 8);
-        ctx.fill();
+        ctx.fillStyle = '#260000'
+        roundRect(ctx, col1X, y - 38, colWidth, rowHeight, 8)
+        ctx.fill()
 
-        roundRect(ctx, col2X, y - 38, colWidth, rowHeight, 8);
-        ctx.fill();
+        roundRect(ctx, col2X, y - 38, colWidth, rowHeight, 8)
+        ctx.fill()
 
-        roundRect(ctx, col3X, y - 38, colWidth, rowHeight, 8);
-        ctx.fill();
+        roundRect(ctx, col3X, y - 38, colWidth, rowHeight, 8)
+        ctx.fill()
 
-        ctx.fillStyle = '#ffffff';
-        ctx.font = '28px Arial';
-        ctx.textAlign = 'center';
+        ctx.fillStyle = '#ffffff'
+        ctx.font = '28px Arial'
+        ctx.textAlign = 'center'
 
         // COP
-        ctx.fillText(amount.toLocaleString('es-VE'), col1X + colWidth / 2, y);
+        ctx.fillText(amount.toLocaleString('es-VE'), col1X + colWidth / 2, y)
 
         // BS (with thousands separator and two decimals)
-        const bs = (amount / rate.sellRate);
+        const bs = amount / rate.sellRate
         ctx.fillText(
           bs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
           col2X + colWidth / 2,
           y
-        );
+        )
 
         // USD
-        const usd = bs / rate.bcv;
-        ctx.fillText(usd.toFixed(2), col3X + colWidth / 2, y);
-      });
+        const usd = bs / rate.bcv
+        ctx.fillText(usd.toFixed(2), col3X + colWidth / 2, y)
+      })
 
       // ---- FOOTER BCV (ROUNDED RECTANGLE) ----
-      const footerRectWidth = 240;
-      const footerRectHeight = 90;
-      const footerRadius = 15;
+      const footerRectWidth = 240
+      const footerRectHeight = 90
+      const footerRadius = 15
 
       const footerX = 600
-      const footerY = offsetY + cardHeight - 60 - (footerRectHeight / 2);
+      const footerY = offsetY + cardHeight - 60 - footerRectHeight / 2
 
-      ctx.fillStyle = grad; // Apply gradient to footer
-      roundRect(ctx, footerX, footerY, footerRectWidth, footerRectHeight, footerRadius);
-      ctx.fill();
+      ctx.fillStyle = grad // Apply gradient to footer
+      roundRect(ctx, footerX, footerY, footerRectWidth, footerRectHeight, footerRadius)
+      ctx.fill()
 
       // Draw BCV logo
-      const logoHeight = 60;
-      const logoWidth = (bcvLogo.width / bcvLogo.height) * logoHeight;
+      const logoHeight = 60
+      const logoWidth = (bcvLogo.width / bcvLogo.height) * logoHeight
 
-      const logoX = footerX + 20;
-      const logoY = footerY + (footerRectHeight / 2) - (logoHeight / 2);
+      const logoX = footerX + 20
+      const logoY = footerY + footerRectHeight / 2 - logoHeight / 2
 
-      const circleRadius = logoHeight / 2; // Un poco más grande que la mitad del alto del logo para un margen
-      const circleX = logoX + logoWidth / 2;
-      const circleY = logoY + logoHeight / 2;
+      const circleRadius = logoHeight / 2 // Un poco más grande que la mitad del alto del logo para un margen
+      const circleX = logoX + logoWidth / 2
+      const circleY = logoY + logoHeight / 2
 
-      ctx.beginPath();
-      ctx.arc(circleX, circleY, circleRadius, 0, Math.PI * 2, false);
-      ctx.fillStyle = '#ffffff'; // Color blanco para el círculo
-      ctx.fill();
+      ctx.beginPath()
+      ctx.arc(circleX, circleY, circleRadius, 0, Math.PI * 2, false)
+      ctx.fillStyle = '#ffffff' // Color blanco para el círculo
+      ctx.fill()
       // ------------
 
-      ctx.drawImage(bcvLogo, logoX, logoY, logoWidth, logoHeight);
+      ctx.drawImage(bcvLogo, logoX, logoY, logoWidth, logoHeight)
 
       // Draw BCV rate value
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 32px Arial';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#ffffff'
+      ctx.font = 'bold 32px Arial'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
 
-      const bcvRateTextX = logoX + logoWidth + 60;
-      const bcvRateTextY = footerY + (footerRectHeight / 2);
+      const bcvRateTextX = logoX + logoWidth + 60
+      const bcvRateTextY = footerY + footerRectHeight / 2
 
       // Display BCV rate
-      ctx.fillText(
-        rate.bcv.toFixed(2),
-        bcvRateTextX,
-        bcvRateTextY
-      );
+      ctx.fillText(rate.bcv.toFixed(2), bcvRateTextX, bcvRateTextY)
 
       // ---- RETURN IMAGE AS DATA URL ----
       return new Promise((resolve) => {
         canvas.toBlob((blob) => {
           if (blob) {
-            const url = URL.createObjectURL(blob);
-            resolve(url);
+            const url = URL.createObjectURL(blob)
+            resolve(url)
           } else {
-            resolve('');
+            resolve('')
           }
-        });
-      });
+        })
+      })
     } catch (error) {
-      console.error('Error generating image:', error);
-      throw error;
+      console.error('Error generating image:', error)
+      throw error
     }
-  }, []);
+  }, [])
 
-  const generateAndDownloadImage = useCallback(async (rate: ExchangeRate) => {
-    try {
-      const imageUrl = await generateImage(rate);
-      if (imageUrl) {
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  const generateAndDownloadImage = useCallback(
+    async (rate: ExchangeRate) => {
+      try {
+        const imageUrl = await generateImage(rate)
+        if (imageUrl) {
+          const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
 
-        if (isMobile) {
-          // Para mobile, abrir en nueva pestaña para que se guarde en galería
-          window.open(imageUrl, '_blank');
-        } else {
-          // Para desktop, descargar normalmente
-          const a = document.createElement('a');
-          a.href = imageUrl;
-          const dateForFilename = new Date().toISOString().split('T')[0];
-          a.download = `tasa-${dateForFilename}.png`;
-          a.click();
-          URL.revokeObjectURL(imageUrl);
+          if (isMobile) {
+            // Para mobile, abrir en nueva pestaña para que se guarde en galería
+            window.open(imageUrl, '_blank')
+          } else {
+            // Para desktop, descargar normalmente
+            const a = document.createElement('a')
+            a.href = imageUrl
+            const dateForFilename = new Date().toISOString().split('T')[0]
+            a.download = `tasa-${dateForFilename}.png`
+            a.click()
+            URL.revokeObjectURL(imageUrl)
+          }
         }
+      } catch (error) {
+        console.error('Error downloading image:', error)
       }
-    } catch (error) {
-      console.error('Error downloading image:', error);
-    }
-  }, [generateImage]);
+    },
+    [generateImage]
+  )
 
-  const generatePreviewImage = useCallback(async (rate: ExchangeRate) => {
-    try {
-      return await generateImage(rate);
-    } catch (error) {
-      console.error('Error generating preview:', error);
-      return null;
-    }
-  }, [generateImage]);
+  const generatePreviewImage = useCallback(
+    async (rate: ExchangeRate) => {
+      try {
+        return await generateImage(rate)
+      } catch (error) {
+        console.error('Error generating preview:', error)
+        return null
+      }
+    },
+    [generateImage]
+  )
 
   return { generateAndDownloadImage, generatePreviewImage }
 }

@@ -1,4 +1,5 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useCallback } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 
 export interface BeneficiaryData {
@@ -10,62 +11,58 @@ export interface BeneficiaryData {
   executionType: 'TRANSFERENCIA' | 'PAGO_MOVIL' | 'RECARGA' | 'EFECTIVO' | 'ZELLE' | 'OTROS'
 }
 
+const BENEFICIARY_SUGGESTIONS_QUERY_KEY = ['beneficiary-suggestions']
+
 export function useBeneficiarySuggestions() {
-  const [suggestions, setSuggestions] = useState<BeneficiaryData[]>([])
-  const [isLoading, setIsLoading] = useState(false)
+  const queryClient = useQueryClient()
 
-  // Load suggestions from API on mount
-  useEffect(() => {
-    const loadSuggestions = async () => {
-      setIsLoading(true)
-      try {
-        const data = await api.get<{ suggestions: any[] }>('/beneficiary-suggestion/list')
-        const beneficiaries = data.suggestions.map((s: any) => ({
-          name: s.beneficiaryName,
-          id: s.beneficiaryId,
-          phone: s.phone,
-          bankId: s.bankId,
-          accountNumber: s.accountNumber,
-          executionType: s.executionType || 'TRANSFERENCIA',
-        }))
-        setSuggestions(beneficiaries)
-      } catch (error) {
-        console.error('Error loading suggestions:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    loadSuggestions()
-  }, [])
+  // Load suggestions from API using React Query
+  const { data: suggestions = [], isLoading } = useQuery({
+    queryKey: BENEFICIARY_SUGGESTIONS_QUERY_KEY,
+    queryFn: async () => {
+      const data = await api.get<{ suggestions: any[] }>('/beneficiary-suggestion/list')
+      return data.suggestions.map((s: any) => ({
+        name: s.beneficiaryName,
+        id: s.beneficiaryId,
+        phone: s.phone,
+        bankId: s.bankId,
+        accountNumber: s.accountNumber,
+        executionType: s.executionType || 'TRANSFERENCIA',
+      }))
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  })
 
   // Add or update a beneficiary suggestion
-  const addSuggestion = useCallback(async (beneficiary: BeneficiaryData) => {
-    try {
-      await api.post('/beneficiary-suggestion/save', {
-        beneficiaryName: beneficiary.name,
-        beneficiaryId: beneficiary.id,
-        phone: beneficiary.phone,
-        bankId: beneficiary.bankId,
-        accountNumber: beneficiary.accountNumber,
-        executionType: beneficiary.executionType,
-      })
+  const addSuggestion = useCallback(
+    async (beneficiary: BeneficiaryData) => {
+      try {
+        await api.post('/beneficiary-suggestion/save', {
+          beneficiaryName: beneficiary.name,
+          beneficiaryId: beneficiary.id,
+          phone: beneficiary.phone,
+          bankId: beneficiary.bankId,
+          accountNumber: beneficiary.accountNumber,
+          executionType: beneficiary.executionType,
+        })
 
-      // Update local state optimistically
-      setSuggestions((prev) => {
-        const filtered = prev.filter(
-          (b) => !(b.name === beneficiary.name && b.id === beneficiary.id && b.phone === beneficiary.phone && b.executionType === beneficiary.executionType)
-        )
-        return [beneficiary, ...filtered]
-      })
-    } catch (error) {
-      console.error('Error saving beneficiary:', error)
-    }
-  }, [])
+        // Invalidate the query to force refetch of updated suggestions
+        await queryClient.invalidateQueries({
+          queryKey: BENEFICIARY_SUGGESTIONS_QUERY_KEY,
+        })
+      } catch (error) {
+        console.error('Error saving beneficiary:', error)
+      }
+    },
+    [queryClient]
+  )
 
   // Get suggestions based on search query
   const getSuggestions = useCallback(
-    (query: string, executionType?: 'TRANSFERENCIA' | 'PAGO_MOVIL' | 'RECARGA' | 'EFECTIVO' | 'ZELLE' | 'OTROS'): BeneficiaryData[] => {
+    (
+      query: string,
+      executionType?: 'TRANSFERENCIA' | 'PAGO_MOVIL' | 'RECARGA' | 'EFECTIVO' | 'ZELLE' | 'OTROS'
+    ): BeneficiaryData[] => {
       const searchLower = query.toLowerCase()
 
       return suggestions.filter((b) => {
@@ -123,11 +120,13 @@ export function useBeneficiarySuggestions() {
   const clearAllSuggestions = useCallback(async () => {
     try {
       await api.delete('/beneficiary-suggestion')
-      setSuggestions([])
+      await queryClient.invalidateQueries({
+        queryKey: BENEFICIARY_SUGGESTIONS_QUERY_KEY,
+      })
     } catch (error) {
       console.error('Error clearing suggestions:', error)
     }
-  }, [])
+  }, [queryClient])
 
   return {
     suggestions,

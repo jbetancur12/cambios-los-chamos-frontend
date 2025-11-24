@@ -69,42 +69,38 @@ export function PrinterDetectionDialog({ open, onOpenChange, onSelectPrinter }: 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent>
-        <SheetHeader>
+        <SheetHeader onClose={() => onOpenChange(false)}>
           <SheetTitle>Detectar Impresoras Disponibles</SheetTitle>
         </SheetHeader>
 
         <SheetBody>
           <div className="space-y-4">
             {loading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-            </div>
-          ) : printers.length > 0 ? (
-            <div className="space-y-3">
-              <p className="text-sm text-muted-foreground">Selecciona una impresora de la lista:</p>
-              <div className="space-y-2">
-                {printers.map((printer) => (
-                  <button
-                    key={printer}
-                    onClick={() => {
-                      onSelectPrinter(printer)
-                      onOpenChange(false)
-                    }}
-                    className="w-full p-3 border rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-all flex items-center gap-2 text-left"
-                  >
-                    <Printer className="h-4 w-4 text-blue-600" />
-                    <span className="text-sm font-medium">{printer}</span>
-                  </button>
-                ))}
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
               </div>
-              <Button
-                onClick={detectPrinters}
-                variant="outline"
-                className="w-full"
-              >
-                Detectar nuevamente
-              </Button>
-            </div>
+            ) : printers.length > 0 ? (
+              <div className="space-y-3">
+                <p className="text-sm text-muted-foreground">Selecciona una impresora de la lista:</p>
+                <div className="space-y-2">
+                  {printers.map((printer) => (
+                    <button
+                      key={printer}
+                      onClick={() => {
+                        onSelectPrinter(printer)
+                        onOpenChange(false)
+                      }}
+                      className="w-full p-3 border rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-all flex items-center gap-2 text-left"
+                    >
+                      <Printer className="h-4 w-4 text-blue-600" />
+                      <span className="text-sm font-medium">{printer}</span>
+                    </button>
+                  ))}
+                </div>
+                <Button onClick={detectPrinters} variant="outline" className="w-full">
+                  Detectar nuevamente
+                </Button>
+              </div>
             ) : (
               <div className="space-y-4">
                 <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">

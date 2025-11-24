@@ -165,7 +165,7 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent>
-        <SheetHeader>
+        <SheetHeader onClose={() => onOpenChange(false)}>
           <SheetTitle>Pago Móvil</SheetTitle>
         </SheetHeader>
 
@@ -297,7 +297,11 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
             >
               Cancelar
             </Button>
-            <Button type="submit" disabled={loading || hasInsufficientBalance()} className="flex-1 bg-[linear-gradient(to_right,#136BBC,#274565)]">
+            <Button
+              type="submit"
+              disabled={loading || hasInsufficientBalance()}
+              className="flex-1 bg-[linear-gradient(to_right,#136BBC,#274565)]"
+            >
               {loading ? 'Procesando...' : 'Registrar Pago Móvil'}
             </Button>
           </div>

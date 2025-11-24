@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
-import { Upload, Download, Trash2, FileIcon } from 'lucide-react'
+import { Upload, Download, FileIcon } from 'lucide-react'
 
 interface PaymentProofUploadProps {
   giroId: string
@@ -36,9 +36,9 @@ export function PaymentProofUpload({
     }
 
     // Validate file type
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf']
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif']
     if (!allowedTypes.includes(file.type)) {
-      toast.error('Solo se permiten imágenes (JPG, PNG, GIF) y PDFs')
+      toast.error('Solo se permiten imágenes (JPG, PNG, GIF)')
       return
     }
 
@@ -82,20 +82,19 @@ export function PaymentProofUpload({
     }
   }
 
-  const handleDelete = async () => {
-    if (!proof) return
+  const handleChangeProof = () => {
+    setProof(null)
+    // El usuario podrá seleccionar uno nuevo que reemplazará automáticamente el anterior
+  }
 
-    try {
-      setUploading(true)
-      // Note: We could implement a delete endpoint, but for now we'll just clear the local state
-      // and let the user upload a new file which will replace the old one
-      setProof(null)
-      toast.success('Comprobante removido. Puedes subir uno nuevo.')
-    } catch (error: any) {
-      toast.error('Error al eliminar el comprobante')
-    } finally {
-      setUploading(false)
-    }
+  const truncateFilename = (filename: string, maxLength: number = 20) => {
+    if (filename.length <= maxLength) return filename
+
+    const ext = filename.substring(filename.lastIndexOf('.'))
+    const nameWithoutExt = filename.substring(0, filename.lastIndexOf('.'))
+    const truncatedName = nameWithoutExt.substring(0, maxLength - ext.length - 3)
+
+    return `${truncatedName}...${ext}`
   }
 
   return (
@@ -106,9 +105,9 @@ export function PaymentProofUpload({
         <div className="p-4 rounded-lg border border-green-200 bg-green-50 dark:bg-green-950 space-y-3">
           <div className="flex items-center gap-2">
             <FileIcon className="h-5 w-5 text-green-600" />
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-green-900 dark:text-green-100">Comprobante cargado</p>
-              <p className="text-xs text-green-700 dark:text-green-300 truncate">{proof.key}</p>
+              <p className="text-xs text-green-700 dark:text-green-300">{truncateFilename(proof.key)}</p>
             </div>
           </div>
 
@@ -128,11 +127,11 @@ export function PaymentProofUpload({
               type="button"
               size="sm"
               variant="outline"
-              onClick={handleDelete}
+              onClick={handleChangeProof}
               disabled={uploading || disabled}
-              className="text-red-600 hover:text-red-700 hover:bg-red-50 flex-1 gap-2"
+              className="flex-1 gap-2"
             >
-              <Trash2 className="h-4 w-4" />
+              <Upload className="h-4 w-4" />
               Cambiar
             </Button>
           </div>
@@ -142,7 +141,7 @@ export function PaymentProofUpload({
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/jpeg,image/png,image/gif,application/pdf"
+            accept="image/jpeg,image/png,image/gif"
             onChange={handleFileSelect}
             disabled={uploading || disabled}
             className="hidden"
@@ -159,7 +158,7 @@ export function PaymentProofUpload({
               <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
                 {uploading ? 'Subiendo...' : 'Selecciona o arrastra el comprobante'}
               </p>
-              <p className="text-xs text-blue-700 dark:text-blue-300">JPG, PNG, GIF o PDF (máx 10MB)</p>
+              <p className="text-xs text-blue-700 dark:text-blue-300">JPG, PNG o GIF (máx 10MB)</p>
             </div>
           </button>
         </div>

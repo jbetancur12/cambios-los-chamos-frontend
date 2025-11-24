@@ -5,9 +5,9 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
-import type { Minorista, MinoristaTransaction } from '@/types/api'
+import type { Minorista, MinoristaTransaction, MinoristaTransactionType } from '@/types/api'
 import { AlertCircle, Eye, DollarSign } from 'lucide-react'
-import { MinoristaTransactionHistory } from './MinoristaTransactionHistory'
+import { MinoristaSimpleTransactionTable } from './MinoristaSimpleTransactionTable'
 import { DateRangeFilter, type DateRange } from './DateRangeFilter'
 
 interface RechargeMinoristaBalanceSheetProps {
@@ -32,7 +32,8 @@ export function RechargeMinoristaBalanceSheet({
   const [localMinorista, setLocalMinorista] = useState<Minorista | null>(minorista)
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
-  const [dateRange, setDateRange] = useState<DateRange>({ startDate: null, endDate: null })
+  const [dateRange, setDateRange] = useState<DateRange>({ from: null, to: null, startDate: null, endDate: null })
+  const [typeFilter, setTypeFilter] = useState<MinoristaTransactionType | 'ALL'>('ALL')
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('es-CO', {
@@ -48,8 +49,8 @@ export function RechargeMinoristaBalanceSheet({
       setTransactionsLoading(true)
       let url = `/minorista/${localMinorista.id}/transactions?page=${page}&limit=10`
 
-      if (dateRange.startDate && dateRange.endDate) {
-        url += `&startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`
+      if (dateRange.from && dateRange.to) {
+        url += `&startDate=${encodeURIComponent(dateRange.from)}&endDate=${encodeURIComponent(dateRange.to)}`
       }
 
       const response = await api.get<{
@@ -147,11 +148,11 @@ export function RechargeMinoristaBalanceSheet({
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent>
-        <SheetHeader>
+        <SheetHeader onClose={() => onOpenChange(false)}>
           <SheetTitle>Gestión de Crédito</SheetTitle>
         </SheetHeader>
 
-        <div className="w-full mt-6 space-y-4 px-4 sm:px-6 md:px-6">
+        <div className="w-full mt-6 space-y-4 px-4 sm:px-6 md:px-6 pb-5">
           {/* Tab Navigation */}
           <div className="flex gap-2 border-b">
             <button
@@ -238,7 +239,34 @@ export function RechargeMinoristaBalanceSheet({
 
               {/* Historial de Transacciones */}
               <div className="mt-6 pt-6 border-t space-y-4">
-                <h3 className="font-semibold">Historial Detallado de Transacciones</h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold">Historial Detallado de Transacciones</h3>
+                </div>
+
+                {/* Filter Tabs */}
+                <div className="flex gap-2 flex-wrap">
+                  <Button
+                    variant={typeFilter === 'ALL' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setTypeFilter('ALL')}
+                  >
+                    Todas
+                  </Button>
+                  <Button
+                    variant={typeFilter === 'DISCOUNT' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setTypeFilter('DISCOUNT')}
+                  >
+                    Descuentos
+                  </Button>
+                  <Button
+                    variant={typeFilter === 'RECHARGE' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setTypeFilter('RECHARGE')}
+                  >
+                    Abonos
+                  </Button>
+                </div>
 
                 {/* Date Filter */}
                 <DateRangeFilter
@@ -247,7 +275,7 @@ export function RechargeMinoristaBalanceSheet({
                     setPage(1)
                   }}
                   onClear={() => {
-                    setDateRange({ startDate: null, endDate: null })
+                    setDateRange({ from: null, to: null, startDate: null, endDate: null })
                     setPage(1)
                   }}
                 />
@@ -259,7 +287,11 @@ export function RechargeMinoristaBalanceSheet({
                   </div>
                 ) : (
                   <>
-                    <MinoristaTransactionHistory transactions={transactions} creditLimit={localMinorista.creditLimit} />
+                    <MinoristaSimpleTransactionTable
+                      transactions={transactions}
+                      typeFilter={typeFilter}
+                      creditLimit={localMinorista?.creditLimit || 0}
+                    />
 
                     {/* Pagination Controls */}
                     {totalPages > 1 && (

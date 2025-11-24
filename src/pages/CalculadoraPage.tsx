@@ -1,19 +1,20 @@
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
-import { api } from '@/lib/api'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-
-interface ExchangeRate {
-  buyRate: number
-  sellRate: number
-  usd: number
-}
+import { useCurrentExchangeRate } from '@/hooks/queries/useExchangeRateQueries'
 
 export function CalculadoraPage() {
   const [activeTab, setActiveTab] = useState<'bcv' | 'manual' | 'ves'>('bcv')
-  const [, setLoading] = useState(false)
-  const [rate, setRate] = useState<ExchangeRate | null>(null)
+
+  // React Query hook
+  const rateQuery = useCurrentExchangeRate()
+  const rate = rateQuery.data
+
+  // Handle errors
+  if (rateQuery.error) {
+    toast.error('Error al obtener tasas de cambio')
+  }
 
   // Tab 1: BCV (Tasa oficial)
   const [usdBCV, setUsdBCV] = useState('')
@@ -27,27 +28,6 @@ export function CalculadoraPage() {
   // Tab 3: VES a COP
   const [vesAmount, setVesAmount] = useState('')
   const [resultVES, setResultVES] = useState<number | null>(null)
-
-  // Fetch tasas al cargar
-  const fetchRates = async () => {
-    try {
-      setLoading(true)
-      const response = await api.get<{ rate: ExchangeRate }>('/exchange-rate/current')
-      if (response?.rate) {
-        setRate(response.rate)
-      } else {
-        toast.error('No se encontró tasa de cambio.')
-      }
-    } catch (error: any) {
-      toast.error(error.message || 'Error al obtener tasas.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchRates()
-  }, [])
 
   // Cálculo BCV en tiempo real
   useEffect(() => {
@@ -111,7 +91,9 @@ export function CalculadoraPage() {
               <div className="grid grid-cols-2 gap-4 text-center">
                 <div>
                   <p className="text-sm text-gray-600">BCV (Compra)</p>
-                  <p className="text-xl font-bold" style={{ color: '#136BBC' }}>{formatCurrency(rate.usd)}</p>
+                  <p className="text-xl font-bold" style={{ color: '#136BBC' }}>
+                    {formatCurrency(rate.usd)}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Tasa Venta</p>
@@ -127,9 +109,7 @@ export function CalculadoraPage() {
           <button
             onClick={() => setActiveTab('bcv')}
             className={`flex-1 py-3 rounded-lg font-medium transition-colors whitespace-nowrap ${
-              activeTab === 'bcv'
-                ? 'text-white'
-                : 'bg-white text-gray-700 border hover:bg-gray-50'
+              activeTab === 'bcv' ? 'text-white' : 'bg-white text-gray-700 border hover:bg-gray-50'
             }`}
             style={activeTab === 'bcv' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
@@ -138,9 +118,7 @@ export function CalculadoraPage() {
           <button
             onClick={() => setActiveTab('manual')}
             className={`flex-1 py-3 rounded-lg font-medium transition-colors whitespace-nowrap ${
-              activeTab === 'manual'
-                ? 'text-white'
-                : 'bg-white text-gray-700 border hover:bg-gray-50'
+              activeTab === 'manual' ? 'text-white' : 'bg-white text-gray-700 border hover:bg-gray-50'
             }`}
             style={activeTab === 'manual' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
@@ -149,9 +127,7 @@ export function CalculadoraPage() {
           <button
             onClick={() => setActiveTab('ves')}
             className={`flex-1 py-3 rounded-lg font-medium transition-colors whitespace-nowrap ${
-              activeTab === 'ves'
-                ? 'text-white'
-                : 'bg-white text-gray-700 border hover:bg-gray-50'
+              activeTab === 'ves' ? 'text-white' : 'bg-white text-gray-700 border hover:bg-gray-50'
             }`}
             style={activeTab === 'ves' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
@@ -181,7 +157,9 @@ export function CalculadoraPage() {
                 <div className="mt-6 p-4 bg-gray-50 rounded-lg space-y-3">
                   <div className="flex justify-between items-center py-2">
                     <p className="text-gray-600">VES</p>
-                    <p className="text-xl font-bold" style={{ color: '#136BBC' }}>{formatCurrency(resultBCV.ves)}</p>
+                    <p className="text-xl font-bold" style={{ color: '#136BBC' }}>
+                      {formatCurrency(resultBCV.ves)}
+                    </p>
                   </div>
                   <div className="flex justify-between items-center py-2 border-t pt-3">
                     <p className="text-gray-600">COP a recibir</p>
@@ -226,7 +204,9 @@ export function CalculadoraPage() {
                 <div className="mt-6 p-4 bg-gray-50 rounded-lg space-y-3">
                   <div className="flex justify-between items-center py-2">
                     <p className="text-gray-600">VES</p>
-                    <p className="text-xl font-bold" style={{ color: '#136BBC' }}>{formatCurrency(resultManual.ves)}</p>
+                    <p className="text-xl font-bold" style={{ color: '#136BBC' }}>
+                      {formatCurrency(resultManual.ves)}
+                    </p>
                   </div>
                   <div className="flex justify-between items-center py-2 border-t pt-3">
                     <p className="text-gray-600">COP a recibir</p>

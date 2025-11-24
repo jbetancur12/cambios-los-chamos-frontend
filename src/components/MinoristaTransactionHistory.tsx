@@ -1,4 +1,4 @@
-import { ChevronDown, TrendingDown, TrendingUp, Plus, Minus } from 'lucide-react'
+import { ChevronDown, TrendingDown, TrendingUp, Minus } from 'lucide-react'
 import { useState } from 'react'
 import type { MinoristaTransaction } from '@/types/api'
 
@@ -32,8 +32,6 @@ export function MinoristaTransactionHistory({ transactions, creditLimit }: Minor
     switch (type) {
       case 'DISCOUNT':
         return 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800'
-      case 'PROFIT':
-        return 'bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800'
       case 'RECHARGE':
         return 'bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800'
       case 'ADJUSTMENT':
@@ -47,8 +45,6 @@ export function MinoristaTransactionHistory({ transactions, creditLimit }: Minor
     switch (type) {
       case 'DISCOUNT':
         return <Minus className="h-4 w-4 text-red-600" />
-      case 'PROFIT':
-        return <Plus className="h-4 w-4 text-green-600" />
       case 'RECHARGE':
         return <TrendingUp className="h-4 w-4 text-blue-600" />
       case 'ADJUSTMENT':
@@ -61,9 +57,7 @@ export function MinoristaTransactionHistory({ transactions, creditLimit }: Minor
   const getTransactionLabel = (type: MinoristaTransaction['type']) => {
     switch (type) {
       case 'DISCOUNT':
-        return 'Consumo de Cupo'
-      case 'PROFIT':
-        return 'Ganancia de Giro'
+        return 'Consumo de Cupo (con ganancia del 5%)'
       case 'RECHARGE':
         return 'Recarga de Saldo'
       case 'ADJUSTMENT':
