@@ -14,18 +14,24 @@ export function useBanksList() {
   })
 }
 
-export function useBankAccountsList(userRole?: string) {
+export function useBankAccountsList(userRole?: string, forExecution?: boolean) {
   return useQuery({
-    queryKey: ['bankAccounts', userRole === 'TRANSFERENCISTA' ? 'my-accounts' : 'all'],
+    queryKey: ['bankAccounts', userRole === 'TRANSFERENCISTA' ? 'my-accounts' : 'all', forExecution ? 'execution' : 'all'],
     queryFn: async () => {
-      // SUPER_ADMIN/ADMIN: obtener todas las cuentas
-      if (userRole === 'SUPER_ADMIN' || userRole === 'ADMIN') {
-        const response = await api.get<{ bankAccounts: BankAccount[] }>('/bank-account/all')
+      // TRANSFERENCISTA: obtener sus propias cuentas
+      if (userRole === 'TRANSFERENCISTA') {
+        const response = await api.get<{ bankAccounts: BankAccount[] }>('/bank-account/my-accounts')
         return response.bankAccounts
       }
 
-      // TRANSFERENCISTA: obtener sus propias cuentas
-      const response = await api.get<{ bankAccounts: BankAccount[] }>('/bank-account/my-accounts')
+      // SUPER_ADMIN/ADMIN: obtener todas las cuentas
+      const response = await api.get<{ bankAccounts: BankAccount[] }>('/bank-account/all')
+
+      // Si es para ejecutar giros, filtrar solo cuentas ADMIN
+      if (forExecution) {
+        return response.bankAccounts.filter((account) => account.ownerType === 'ADMIN')
+      }
+
       return response.bankAccounts
     },
     ...applyDedupConfig('NORMAL'), // 5 min - cuentas cambian moderadamente
