@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { ChevronDown } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 import { TransferForm } from '@/components/forms/TransferForm'
 import { MobilePaymentForm } from '@/components/forms/MobilePaymentForm'
 import { RechargeForm } from '@/components/forms/RechargeForm'
@@ -39,7 +40,8 @@ export function SendGiroPage() {
   const [dropdownOpen, setDropdownOpen] = useState(false)
 
   const handleSuccess = () => {
-    navigate('/giros')
+    // No navegar - permitir crear múltiples giros seguidos
+    toast.success('✓ Giro creado. Puedes enviar otro giro si lo deseas.')
   }
 
   const currentTypeLabel = giroTypes.find((t) => t.value === selectedType)?.label || ''
