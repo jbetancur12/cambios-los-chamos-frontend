@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Building, Eye, Search, X, CheckCircle2, AlertCircle, Briefcase } from 'lucide-react'
+import { Building, Eye, Search, X, CheckCircle2, AlertCircle, Briefcase, Plus } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -12,6 +12,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { Switch } from '@/components/ui/switch'
 import { api } from '@/lib/api'
 import { CreateUserSheet } from '@/components/CreateUserSheet'
+import { CreateBankAccountSheet } from '@/components/CreateBankAccountSheet'
 import { cn } from '@/lib/utils'
 
 export function BankAccountsPage() {
@@ -22,6 +23,7 @@ export function BankAccountsPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [searchTransferencistasTerm, setSearchTransferencistasTerm] = useState('')
   const [createTrasferencistaSheetOpen, setCreateTrasferencistaSheetOpen] = useState(false)
+  const [createAdminBankAccountSheetOpen, setCreateAdminBankAccountSheetOpen] = useState(false)
 
   // React Query hook for bank accounts
   const accountsQuery = useBankAccountsList(user?.role)
@@ -109,6 +111,12 @@ export function BankAccountsPage() {
     setCreateTrasferencistaSheetOpen(false)
     queryClient.invalidateQueries({ queryKey: ['users'] })
     toast.success('Trasferencista creado exitosamente')
+  }
+
+  const handleAdminBankAccountCreated = () => {
+    setCreateAdminBankAccountSheetOpen(false)
+    queryClient.invalidateQueries({ queryKey: ['bankAccounts'] })
+    toast.success('Cuenta bancaria compartida creada exitosamente')
   }
 
   return (
@@ -202,10 +210,23 @@ export function BankAccountsPage() {
         {activeTab === 'cuentas' && (
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Building className="h-5 w-5" />
-                Cuentas Bancarias ({filteredAccounts.length})
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Building className="h-5 w-5" />
+                  Cuentas Bancarias ({filteredAccounts.length})
+                </CardTitle>
+                {/* ✨ NUEVO: Botón para crear cuenta ADMIN solo visible para SUPERADMIN */}
+                {user?.role === 'SUPER_ADMIN' && (
+                  <Button
+                    onClick={() => setCreateAdminBankAccountSheetOpen(true)}
+                    className="gap-2"
+                    size="sm"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Crear Cuenta Compartida
+                  </Button>
+                )}
+              </div>
             </CardHeader>
             <CardContent>
               {isLoading ? (
@@ -417,6 +438,14 @@ export function BankAccountsPage() {
           onOpenChange={setCreateTrasferencistaSheetOpen}
           onUserCreated={handleTrasferencistaCreated}
           role="TRANSFERENCISTA"
+        />
+
+        {/* ✨ NUEVO: Create ADMIN Bank Account Sheet */}
+        <CreateBankAccountSheet
+          open={createAdminBankAccountSheetOpen}
+          onOpenChange={setCreateAdminBankAccountSheetOpen}
+          mode="admin"
+          onAccountCreated={handleAdminBankAccountCreated}
         />
       </div>
     </div>

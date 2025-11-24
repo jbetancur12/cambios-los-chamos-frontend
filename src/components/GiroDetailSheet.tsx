@@ -796,7 +796,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                         <Share2 className="h-3 w-3" />
                         Ver
                       </Button>
-                      {isTransferencista && giro.transferencista?.user?.id === user?.id && (
+                      {((isTransferencista && giro.transferencista?.user?.id === user?.id) || isAdmin) && (
                         <Button
                           type="button"
                           size="sm"
@@ -854,14 +854,15 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
               </div>
 
               {/* Actions for Transferencista */}
-              {isTransferencista && giro.status === 'ASIGNADO' && (
+              {/* ✨ ACTUALIZADO: Permitir ADMIN/SUPERADMIN marcar como procesando */}
+              {(isTransferencista || isAdmin) && giro.status === 'ASIGNADO' && (
                 <Button onClick={handleMarkAsProcessing} disabled={isProcessing} className="w-full text-xs" size="sm">
                   {isProcessing ? 'Procesando...' : 'Marcar Procesando'}
                 </Button>
               )}
 
-              {/* Execute/Return Form for Transferencista */}
-              {isTransferencista && giro.status === 'PROCESANDO' && (
+              {/* ✨ ACTUALIZADO: Execute/Return Form for Transferencista AND Admin/SuperAdmin */}
+              {(isTransferencista || isAdmin) && giro.status === 'PROCESANDO' && (
                 <div className="space-y-4 pt-4 border-t">
                   <h3 className="font-semibold">Acciones de Procesamiento</h3>
 

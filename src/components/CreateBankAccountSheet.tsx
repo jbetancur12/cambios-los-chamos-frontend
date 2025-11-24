@@ -5,13 +5,14 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
-import type { Bank, AccountType } from '@/types/api'
+import type { Bank, AccountType, BankAccountOwnerType } from '@/types/api'
 
 interface CreateBankAccountSheetProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  transferencistaId: string
-  transferencistaName: string
+  transferencistaId?: string // Opcional para cuentas ADMIN
+  transferencistaName?: string
+  mode?: 'transferencista' | 'admin' // NUEVO: modo de creación
   onAccountCreated: () => void
 }
 
@@ -20,6 +21,7 @@ export function CreateBankAccountSheet({
   onOpenChange,
   transferencistaId,
   transferencistaName,
+  mode = 'transferencista',
   onAccountCreated,
 }: CreateBankAccountSheetProps) {
   const [loading, setLoading] = useState(false)
@@ -29,6 +31,7 @@ export function CreateBankAccountSheet({
     accountNumber: '',
     accountHolder: '',
     accountType: 'AHORROS' as AccountType,
+    ownerType: (mode === 'admin' ? 'ADMIN' : 'TRANSFERENCISTA') as BankAccountOwnerType,
   })
 
   useEffect(() => {
@@ -55,12 +58,29 @@ export function CreateBankAccountSheet({
       return
     }
 
+    // ✨ Validar según mode
+    if (mode === 'transferencista' && !transferencistaId) {
+      toast.error('ID del transferencista es requerido')
+      return
+    }
+
     try {
       setLoading(true)
-      await api.post('/bank-account/create', {
-        transferencistaId,
-        ...formData,
-      })
+
+      const payload: any = {
+        bankId: formData.bankId,
+        accountNumber: formData.accountNumber,
+        accountHolder: formData.accountHolder,
+        accountType: formData.accountType,
+        ownerType: formData.ownerType,
+      }
+
+      // ✨ Si es transferencista, agregar ID
+      if (mode === 'transferencista') {
+        payload.ownerId = transferencistaId
+      }
+
+      await api.post('/bank-account/create', payload)
 
       // Reset form
       setFormData({
@@ -68,22 +88,31 @@ export function CreateBankAccountSheet({
         accountNumber: '',
         accountHolder: '',
         accountType: 'AHORROS',
+        ownerType: (mode === 'admin' ? 'ADMIN' : 'TRANSFERENCISTA') as BankAccountOwnerType,
       })
 
+      toast.success('Cuenta bancaria creada exitosamente')
       onAccountCreated()
+      onOpenChange(false)
     } catch (error: any) {
+      console.error('Error:', error)
       toast.error(error.message || 'Error al crear cuenta bancaria')
     } finally {
       setLoading(false)
     }
   }
 
+  const title = mode === 'admin' ? 'Crear Cuenta Bancaria Compartida' : 'Agregar Cuenta Bancaria'
+  const description = mode === 'admin'
+    ? 'Esta cuenta será compartida entre Admin y SuperAdmin'
+    : `Cuenta para ${transferencistaName}`
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent>
         <SheetHeader onClose={() => onOpenChange(false)}>
-          <SheetTitle>Agregar Cuenta Bancaria</SheetTitle>
-          <p className="text-sm text-muted-foreground mt-1">{transferencistaName}</p>
+          <SheetTitle>{title}</SheetTitle>
+          <p className="text-sm text-muted-foreground mt-1">{description}</p>
         </SheetHeader>
 
         <SheetBody>
@@ -150,8 +179,16 @@ export function CreateBankAccountSheet({
             {/* Info */}
             <div className="rounded-md bg-muted p-3">
               <p className="text-sm text-muted-foreground">
-                Esta cuenta será asignada al transferencista{' '}
-                <span className="font-semibold">{transferencistaName}</span>
+                {mode === 'admin' ? (
+                  <>
+                    Esta cuenta será <span className="font-semibold">compartida</span> entre Admin y SuperAdmin
+                  </>
+                ) : (
+                  <>
+                    Esta cuenta será asignada al transferencista{' '}
+                    <span className="font-semibold">{transferencistaName}</span>
+                  </>
+                )}
               </p>
             </div>
 

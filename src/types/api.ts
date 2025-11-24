@@ -44,6 +44,7 @@ export interface Bank {
 
 // Bank Account Types
 export type AccountType = 'AHORROS' | 'CORRIENTE'
+export type BankAccountOwnerType = 'TRANSFERENCISTA' | 'ADMIN'
 
 export interface BankAccount {
   id: string
@@ -52,6 +53,10 @@ export interface BankAccount {
   accountType: AccountType
   balance: number
   bank: Bank
+  // ✨ NUEVO: Tipo de propietario
+  ownerType: BankAccountOwnerType
+  // ✨ NUEVO: ID del propietario (null si es compartida)
+  ownerId?: string
   transferencista?: {
     id: string
     user: {
