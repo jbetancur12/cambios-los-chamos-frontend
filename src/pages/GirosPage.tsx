@@ -21,6 +21,7 @@ import { Input } from '@/components/ui/input'
 import { GiroDetailSheet } from '@/components/GiroDetailSheet'
 import { PrintTicketModal } from '@/components/PrintTicketModal'
 import { useGirosList } from '@/hooks/queries/useGiroQueries'
+import { useAllUsers } from '@/hooks/queries/useUserQueries'
 import type { GiroStatus, Currency, ExecutionType } from '@/types/api'
 
 type DateFilterType = 'TODAY' | 'YESTERDAY' | 'THIS_WEEK' | 'LAST_WEEK' | 'THIS_MONTH' | 'LAST_MONTH' | 'CUSTOM' | 'ALL'
@@ -31,7 +32,8 @@ export function GirosPage() {
   // Filter states
   const [filterStatus, setFilterStatus] = useState<GiroStatus | 'ALL'>('ASIGNADO')
   const [filterDate, setFilterDate] = useState<DateFilterType>('TODAY')
-  const [filterUserType, setFilterUserType] = useState<'MINORISTA' | 'TRANSFERENCISTA' | 'ALL'>('ALL')
+  const [filterUserType, setFilterUserType] = useState<'MINORISTA' | 'TRANSFERENCISTA' | 'ALL'>('MINORISTA')
+  const [selectedTransferencistaId, setSelectedTransferencistaId] = useState<string | 'ALL'>('ALL')
   const [customDateRange, setCustomDateRange] = useState<{ from: string; to: string }>({
     from: new Date().toISOString().split('T')[0],
     to: new Date().toISOString().split('T')[0],
@@ -106,8 +108,11 @@ export function GirosPage() {
     dateTo: dateRange?.to,
   }
 
-  // React Query hook
+  // React Query hooks
   const { data: giros = [], isLoading, error } = useGirosList(queryParams)
+  const { data: transferencistas = [] } = useAllUsers(
+    user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN' ? 'TRANSFERENCISTA' : null
+  )
 
   const getStatusBadge = (status: GiroStatus) => {
     const statusMap = {
@@ -198,7 +203,13 @@ export function GirosPage() {
       matchesUserType = !!giro.transferencista
     }
 
-    return matchesSearch && matchesUserType
+    // Transferencista specific filter
+    let matchesTransferencista = true
+    if (filterUserType === 'TRANSFERENCISTA' && selectedTransferencistaId !== 'ALL') {
+      matchesTransferencista = giro.transferencista?.id === selectedTransferencistaId
+    }
+
+    return matchesSearch && matchesUserType && matchesTransferencista
   })
 
   // Pagination
@@ -303,21 +314,15 @@ export function GirosPage() {
           </button>
 
           {userFiltersExpanded && (
-            <div className="border-t p-3">
+            <div className="border-t p-3 space-y-3">
               <div className="flex gap-2 overflow-x-auto pb-2">
-                <Button
-                  variant={filterUserType === 'ALL' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setFilterUserType('ALL')}
-                  className={filterUserType === 'ALL' ? 'text-white' : ''}
-                  style={filterUserType === 'ALL' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
-                >
-                  Todos
-                </Button>
                 <Button
                   variant={filterUserType === 'MINORISTA' ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => setFilterUserType('MINORISTA')}
+                  onClick={() => {
+                    setFilterUserType('MINORISTA')
+                    setSelectedTransferencistaId('ALL')
+                  }}
                   className={filterUserType === 'MINORISTA' ? 'text-white' : ''}
                   style={
                     filterUserType === 'MINORISTA' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}
@@ -339,6 +344,25 @@ export function GirosPage() {
                   Trasferencistas
                 </Button>
               </div>
+
+              {/* Subfiltro de Trasferencistas */}
+              {filterUserType === 'TRANSFERENCISTA' && (
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold text-muted-foreground">Filtrar por Trasferencista</p>
+                  <select
+                    value={selectedTransferencistaId}
+                    onChange={(e) => setSelectedTransferencistaId(e.target.value)}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  >
+                    <option value="ALL">Todos los Trasferencistas</option>
+                    {transferencistas.map((t) => (
+                      <option key={t.transferencistaId} value={t.transferencistaId}>
+                        {t.fullName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
           )}
         </div>
