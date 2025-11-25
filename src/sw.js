@@ -2,7 +2,7 @@
 // Este archivo es inyectado por vite-plugin-pwa
 
 // Importar Workbox
-importScripts('https://cdn.jsdelivr.net/npm/workbox-cdn@6/workbox/workbox-sw.js')
+importScripts('https://cdnjs.cloudflare.com/ajax/libs/workbox-sw/7.3.0/workbox-sw.js')
 
 // Usar la estrategia de precachear que inyecta Workbox
 if (workbox) {
