@@ -29,6 +29,7 @@ import { useEffect } from 'react'
 import { requestNotifyPermission } from './firebase/messaging'
 import { useGiroWebSocket } from '@/hooks/useGiroWebSocket'
 import { setupWebSocketSync } from '@/lib/websocketSync'
+import { UpdatePrompt } from '@/components/UpdatePrompt'
 
 function QueryMonitorInitializer() {
   useQueryMonitor()
@@ -267,6 +268,7 @@ function App() {
           </ErrorBoundary>
 
           <Toaster position="top-center" richColors />
+          <UpdatePrompt />
         </AuthProvider>
       </BrowserRouter>
 

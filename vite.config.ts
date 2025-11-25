@@ -24,6 +24,10 @@ export default defineConfig({
         enabled: true,
         type: "module",
       },
+      injectManifest: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+        globIgnores: ['firebase-messaging-sw/**'],
+      },
 
       // Archivos estáticos incluidos en precache
       includeAssets: [
