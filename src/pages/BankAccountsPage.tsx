@@ -26,8 +26,14 @@ export function BankAccountsPage() {
   const [searchTransferencistasTerm, setSearchTransferencistasTerm] = useState('')
   const [createTrasferencistaSheetOpen, setCreateTrasferencistaSheetOpen] = useState(false)
   const [createAdminBankAccountSheetOpen, setCreateAdminBankAccountSheetOpen] = useState(false)
+  const [createTransferencistaBankAccountSheetOpen, setCreateTransferencistaBankAccountSheetOpen] = useState(false)
   const [rechargeSheetOpen, setRechargeSheetOpen] = useState(false)
   const [selectedAccount, setSelectedAccount] = useState<BankAccount | null>(null)
+  const [selectedTransferencista, setSelectedTransferencista] = useState<{
+    id: string
+    name: string
+    transferencistaId: string
+  } | null>(null)
 
   // React Query hook for bank accounts
   const accountsQuery = useBankAccountsList(user?.role)
@@ -132,6 +138,18 @@ export function BankAccountsPage() {
     queryClient.invalidateQueries({ queryKey: ['bankAccounts'] })
     setRechargeSheetOpen(false)
     setSelectedAccount(null)
+  }
+
+  const handleCreateBankAccountForTransferencista = (userId: string, fullName: string, transferencistaId: string) => {
+    setSelectedTransferencista({ id: userId, name: fullName, transferencistaId })
+    setCreateTransferencistaBankAccountSheetOpen(true)
+  }
+
+  const handleTransferencistaBankAccountCreated = () => {
+    setCreateTransferencistaBankAccountSheetOpen(false)
+    setSelectedTransferencista(null)
+    queryClient.invalidateQueries({ queryKey: ['bankAccounts'] })
+    toast.success('Cuenta bancaria creada exitosamente')
   }
 
   return (
@@ -464,6 +482,20 @@ export function BankAccountsPage() {
                           </div>
                         )}
                       </div>
+                      {t.transferencistaId && (
+                        <div className="mt-4">
+                          <Button
+                            onClick={() =>
+                              handleCreateBankAccountForTransferencista(t.id, t.fullName, t.transferencistaId!)
+                            }
+                            className="w-full gap-2 bg-[linear-gradient(to_right,#136BBC,#274565)] text-white"
+                            size="sm"
+                          >
+                            <Plus className="h-4 w-4" />
+                            Crear Cuenta Bancaria
+                          </Button>
+                        </div>
+                      )}
                     </CardHeader>
                   </Card>
                 ))
@@ -486,6 +518,16 @@ export function BankAccountsPage() {
           onOpenChange={setCreateAdminBankAccountSheetOpen}
           mode="admin"
           onAccountCreated={handleAdminBankAccountCreated}
+        />
+
+        {/* Create Transferencista Bank Account Sheet */}
+        <CreateBankAccountSheet
+          open={createTransferencistaBankAccountSheetOpen}
+          onOpenChange={setCreateTransferencistaBankAccountSheetOpen}
+          mode="transferencista"
+          transferencistaId={selectedTransferencista?.transferencistaId}
+          transferencistaName={selectedTransferencista?.name}
+          onAccountCreated={handleTransferencistaBankAccountCreated}
         />
 
         {/* Recharge Balance Sheet */}
