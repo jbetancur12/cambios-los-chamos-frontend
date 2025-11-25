@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { ChevronDown } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+// import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { TransferForm } from '@/components/forms/TransferForm'
 import { MobilePaymentForm } from '@/components/forms/MobilePaymentForm'
@@ -35,7 +35,7 @@ const giroTypes: GiroTypeOption[] = [
 ]
 
 export function SendGiroPage() {
-  const navigate = useNavigate()
+  // const navigate = useNavigate()
   const [selectedType, setSelectedType] = useState<GiroType>('TRANSFERENCIA')
   const [dropdownOpen, setDropdownOpen] = useState(false)
 
@@ -97,7 +97,7 @@ export function SendGiroPage() {
       </Card>
 
       {/* Back Button */}
-      <div className="mt-8 flex justify-center">
+      {/* <div className="mt-8 flex justify-center">
         <Button
           variant="outline"
           onClick={() => navigate('/giros')}
@@ -105,7 +105,7 @@ export function SendGiroPage() {
         >
           Volver a Solicitudes
         </Button>
-      </div>
+      </div> */}
     </div>
   )
 }
