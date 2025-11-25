@@ -48,6 +48,12 @@ export function CalculadoraVesCompraPage() {
     return value.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
   }
 
+  const formatNumber = (value: string) => {
+    const num = parseFloat(value)
+    if (isNaN(num)) return value
+    return num.toLocaleString('es-VE', { minimumFractionDigits: 0, maximumFractionDigits: 6 })
+  }
+
   return (
     <div className="min-h-screen p-4 md:p-8 bg-gray-50">
       <div className="max-w-2xl mx-auto">
@@ -83,7 +89,7 @@ export function CalculadoraVesCompraPage() {
                 <label className="block text-sm font-medium">Tasa de compra (COP por VES)</label>
                 {savedRate && (
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-500">Guardada: {savedRate}</span>
+                    <span className="text-xs text-gray-500">Guardada: {formatNumber(savedRate)}</span>
                     <Button
                       type="button"
                       size="sm"
