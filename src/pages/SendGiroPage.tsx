@@ -41,7 +41,7 @@ export function SendGiroPage() {
 
   const handleSuccess = () => {
     // No navegar - permitir crear múltiples giros seguidos
-    toast.success('✅ Giro creado exitosamente. Puedes enviar otro si lo deseas.')
+    toast.success('✓ Giro creado. Puedes enviar otro giro si lo deseas.')
   }
 
   const currentTypeLabel = giroTypes.find((t) => t.value === selectedType)?.label || ''
