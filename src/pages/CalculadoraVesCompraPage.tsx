@@ -1,12 +1,34 @@
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 import { NumericFormat } from 'react-number-format'
+import { RotateCcw } from 'lucide-react'
+
+const STORAGE_KEY = 'ves_purchase_rate'
 
 export function CalculadoraVesCompraPage() {
   const [vesAmount, setVesAmount] = useState('')
   const [purchaseRate, setPurchaseRate] = useState('')
   const [result, setResult] = useState<number | null>(null)
+  const [savedRate, setSavedRate] = useState<string | null>(null)
+
+  // Cargar tasa guardada del localStorage al montar
+  useEffect(() => {
+    const stored = localStorage.getItem(STORAGE_KEY)
+    if (stored) {
+      setSavedRate(stored)
+      setPurchaseRate(stored)
+    }
+  }, [])
+
+  // Guardar tasa en localStorage cuando cambia
+  useEffect(() => {
+    if (purchaseRate && parseFloat(purchaseRate) > 0) {
+      localStorage.setItem(STORAGE_KEY, purchaseRate)
+      setSavedRate(purchaseRate)
+    }
+  }, [purchaseRate])
 
   // Cálculo en tiempo real
   useEffect(() => {
@@ -57,13 +79,34 @@ export function CalculadoraVesCompraPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Tasa de compra (COP por VES)</label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium">Tasa de compra (COP por VES)</label>
+                {savedRate && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-500">Guardada: {savedRate}</span>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        localStorage.removeItem(STORAGE_KEY)
+                        setPurchaseRate('')
+                        setSavedRate(null)
+                      }}
+                      title="Limpiar tasa guardada"
+                      className="h-8 w-8 p-0"
+                    >
+                      <RotateCcw className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </div>
               <NumericFormat
-                id="amount"
+                id="rate"
                 customInput={Input}
                 thousandSeparator="."
                 decimalSeparator=","
-                decimalScale={2}
+                decimalScale={6}
                 fixedDecimalScale={false}
                 prefix=""
                 value={purchaseRate}
