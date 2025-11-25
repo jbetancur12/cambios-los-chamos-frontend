@@ -3,8 +3,6 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import path from 'path'
 
-const isDev = process.env.NODE_ENV === "development";
-
 export default defineConfig({
   resolve: {
     alias: {
@@ -15,18 +13,9 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      strategies: isDev ? "generateSW" : "injectManifest",
       registerType: 'prompt',
-      srcDir: "src",
-      filename: "sw.js",
-      // Habilitar SW personalizado en desarrollo
       devOptions: {
         enabled: true,
-        type: "module",
-      },
-      injectManifest: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
-        globIgnores: ['firebase-messaging-sw/**'],
       },
 
       // Archivos estáticos incluidos en precache
@@ -72,23 +61,34 @@ export default defineConfig({
 
       // --- CONFIGURACIÓN DE WORKBOX ---
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
         runtimeCaching: [
-          { urlPattern: ({ url }) => url.port === '3000' || url.hostname === 'localhost', handler: 'NetworkOnly' },
-          { urlPattern: ({ url }) => url.pathname.startsWith('/api/'), handler: 'NetworkOnly' },
-          { urlPattern: ({ url }) => url.origin.includes('firebase.googleapis.com'), handler: 'NetworkOnly' },
-          { urlPattern: ({ url }) => url.origin.includes('fcm.googleapis.com'), handler: 'NetworkOnly' },
-          { urlPattern: ({ url }) => url.origin.includes('googletagmanager.com'), handler: 'NetworkOnly' },
-          { urlPattern: ({ url }) => url.pathname.startsWith('/icons/'), handler: 'NetworkOnly' },
-          { urlPattern: ({ url }) => url.pathname.endsWith('manifest.webmanifest'), handler: 'NetworkOnly' },
+          {
+            urlPattern: ({ url }) => url.port === '3000' || url.hostname === 'localhost',
+            handler: 'NetworkOnly'
+          },
+          {
+            urlPattern: ({ url }) => url.pathname.startsWith('/api/'),
+            handler: 'NetworkOnly'
+          },
+          {
+            urlPattern: ({ url }) => url.origin.includes('firebase.googleapis.com'),
+            handler: 'NetworkOnly'
+          },
+          {
+            urlPattern: ({ url }) => url.origin.includes('fcm.googleapis.com'),
+            handler: 'NetworkOnly'
+          },
+          {
+            urlPattern: ({ url }) => url.origin.includes('googletagmanager.com'),
+            handler: 'NetworkOnly'
+          },
         ],
         globIgnores: ['firebase-messaging-sw/**'],
         navigateFallbackDenylist: [/firebase-messaging-sw/],
-
+        skipWaiting: false,
+        clientsClaim: false,
       },
-
-      // INYECTA TU SW PERSONALIZADO EN PRODUCCIÓN
-
     }),
   ],
 
