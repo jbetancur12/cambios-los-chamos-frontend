@@ -69,7 +69,8 @@ const getBackendUrl = () => {
 
   // Si accedes desde localhost, usa localhost:3000
   // Si accedes desde una IP (ej: 192.168.40.15), usa esa IP:3000
-  return `http://${hostname}:3000`
+  // Usa el protocolo de la página actual para que HTTPS use WSS y HTTP use WS
+  return `${protocol}//${hostname}:3000`
 }
 
 export function useGiroWebSocket() {
