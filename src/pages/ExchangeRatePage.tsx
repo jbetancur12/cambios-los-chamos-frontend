@@ -190,7 +190,10 @@ export function ExchangeRatePage() {
               <TrendingUp className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
               <p className="text-muted-foreground mb-4">No hay tasas de cambio registradas</p>
               {canCreateRate && (
-                <Button onClick={() => setCreateSheetOpen(true)}>
+                <Button
+                  onClick={() => setCreateSheetOpen(true)}
+                  className="bg-[linear-gradient(to_right,#136BBC,#274565)] mx-auto"
+                >
                   <Plus className="h-4 w-4 mr-2" />
                   Crear primera tasa
                 </Button>
@@ -316,7 +319,11 @@ export function ExchangeRatePage() {
                 <Button type="button" variant="outline" onClick={() => setCreateSheetOpen(false)} className="flex-1">
                   Cancelar
                 </Button>
-                <Button type="submit" disabled={createExchangeRateMutation.isPending} className="flex-1">
+                <Button
+                  type="submit"
+                  disabled={createExchangeRateMutation.isPending}
+                  className="flex-1 bg-[linear-gradient(to_right,#136BBC,#274565)]"
+                >
                   {createExchangeRateMutation.isPending ? 'Creando...' : 'Crear Tasa'}
                 </Button>
               </div>

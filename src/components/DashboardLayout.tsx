@@ -156,8 +156,8 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
               <p className="text-xs text-blue-100">{user?.email}</p>
             </div>
             <Button
-              className="w-full justify-start gap-2 text-white hover:text-white"
-              style={{ backgroundColor: '#37B6FF', border: 'none' }}
+              className="w-full justify-start gap-2 text-white hover:text-white bg-[linear-gradient(to_right,#510200,#f80000)]"
+              style={{ border: 'none' }}
               onClick={handleLogout}
             >
               <LogOut className="w-4 h-4" />
@@ -222,8 +222,8 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
               <p className="text-xs text-blue-100 truncate">{user?.email}</p>
             </div>
             <Button
-              className="w-full justify-start gap-2 text-white hover:text-white text-sm"
-              style={{ backgroundColor: '#37B6FF', border: 'none' }}
+              className="w-full justify-start gap-2 text-white hover:text-white text-sm bg-[linear-gradient(to_right,#510200,#f80000)]"
+              style={{ border: 'none' }}
               onClick={handleLogout}
             >
               <LogOut className="w-4 h-4" />
