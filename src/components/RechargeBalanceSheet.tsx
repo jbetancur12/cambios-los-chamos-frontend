@@ -151,7 +151,7 @@ export function RechargeBalanceSheet({ open, onOpenChange, account, onBalanceUpd
               >
                 Cancelar
               </Button>
-              <Button type="submit" className="flex-1" disabled={loading || numericAmount === 0}>
+              <Button type="submit" className="flex-1 bg-[linear-gradient(to_right,#136BBC,#274565)]" disabled={loading || numericAmount === 0}>
                 {loading ? 'Procesando...' : isAdjustment ? 'Realizar Ajuste' : 'Recargar Saldo'}
               </Button>
             </div>
