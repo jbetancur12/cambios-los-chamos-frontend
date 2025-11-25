@@ -50,8 +50,8 @@ export function SendGiroPage() {
     <div className="container mx-auto max-w-2xl px-4 py-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Enviar giro</h1>
-        <p className="mt-2 text-gray-600">Completa el formulario para enviar un giro</p>
+        <h1 className="text-xl font-bold text-gray-900">Enviar giro</h1>
+        <p className="mt-1 text-gray-600">Completa el formulario para enviar un giro</p>
       </div>
 
       {/* Type Selector Dropdown */}
@@ -74,14 +74,14 @@ export function SendGiroPage() {
                     setSelectedType(type.value)
                     setDropdownOpen(false)
                   }}
-                  className={`flex w-full flex-col gap-1 border-b border-gray-100 px-6 py-4 text-left transition-colors last:border-0 ${
+                  className={`flex w-full flex-col gap-1 border-b border-gray-100 px-6 py-2 text-left transition-colors last:border-0 ${
                     selectedType === type.value ? 'bg-blue-50' : 'hover:bg-gray-50'
                   }`}
                 >
                   <span className={`font-medium ${selectedType === type.value ? 'text-blue-600' : 'text-gray-900'}`}>
                     {type.label}
                   </span>
-                  <span className="text-sm text-gray-500">{type.description}</span>
+                  {/* <span className="text-sm text-gray-500">{type.description}</span> */}
                 </button>
               ))}
             </div>
