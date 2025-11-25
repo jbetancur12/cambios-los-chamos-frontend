@@ -98,7 +98,7 @@ export function DashboardPage() {
       {/* Welcome Header */}
       <div className="mb-6">
         <h1 className="text-2xl md:text-3xl font-bold text-foreground">Bienvenido, {user?.fullName}</h1>
-        <p className="text-sm md:text-base text-muted-foreground mt-1">Rol: {user?.role}</p>
+        {/* <p className="text-sm md:text-base text-muted-foreground mt-1">Rol: {user?.role}</p> */}
       </div>
 
       {/* Stats Grid - Different for each role */}
