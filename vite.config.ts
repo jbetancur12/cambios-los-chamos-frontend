@@ -16,7 +16,7 @@ export default defineConfig({
     react(),
     VitePWA({
       strategies: isDev ? "generateSW" : "injectManifest",
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
       srcDir: "src",
       filename: "sw.js",
       // Habilitar SW personalizado en desarrollo
