@@ -198,7 +198,8 @@ export function GirosPage() {
     // User type filter
     let matchesUserType = true
     if (filterUserType === 'MINORISTA') {
-      matchesUserType = !!giro.minorista
+      // Mostrar giros con minorista asignado O giros creados por admin/super_admin
+      matchesUserType = !!giro.minorista || giro.createdBy?.role === 'ADMIN' || giro.createdBy?.role === 'SUPER_ADMIN'
     } else if (filterUserType === 'TRANSFERENCISTA') {
       matchesUserType = !!giro.transferencista
     }
@@ -520,7 +521,6 @@ export function GirosPage() {
                         : user?.role === 'TRANSFERENCISTA'
                           ? giro.createdBy?.fullName || '—'
                           : giro.minorista?.user?.fullName || giro.createdBy?.fullName || '—'
-
                     return (
                       <tr
                         key={giro.id}
@@ -598,7 +598,6 @@ export function GirosPage() {
                   : user?.role === 'TRANSFERENCISTA'
                     ? giro.createdBy?.fullName || '—'
                     : giro.minorista?.user?.fullName || giro.createdBy?.fullName || '—'
-
               return (
                 <div
                   key={giro.id}
