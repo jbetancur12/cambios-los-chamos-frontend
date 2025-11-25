@@ -10,6 +10,7 @@ import type { Bank, ExchangeRate, Currency, Minorista } from '@/types/api'
 import { BalanceInfo } from '@/components/BalanceInfo'
 import { BeneficiaryAutocomplete } from '@/components/BeneficiaryAutocomplete'
 import { useBeneficiarySuggestions } from '@/hooks/useBeneficiarySuggestions'
+import { useCreateGiro } from '@/hooks/mutations/useGiroMutations'
 
 interface TransferFormProps {
   onSuccess: () => void
@@ -18,6 +19,7 @@ interface TransferFormProps {
 export function TransferForm({ onSuccess }: TransferFormProps) {
   const { user } = useAuth()
   const { getSuggestionsByName, addSuggestion } = useBeneficiarySuggestions()
+  const createGiroMutation = useCreateGiro()
 
   const [loading, setLoading] = useState(false)
   const [banks, setBanks] = useState<Bank[]>([])
@@ -169,20 +171,26 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
         payload.customRate = { buyRate, sellRate, usd, bcv }
       }
 
-      const response = await api.post<{ giro: any; message: string }>('/giro/create', payload)
+      createGiroMutation.mutate(payload, {
+        onSuccess: () => {
+          // Save beneficiary suggestion for future use
+          addSuggestion({
+            name: beneficiaryName,
+            id: beneficiaryId,
+            phone,
+            bankId,
+            accountNumber,
+            executionType: 'TRANSFERENCIA',
+          })
 
-      addSuggestion({
-        name: beneficiaryName,
-        id: beneficiaryId,
-        phone,
-        bankId,
-        accountNumber,
-        executionType: 'TRANSFERENCIA',
+          toast.success('Giro creado exitosamente')
+          resetForm()
+          onSuccess()
+        },
+        onError: (error: any) => {
+          toast.error(error.message || 'Error al crear giro')
+        },
       })
-
-      toast.success(response.message || 'Giro creado exitosamente')
-      resetForm()
-      onSuccess()
     } catch (error: any) {
       toast.error(error.message || 'Error al crear giro')
     } finally {
