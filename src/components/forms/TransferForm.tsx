@@ -344,7 +344,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
           <option value="">Banco Destino</option>
           {banks.map((bank) => (
             <option key={bank.id} value={bank.id}>
-              {bank.name}
+              {`${bank.code} - ${bank.name}`}
             </option>
           ))}
         </select>

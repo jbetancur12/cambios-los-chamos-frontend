@@ -14,6 +14,7 @@ import { formatDecimal } from '@/lib/formatCurrency'
 interface Bank {
   id: string
   name: string
+  code: string
 }
 
 interface MobilePaymentFormProps {
@@ -246,7 +247,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
           <option value="">Banco Origen</option>
           {banks.map((bank) => (
             <option key={bank.id} value={bank.id}>
-              {bank.name}
+              {`${bank.code} - ${bank.name}`}
             </option>
           ))}
         </select>
