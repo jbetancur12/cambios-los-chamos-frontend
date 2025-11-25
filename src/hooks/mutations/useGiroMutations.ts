@@ -93,8 +93,10 @@ export function useMarkGiroAsProcessing() {
       return response.giro
     },
     onSuccess: (giro) => {
-      queryClient.invalidateQueries({ queryKey: ['giro', giro.id] })
-      queryClient.invalidateQueries({ queryKey: ['giros'] })
+      queryClient.invalidateQueries({ queryKey: ['giro', giro.id], refetchType: 'active' })
+      queryClient.invalidateQueries({ queryKey: ['giros'], exact: false, refetchType: 'active' })
+      // Invalidar cuentas bancarias porque se abrirá el formulario de ejecución
+      queryClient.invalidateQueries({ queryKey: ['bankAccounts'], exact: false, refetchType: 'active' })
     },
   })
 }

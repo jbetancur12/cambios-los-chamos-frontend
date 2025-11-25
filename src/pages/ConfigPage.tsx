@@ -2,11 +2,10 @@ import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Settings, Search, X, CheckCircle2, AlertCircle, ShieldCheck } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/contexts/AuthContext'
-import { usePrinterConfig, useSetPrinterConfig, useClearPrinterConfig } from '@/hooks/queries/usePrinterConfigQueries'
+import { usePrinterConfig } from '@/hooks/queries/usePrinterConfigQueries'
 import { PrinterDetectionDialog } from '@/components/PrinterDetectionDialog'
 import { RechargeOperatorsManager } from '@/components/RechargeOperatorsManager'
 import { OperatorAmountsManager } from '@/components/OperatorAmountsManager'
@@ -36,43 +35,12 @@ export function ConfigPage() {
 
   // React Query hooks
   const printerConfigQuery = usePrinterConfig()
-  const setPrinterConfigMutation = useSetPrinterConfig()
-  const clearPrinterConfigMutation = useClearPrinterConfig()
-
   const printerConfig = printerConfigQuery.data
-  const isLoading = setPrinterConfigMutation.isPending || clearPrinterConfigMutation.isPending
 
   // Update form when config loads
   if (printerConfig && (!printerName || !printerType)) {
     if (!printerName) setPrinterName(printerConfig.name)
     if (printerType === 'thermal') setPrinterType(printerConfig.type)
-  }
-
-  const handleSavePrinterConfig = async () => {
-    if (!printerName.trim()) {
-      toast.error('Por favor ingresa el nombre de la impresora')
-      return
-    }
-
-    try {
-      await setPrinterConfigMutation.mutateAsync({
-        name: printerName,
-        type: printerType,
-      })
-      toast.success('Configuración de impresora guardada')
-    } catch (error) {
-      toast.error('Error al guardar la configuración')
-    }
-  }
-
-  const handleClearPrinterConfig = async () => {
-    try {
-      await clearPrinterConfigMutation.mutateAsync()
-      setPrinterName('')
-      toast.success('Configuración de impresora eliminada')
-    } catch (error) {
-      toast.error('Error al eliminar la configuración')
-    }
   }
 
   const handleSelectPrinter = (printerName: string) => {

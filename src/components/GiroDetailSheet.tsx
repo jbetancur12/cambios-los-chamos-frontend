@@ -136,6 +136,13 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
     }
   }, [open, giro])
 
+  // Invalidate bank accounts when opening a processing giro to ensure fresh data
+  useEffect(() => {
+    if (giro?.status === 'PROCESANDO' && open) {
+      queryClient.invalidateQueries({ queryKey: ['bankAccounts'], exact: false, refetchType: 'active' })
+    }
+  }, [giro?.status, open, queryClient])
+
   const handleMarkAsProcessing = () => {
     if (!giro) return
     markProcessingMutation.mutate(giro.id, {
