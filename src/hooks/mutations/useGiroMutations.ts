@@ -57,11 +57,11 @@ export function useCreateGiro() {
       return response.giro
     },
     onSuccess: () => {
-      // Invalidar listas de giros
-      queryClient.invalidateQueries({ queryKey: ['giros'] })
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] })
-      // Invalidar balance del minorista para actualizar crédito disponible
-      queryClient.invalidateQueries({ queryKey: ['minorista', 'balance'] })
+      // Invalidar TODAS las queries relacionadas a giros (con exact: false)
+      queryClient.invalidateQueries({ queryKey: ['giros'], exact: false })
+      queryClient.invalidateQueries({ queryKey: ['dashboard'], exact: false })
+      queryClient.invalidateQueries({ queryKey: ['minorista'], exact: false })
+      queryClient.invalidateQueries({ queryKey: ['bankAccounts'], exact: false })
     },
   })
 }
@@ -75,9 +75,11 @@ export function useExecuteGiro() {
       return response.giro
     },
     onSuccess: (giro) => {
-      // Invalidar giro específico y lista
+      // Invalidar giro específico y lista + balance de cuentas bancarias
       queryClient.invalidateQueries({ queryKey: ['giro', giro.id] })
-      queryClient.invalidateQueries({ queryKey: ['giros'] })
+      queryClient.invalidateQueries({ queryKey: ['giros'], exact: false })
+      queryClient.invalidateQueries({ queryKey: ['bankAccounts'], exact: false })
+      queryClient.invalidateQueries({ queryKey: ['dashboard'], exact: false })
     },
   })
 }
@@ -109,9 +111,9 @@ export function useReturnGiro() {
     },
     onSuccess: (giro) => {
       queryClient.invalidateQueries({ queryKey: ['giro', giro.id] })
-      queryClient.invalidateQueries({ queryKey: ['giros'] })
-      // Invalidar balance del minorista para actualizar crédito disponible (refund)
-      queryClient.invalidateQueries({ queryKey: ['minorista', 'balance'] })
+      queryClient.invalidateQueries({ queryKey: ['giros'], exact: false })
+      queryClient.invalidateQueries({ queryKey: ['minorista'], exact: false })
+      queryClient.invalidateQueries({ queryKey: ['dashboard'], exact: false })
     },
   })
 }
@@ -124,9 +126,9 @@ export function useDeleteGiro() {
       await api.delete(`/giro/${giroId}`)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['giros'] })
-      // Invalidar balance del minorista para actualizar crédito disponible (refund)
-      queryClient.invalidateQueries({ queryKey: ['minorista', 'balance'] })
+      queryClient.invalidateQueries({ queryKey: ['giros'], exact: false })
+      queryClient.invalidateQueries({ queryKey: ['minorista'], exact: false })
+      queryClient.invalidateQueries({ queryKey: ['dashboard'], exact: false })
     },
   })
 }
@@ -141,7 +143,7 @@ export function useUpdateGiro() {
     },
     onSuccess: (giro) => {
       queryClient.invalidateQueries({ queryKey: ['giro', giro.id] })
-      queryClient.invalidateQueries({ queryKey: ['giros'] })
+      queryClient.invalidateQueries({ queryKey: ['giros'], exact: false })
     },
   })
 }
@@ -156,7 +158,7 @@ export function useUpdateGiroRate() {
     },
     onSuccess: (giro) => {
       queryClient.invalidateQueries({ queryKey: ['giro', giro.id] })
-      queryClient.invalidateQueries({ queryKey: ['giros'] })
+      queryClient.invalidateQueries({ queryKey: ['giros'], exact: false })
     },
   })
 }
