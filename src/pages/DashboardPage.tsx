@@ -102,15 +102,15 @@ export function DashboardPage() {
       </div>
 
       {/* Stats Grid - Different for each role */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 mb-6">
         {/* Giros - Shown to all roles */}
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 md:p-6">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-5 md:p-6">
             <CardTitle className="text-xs md:text-sm font-medium">{stats?.girosLabel || 'Giros'}</CardTitle>
             <FileText className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
           </CardHeader>
-          <CardContent className="p-4 pt-0 md:p-6 md:pt-0">
-            <div className="text-xl md:text-2xl font-bold">{stats?.girosCount ?? 0}</div>
+          <CardContent className="p-5 pt-0 md:p-6 md:pt-0">
+            <div className="text-2xl md:text-3xl font-bold">{stats?.girosCount ?? 0}</div>
             {isTransferencista && (stats?.processingToday !== undefined || stats?.completedToday !== undefined) ? (
               <div className="text-xs text-muted-foreground space-y-1 mt-2">
                 <p>
@@ -129,12 +129,12 @@ export function DashboardPage() {
         {/* Users - Only Super Admin */}
         {isSuperAdmin && stats?.usersCount !== undefined && (
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 md:p-6">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-5 md:p-6">
               <CardTitle className="text-xs md:text-sm font-medium">Usuarios</CardTitle>
               <Users className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
             </CardHeader>
-            <CardContent className="p-4 pt-0 md:p-6 md:pt-0">
-              <div className="text-xl md:text-2xl font-bold">{stats.usersCount}</div>
+            <CardContent className="p-5 pt-0 md:p-6 md:pt-0">
+              <div className="text-2xl md:text-3xl font-bold">{stats.usersCount}</div>
               <p className="text-xs text-muted-foreground">Activos</p>
             </CardContent>
           </Card>
@@ -143,12 +143,12 @@ export function DashboardPage() {
         {/* Volume Bs - Only Super Admin */}
         {isSuperAdmin && stats?.volumeBs !== undefined && (
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 md:p-6">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-5 md:p-6">
               <CardTitle className="text-xs md:text-sm font-medium">Volumen Bs</CardTitle>
               <Wallet className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
             </CardHeader>
-            <CardContent className="p-4 pt-0 md:p-6 md:pt-0">
-              <div className="text-xl md:text-2xl font-bold">{formatCurrency(stats.volumeBs, 'VES')}</div>
+            <CardContent className="p-5 pt-0 md:p-6 md:pt-0">
+              <div className="text-2xl md:text-3xl font-bold">{formatCurrency(stats.volumeBs, 'VES')}</div>
               <p className="text-xs text-muted-foreground">Este mes</p>
             </CardContent>
           </Card>
@@ -157,12 +157,12 @@ export function DashboardPage() {
         {/* Volume COP - Only Super Admin */}
         {isSuperAdmin && stats?.volumeCOP !== undefined && (
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 md:p-6">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-5 md:p-6">
               <CardTitle className="text-xs md:text-sm font-medium">Volumen COP</CardTitle>
               <Coins className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
             </CardHeader>
-            <CardContent className="p-4 pt-0 md:p-6 md:pt-0">
-              <div className="text-xl md:text-2xl font-bold">{formatCurrency(stats.volumeCOP, 'COP')}</div>
+            <CardContent className="p-5 pt-0 md:p-6 md:pt-0">
+              <div className="text-2xl md:text-3xl font-bold">{formatCurrency(stats.volumeCOP, 'COP')}</div>
               <p className="text-xs text-muted-foreground">Este mes</p>
             </CardContent>
           </Card>
@@ -171,12 +171,12 @@ export function DashboardPage() {
         {/* Volume USD - Only Super Admin */}
         {isSuperAdmin && stats?.volumeUSD !== undefined && (
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 md:p-6">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-5 md:p-6">
               <CardTitle className="text-xs md:text-sm font-medium">Volumen USD</CardTitle>
               <TrendingUp className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
             </CardHeader>
-            <CardContent className="p-4 pt-0 md:p-6 md:pt-0">
-              <div className="text-xl md:text-2xl font-bold">{formatCurrency(stats.volumeUSD, 'USD')}</div>
+            <CardContent className="p-5 pt-0 md:p-6 md:pt-0">
+              <div className="text-2xl md:text-3xl font-bold">{formatCurrency(stats.volumeUSD, 'USD')}</div>
               <p className="text-xs text-muted-foreground">Este mes</p>
             </CardContent>
           </Card>
@@ -185,12 +185,12 @@ export function DashboardPage() {
         {/* System Earnings - Only Super Admin */}
         {isSuperAdmin && stats?.systemEarnings !== undefined && (
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 md:p-6">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-5 md:p-6">
               <CardTitle className="text-xs md:text-sm font-medium">Ganancias Sistema</CardTitle>
               <DollarSign className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
             </CardHeader>
-            <CardContent className="p-4 pt-0 md:p-6 md:pt-0">
-              <div className="text-xl md:text-2xl font-bold">{formatCurrency(stats.systemEarnings, 'COP')}</div>
+            <CardContent className="p-5 pt-0 md:p-6 md:pt-0">
+              <div className="text-2xl md:text-3xl font-bold">{formatCurrency(stats.systemEarnings, 'COP')}</div>
               <p className="text-xs text-muted-foreground">Este mes</p>
             </CardContent>
           </Card>
@@ -199,12 +199,12 @@ export function DashboardPage() {
         {/* Minorista Earnings - Only Super Admin */}
         {isSuperAdmin && stats?.minoristaEarnings !== undefined && (
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 md:p-6">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-5 md:p-6">
               <CardTitle className="text-xs md:text-sm font-medium">Ganancias Minoristas</CardTitle>
               <DollarSign className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
             </CardHeader>
-            <CardContent className="p-4 pt-0 md:p-6 md:pt-0">
-              <div className="text-xl md:text-2xl font-bold">{formatCurrency(stats.minoristaEarnings, 'COP')}</div>
+            <CardContent className="p-5 pt-0 md:p-6 md:pt-0">
+              <div className="text-2xl md:text-3xl font-bold">{formatCurrency(stats.minoristaEarnings, 'COP')}</div>
               <p className="text-xs text-muted-foreground">Este mes</p>
             </CardContent>
           </Card>
@@ -213,12 +213,12 @@ export function DashboardPage() {
         {/* Earnings - Minorista only */}
         {isMinorista && stats?.earnings !== undefined && (
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 md:p-6">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-5 md:p-6">
               <CardTitle className="text-xs md:text-sm font-medium">Mis Ganancias</CardTitle>
               <DollarSign className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
             </CardHeader>
-            <CardContent className="p-4 pt-0 md:p-6 md:pt-0">
-              <div className="text-xl md:text-2xl font-bold">{formatCurrency(stats.earnings, 'COP')}</div>
+            <CardContent className="p-5 pt-0 md:p-6 md:pt-0">
+              <div className="text-2xl md:text-3xl font-bold">{formatCurrency(stats.earnings, 'COP')}</div>
               <p className="text-xs text-muted-foreground">Este mes</p>
             </CardContent>
           </Card>

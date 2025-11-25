@@ -338,7 +338,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
           id="bank"
           value={bankId}
           onChange={(e) => setBankId(e.target.value)}
-          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           required
         >
           <option value="">Banco Destino</option>
@@ -395,7 +395,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
             id="currency"
             value={currencyInput}
             onChange={(e) => setCurrencyInput(e.target.value as Currency)}
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="flex h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             required
           >
             <option value="">Moneda</option>
@@ -419,33 +419,33 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
 
       {/* Exchange Rate Info */}
       {!loadingRate && currentRate && (
-        <div className="p-3 bg-muted rounded-lg space-y-2">
-          <p className="text-sm font-medium">Tasa de Cambio Actual</p>
+        <div className="bg-gray-100 rounded-lg p-4 mb-5">
+          <p className="text-sm font-semibold text-gray-700 mb-3">Tasa de Cambio Actual</p>
 
           {isMinorista ? (
-            <div className="grid grid-cols-1 gap-2 text-xs">
+            <div className="grid grid-cols-1 gap-3 text-base">
               <div>
-                <span className="text-muted-foreground">Tasa de Venta: </span>
-                <span className="font-semibold text-lg">{currentRate.sellRate.toFixed(2)}</span>
+                <span className="text-gray-600">Tasa de Venta: </span>
+                <span className="font-bold text-blue-700">{currentRate.sellRate.toFixed(2)}</span>
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-2 text-xs">
+            <div className="grid grid-cols-2 gap-3 text-base">
               <div>
-                <span className="text-muted-foreground">Compra: </span>
-                <span className="font-semibold">{currentRate.buyRate.toFixed(2)}</span>
+                <span className="text-gray-600">Compra: </span>
+                <span className="font-bold text-blue-700">{currentRate.buyRate.toFixed(2)}</span>
               </div>
               <div>
-                <span className="text-muted-foreground">Venta: </span>
-                <span className="font-semibold">{currentRate.sellRate.toFixed(2)}</span>
+                <span className="text-gray-600">Venta: </span>
+                <span className="font-bold text-blue-700">{currentRate.sellRate.toFixed(2)}</span>
               </div>
               <div>
-                <span className="text-muted-foreground">USD: </span>
-                <span className="font-semibold">{currentRate.usd.toFixed(2)}</span>
+                <span className="text-gray-600">USD: </span>
+                <span className="font-bold text-blue-700">{currentRate.usd.toFixed(2)}</span>
               </div>
               <div>
-                <span className="text-muted-foreground">BCV: </span>
-                <span className="font-semibold">{currentRate.bcv.toFixed(2)}</span>
+                <span className="text-gray-600">BCV: </span>
+                <span className="font-bold text-blue-700">{currentRate.bcv.toFixed(2)}</span>
               </div>
             </div>
           )}
