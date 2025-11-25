@@ -57,11 +57,11 @@ export function useCreateGiro() {
       return response.giro
     },
     onSuccess: () => {
-      // Invalidar TODAS las queries relacionadas a giros (con exact: false)
-      queryClient.invalidateQueries({ queryKey: ['giros'], exact: false })
-      queryClient.invalidateQueries({ queryKey: ['dashboard'], exact: false })
-      queryClient.invalidateQueries({ queryKey: ['minorista'], exact: false })
-      queryClient.invalidateQueries({ queryKey: ['bankAccounts'], exact: false })
+      // Invalidar y refetchear inmediatamente las queries activas
+      queryClient.invalidateQueries({ queryKey: ['giros'], exact: false, refetchType: 'active' })
+      queryClient.invalidateQueries({ queryKey: ['dashboard'], exact: false, refetchType: 'active' })
+      queryClient.invalidateQueries({ queryKey: ['minorista'], exact: false, refetchType: 'active' })
+      queryClient.invalidateQueries({ queryKey: ['bankAccounts'], exact: false, refetchType: 'active' })
     },
   })
 }
@@ -75,11 +75,11 @@ export function useExecuteGiro() {
       return response.giro
     },
     onSuccess: (giro) => {
-      // Invalidar giro específico y lista + balance de cuentas bancarias
-      queryClient.invalidateQueries({ queryKey: ['giro', giro.id] })
-      queryClient.invalidateQueries({ queryKey: ['giros'], exact: false })
-      queryClient.invalidateQueries({ queryKey: ['bankAccounts'], exact: false })
-      queryClient.invalidateQueries({ queryKey: ['dashboard'], exact: false })
+      // Invalidar giro específico y lista + balance de cuentas bancarias - refetchear inmediatamente
+      queryClient.invalidateQueries({ queryKey: ['giro', giro.id], refetchType: 'active' })
+      queryClient.invalidateQueries({ queryKey: ['giros'], exact: false, refetchType: 'active' })
+      queryClient.invalidateQueries({ queryKey: ['bankAccounts'], exact: false, refetchType: 'active' })
+      queryClient.invalidateQueries({ queryKey: ['dashboard'], exact: false, refetchType: 'active' })
     },
   })
 }
@@ -110,10 +110,10 @@ export function useReturnGiro() {
       return response.giro
     },
     onSuccess: (giro) => {
-      queryClient.invalidateQueries({ queryKey: ['giro', giro.id] })
-      queryClient.invalidateQueries({ queryKey: ['giros'], exact: false })
-      queryClient.invalidateQueries({ queryKey: ['minorista'], exact: false })
-      queryClient.invalidateQueries({ queryKey: ['dashboard'], exact: false })
+      queryClient.invalidateQueries({ queryKey: ['giro', giro.id], refetchType: 'active' })
+      queryClient.invalidateQueries({ queryKey: ['giros'], exact: false, refetchType: 'active' })
+      queryClient.invalidateQueries({ queryKey: ['minorista'], exact: false, refetchType: 'active' })
+      queryClient.invalidateQueries({ queryKey: ['dashboard'], exact: false, refetchType: 'active' })
     },
   })
 }
@@ -126,9 +126,9 @@ export function useDeleteGiro() {
       await api.delete(`/giro/${giroId}`)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['giros'], exact: false })
-      queryClient.invalidateQueries({ queryKey: ['minorista'], exact: false })
-      queryClient.invalidateQueries({ queryKey: ['dashboard'], exact: false })
+      queryClient.invalidateQueries({ queryKey: ['giros'], exact: false, refetchType: 'active' })
+      queryClient.invalidateQueries({ queryKey: ['minorista'], exact: false, refetchType: 'active' })
+      queryClient.invalidateQueries({ queryKey: ['dashboard'], exact: false, refetchType: 'active' })
     },
   })
 }
@@ -142,8 +142,8 @@ export function useUpdateGiro() {
       return response.giro
     },
     onSuccess: (giro) => {
-      queryClient.invalidateQueries({ queryKey: ['giro', giro.id] })
-      queryClient.invalidateQueries({ queryKey: ['giros'], exact: false })
+      queryClient.invalidateQueries({ queryKey: ['giro', giro.id], refetchType: 'active' })
+      queryClient.invalidateQueries({ queryKey: ['giros'], exact: false, refetchType: 'active' })
     },
   })
 }
@@ -157,8 +157,8 @@ export function useUpdateGiroRate() {
       return response.giro
     },
     onSuccess: (giro) => {
-      queryClient.invalidateQueries({ queryKey: ['giro', giro.id] })
-      queryClient.invalidateQueries({ queryKey: ['giros'], exact: false })
+      queryClient.invalidateQueries({ queryKey: ['giro', giro.id], refetchType: 'active' })
+      queryClient.invalidateQueries({ queryKey: ['giros'], exact: false, refetchType: 'active' })
     },
   })
 }
