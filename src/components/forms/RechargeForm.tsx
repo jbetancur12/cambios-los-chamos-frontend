@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
+import { useAuth } from '@/contexts/AuthContext'
 import type { ExchangeRate, Minorista } from '@/types/api'
 import { BalanceInfo } from '@/components/BalanceInfo'
 import { formatCurrency } from '@/lib/formatCurrency'
@@ -32,6 +33,7 @@ interface RechargeFormProps {
 }
 
 export function RechargeForm({ onSuccess }: RechargeFormProps) {
+  const { user } = useAuth()
   const [selectedOperator, setSelectedOperator] = useState('')
   const [selectedAmount, setSelectedAmount] = useState('')
   const [phone, setPhone] = useState('')
@@ -44,11 +46,15 @@ export function RechargeForm({ onSuccess }: RechargeFormProps) {
   const [minoristaBalanceInFavor, setMinoristaBalanceInFavor] = useState<number | null>(null)
   const [loadingBalance, setLoadingBalance] = useState(false)
 
+  const isMinorista = user?.role === 'MINORISTA'
+
   useEffect(() => {
     loadOperators()
     loadExchangeRate()
-    fetchMinoristaBalance()
-  }, [])
+    if (isMinorista) {
+      fetchMinoristaBalance()
+    }
+  }, [isMinorista])
 
   useEffect(() => {
     if (selectedOperator) {

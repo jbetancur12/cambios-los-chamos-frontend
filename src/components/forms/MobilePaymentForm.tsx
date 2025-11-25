@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
+import { useAuth } from '@/contexts/AuthContext'
 import { useBeneficiarySuggestions, type BeneficiaryData } from '@/hooks/useBeneficiarySuggestions'
 import type { ExchangeRate, Minorista } from '@/types/api'
 import { BalanceInfo } from '@/components/BalanceInfo'
@@ -20,6 +21,7 @@ interface MobilePaymentFormProps {
 }
 
 export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
+  const { user } = useAuth()
   const [cedula, setCedula] = useState('')
   const [selectedBank, setSelectedBank] = useState('')
   const [phone, setPhone] = useState('')
@@ -34,13 +36,16 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   const [loadingBalance, setLoadingBalance] = useState(false)
   const { getSuggestions } = useBeneficiarySuggestions()
 
+  const isMinorista = user?.role === 'MINORISTA'
   const filteredSuggestions = getSuggestions(phone, 'PAGO_MOVIL')
 
   useEffect(() => {
     loadBanks()
     loadExchangeRate()
-    fetchMinoristaBalance()
-  }, [])
+    if (isMinorista) {
+      fetchMinoristaBalance()
+    }
+  }, [isMinorista])
 
   const loadBanks = async () => {
     try {
