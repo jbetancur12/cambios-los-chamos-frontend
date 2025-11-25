@@ -740,14 +740,6 @@ export function GirosPage() {
         </>
       )}
 
-      {/* Giro Detail Sheet */}
-      <GiroDetailSheet
-        open={detailSheetOpen}
-        onOpenChange={setDetailSheetOpen}
-        giroId={selectedGiroId}
-        onUpdate={() => {}}
-      />
-
       {/* Custom Date Range Modal */}
       {customDateModalOpen && (
         <div
