@@ -4,6 +4,7 @@ import { Building, Eye, Search, X, CheckCircle2, AlertCircle, Briefcase, Plus } 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from 'sonner'
 import { useBankAccountsList } from '@/hooks/queries/useBankQueries'
 import { useAuth } from '@/contexts/AuthContext'
@@ -264,8 +265,83 @@ export function BankAccountsPage() {
             </CardHeader>
             <CardContent>
               {isLoading ? (
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground">Cargando cuentas...</p>
+                <div className="space-y-3">
+                  {/* Desktop Table Skeleton */}
+                  <div className="hidden md:block overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="border-b">
+                        <tr className="text-left text-sm text-muted-foreground">
+                          <th className="pb-3 font-medium">Banco</th>
+                          <th className="pb-3 font-medium">Número de Cuenta</th>
+                          <th className="pb-3 font-medium">Titular</th>
+                          <th className="pb-3 font-medium">Transferencista</th>
+                          <th className="pb-3 font-medium text-right">Saldo</th>
+                          <th className="pb-3 font-medium text-right">Acciones</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <tr key={i} className="border-b">
+                            <td className="py-4">
+                              <div className="flex items-center gap-2">
+                                <Skeleton className="h-4 w-4 rounded" />
+                                <Skeleton className="h-4 w-32" />
+                              </div>
+                            </td>
+                            <td className="py-4">
+                              <Skeleton className="h-4 w-28" />
+                            </td>
+                            <td className="py-4">
+                              <Skeleton className="h-4 w-32" />
+                            </td>
+                            <td className="py-4">
+                              <Skeleton className="h-4 w-28" />
+                            </td>
+                            <td className="py-4 text-right">
+                              <Skeleton className="h-4 w-24 ml-auto" />
+                            </td>
+                            <td className="py-4 text-right">
+                              <div className="flex gap-2 justify-end">
+                                <Skeleton className="h-9 w-32" />
+                                <Skeleton className="h-9 w-20" />
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Mobile Cards Skeleton */}
+                  <div className="md:hidden space-y-3">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Card key={i} className="p-4">
+                        <div className="space-y-3">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <Skeleton className="h-4 w-4 rounded" />
+                                <Skeleton className="h-5 w-28" />
+                              </div>
+                              <Skeleton className="h-4 w-32" />
+                            </div>
+                            <div className="text-right">
+                              <Skeleton className="h-3 w-12 mb-1" />
+                              <Skeleton className="h-5 w-20" />
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <Skeleton className="h-4 w-full" />
+                            <Skeleton className="h-4 w-full" />
+                          </div>
+                          <div className="flex gap-2">
+                            <Skeleton className="h-9 flex-1" />
+                            <Skeleton className="h-9 w-24" />
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
                 </div>
               ) : filteredAccounts.length === 0 ? (
                 <div className="text-center py-8">
@@ -413,9 +489,41 @@ export function BankAccountsPage() {
 
             <div className="grid gap-4 grid-cols-1">
               {isLoadingTrasferencistas ? (
-                <div className="text-center py-12">
-                  <p className="text-muted-foreground">Cargando trasferencistas...</p>
-                </div>
+                <>
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <Card key={i}>
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <Skeleton className="h-6 w-40 mb-2" />
+                            <div className="flex items-center gap-2 mt-2">
+                              <Skeleton className="h-4 w-4 rounded-full" />
+                              <Skeleton className="h-4 w-48" />
+                              <Skeleton className="h-4 w-4 rounded-full" />
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-end gap-2">
+                            <Skeleton className="h-5 w-24 rounded-full" />
+                            <Skeleton className="h-5 w-16 rounded-full" />
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-6 mt-3">
+                          <div className="flex items-center gap-2">
+                            <Skeleton className="h-5 w-10 rounded-full" />
+                            <Skeleton className="h-4 w-16" />
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Skeleton className="h-5 w-10 rounded-full" />
+                            <Skeleton className="h-4 w-20" />
+                          </div>
+                        </div>
+                        <div className="mt-4">
+                          <Skeleton className="h-9 w-full" />
+                        </div>
+                      </CardHeader>
+                    </Card>
+                  ))}
+                </>
               ) : filteredTrasferencistas.length === 0 ? (
                 <Card>
                   <CardContent className="p-12 text-center">

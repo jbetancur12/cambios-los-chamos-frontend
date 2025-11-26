@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from 'sonner'
 import { useBankAccountDetail, useBankAccountTransactions } from '@/hooks/queries/useBankQueries'
 import type { BankAccountTransactionType } from '@/types/api'
@@ -342,7 +343,74 @@ export function BankTransactionsPage() {
           </CardHeader>
           <CardContent>
             {isLoading ? (
-              <div className="text-center py-8 text-muted-foreground">Cargando transacciones...</div>
+              <div className="space-y-3">
+                {/* Desktop Table Skeleton */}
+                <div className="hidden md:block overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="border-b">
+                      <tr className="text-left text-sm text-muted-foreground">
+                        <th className="pb-3 font-medium">Fecha</th>
+                        <th className="pb-3 font-medium">Tipo</th>
+                        <th className="pb-3 font-medium text-right">Monto</th>
+                        <th className="pb-3 font-medium text-right">Comisión</th>
+                        <th className="pb-3 font-medium text-right pr-6">Dé</th>
+                        <th className="pb-3 font-medium text-right pr-6">Ahora</th>
+                        <th className="pb-3 font-medium pl-4">Creado por</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {Array.from({ length: 8 }).map((_, i) => (
+                        <tr key={i} className="border-b">
+                          <td className="py-3">
+                            <Skeleton className="h-4 w-32" />
+                          </td>
+                          <td className="py-3">
+                            <Skeleton className="h-6 w-20 rounded-full" />
+                          </td>
+                          <td className="py-3 text-right">
+                            <Skeleton className="h-4 w-24 ml-auto" />
+                          </td>
+                          <td className="py-3 text-right pr-6">
+                            <Skeleton className="h-4 w-16 ml-auto" />
+                          </td>
+                          <td className="py-3 text-right pr-6">
+                            <Skeleton className="h-4 w-20 ml-auto" />
+                          </td>
+                          <td className="py-3 text-right pr-6">
+                            <Skeleton className="h-4 w-20 ml-auto" />
+                          </td>
+                          <td className="py-3 pl-4">
+                            <Skeleton className="h-4 w-28" />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Mobile Cards Skeleton */}
+                <div className="md:hidden space-y-3">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <Card key={i} className="p-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <Skeleton className="h-5 w-5 rounded" />
+                          <Skeleton className="h-6 w-20 rounded-full" />
+                        </div>
+                        <Skeleton className="h-6 w-24" />
+                      </div>
+                      <div className="space-y-2">
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-full" />
+                        <div className="pt-2 border-t">
+                          <Skeleton className="h-4 w-full" />
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </div>
             ) : transactions.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">No hay transacciones registradas</div>
             ) : (
