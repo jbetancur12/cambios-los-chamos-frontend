@@ -361,18 +361,6 @@ export function GirosPage() {
                 <div className="space-y-2">
                   <p className="text-xs font-semibold text-muted-foreground">Filtrar por Trasferencista</p>
                   <div className="flex flex-wrap gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setSelectedTransferencistaId('ALL')}
-                      className={
-                        selectedTransferencistaId === 'ALL'
-                          ? 'bg-[linear-gradient(to_right,#136BBC,#274565)] text-white hover:bg-[linear-gradient(to_right,#136BBC,#274565)]'
-                          : ''
-                      }
-                    >
-                      Todos
-                    </Button>
                     {transferencistas.map((t) => (
                       <Button
                         key={t.transferencistaId}
@@ -388,6 +376,18 @@ export function GirosPage() {
                         {t.fullName}
                       </Button>
                     ))}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSelectedTransferencistaId('ALL')}
+                      className={
+                        selectedTransferencistaId === 'ALL'
+                          ? 'bg-[linear-gradient(to_right,#136BBC,#274565)] text-white hover:bg-[linear-gradient(to_right,#136BBC,#274565)]'
+                          : ''
+                      }
+                    >
+                      Todos
+                    </Button>
                   </div>
                 </div>
               )}
