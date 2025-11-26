@@ -293,18 +293,18 @@ export function UsersPage() {
             className="mt-4 rounded border text-white text-sm"
             style={{ background: 'linear-gradient(to right, #136BBC, #274565)', borderColor: '#136BBC' }}
           >
-            <div className="p-4 grid grid-cols-3 gap-4">
+            <div className="p-3 md:p-4 grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
               <div className="text-center">
                 <p className="text-xs opacity-80 mb-1">Total Minoristas</p>
-                <p className="text-2xl font-bold">{totals.count}</p>
+                <p className="text-xl md:text-2xl font-bold">{totals.count}</p>
               </div>
               <div className="text-center">
-                <p className="text-xs opacity-80 mb-1">Cupo Total Asignado</p>
-                <p className="text-xl font-bold">{formatCurrency(totals.totalCredit)}</p>
+                <p className="text-xs opacity-80 mb-1">Cupo Total</p>
+                <p className="text-lg md:text-xl font-bold">{formatCurrency(totals.totalCredit)}</p>
               </div>
               <div className="text-center">
                 <p className="text-xs opacity-80 mb-1">Deuda Total</p>
-                <p className="text-xl font-bold">{formatCurrency(totals.totalDebt)}</p>
+                <p className="text-lg md:text-xl font-bold">{formatCurrency(totals.totalDebt)}</p>
               </div>
             </div>
           </div>
