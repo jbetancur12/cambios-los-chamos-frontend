@@ -376,18 +376,6 @@ export function GirosPage() {
                         {t.fullName}
                       </Button>
                     ))}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setSelectedTransferencistaId('ALL')}
-                      className={
-                        selectedTransferencistaId === 'ALL'
-                          ? 'bg-[linear-gradient(to_right,#136BBC,#274565)] text-white hover:bg-[linear-gradient(to_right,#136BBC,#274565)]'
-                          : ''
-                      }
-                    >
-                      Todos
-                    </Button>
                   </div>
                 </div>
               )}
