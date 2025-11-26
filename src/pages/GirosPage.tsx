@@ -242,10 +242,10 @@ export function GirosPage() {
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="mb-6">
+      {/* <div className="mb-6">
         <h1 className="text-2xl md:text-3xl font-bold text-foreground">Giros</h1>
         <p className="text-sm md:text-base text-muted-foreground mt-1">Gestiona tus giros y transferencias</p>
-      </div>
+      </div> */}
 
       {/* Search Bar */}
       <div className="relative mb-6">
