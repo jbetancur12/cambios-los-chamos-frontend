@@ -118,6 +118,21 @@ export function UsersPage() {
     })
     .sort((a, b) => a.fullName.localeCompare(b.fullName))
 
+  // Calculate totals
+  const totals = {
+    count: filteredUsers.length,
+    totalCredit: filteredUsers.reduce((sum, user) => sum + (user.creditLimit || 0), 0),
+    totalAvailable: filteredUsers.reduce((sum, user) => sum + (user.availableCredit || 0), 0),
+  }
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('es-CO', {
+      style: 'currency',
+      currency: 'COP',
+      minimumFractionDigits: 0,
+    }).format(amount)
+  }
+
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
       {/* Header */}
@@ -267,6 +282,27 @@ export function UsersPage() {
                 </Card>
               )
             })}
+          </div>
+
+          {/* Totalizador */}
+          <div
+            className="mt-4 rounded border text-white text-sm"
+            style={{ background: 'linear-gradient(to right, #136BBC, #274565)', borderColor: '#136BBC' }}
+          >
+            <div className="p-4 grid grid-cols-3 gap-4">
+              <div className="text-center">
+                <p className="text-xs opacity-80 mb-1">Total Minoristas</p>
+                <p className="text-2xl font-bold">{totals.count}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-xs opacity-80 mb-1">Cupo Total Asignado</p>
+                <p className="text-xl font-bold">{formatCurrency(totals.totalCredit)}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-xs opacity-80 mb-1">Saldo Total Disponible</p>
+                <p className="text-xl font-bold">{formatCurrency(totals.totalAvailable)}</p>
+              </div>
+            </div>
           </div>
         </>
       )}
