@@ -6,7 +6,8 @@ import { Label } from '@/components/ui/label'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
 import type { BankAccount } from '@/types/api'
-import { Wallet, MinusCircle, PlusCircle } from 'lucide-react' // Importamos MinusCircle y PlusCircle
+import { Wallet, MinusCircle, PlusCircle } from 'lucide-react'
+import { NumericFormat } from 'react-number-format'
 
 interface RechargeBalanceSheetProps {
   open: boolean
@@ -101,15 +102,20 @@ export function RechargeBalanceSheet({ open, onOpenChange, account, onBalanceUpd
               <Label htmlFor="amount" className="text-base">
                 Monto de Recarga o Ajuste (Bs)
               </Label>
-              <Input
+              <NumericFormat
                 id="amount"
-                type="number"
-                inputMode="decimal"
-                step="0.01"
-                // **IMPORTANTE: Se remueve el atributo min="0.01" para permitir números negativos**
-                placeholder="Ej: 15.00 o -5.00"
+                customInput={Input}
+                thousandSeparator="."
+                decimalSeparator=","
+                decimalScale={2}
+                fixedDecimalScale={false}
+                prefix=""
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
+                onValueChange={(values) => {
+                  setAmount(values.floatValue !== undefined ? values.floatValue.toString() : '')
+                }}
+                placeholder="Ej: 15,00 o -5,00"
+                allowNegative={true}
                 required
                 autoFocus
                 className="text-lg h-12"
