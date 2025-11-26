@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Skeleton } from '@/components/ui/skeleton'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
 import { useAuth } from '@/contexts/AuthContext'
@@ -418,7 +419,23 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
       )}
 
       {/* Exchange Rate Info */}
-      {!loadingRate && currentRate && (
+      {loadingRate ? (
+        <div className="bg-gray-100 rounded-lg p-4 mb-5">
+          <Skeleton className="h-4 w-40 mb-3" />
+          {isMinorista ? (
+            <div className="grid grid-cols-1 gap-3">
+              <Skeleton className="h-6 w-32" />
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-3">
+              <Skeleton className="h-6 w-24" />
+              <Skeleton className="h-6 w-24" />
+              <Skeleton className="h-6 w-24" />
+              <Skeleton className="h-6 w-24" />
+            </div>
+          )}
+        </div>
+      ) : currentRate ? (
         <div className="bg-gray-100 rounded-lg p-4 mb-5">
           <p className="text-sm font-semibold text-gray-700 mb-3">Tasa de Cambio Actual</p>
 
@@ -450,7 +467,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
             </div>
           )}
         </div>
-      )}
+      ) : null}
 
       {/* Custom Rate Override (SUPER_ADMIN only) */}
       {isSuperAdmin && (

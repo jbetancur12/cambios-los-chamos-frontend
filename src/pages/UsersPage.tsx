@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Users as UsersIcon, Search, X, Plus } from 'lucide-react'
 import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
 import { useQueryClient } from '@tanstack/react-query'
@@ -155,8 +156,31 @@ export function UsersPage() {
 
       {/* Users List */}
       {isLoading ? (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">Cargando usuarios...</p>
+        <div className="grid gap-4 grid-cols-2">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Card key={i} className="py-0">
+              <CardHeader className="px-4 py-1">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <Skeleton className="h-6 w-32 mb-2" />
+                  </div>
+                  <Skeleton className="h-5 w-16 rounded-full" />
+                </div>
+                <div className="flex items-center gap-4 mt-1 flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-5 w-10 rounded-full" />
+                    <Skeleton className="h-4 w-16" />
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="px-4 py-1">
+                <div className="flex items-center justify-between p-1 rounded-md bg-muted">
+                  <Skeleton className="h-4 w-28" />
+                  <Skeleton className="h-5 w-24" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       ) : users.length === 0 ? (
         <Card>
