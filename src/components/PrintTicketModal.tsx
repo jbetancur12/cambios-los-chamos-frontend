@@ -183,6 +183,19 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
             word-wrap: break-word;
         }
 
+        
+        .label {
+            flex: 1;
+            font-weight: bold;
+        }
+
+        .value-1 {
+            flex: 1;
+            text-align: right;
+            word-wrap: break-word;
+        }
+
+
         .full-row {
             width: 100%;
             font-size: 12px;
@@ -307,7 +320,7 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
                 ? `
             <div class="row">
                 <span class="label">Ejecutado por:</span>
-                <span class="value">${data.executedByName}</span>
+                <span class="value-1">${data.executedByName}</span>
             </div>
             `
                 : ''
