@@ -18,6 +18,7 @@ import {
 } from '@/hooks/mutations/useGiroMutations'
 import { useQueryClient } from '@tanstack/react-query'
 import { PaymentProofUpload } from './PaymentProofUpload'
+import { PrintTicketModal } from './PrintTicketModal'
 import {
   Clock,
   CheckCircle,
@@ -102,6 +103,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
   const [proofPreviewBlob, setProofPreviewBlob] = useState<Blob | null>(null)
   const [proofPreviewFilename, setProofPreviewFilename] = useState('')
   const [isEditingCompletedProof, setIsEditingCompletedProof] = useState(false)
+  const [showPrintModal, setShowPrintModal] = useState(false)
 
   const isNotEditableStatus =
     giro?.status === 'PROCESANDO' || giro?.status === 'COMPLETADO' || giro?.status === 'CANCELADO'
@@ -218,6 +220,10 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
         onSuccess: () => {
           toast.success('Giro ejecutado exitosamente')
           onUpdate()
+          // Abrir modal de impresión para transferencistas y admins
+          if (isTransferencista || isAdmin) {
+            setShowPrintModal(true)
+          }
         },
         onError: (error: any) => {
           toast.error(error.message || 'Error al ejecutar giro')
@@ -1083,6 +1089,17 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
             </div>
           </div>
         </div>
+      )}
+
+      {/* Print Modal */}
+      {giro && (
+        <PrintTicketModal
+          giroId={giro.id}
+          open={showPrintModal}
+          onOpenChange={(open) => {
+            setShowPrintModal(open)
+          }}
+        />
       )}
     </Sheet>
   )
