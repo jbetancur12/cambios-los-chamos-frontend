@@ -18,6 +18,7 @@ import {
   Printer,
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
 import { GiroDetailSheet } from '@/components/GiroDetailSheet'
 import { PrintTicketModal } from '@/components/PrintTicketModal'
 import { useGirosList } from '@/hooks/queries/useGiroQueries'
@@ -464,9 +465,99 @@ export function GirosPage() {
 
       {/* Giros List */}
       {isLoading ? (
-        <div className="text-center py-8">
-          <p className="text-sm text-muted-foreground">Cargando giros...</p>
-        </div>
+        <>
+          {/* Desktop Skeleton: Table */}
+          <div className="hidden md:block border rounded-lg overflow-hidden bg-card">
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b bg-muted/50">
+                    {user?.role !== 'MINORISTA' && (
+                      <th className="px-3 py-2 text-left font-semibold w-28">
+                        {filterUserType === 'TRANSFERENCISTA' ? 'Trasferencista' : 'Minorista'}
+                      </th>
+                    )}
+                    <th className="px-3 py-2 text-right font-semibold w-24">COP</th>
+                    <th className="px-3 py-2 text-right font-semibold w-20">Bs</th>
+                    <th className="px-3 py-2 text-left font-semibold w-32">Banco</th>
+                    <th className="px-3 py-2 text-center font-semibold w-20">Estado</th>
+                    <th className="px-3 py-2 text-center font-semibold w-24">Tipo</th>
+                    <th className="px-3 py-2 text-center font-semibold w-16">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <tr key={i} className="border-b">
+                      {user?.role !== 'MINORISTA' && (
+                        <td className="px-3 py-2">
+                          <Skeleton className="h-4 w-20" />
+                        </td>
+                      )}
+                      <td className="px-3 py-2">
+                        <Skeleton className="h-4 w-16 ml-auto" />
+                      </td>
+                      <td className="px-3 py-2">
+                        <Skeleton className="h-4 w-12 ml-auto" />
+                      </td>
+                      <td className="px-3 py-2">
+                        <Skeleton className="h-4 w-24" />
+                      </td>
+                      <td className="px-3 py-2">
+                        <div className="flex justify-center">
+                          <Skeleton className="h-5 w-16 rounded-full" />
+                        </div>
+                      </td>
+                      <td className="px-3 py-2">
+                        <div className="flex justify-center">
+                          <Skeleton className="h-5 w-20 rounded-full" />
+                        </div>
+                      </td>
+                      <td className="px-3 py-2">
+                        <div className="flex justify-center">
+                          <Skeleton className="h-4 w-4 rounded" />
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Mobile Skeleton: Cards */}
+          <div className="md:hidden space-y-2">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="bg-card border rounded p-3">
+                <div className={`grid ${user?.role === 'MINORISTA' ? 'grid-cols-2' : 'grid-cols-2'} gap-2 text-xs`}>
+                  {user?.role !== 'MINORISTA' && (
+                    <div>
+                      <Skeleton className="h-3 w-16 mb-1" />
+                      <Skeleton className="h-4 w-24" />
+                    </div>
+                  )}
+                  <div className={user?.role === 'MINORISTA' ? 'col-span-1' : ''}>
+                    <Skeleton className="h-3 w-8 mb-1" />
+                    <Skeleton className="h-4 w-20" />
+                  </div>
+                  <div>
+                    <Skeleton className="h-3 w-6 mb-1" />
+                    <Skeleton className="h-4 w-16" />
+                  </div>
+                  <div>
+                    <Skeleton className="h-3 w-12 mb-1" />
+                    <Skeleton className="h-4 w-20" />
+                  </div>
+                  <div>
+                    <Skeleton className="h-5 w-16 rounded-full" />
+                  </div>
+                  <div className="text-right">
+                    <Skeleton className="h-5 w-20 rounded-full ml-auto" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
       ) : error ? (
         <Card>
           <CardContent className="p-8 text-center">
