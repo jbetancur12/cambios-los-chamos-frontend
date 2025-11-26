@@ -104,7 +104,8 @@ export function GirosPage() {
   // Build query params
   const dateRange = getDateRange(filterDate)
   const queryParams = {
-    status: filterStatus !== 'ALL' ? filterStatus : undefined,
+    // Cuando es ASIGNADO, no enviamos filtro para obtener todos y filtrar en frontend (incluir DEVUELTO)
+    status: filterStatus !== 'ALL' && filterStatus !== 'ASIGNADO' ? filterStatus : undefined,
     dateFrom: dateRange?.from,
     dateTo: dateRange?.to,
   }
@@ -211,7 +212,15 @@ export function GirosPage() {
       matchesTransferencista = giro.transferencista?.id === selectedTransferencistaId
     }
 
-    return matchesSearch && matchesUserType && matchesTransferencista
+    // Status filter - cuando es ASIGNADO, incluir también DEVUELTO
+    let matchesStatus = true
+    if (filterStatus === 'ASIGNADO') {
+      matchesStatus = giro.status === 'ASIGNADO' || giro.status === 'DEVUELTO'
+    } else if (filterStatus !== 'ALL') {
+      matchesStatus = giro.status === filterStatus
+    }
+
+    return matchesSearch && matchesUserType && matchesTransferencista && matchesStatus
   })
 
   // Pagination
