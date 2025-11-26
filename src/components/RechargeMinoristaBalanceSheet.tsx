@@ -71,24 +71,28 @@ export function RechargeMinoristaBalanceSheet({
     setLocalMinorista(minorista)
   }, [minorista])
 
+  // Cargar datos iniciales cuando se abre el modal
   useEffect(() => {
-    if (open && localMinorista) {
-      // Cargar datos actualizados del minorista
+    if (open && minorista) {
       const loadUpdatedMinorista = async () => {
         try {
-          const response = await api.get<{ minorista: Minorista }>(`/minorista/${localMinorista.id}`)
+          const response = await api.get<{ minorista: Minorista }>(`/minorista/${minorista.id}`)
           setLocalMinorista(response.minorista)
         } catch (error) {
           console.error('Error loading updated minorista:', error)
         }
       }
       loadUpdatedMinorista()
-
-      if (activeTab === 'view') {
-        fetchTransactions()
-      }
     }
-  }, [open, activeTab, localMinorista?.id, page, dateRange])
+  }, [open, minorista?.id])
+
+  // Cargar transacciones cuando cambia la paginación o filtros
+  useEffect(() => {
+    if (open && activeTab === 'view' && localMinorista) {
+      fetchTransactions()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, activeTab, page, dateRange])
 
   const handlePayDebt = async (e: React.FormEvent) => {
     e.preventDefault()
