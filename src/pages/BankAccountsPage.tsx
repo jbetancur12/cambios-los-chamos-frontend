@@ -53,9 +53,7 @@ export function BankAccountsPage() {
       : accounts.filter(
           (account) =>
             account.bank.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            account.accountNumber.includes(searchTerm) ||
-            account.accountHolder.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            account.transferencista?.user.fullName.toLowerCase().includes(searchTerm.toLowerCase())
+            account.accountHolder.toLowerCase().includes(searchTerm.toLowerCase())
         )
 
   // Client-side filtering for trasferencistas
@@ -197,7 +195,7 @@ export function BankAccountsPage() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Buscar por banco, número de cuenta, titular o transferencista..."
+                  placeholder="Buscar por banco o titular..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-9 pr-10"
@@ -272,9 +270,7 @@ export function BankAccountsPage() {
                       <thead className="border-b">
                         <tr className="text-left text-sm text-muted-foreground">
                           <th className="pb-3 font-medium">Banco</th>
-                          <th className="pb-3 font-medium">Número de Cuenta</th>
                           <th className="pb-3 font-medium">Titular</th>
-                          <th className="pb-3 font-medium">Transferencista</th>
                           <th className="pb-3 font-medium text-right">Saldo</th>
                           <th className="pb-3 font-medium text-right">Acciones</th>
                         </tr>
@@ -290,9 +286,6 @@ export function BankAccountsPage() {
                             </td>
                             <td className="py-4">
                               <Skeleton className="h-4 w-28" />
-                            </td>
-                            <td className="py-4">
-                              <Skeleton className="h-4 w-32" />
                             </td>
                             <td className="py-4">
                               <Skeleton className="h-4 w-28" />
@@ -360,9 +353,7 @@ export function BankAccountsPage() {
                       <thead className="border-b">
                         <tr className="text-left text-sm text-muted-foreground">
                           <th className="pb-3 font-medium">Banco</th>
-                          <th className="pb-3 font-medium">Número de Cuenta</th>
                           <th className="pb-3 font-medium">Titular</th>
-                          <th className="pb-3 font-medium">Transferencista</th>
                           <th className="pb-3 font-medium text-right">Saldo</th>
                           <th className="pb-3 font-medium text-right">Acciones</th>
                         </tr>
@@ -376,9 +367,7 @@ export function BankAccountsPage() {
                                 <span className="font-medium">{account.bank.name}</span>
                               </div>
                             </td>
-                            <td className="py-4 text-sm">{account.accountNumber}</td>
                             <td className="py-4 text-sm">{account.accountHolder}</td>
-                            <td className="py-4 text-sm">{account.transferencista?.user.fullName}</td>
                             <td className="py-4 text-right font-semibold text-green-600">
                               {formatCurrency(account.balance)}
                             </td>
@@ -422,7 +411,6 @@ export function BankAccountsPage() {
                                 <Building className="h-4 w-4 text-muted-foreground" />
                                 <span className="font-semibold">{account.bank.name}</span>
                               </div>
-                              <p className="text-sm text-muted-foreground">{account.accountNumber}</p>
                             </div>
                             <div className="text-right">
                               <p className="text-xs text-muted-foreground">Saldo</p>
@@ -434,10 +422,6 @@ export function BankAccountsPage() {
                             <div className="flex justify-between">
                               <span className="text-muted-foreground">Titular</span>
                               <span>{account.accountHolder}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">Transferencista</span>
-                              <span>{account.transferencista?.user.fullName}</span>
                             </div>
                           </div>
 

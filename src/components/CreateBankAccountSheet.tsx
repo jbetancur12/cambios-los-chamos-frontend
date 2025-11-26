@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
-import type { Bank, AccountType, BankAccountOwnerType } from '@/types/api'
+import type { Bank, BankAccountOwnerType } from '@/types/api'
 
 interface CreateBankAccountSheetProps {
   open: boolean
@@ -28,9 +28,7 @@ export function CreateBankAccountSheet({
   const [banks, setBanks] = useState<Bank[]>([])
   const [formData, setFormData] = useState({
     bankId: '',
-    accountNumber: '',
     accountHolder: '',
-    accountType: 'AHORROS' as AccountType,
     ownerType: (mode === 'admin' ? 'ADMIN' : 'TRANSFERENCISTA') as BankAccountOwnerType,
   })
 
@@ -53,7 +51,7 @@ export function CreateBankAccountSheet({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!formData.bankId || !formData.accountNumber || !formData.accountHolder) {
+    if (!formData.bankId || !formData.accountHolder) {
       toast.error('Por favor completa todos los campos')
       return
     }
@@ -69,9 +67,7 @@ export function CreateBankAccountSheet({
 
       const payload: any = {
         bankId: formData.bankId,
-        accountNumber: formData.accountNumber,
         accountHolder: formData.accountHolder,
-        accountType: formData.accountType,
         ownerType: formData.ownerType,
       }
 
@@ -85,9 +81,7 @@ export function CreateBankAccountSheet({
       // Reset form
       setFormData({
         bankId: '',
-        accountNumber: '',
         accountHolder: '',
-        accountType: 'AHORROS',
         ownerType: (mode === 'admin' ? 'ADMIN' : 'TRANSFERENCISTA') as BankAccountOwnerType,
       })
 
@@ -135,19 +129,6 @@ export function CreateBankAccountSheet({
               </select>
             </div>
 
-            {/* Account Number */}
-            <div className="space-y-2">
-              <Label htmlFor="accountNumber">Número de Cuenta</Label>
-              <Input
-                id="accountNumber"
-                type="text"
-                placeholder="0000000000000000000000"
-                value={formData.accountNumber}
-                onChange={(e) => setFormData({ ...formData, accountNumber: e.target.value })}
-                required
-              />
-            </div>
-
             {/* Account Holder */}
             <div className="space-y-2">
               <Label htmlFor="accountHolder">Titular de la Cuenta</Label>
@@ -159,20 +140,6 @@ export function CreateBankAccountSheet({
                 onChange={(e) => setFormData({ ...formData, accountHolder: e.target.value })}
                 required
               />
-            </div>
-
-            {/* Account Type */}
-            <div className="space-y-2">
-              <Label htmlFor="accountType">Tipo de Cuenta</Label>
-              <select
-                id="accountType"
-                value={formData.accountType}
-                onChange={(e) => setFormData({ ...formData, accountType: e.target.value as AccountType })}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              >
-                <option value="AHORROS">Ahorros</option>
-                <option value="CORRIENTE">Corriente</option>
-              </select>
             </div>
 
             {/* Info */}

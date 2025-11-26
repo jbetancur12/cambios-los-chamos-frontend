@@ -48,9 +48,9 @@ export type BankAccountOwnerType = 'TRANSFERENCISTA' | 'ADMIN'
 
 export interface BankAccount {
   id: string
-  accountNumber: string
+  accountNumber?: string
   accountHolder: string
-  accountType: AccountType
+  accountType?: AccountType
   balance: number
   bank: Bank
   // ✨ NUEVO: Tipo de propietario

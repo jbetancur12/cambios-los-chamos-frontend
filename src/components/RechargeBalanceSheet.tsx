@@ -87,7 +87,7 @@ export function RechargeBalanceSheet({ open, onOpenChange, account, onBalanceUpd
           <div className="mb-6 p-4 rounded-lg bg-muted">
             <p className="text-sm text-muted-foreground mb-1">Cuenta</p>
             <p className="font-semibold">{account.bank.name}</p>
-            <p className="text-sm text-muted-foreground mt-2">Número: {account.accountNumber}</p>
+            <p className="text-sm text-muted-foreground mt-2">Titular: {account.accountHolder}</p>
             <div className="flex items-center gap-2 mt-3 pt-3 border-t">
               <Wallet className="h-4 w-4 text-green-600" />
               <span className="text-sm text-muted-foreground">Saldo actual:</span>

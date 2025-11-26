@@ -908,8 +908,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                           <option value="">Selecciona una cuenta</option>
                           {bankAccounts.map((account) => (
                             <option key={account.id} value={account.id}>
-                              {account.bank.name} - ...{account.accountNumber.slice(-4)} (
-                              {formatCurrency(account.balance, 'VES')})
+                              {account.bank.name} ({formatCurrency(account.balance, 'VES')})
                             </option>
                           ))}
                         </select>

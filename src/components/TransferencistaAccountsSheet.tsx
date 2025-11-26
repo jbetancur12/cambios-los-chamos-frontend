@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetBody } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Plus, Building2, CreditCard, Wallet, ArrowUpCircle } from 'lucide-react'
+import { Plus, Building2, Wallet, ArrowUpCircle } from 'lucide-react'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
 import { CreateBankAccountSheet } from '@/components/CreateBankAccountSheet'
@@ -76,9 +76,6 @@ export function TransferencistaAccountsSheet({
     }).format(amount)
   }
 
-  const getAccountTypeLabel = (type: string) => {
-    return type === 'AHORROS' ? 'Ahorros' : 'Corriente'
-  }
 
   return (
     <>
@@ -118,19 +115,8 @@ export function TransferencistaAccountsSheet({
                         {/* Account Details */}
                         <div className="space-y-2 text-sm">
                           <div className="flex items-center gap-2">
-                            <CreditCard className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-muted-foreground">Número:</span>
-                            <span className="font-medium">{account.accountNumber}</span>
-                          </div>
-
-                          <div className="flex items-center gap-2">
-                            <span className="text-muted-foreground ml-6">Titular:</span>
+                            <span className="text-muted-foreground">Titular:</span>
                             <span className="font-medium">{account.accountHolder}</span>
-                          </div>
-
-                          <div className="flex items-center gap-2">
-                            <span className="text-muted-foreground ml-6">Tipo:</span>
-                            <span className="font-medium">{getAccountTypeLabel(account.accountType)}</span>
                           </div>
 
                           {/* Balance */}
