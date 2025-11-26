@@ -122,7 +122,11 @@ export function UsersPage() {
   const totals = {
     count: filteredUsers.length,
     totalCredit: filteredUsers.reduce((sum, user) => sum + (user.creditLimit || 0), 0),
-    totalAvailable: filteredUsers.reduce((sum, user) => sum + (user.availableCredit || 0), 0),
+    totalDebt: filteredUsers.reduce((sum, user) => {
+      const creditLimit = user.creditLimit || 0
+      const availableCredit = user.availableCredit || 0
+      return sum + (creditLimit - availableCredit)
+    }, 0),
   }
 
   const formatCurrency = (amount: number) => {
@@ -299,8 +303,8 @@ export function UsersPage() {
                 <p className="text-xl font-bold">{formatCurrency(totals.totalCredit)}</p>
               </div>
               <div className="text-center">
-                <p className="text-xs opacity-80 mb-1">Saldo Total Disponible</p>
-                <p className="text-xl font-bold">{formatCurrency(totals.totalAvailable)}</p>
+                <p className="text-xs opacity-80 mb-1">Deuda Total</p>
+                <p className="text-xl font-bold">{formatCurrency(totals.totalDebt)}</p>
               </div>
             </div>
           </div>
