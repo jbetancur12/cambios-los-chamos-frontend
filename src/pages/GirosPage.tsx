@@ -360,18 +360,35 @@ export function GirosPage() {
               {filterUserType === 'TRANSFERENCISTA' && (
                 <div className="space-y-2">
                   <p className="text-xs font-semibold text-muted-foreground">Filtrar por Trasferencista</p>
-                  <select
-                    value={selectedTransferencistaId}
-                    onChange={(e) => setSelectedTransferencistaId(e.target.value)}
-                    className="flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                  >
-                    <option value="ALL">Todos los Trasferencistas</option>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSelectedTransferencistaId('ALL')}
+                      className={
+                        selectedTransferencistaId === 'ALL'
+                          ? 'bg-[linear-gradient(to_right,#136BBC,#274565)] text-white hover:bg-[linear-gradient(to_right,#136BBC,#274565)]'
+                          : ''
+                      }
+                    >
+                      Todos
+                    </Button>
                     {transferencistas.map((t) => (
-                      <option key={t.transferencistaId} value={t.transferencistaId}>
+                      <Button
+                        key={t.transferencistaId}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => t.transferencistaId && setSelectedTransferencistaId(t.transferencistaId)}
+                        className={
+                          selectedTransferencistaId === t.transferencistaId
+                            ? 'bg-[linear-gradient(to_right,#136BBC,#274565)] text-white hover:bg-[linear-gradient(to_right,#136BBC,#274565)]'
+                            : ''
+                        }
+                      >
                         {t.fullName}
-                      </option>
+                      </Button>
                     ))}
-                  </select>
+                  </div>
                 </div>
               )}
             </div>
