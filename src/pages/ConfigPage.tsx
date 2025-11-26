@@ -14,6 +14,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { Switch } from '@/components/ui/switch'
 import { CreateUserSheet } from '@/components/CreateUserSheet'
 import { cn } from '@/lib/utils'
+import { api } from '@/lib/api'
 
 export function ConfigPage() {
   const { user } = useAuth()
@@ -49,7 +50,6 @@ export function ConfigPage() {
 
   const handleToggleAdminActive = async (userId: string, newValue: boolean) => {
     try {
-      const { api } = await import('@/lib/api')
       await api.put(`/user/${userId}/toggle-active`, { isActive: newValue })
       queryClient.invalidateQueries({ queryKey: ['users'] })
       toast.success(newValue ? 'Admin activado' : 'Admin desactivado')
