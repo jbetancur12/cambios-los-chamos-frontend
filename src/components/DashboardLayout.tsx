@@ -135,7 +135,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
                   key={item.href}
                   to={item.href}
                   className={cn(
-                    'flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors',
+                    'flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-all duration-200',
                     isActive ? 'text-white' : 'text-blue-100 hover:text-white'
                   )}
                   style={
@@ -201,7 +201,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
                   to={item.href}
                   onClick={() => setSideMenuOpen(false)}
                   className={cn(
-                    'flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors',
+                    'flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-all duration-200',
                     isActive ? 'text-white' : 'text-blue-100 hover:text-white'
                   )}
                   style={
@@ -248,7 +248,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 pb-20 md:pb-6">{children}</main>
+        <main className="flex-1 pb-24 md:pb-6">{children}</main>
 
         {/* Mobile Bottom Navigation - 5 icons */}
         <nav
@@ -258,13 +258,13 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
             borderTopColor: 'rgba(255, 255, 255, 0.1)',
           }}
         >
-          <div className="flex h-16 items-center justify-around">
+          <div className="flex h-20 items-center justify-around">
             {/* Solicitudes */}
             {visibleBottomItems.find((item) => item.href === '/giros') && (
               <Link
                 to="/giros"
                 className={cn(
-                  'flex flex-col items-center justify-center gap-1 flex-1 h-16 transition-colors',
+                  'flex flex-col items-center justify-center gap-1 flex-1 h-20 transition-all duration-200',
                   location.pathname === '/giros' ? 'text-white font-semibold' : 'text-blue-100 hover:text-white'
                 )}
               >
@@ -278,7 +278,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
               <Link
                 to="/cuentas-bancarias"
                 className={cn(
-                  'flex flex-col items-center justify-center gap-1 flex-1 h-16 transition-colors',
+                  'flex flex-col items-center justify-center gap-1 flex-1 h-20 transition-all duration-200',
                   location.pathname === '/cuentas-bancarias'
                     ? 'text-white font-semibold'
                     : 'text-blue-100 hover:text-white'
@@ -294,7 +294,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
               <Link
                 to="/enviar-giro"
                 className={cn(
-                  'flex flex-col items-center justify-center gap-1 flex-1 h-16 transition-colors',
+                  'flex flex-col items-center justify-center gap-1 flex-1 h-20 transition-all duration-200',
                   location.pathname === '/enviar-giro' ? 'text-white font-semibold' : 'text-blue-100 hover:text-white'
                 )}
               >
@@ -308,7 +308,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
               <Link
                 to="/usuarios"
                 className={cn(
-                  'flex flex-col items-center justify-center gap-1 flex-1 h-16 transition-colors',
+                  'flex flex-col items-center justify-center gap-1 flex-1 h-20 transition-all duration-200',
                   location.pathname === '/usuarios' ? 'text-white font-semibold' : 'text-blue-100 hover:text-white'
                 )}
               >
@@ -321,7 +321,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
             <button
               onClick={() => setSideMenuOpen(!sideMenuOpen)}
               className={cn(
-                'flex flex-col items-center justify-center gap-1 flex-1 h-16 transition-colors',
+                'flex flex-col items-center justify-center gap-1 flex-1 h-20 transition-all duration-200',
                 sideMenuOpen ? 'text-white font-semibold' : 'text-blue-100 hover:text-white'
               )}
             >

@@ -993,9 +993,9 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                 </div>
               )}
 
-              {/* Delete Button for Minorista - Only for PENDIENTE, ASIGNADO or DEVUELTO */}
-              {isMinorista &&
-                giro &&
+              {/* Delete Button - Only for creator and only for PENDIENTE, ASIGNADO or DEVUELTO */}
+              {giro &&
+                giro.createdBy?.id === user?.id &&
                 (giro.status === 'PENDIENTE' || giro.status === 'ASIGNADO' || giro.status === 'DEVUELTO') && (
                   <Button
                     onClick={handleDeleteGiro}
