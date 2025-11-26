@@ -130,6 +130,7 @@ export function RechargeMinoristaBalanceSheet({
       })
       setLocalMinorista(response.minorista)
       setCreditLimitAmount('')
+      onBalanceUpdated() // Invalidar query para actualizar la lista
       toast.success('Cupo de crédito asignado exitosamente')
     } catch (error: any) {
       toast.error(error.message || 'Error al asignar cupo')
