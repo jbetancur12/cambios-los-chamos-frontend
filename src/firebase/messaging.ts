@@ -25,7 +25,7 @@ async function loadMessaging() {
 async function saveTokenToBackend(userId: string, token: string): Promise<void> {
   try {
     await api.post('/notifications/save-token', { userId, token })
-    console.log('Token guardado en la DB con éxito.')
+    // console.log('Token guardado en la DB con éxito.')
   } catch (error) {
     console.error('Error en saveTokenToBackend:', error)
   }
@@ -47,7 +47,7 @@ export async function requestNotifyPermission(userId: string) {
     })
 
     if (token) {
-      console.log('TOKEN FCM:', token)
+      // console.log('TOKEN FCM:', token)
       await saveTokenToBackend(userId, token)
     }
   } catch (error) {

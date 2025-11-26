@@ -91,17 +91,10 @@ export function useGiroWebSocket() {
       })
 
       socket.on('connect', () => {
-        console.log('[WS] 🔗 Conectado al WebSocket. SocketId:', socket.id)
-
         // Notificar al servidor que el usuario se conectó
         const user = JSON.parse(localStorage.getItem('user') || '{}')
         if (user.id) {
-          console.log('[WS] 📤 Emitiendo user:connected -', {
-            userId: user.id,
-            role: user.role,
-            minoristaId: user.minoristaId,
-            transferencistaId: user.transferencistaId,
-          })
+
           socket.emit('user:connected', {
             userId: user.id,
             role: user.role,

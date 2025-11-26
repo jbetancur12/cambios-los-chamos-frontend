@@ -76,7 +76,6 @@ export function TransferencistaAccountsSheet({
     }).format(amount)
   }
 
-
   return (
     <>
       <Sheet open={open} onOpenChange={onOpenChange}>

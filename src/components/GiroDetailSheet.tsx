@@ -869,7 +869,12 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
               {/* Actions for Transferencista */}
               {/* ✨ ACTUALIZADO: Permitir ADMIN/SUPERADMIN marcar como procesando */}
               {(isTransferencista || isAdmin) && giro.status === 'ASIGNADO' && (
-                <Button onClick={handleMarkAsProcessing} disabled={isProcessing} className="w-full text-xs" size="sm">
+                <Button
+                  onClick={handleMarkAsProcessing}
+                  disabled={isProcessing}
+                  className="w-full text-xs bg-[linear-gradient(to_right,#136BBC,#274565)]"
+                  size="sm"
+                >
                   {isProcessing ? 'Procesando...' : 'Marcar Procesando'}
                 </Button>
               )}
@@ -880,19 +885,27 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                   <h3 className="font-semibold">Acciones de Procesamiento</h3>
 
                   {/* Botones para alternar entre Ejecutar y Devolver */}
-                  <div className="flex gap-2 mb-4">
+                  <div className="flex gap-1 p-1 bg-muted rounded-lg">
                     <Button
                       type="button"
-                      variant={!showReturnForm ? 'default' : 'outline'}
-                      className="flex-1"
+                      variant="ghost"
+                      className={`flex-1 ${
+                        !showReturnForm
+                          ? 'bg-green-600 hover:bg-green-700 text-white'
+                          : 'hover:bg-muted text-muted-foreground'
+                      }`}
                       onClick={() => setShowReturnForm(false)}
                     >
                       Ejecutar
                     </Button>
                     <Button
                       type="button"
-                      variant={showReturnForm ? 'default' : 'outline'}
-                      className="flex-1"
+                      variant="ghost"
+                      className={`flex-1 ${
+                        showReturnForm
+                          ? 'bg-orange-600 hover:bg-orange-700 text-white'
+                          : 'hover:bg-muted text-muted-foreground'
+                      }`}
                       onClick={() => setShowReturnForm(true)}
                     >
                       Devolver
@@ -950,7 +963,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                       <Button
                         onClick={handleExecuteGiro}
                         disabled={isProcessing || !selectedBankAccountId || !proofUrl}
-                        className="w-full"
+                        className="w-full bg-[linear-gradient(to_right,#136BBC,#274565)]"
                         title={!proofUrl ? 'Debes cargar un comprobante de pago antes de ejecutar' : ''}
                       >
                         {isProcessing ? 'Ejecutando...' : 'Ejecutar Giro'}

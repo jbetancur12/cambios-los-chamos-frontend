@@ -111,7 +111,7 @@ export function DashboardPage() {
           </CardHeader>
           <CardContent className="p-5 pt-0 md:p-6 md:pt-0">
             <div className="text-2xl md:text-3xl font-bold">{stats?.girosCount ?? 0}</div>
-            {isTransferencista && (stats?.processingToday !== undefined || stats?.completedToday !== undefined) ? (
+            {stats?.processingToday !== undefined || stats?.completedToday !== undefined ? (
               <div className="text-xs text-muted-foreground space-y-1 mt-2">
                 <p>
                   Procesando hoy: <span className="font-semibold text-blue-600">{stats?.processingToday ?? 0}</span>
@@ -127,14 +127,14 @@ export function DashboardPage() {
         </Card>
 
         {/* Users - Only Super Admin */}
-        {isSuperAdmin && stats?.usersCount !== undefined && (
+        {isSuperAdmin && stats?.fees !== undefined && (
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-5 md:p-6">
-              <CardTitle className="text-xs md:text-sm font-medium">Usuarios</CardTitle>
+              <CardTitle className="text-xs md:text-sm font-medium">Comisión</CardTitle>
               <Users className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
             </CardHeader>
             <CardContent className="p-5 pt-0 md:p-6 md:pt-0">
-              <div className="text-2xl md:text-3xl font-bold">{stats.usersCount}</div>
+              <div className="text-2xl md:text-3xl font-bold">{formatCurrency(stats.fees, 'VES')}</div>
               <p className="text-xs text-muted-foreground">Activos</p>
             </CardContent>
           </Card>

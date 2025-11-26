@@ -5,7 +5,7 @@ import { applyDedupConfig } from '@/lib/deduplication'
 interface DashboardStats {
   girosCount?: number
   girosLabel?: string
-  usersCount?: number
+  fees?: number
   volumeBs?: number
   volumeCOP?: number
   volumeUSD?: number
