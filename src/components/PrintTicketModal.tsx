@@ -9,6 +9,8 @@ import { usePrinterConfig } from '@/hooks/usePrinterConfig'
 interface ThermalTicketData {
   companyName: string
   companyPhone: string
+  companyAddress: string
+  companyCity: string
   divider: string
   giroId: string
   createdAt: string
@@ -135,7 +137,7 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
         .company-name {
             font-weight: bold;
             font-size: 14px;
-            margin-bottom: 5px;
+            margin-bottom: 1px;
         }
 
         .company-phone {
@@ -176,7 +178,7 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
         }
 
         .value {
-            flex: 1;
+            flex: 2;
             text-align: right;
             word-wrap: break-word;
         }
@@ -232,14 +234,13 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
         <!-- ENCABEZADO -->
         <div class="header">
             <div class="company-name">${data.companyName}</div>
+            <div class="company-address">${data.companyAddress}</div>
+            <div class="company-city">${data.companyCity}</div>
             <div class="company-phone">${data.companyPhone}</div>
         </div>
 
-        <div class="divider">${data.divider}</div>
-
         <!-- INFORMACIÓN DEL GIRO -->
-        <div class="section">
-            <div class="section-title">Giro #${data.giroId}</div>
+        <div class="section"> 
             <div class="row">
                 <span class="label">Creado:</span>
                 <span class="value">${data.createdAt}</span>
