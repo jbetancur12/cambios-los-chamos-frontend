@@ -296,9 +296,12 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
 
         </div>
 
-        <!-- OPERADORES -->
+        <!-- EJECUCIÓN -->
         <div class="section">
-
+            <div class="row">
+                <span class="label">Tipo:</span>
+                <span class="value">${data.executionType}</span>
+            </div>
             ${
               data.executedByName
                 ? `
@@ -430,6 +433,11 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
                       Bs. {ticketData.amountBs}
                     </div>
                     <div>TRM: {ticketData.bcvApplied}</div>
+                  </div>
+
+                  <div style={{ marginBottom: '10px', borderTop: '1px dashed #000', paddingTop: '5px' }}>
+                    <div>Tipo: {ticketData.executionType}</div>
+                    {ticketData.executedByName && <div>Ejecutado por: {ticketData.executedByName}</div>}
                   </div>
 
                   <div style={{ textAlign: 'center', marginTop: '10px', fontSize: '10px' }}>
