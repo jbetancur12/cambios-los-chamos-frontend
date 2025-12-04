@@ -59,8 +59,9 @@ export function MinoristaSimpleTransactionTable({
     }
   }
 
-  const isPositiveTransaction = (type: MinoristaTransactionType) => {
-    return type === 'RECHARGE'
+  const isPositiveTransaction = (type: MinoristaTransactionType, amount: number) => {
+    if (type === 'RECHARGE') return amount >= 0
+    return false
   }
 
   if (transactions.length === 0) {
@@ -91,8 +92,28 @@ export function MinoristaSimpleTransactionTable({
           </thead>
           <tbody>
             {filteredTransactions.map((transaction) => {
-              const isPositive = isPositiveTransaction(transaction.type)
-              const displayAmount = isPositive ? transaction.amount : -transaction.amount
+              const isPositive = isPositiveTransaction(transaction.type, transaction.amount)
+              // Para RECHARGE, mostrar el monto tal cual (puede ser negativo). Para otros, invertir si es necesario.
+              // DISCOUNT siempre es negativo en lógica, pero se muestra positivo o negativo según contexto?
+              // Original logic: isPositive ? amount : -amount.
+              // RECHARGE was always positive. Now it can be negative.
+              // DISCOUNT is expenditure, so usually shown as negative or red.
+
+              // New logic:
+              // If RECHARGE: show amount as is.
+              // If DISCOUNT: show as negative (or just amount if it's stored as negative? usually stored as positive in db for amount, but context implies subtraction).
+              // Let's look at previous logic: `displayAmount = isPositive ? transaction.amount : -transaction.amount`
+              // If RECHARGE (was always positive): displayAmount = amount.
+              // If DISCOUNT (was always negative): displayAmount = -amount.
+
+              // Adjusted logic:
+              let displayAmount = transaction.amount
+              if (transaction.type !== 'RECHARGE' && transaction.type !== 'ADJUSTMENT') {
+                displayAmount = -transaction.amount
+              }
+
+              // Recalculate isPositive based on displayAmount for color
+              const isGreen = displayAmount >= 0
               const balanceQueda = transaction.currentBalanceInFavor || 0
               const isBalanceInFavor = balanceQueda > 0
 
@@ -105,11 +126,10 @@ export function MinoristaSimpleTransactionTable({
                     </Badge>
                   </td>
                   <td
-                    className={`py-3 text-right font-semibold whitespace-nowrap ${
-                      isPositive ? 'text-green-600' : 'text-red-600'
-                    }`}
+                    className={`py-3 text-right font-semibold whitespace-nowrap ${isGreen ? 'text-green-600' : 'text-red-600'
+                      }`}
                   >
-                    {isPositive && '+'}
+                    {isGreen && '+'}
                     {formatCurrency(displayAmount)}
                   </td>
                   <td className="py-3 text-right text-sm font-semibold text-blue-600 whitespace-nowrap">
@@ -119,9 +139,8 @@ export function MinoristaSimpleTransactionTable({
                     {formatCurrency(creditLimit - transaction.previousAvailableCredit)}
                   </td>
                   <td
-                    className={`py-3 text-right font-semibold pr-6 whitespace-nowrap ${
-                      isBalanceInFavor ? 'text-green-600' : 'text-red-600'
-                    }`}
+                    className={`py-3 text-right font-semibold pr-6 whitespace-nowrap ${isBalanceInFavor ? 'text-green-600' : 'text-red-600'
+                      }`}
                   >
                     {formatCurrency(transaction.accumulatedDebt as number)}
                   </td>
@@ -135,8 +154,12 @@ export function MinoristaSimpleTransactionTable({
       {/* Mobile Cards */}
       <div className="md:hidden space-y-3">
         {filteredTransactions.map((transaction) => {
-          const isPositive = isPositiveTransaction(transaction.type)
-          const displayAmount = isPositive ? transaction.amount : -transaction.amount
+          let displayAmount = transaction.amount
+          if (transaction.type !== 'RECHARGE' && transaction.type !== 'ADJUSTMENT') {
+            displayAmount = -transaction.amount
+          }
+          const isGreen = displayAmount >= 0
+
           const balanceQueda = transaction.currentBalanceInFavor || 0
           const isBalanceInFavor = balanceQueda > 0
 
@@ -144,7 +167,7 @@ export function MinoristaSimpleTransactionTable({
             <Card key={transaction.id} className="p-2">
               <div className="flex items-start justify-between mb-1">
                 <div className="flex items-center gap-2">
-                  {isPositive ? (
+                  {isGreen ? (
                     <TrendingUp className="h-5 w-5 text-green-600" />
                   ) : (
                     <TrendingDown className="h-5 w-5 text-red-600" />
@@ -153,8 +176,8 @@ export function MinoristaSimpleTransactionTable({
                     {getTransactionTypeLabel(transaction.type)}
                   </Badge>
                 </div>
-                <span className={`text-lg font-bold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                  {isPositive && '+'}
+                <span className={`text-lg font-bold ${isGreen ? 'text-green-600' : 'text-red-600'}`}>
+                  {isGreen && '+'}
                   {formatCurrency(displayAmount)}
                 </span>
               </div>

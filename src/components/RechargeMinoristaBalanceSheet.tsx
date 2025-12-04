@@ -97,7 +97,7 @@ export function RechargeMinoristaBalanceSheet({
   const handlePayDebt = async (e: React.FormEvent) => {
     e.preventDefault()
     const numericAmount = parseFloat(payAmount)
-    if (isNaN(numericAmount) || numericAmount <= 0) {
+    if (isNaN(numericAmount) || numericAmount === 0) {
       toast.error('Ingresa un monto válido')
       return
     }
@@ -164,8 +164,8 @@ export function RechargeMinoristaBalanceSheet({
             <button
               onClick={() => setActiveTab('view')}
               className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'view'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
                 }`}
             >
               <Eye className="h-4 w-4 inline mr-2" />
@@ -174,8 +174,8 @@ export function RechargeMinoristaBalanceSheet({
             <button
               onClick={() => setActiveTab('assign')}
               className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'assign'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
                 }`}
             >
               <DollarSign className="h-4 w-4 inline mr-2" />
@@ -184,8 +184,8 @@ export function RechargeMinoristaBalanceSheet({
             <button
               onClick={() => setActiveTab('pay')}
               className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'pay'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
                 }`}
             >
               <DollarSign className="h-4 w-4 inline mr-2" />
@@ -398,7 +398,7 @@ export function RechargeMinoristaBalanceSheet({
                         setPayAmount(values.floatValue ? values.floatValue.toString() : '')
                       }}
                       placeholder="0"
-                      allowNegative={false}
+                      allowNegative={true}
                       required
                     />
                     <Button
