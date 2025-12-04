@@ -219,8 +219,8 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
         onSuccess: () => {
           toast.success('Giro ejecutado exitosamente')
           onUpdate()
-          // Abrir modal de impresión para transferencistas y admins
-          if (isTransferencista || isAdmin) {
+          // Abrir modal de impresión para transferencistas y admins (solo en desktop)
+          if ((isTransferencista || isAdmin) && window.innerWidth >= 1024) {
             setShowPrintModal(true)
           }
         },
