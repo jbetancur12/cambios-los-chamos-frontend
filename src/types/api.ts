@@ -105,6 +105,7 @@ export interface Giro {
   beneficiaryName: string
   beneficiaryId: string
   bankName: string
+  bankCode: number
   accountNumber: string
   phone: string
   amountInput: number

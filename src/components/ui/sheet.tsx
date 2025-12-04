@@ -67,6 +67,8 @@ export function SheetTitle({ children }: { children: React.ReactNode }) {
   return <h2 className="text-xl font-semibold">{children}</h2>
 }
 
-export function SheetBody({ children }: { children: React.ReactNode }) {
-  return <div className="px-6 py-4">{children}</div>
+import { cn } from '@/lib/utils'
+
+export function SheetBody({ children, className }: { children: React.ReactNode; className?: string }) {
+  return <div className={cn("px-6 py-4", className)}>{children}</div>
 }

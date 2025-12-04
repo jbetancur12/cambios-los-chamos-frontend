@@ -71,7 +71,6 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
   const { data: bankAccounts = [] } = useBankAccountsList(user?.role, true)
   const { data: banks = [] } = useBanksList()
   const { data: minoristaTransaction } = useMinoristaTransaction(open && isMinorista ? giroId : null)
-
   // Mutations
   const executeGiroMutation = useExecuteGiro()
   const markProcessingMutation = useMarkGiroAsProcessing()
@@ -407,11 +406,11 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
               )}
 
               {/* Beneficiary Info */}
-              <div className="p-2 bg-muted rounded text-xs space-y-1">
-                <h3 className="font-semibold flex items-center gap-1">
+              <div className="p-2 bg-muted rounded text-sm space-y-1">
+                {/* <h3 className="font-semibold flex items-center gap-1">
                   <User className="h-3 w-3" />
                   Beneficiario
-                </h3>
+                </h3> */}
                 <div className="space-y-1">
                   {isEditing ? (
                     // Formulario de edición
@@ -445,68 +444,86 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                     // Vista estática
                     <div className="space-y-1">
                       {giro.executionType === 'PAGO_MOVIL' ? (
-                        // Para pago móvil, mostrar el celular como identificador principal
-                        <div className="flex justify-between items-center gap-1">
-                          <span className="text-muted-foreground">Celular:</span>
-                          <div className="flex items-center gap-1">
-                            <span className="font-medium">{giro.phone}</span>
-                            <button
-                              onClick={() => copyToClipboard(giro.phone, 'Celular')}
-                              className="p-0.5 hover:bg-muted rounded text-xs"
-                              title="Copiar celular"
-                            >
-                              <Copy className="h-3 w-3" />
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        // Para otras modalidades, mostrar nombre normalmente
-                        <div className="flex justify-between items-center">
-                          <span className="text-muted-foreground">Nombre:</span>
-                          <span className="font-medium">{giro.beneficiaryName}</span>
-                        </div>
-                      )}
-                      <div className="flex justify-between items-center gap-1">
-                        <span className="text-muted-foreground">Cédula:</span>
-                        <div className="flex items-center gap-1">
-                          <span className="font-medium">{giro.beneficiaryId}</span>
-                          <button
-                            onClick={() => copyToClipboard(giro.beneficiaryId, 'Cédula')}
-                            className="p-0.5 hover:bg-muted rounded text-xs"
-                            title="Copiar cédula"
-                          >
-                            <Copy className="h-3 w-3" />
-                          </button>
-                        </div>
-                      </div>
-                      {giro.executionType !== 'PAGO_MOVIL' && (
-                        <div className="flex justify-between items-center gap-1">
-                          <span className="text-muted-foreground">Teléfono:</span>
-                          <div className="flex items-center gap-1">
-                            <span className="font-medium">{giro.phone || '—'}</span>
-                            {giro.phone && (
+                        /* PAGO MÓVIL ORDER: Cédula -> Celular -> Banco */
+                        <>
+                          <div className="flex justify-between items-center gap-1">
+                            <span className="text-muted-foreground">Cédula:</span>
+                            <div className="flex items-center gap-1">
+                              <span className="font-medium">{giro.beneficiaryId}</span>
                               <button
-                                onClick={() => copyToClipboard(giro.phone, 'Teléfono')}
+                                onClick={() => copyToClipboard(giro.beneficiaryId, 'Cédula')}
                                 className="p-0.5 hover:bg-muted rounded text-xs"
-                                title="Copiar teléfono"
+                                title="Copiar cédula"
                               >
                                 <Copy className="h-3 w-3" />
                               </button>
-                            )}
+                            </div>
                           </div>
-                        </div>
+
+                          <div className="flex justify-between items-center gap-1">
+                            <span className="text-muted-foreground">Celular:</span>
+                            <div className="flex items-center gap-1">
+                              <span className="font-medium">{giro.phone}</span>
+                              <button
+                                onClick={() => copyToClipboard(giro.phone, 'Celular')}
+                                className="p-0.5 hover:bg-muted rounded text-xs"
+                                title="Copiar celular"
+                              >
+                                <Copy className="h-3 w-3" />
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Banco:</span>
+                            <span className="font-medium">{`0${giro.bankCode} - ${giro.bankName}`}</span>
+                          </div>
+                        </>
+                      ) : (
+                        /* TRANSFERENCIA ORDER: Nombre -> Cédula -> Cuenta -> Banco */
+                        <>
+                          <div className="flex justify-between items-center">
+                            <span className="text-muted-foreground">Nombre:</span>
+                            <span className="font-medium">{giro.beneficiaryName}</span>
+                          </div>
+
+                          <div className="flex justify-between items-center gap-1">
+                            <span className="text-muted-foreground">Cédula:</span>
+                            <div className="flex items-center gap-1">
+                              <span className="font-medium">{giro.beneficiaryId}</span>
+                              <button
+                                onClick={() => copyToClipboard(giro.beneficiaryId, 'Cédula')}
+                                className="p-0.5 hover:bg-muted rounded text-xs"
+                                title="Copiar cédula"
+                              >
+                                <Copy className="h-3 w-3" />
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="flex justify-between items-center gap-1">
+                            <span className="text-muted-foreground">Cuenta:</span>
+                            <div className="flex items-center gap-1">
+                              <span className="font-medium font-mono text-xs">{giro.accountNumber}</span>
+                              <button
+                                onClick={() => copyToClipboard(giro.accountNumber, 'Cuenta')}
+                                className="p-0.5 hover:bg-muted rounded text-xs"
+                                title="Copiar cuenta"
+                              >
+                                <Copy className="h-3 w-3" />
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Banco:</span>
+                            <span className="font-medium">{`0${giro.bankCode} - ${giro.bankName}`}</span>
+                          </div>
+                        </>
                       )}
                     </div>
                   )}
                 </div>
-              </div>
-
-              {/* Bank Info */}
-              <div className="p-2 bg-muted rounded text-xs space-y-1">
-                <h3 className="font-semibold flex items-center gap-1">
-                  <Building className="h-3 w-3" />
-                  Banco
-                </h3>
                 <div className="space-y-0.5">
                   {isEditing ? (
                     // Formulario de edición
@@ -539,30 +556,11 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                         />
                       </div>
                     </div>
-                  ) : (
-                    // Vista estática
-                    <div className="space-y-1">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Banco:</span>
-                        <span className="font-medium">{giro.bankName}</span>
-                      </div>
-                      <div className="flex justify-between items-center gap-1">
-                        <span className="text-muted-foreground">Cuenta:</span>
-                        <div className="flex items-center gap-1">
-                          <span className="font-medium font-mono text-xs">{giro.accountNumber}</span>
-                          <button
-                            onClick={() => copyToClipboard(giro.accountNumber, 'Cuenta')}
-                            className="p-0.5 hover:bg-muted rounded text-xs"
-                            title="Copiar cuenta"
-                          >
-                            <Copy className="h-3 w-3" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                  ) : null}
                 </div>
               </div>
+
+
 
               {/* Amounts */}
               <div className="p-2 bg-muted rounded text-xs space-y-1">
@@ -889,11 +887,10 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                     <Button
                       type="button"
                       variant="ghost"
-                      className={`flex-1 ${
-                        !showReturnForm
-                          ? 'bg-green-600 hover:bg-green-700 text-white'
-                          : 'hover:bg-muted text-muted-foreground'
-                      }`}
+                      className={`flex-1 ${!showReturnForm
+                        ? 'bg-green-600 hover:bg-green-700 text-white'
+                        : 'hover:bg-muted text-muted-foreground'
+                        }`}
                       onClick={() => setShowReturnForm(false)}
                     >
                       Ejecutar
@@ -901,11 +898,10 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                     <Button
                       type="button"
                       variant="ghost"
-                      className={`flex-1 ${
-                        showReturnForm
-                          ? 'bg-orange-600 hover:bg-orange-700 text-white'
-                          : 'hover:bg-muted text-muted-foreground'
-                      }`}
+                      className={`flex-1 ${showReturnForm
+                        ? 'bg-orange-600 hover:bg-orange-700 text-white'
+                        : 'hover:bg-muted text-muted-foreground'
+                        }`}
                       onClick={() => setShowReturnForm(true)}
                     >
                       Devolver
