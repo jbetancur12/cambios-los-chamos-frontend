@@ -323,7 +323,7 @@ export function BankTransactionsPage() {
           <CardHeader>
             <CardTitle>Historial de Transacciones</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-2">
             {isLoading ? (
               <div className="space-y-3">
                 {/* Table Skeleton */}
@@ -375,12 +375,12 @@ export function BankTransactionsPage() {
                   <table className="w-full">
                     <thead className="border-b">
                       <tr className="text-center text-xs text-muted-foreground">
-                        <th className="pb-2 font-medium whitespace-nowrap px-2">Fecha</th>
-                        <th className="pb-2 font-medium whitespace-nowrap px-2">Monto</th>
-                        <th className="pb-2 font-medium whitespace-nowrap px-2">Comisión</th>
-                        <th className="pb-2 font-medium whitespace-nowrap px-2">Dé</th>
-                        <th className="pb-2 font-medium whitespace-nowrap px-2">Ahora</th>
-                        <th className="pb-2 font-medium whitespace-nowrap px-2">Creado por</th>
+                        <th className="pb-2 font-medium whitespace-nowrap px-1">Fecha</th>
+                        <th className="pb-2 font-medium whitespace-nowrap px-1">Monto</th>
+                        <th className="pb-2 font-medium whitespace-nowrap px-1">Comisión</th>
+                        <th className="pb-2 font-medium whitespace-nowrap px-1">Dé</th>
+                        <th className="pb-2 font-medium whitespace-nowrap px-1">Ahora</th>
+                        <th className="pb-2 font-medium whitespace-nowrap px-1">Creado por</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -390,24 +390,24 @@ export function BankTransactionsPage() {
 
                         return (
                           <tr key={transaction.id} className="border-b last:border-0 hover:bg-muted/50 text-xs text-center">
-                            <td className="py-2 whitespace-nowrap px-2">{formatCompactDate(transaction.createdAt)}</td>
+                            <td className="py-2 whitespace-nowrap px-1">{formatCompactDate(transaction.createdAt)}</td>
                             <td
-                              className={`py-2 font-semibold whitespace-nowrap px-2 ${isPositive ? 'text-green-600' : 'text-red-600'
+                              className={`py-2 font-semibold whitespace-nowrap px-1 ${isPositive ? 'text-green-600' : 'text-red-600'
                                 }`}
                             >
                               {isPositive && '+'}
                               {formatNumber(displayAmount)}
                             </td>
-                            <td className="py-2 text-muted-foreground whitespace-nowrap px-2">
+                            <td className="py-2 text-muted-foreground whitespace-nowrap px-1">
                               {formatNumber(transaction.fee)}
                             </td>
-                            <td className="py-2 text-muted-foreground whitespace-nowrap px-2">
+                            <td className="py-2 text-muted-foreground whitespace-nowrap px-1">
                               {formatNumber(transaction.previousBalance)}
                             </td>
-                            <td className="py-2 font-semibold whitespace-nowrap px-2">
+                            <td className="py-2 font-semibold whitespace-nowrap px-1">
                               {formatNumber(transaction.currentBalance)}
                             </td>
-                            <td className="py-2 whitespace-nowrap px-2">{transaction.createdBy.fullName}</td>
+                            <td className="py-2 whitespace-nowrap px-1">{transaction.createdBy.fullName}</td>
                           </tr>
                         )
                       })}
