@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, TrendingUp, TrendingDown, DollarSign, ChevronDown } from 'lucide-react'
+import { ArrowLeft, DollarSign, ChevronDown } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -344,18 +344,18 @@ export function BankTransactionsPage() {
           <CardContent>
             {isLoading ? (
               <div className="space-y-3">
-                {/* Desktop Table Skeleton */}
-                <div className="hidden md:block overflow-x-auto">
+                {/* Table Skeleton */}
+                <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead className="border-b">
                       <tr className="text-left text-sm text-muted-foreground">
-                        <th className="pb-3 font-medium">Fecha</th>
-                        <th className="pb-3 font-medium">Tipo</th>
-                        <th className="pb-3 font-medium text-right">Monto</th>
-                        <th className="pb-3 font-medium text-right">Comisión</th>
-                        <th className="pb-3 font-medium text-right pr-6">Dé</th>
-                        <th className="pb-3 font-medium text-right pr-6">Ahora</th>
-                        <th className="pb-3 font-medium pl-4">Creado por</th>
+                        <th className="pb-3 font-medium whitespace-nowrap">Fecha</th>
+                        <th className="pb-3 font-medium whitespace-nowrap">Tipo</th>
+                        <th className="pb-3 font-medium text-right whitespace-nowrap">Monto</th>
+                        <th className="pb-3 font-medium text-right whitespace-nowrap">Comisión</th>
+                        <th className="pb-3 font-medium text-right pr-6 whitespace-nowrap">Dé</th>
+                        <th className="pb-3 font-medium text-right pr-6 whitespace-nowrap">Ahora</th>
+                        <th className="pb-3 font-medium pl-4 whitespace-nowrap">Creado por</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -387,46 +387,23 @@ export function BankTransactionsPage() {
                     </tbody>
                   </table>
                 </div>
-
-                {/* Mobile Cards Skeleton */}
-                <div className="md:hidden space-y-3">
-                  {Array.from({ length: 8 }).map((_, i) => (
-                    <Card key={i} className="p-4">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <Skeleton className="h-5 w-5 rounded" />
-                          <Skeleton className="h-6 w-20 rounded-full" />
-                        </div>
-                        <Skeleton className="h-6 w-24" />
-                      </div>
-                      <div className="space-y-2">
-                        <Skeleton className="h-4 w-full" />
-                        <Skeleton className="h-4 w-full" />
-                        <Skeleton className="h-4 w-full" />
-                        <div className="pt-2 border-t">
-                          <Skeleton className="h-4 w-full" />
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
               </div>
             ) : transactions.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">No hay transacciones registradas</div>
             ) : (
               <div className="space-y-3">
-                {/* Desktop Table */}
-                <div className="hidden md:block overflow-x-auto">
+                {/* Transactions Table (Scrollable on mobile) */}
+                <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead className="border-b">
                       <tr className="text-left text-sm text-muted-foreground">
-                        <th className="pb-3 font-medium">Fecha</th>
-                        <th className="pb-3 font-medium">Tipo</th>
-                        <th className="pb-3 font-medium text-right">Monto</th>
-                        <th className="pb-3 font-medium text-right">Comisión</th>
-                        <th className="pb-3 font-medium text-right pr-6">Dé</th>
-                        <th className="pb-3 font-medium text-right pr-6">Ahora</th>
-                        <th className="pb-3 font-medium pl-4">Creado por</th>
+                        <th className="pb-3 font-medium whitespace-nowrap">Fecha</th>
+                        <th className="pb-3 font-medium whitespace-nowrap">Tipo</th>
+                        <th className="pb-3 font-medium text-right whitespace-nowrap">Monto</th>
+                        <th className="pb-3 font-medium text-right whitespace-nowrap">Comisión</th>
+                        <th className="pb-3 font-medium text-right pr-6 whitespace-nowrap">Dé</th>
+                        <th className="pb-3 font-medium text-right pr-6 whitespace-nowrap">Ahora</th>
+                        <th className="pb-3 font-medium pl-4 whitespace-nowrap">Creado por</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -437,15 +414,14 @@ export function BankTransactionsPage() {
                         return (
                           <tr key={transaction.id} className="border-b last:border-0 hover:bg-muted/50">
                             <td className="py-3 text-sm whitespace-nowrap">{formatDate(transaction.createdAt)}</td>
-                            <td className="py-3">
+                            <td className="py-3 whitespace-nowrap">
                               <Badge variant="outline" className={getTransactionTypeColor(transaction.type)}>
                                 {getTransactionTypeLabel(transaction.type)}
                               </Badge>
                             </td>
                             <td
-                              className={`py-3 text-right font-semibold whitespace-nowrap ${
-                                isPositive ? 'text-green-600' : 'text-red-600'
-                              }`}
+                              className={`py-3 text-right font-semibold whitespace-nowrap ${isPositive ? 'text-green-600' : 'text-red-600'
+                                }`}
                             >
                               {isPositive && '+'}
                               {formatCurrency(displayAmount)}
@@ -459,59 +435,12 @@ export function BankTransactionsPage() {
                             <td className="py-3 text-right font-semibold pr-6 whitespace-nowrap">
                               {formatCurrency(transaction.currentBalance)}
                             </td>
-                            <td className="py-3 text-sm pl-4">{transaction.createdBy.fullName}</td>
+                            <td className="py-3 text-sm pl-4 whitespace-nowrap">{transaction.createdBy.fullName}</td>
                           </tr>
                         )
                       })}
                     </tbody>
                   </table>
-                </div>
-
-                {/* Mobile Cards */}
-                <div className="md:hidden space-y-3">
-                  {transactions.map((transaction) => {
-                    const isPositive = isPositiveTransaction(transaction.type)
-                    const displayAmount = isPositive ? transaction.amount : -transaction.amount
-
-                    return (
-                      <Card key={transaction.id} className="p-4">
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex items-center gap-2">
-                            {isPositive ? (
-                              <TrendingUp className="h-5 w-5 text-green-600" />
-                            ) : (
-                              <TrendingDown className="h-5 w-5 text-red-600" />
-                            )}
-                            <Badge variant="outline" className={getTransactionTypeColor(transaction.type)}>
-                              {getTransactionTypeLabel(transaction.type)}
-                            </Badge>
-                          </div>
-                          <span className={`text-lg font-bold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                            {isPositive && '+'}
-                            {formatCurrency(displayAmount)}
-                          </span>
-                        </div>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Fecha</span>
-                            <span>{formatDate(transaction.createdAt)}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">De</span>
-                            <span>{formatCurrency(transaction.previousBalance)}</span>
-                          </div>
-                          <div className="flex justify-between font-semibold">
-                            <span>Ahora</span>
-                            <span>{formatCurrency(transaction.currentBalance)}</span>
-                          </div>
-                          <div className="flex justify-between pt-2 border-t">
-                            <span className="text-muted-foreground">Creado por</span>
-                            <span>{transaction.createdBy.fullName}</span>
-                          </div>
-                        </div>
-                      </Card>
-                    )
-                  })}
                 </div>
 
                 {/* Pagination */}
