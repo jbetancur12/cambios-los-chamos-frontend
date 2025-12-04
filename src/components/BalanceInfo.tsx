@@ -38,20 +38,20 @@ export function BalanceInfo({
 
   const consumption = calculateConsumption()
   return (
-    <div className="space-y-3">
+    <div className="space-y-2 md:space-y-3">
       {/* Balances Available */}
-      <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-lg space-y-3">
+      <div className="p-2 md:p-3 bg-blue-50 dark:bg-blue-950 rounded-lg space-y-2 md:space-y-3">
         <div className="flex items-center gap-2">
           <Wallet className="h-4 w-4 text-blue-600" />
           <p className="text-sm font-medium text-blue-900 dark:text-blue-100">Tu Balance</p>
         </div>
 
         {/* Two column layout for balances */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2 md:gap-3">
           {/* Crédito Disponible */}
           <div className="p-2 bg-white dark:bg-slate-900 rounded border border-blue-200 dark:border-blue-700">
             <p className="text-xs text-muted-foreground mb-1">Crédito Disponible</p>
-            <p className="text-lg font-semibold text-blue-700 dark:text-blue-300">
+            <p className="text-base md:text-lg font-semibold text-blue-700 dark:text-blue-300">
               {new Intl.NumberFormat('es-CO', {
                 style: 'currency',
                 currency: 'COP',
@@ -63,7 +63,7 @@ export function BalanceInfo({
           {/* Saldo a Favor */}
           <div className="p-2 bg-white dark:bg-slate-900 rounded border border-emerald-200 dark:border-emerald-700">
             <p className="text-xs text-muted-foreground mb-1">Saldo a Favor</p>
-            <p className="text-lg font-semibold text-emerald-700 dark:text-emerald-300">
+            <p className="text-base md:text-lg font-semibold text-emerald-700 dark:text-emerald-300">
               {new Intl.NumberFormat('es-CO', {
                 style: 'currency',
                 currency: 'COP',
@@ -147,8 +147,8 @@ export function BalanceInfo({
                     <p className="text-xs text-muted-foreground">Balance Total Después</p>
                     <p
                       className={`text-lg font-semibold ${hasInsufficientBalance()
-                          ? 'text-red-600 dark:text-red-400'
-                          : 'text-green-600 dark:text-green-400'
+                        ? 'text-red-600 dark:text-red-400'
+                        : 'text-green-600 dark:text-green-400'
                         }`}
                     >
                       {new Intl.NumberFormat('es-CO', {
