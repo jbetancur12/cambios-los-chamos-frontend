@@ -51,20 +51,20 @@ export function BankAccountsPage() {
     searchTerm.trim() === ''
       ? accounts
       : accounts.filter(
-          (account) =>
-            account.bank.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            account.accountHolder.toLowerCase().includes(searchTerm.toLowerCase())
-        )
+        (account) =>
+          account.bank.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          account.accountHolder.toLowerCase().includes(searchTerm.toLowerCase())
+      )
 
   // Client-side filtering for trasferencistas
   const filteredTrasferencistas =
     searchTransferencistasTerm.trim() === ''
       ? trasferencistas
       : trasferencistas.filter(
-          (t) =>
-            t.fullName.toLowerCase().includes(searchTransferencistasTerm.toLowerCase()) ||
-            t.email.toLowerCase().includes(searchTransferencistasTerm.toLowerCase())
-        )
+        (t) =>
+          t.fullName.toLowerCase().includes(searchTransferencistasTerm.toLowerCase()) ||
+          t.email.toLowerCase().includes(searchTransferencistasTerm.toLowerCase())
+      )
 
   // Handle errors
   if (accountsQuery.error) {
@@ -368,7 +368,12 @@ export function BankAccountsPage() {
                               </div>
                             </td>
                             <td className="py-4 text-sm">{account.accountHolder}</td>
-                            <td className="py-4 text-right font-semibold text-green-600">
+                            <td
+                              className={cn(
+                                'py-4 text-right font-semibold',
+                                account.balance < 0 ? 'text-red-600' : 'text-green-600'
+                              )}
+                            >
                               {formatCurrency(account.balance)}
                             </td>
                             <td className="py-4 text-right">
@@ -414,7 +419,14 @@ export function BankAccountsPage() {
                             </div>
                             <div className="text-right">
                               <p className="text-xs text-muted-foreground">Saldo</p>
-                              <p className="text-lg font-bold text-green-600">{formatCurrency(account.balance)}</p>
+                              <p
+                                className={cn(
+                                  'text-lg font-bold',
+                                  account.balance < 0 ? 'text-red-600' : 'text-green-600'
+                                )}
+                              >
+                                {formatCurrency(account.balance)}
+                              </p>
                             </div>
                           </div>
 
