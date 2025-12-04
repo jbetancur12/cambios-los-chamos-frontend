@@ -75,6 +75,7 @@ export function BalanceInfo({
       </div>
 
       {/* Consumption Breakdown when amount is entered */}
+      {/* Transaction Details (Collapsible) */}
       {amountInput && parseFloat(amountInput) > 0 && (
         <div className="bg-amber-50 dark:bg-amber-950 rounded-lg overflow-hidden">
           <button
@@ -82,162 +83,175 @@ export function BalanceInfo({
             onClick={() => setIsBreakdownOpen(!isBreakdownOpen)}
             className="w-full flex items-center justify-between p-3 text-sm font-medium text-amber-900 dark:text-amber-100 hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-colors"
           >
-            <span>Desglose del Consumo</span>
+            <span>Detalles de la Transacción</span>
             {isBreakdownOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </button>
 
           {isBreakdownOpen && (
-            <div className="p-3 pt-0 space-y-2">
-              <div className="space-y-2 text-sm">
+            <div className="p-3 pt-0 space-y-4 border-t border-amber-200 dark:border-amber-800 mt-2">
+              {/* Consumption Breakdown */}
+              <div className="space-y-2">
+                <p className="text-xs font-semibold text-amber-800 dark:text-amber-200 uppercase tracking-wider">
+                  Desglose del Consumo
+                </p>
+                <div className="space-y-2 text-sm">
+                  {consumption.fromBalanceInFavor > 0 && (
+                    <div className="p-2 bg-white dark:bg-slate-900 rounded border border-emerald-200 dark:border-emerald-700">
+                      <p className="text-xs text-muted-foreground">Del Saldo a Favor</p>
+                      <p className="text-base font-semibold text-emerald-700 dark:text-emerald-300">
+                        {new Intl.NumberFormat('es-CO', {
+                          style: 'currency',
+                          currency: 'COP',
+                          minimumFractionDigits: 0,
+                        }).format(consumption.fromBalanceInFavor)}
+                      </p>
+                    </div>
+                  )}
+                  {consumption.fromCredit > 0 && (
+                    <div className="p-2 bg-white dark:bg-slate-900 rounded border border-blue-200 dark:border-blue-700">
+                      <p className="text-xs text-muted-foreground">Del Crédito Disponible</p>
+                      <p className="text-base font-semibold text-blue-700 dark:text-blue-300">
+                        {new Intl.NumberFormat('es-CO', {
+                          style: 'currency',
+                          currency: 'COP',
+                          minimumFractionDigits: 0,
+                        }).format(consumption.fromCredit)}
+                      </p>
+                    </div>
+                  )}
+                </div>
                 {consumption.fromBalanceInFavor > 0 && (
-                  <div className="p-2 bg-white dark:bg-slate-900 rounded border border-emerald-200 dark:border-emerald-700">
-                    <p className="text-xs text-muted-foreground">Del Saldo a Favor</p>
-                    <p className="text-base font-semibold text-emerald-700 dark:text-emerald-300">
-                      {new Intl.NumberFormat('es-CO', {
-                        style: 'currency',
-                        currency: 'COP',
-                        minimumFractionDigits: 0,
-                      }).format(consumption.fromBalanceInFavor)}
-                    </p>
-                  </div>
-                )}
-                {consumption.fromCredit > 0 && (
-                  <div className="p-2 bg-white dark:bg-slate-900 rounded border border-blue-200 dark:border-blue-700">
-                    <p className="text-xs text-muted-foreground">Del Crédito Disponible</p>
-                    <p className="text-base font-semibold text-blue-700 dark:text-blue-300">
-                      {new Intl.NumberFormat('es-CO', {
-                        style: 'currency',
-                        currency: 'COP',
-                        minimumFractionDigits: 0,
-                      }).format(consumption.fromCredit)}
-                    </p>
-                  </div>
+                  <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
+                    💡 El saldo a favor se consume primero
+                  </p>
                 )}
               </div>
-              {consumption.fromBalanceInFavor > 0 && (
-                <p className="text-xs text-amber-700 dark:text-amber-300 mt-2">💡 El saldo a favor se consume primero</p>
-              )}
+
+              {/* Profit and Remaining Balance */}
+              <div className="space-y-2 pt-2 border-t border-amber-200 dark:border-amber-800">
+                <p className="text-xs font-semibold text-amber-800 dark:text-amber-200 uppercase tracking-wider">
+                  Proyección
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-2 bg-white dark:bg-slate-900 rounded border border-amber-200 dark:border-amber-800">
+                    <p className="text-xs text-muted-foreground">Ganancia</p>
+                    <p className={`text-lg font-semibold text-green-600 dark:text-green-400`}>
+                      {new Intl.NumberFormat('es-CO', {
+                        style: 'currency',
+                        currency: 'COP',
+                        minimumFractionDigits: 0,
+                      }).format(getEarnedProfit() ?? 0)}
+                    </p>
+                  </div>
+                  <div className="p-2 bg-white dark:bg-slate-900 rounded border border-amber-200 dark:border-amber-800">
+                    <p className="text-xs text-muted-foreground">Balance Total Después</p>
+                    <p
+                      className={`text-lg font-semibold ${hasInsufficientBalance()
+                          ? 'text-red-600 dark:text-red-400'
+                          : 'text-green-600 dark:text-green-400'
+                        }`}
+                    >
+                      {new Intl.NumberFormat('es-CO', {
+                        style: 'currency',
+                        currency: 'COP',
+                        minimumFractionDigits: 0,
+                      }).format(getRemainingBalance() ?? 0)}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Breakdown of remaining balances */}
+                {(() => {
+                  const amount = parseFloat(amountInput) || 0
+                  const balanceInFavor = minoristaBalanceInFavor ?? 0
+                  const availableCredit = minoristaBalance ?? 0
+                  const profit = getEarnedProfit() || 0
+
+                  // Apply processTransfer logic
+                  let userBalance = balanceInFavor
+                  let remainingAmount = amount
+                  let externalDebt = 0
+                  let remainingBalanceInFavor = 0
+                  let remainingCredit = 0
+
+                  // Step 1: Deduct from balance (saldo a favor)
+                  if (remainingAmount <= userBalance) {
+                    remainingBalanceInFavor = userBalance - remainingAmount
+                    remainingAmount = 0
+                  } else {
+                    remainingAmount -= userBalance
+                    remainingBalanceInFavor = 0
+                  }
+
+                  // Step 2: Deduct from credit
+                  let creditUsed = 0
+                  if (remainingAmount > 0) {
+                    if (remainingAmount <= availableCredit) {
+                      creditUsed = remainingAmount
+                      remainingCredit = availableCredit - remainingAmount
+                      remainingAmount = 0
+                    } else {
+                      creditUsed = availableCredit
+                      externalDebt = remainingAmount - availableCredit
+                      remainingCredit = 0
+                      remainingAmount = 0
+                    }
+                  } else {
+                    remainingCredit = availableCredit
+                  }
+
+                  // Step 3: Apply profit
+                  if (creditUsed === 0 && externalDebt === 0) {
+                    // Only balance was used → profit goes to balance
+                    remainingBalanceInFavor += profit
+                  } else {
+                    // Profit first covers external debt
+                    const paidExternalDebt = Math.min(profit, externalDebt)
+                    let remainingProfit = profit - paidExternalDebt
+
+                    // Then restores used credit
+                    const restoreCredit = Math.min(remainingProfit, creditUsed)
+                    remainingCredit += restoreCredit
+                    remainingProfit -= restoreCredit
+
+                    // Anything extra goes to balance
+                    if (remainingProfit > 0) {
+                      remainingBalanceInFavor += remainingProfit
+                    }
+                  }
+
+                  return (
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="p-2 bg-white dark:bg-slate-900 rounded border border-blue-200 dark:border-blue-700">
+                        <p className="text-xs text-muted-foreground">Crédito Después</p>
+                        <p className="text-base font-semibold text-blue-700 dark:text-blue-300">
+                          {new Intl.NumberFormat('es-CO', {
+                            style: 'currency',
+                            currency: 'COP',
+                            minimumFractionDigits: 0,
+                          }).format(remainingCredit)}
+                        </p>
+                      </div>
+                      <div className="p-2 bg-white dark:bg-slate-900 rounded border border-emerald-200 dark:border-emerald-700">
+                        <p className="text-xs text-muted-foreground">Saldo a Favor Después</p>
+                        <p className="text-base font-semibold text-emerald-700 dark:text-emerald-300">
+                          {new Intl.NumberFormat('es-CO', {
+                            style: 'currency',
+                            currency: 'COP',
+                            minimumFractionDigits: 0,
+                          }).format(remainingBalanceInFavor)}
+                        </p>
+                      </div>
+                    </div>
+                  )
+                })()}
+              </div>
             </div>
           )}
         </div>
       )}
 
-      {/* Profit and Remaining Balance */}
-      {amountInput && (
-        <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-lg space-y-3 text-sm">
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <p className="text-xs text-muted-foreground">Ganancia</p>
-              <p className={`text-lg font-semibold text-green-600 dark:text-green-400`}>
-                {new Intl.NumberFormat('es-CO', {
-                  style: 'currency',
-                  currency: 'COP',
-                  minimumFractionDigits: 0,
-                }).format(getEarnedProfit() ?? 0)}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Balance Total Después</p>
-              <p
-                className={`text-lg font-semibold ${hasInsufficientBalance() ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'
-                  }`}
-              >
-                {new Intl.NumberFormat('es-CO', {
-                  style: 'currency',
-                  currency: 'COP',
-                  minimumFractionDigits: 0,
-                }).format(getRemainingBalance() ?? 0)}
-              </p>
-            </div>
-          </div>
 
-          {/* Breakdown of remaining balances */}
-          {(() => {
-            const amount = parseFloat(amountInput) || 0
-            const balanceInFavor = minoristaBalanceInFavor ?? 0
-            const availableCredit = minoristaBalance ?? 0
-            const profit = getEarnedProfit() || 0
-
-            // Apply processTransfer logic
-            let userBalance = balanceInFavor
-            let remainingAmount = amount
-            let externalDebt = 0
-            let remainingBalanceInFavor = 0
-            let remainingCredit = 0
-
-            // Step 1: Deduct from balance (saldo a favor)
-            if (remainingAmount <= userBalance) {
-              remainingBalanceInFavor = userBalance - remainingAmount
-              remainingAmount = 0
-            } else {
-              remainingAmount -= userBalance
-              remainingBalanceInFavor = 0
-            }
-
-            // Step 2: Deduct from credit
-            let creditUsed = 0
-            if (remainingAmount > 0) {
-              if (remainingAmount <= availableCredit) {
-                creditUsed = remainingAmount
-                remainingCredit = availableCredit - remainingAmount
-                remainingAmount = 0
-              } else {
-                creditUsed = availableCredit
-                externalDebt = remainingAmount - availableCredit
-                remainingCredit = 0
-                remainingAmount = 0
-              }
-            } else {
-              remainingCredit = availableCredit
-            }
-
-            // Step 3: Apply profit
-            if (creditUsed === 0 && externalDebt === 0) {
-              // Only balance was used → profit goes to balance
-              remainingBalanceInFavor += profit
-            } else {
-              // Profit first covers external debt
-              const paidExternalDebt = Math.min(profit, externalDebt)
-              let remainingProfit = profit - paidExternalDebt
-
-              // Then restores used credit
-              const restoreCredit = Math.min(remainingProfit, creditUsed)
-              remainingCredit += restoreCredit
-              remainingProfit -= restoreCredit
-
-              // Anything extra goes to balance
-              if (remainingProfit > 0) {
-                remainingBalanceInFavor += remainingProfit
-              }
-            }
-
-            return (
-              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-blue-200 dark:border-blue-700">
-                <div className="p-2 bg-white dark:bg-slate-900 rounded border border-blue-200 dark:border-blue-700">
-                  <p className="text-xs text-muted-foreground">Crédito Después</p>
-                  <p className="text-base font-semibold text-blue-700 dark:text-blue-300">
-                    {new Intl.NumberFormat('es-CO', {
-                      style: 'currency',
-                      currency: 'COP',
-                      minimumFractionDigits: 0,
-                    }).format(remainingCredit)}
-                  </p>
-                </div>
-                <div className="p-2 bg-white dark:bg-slate-900 rounded border border-emerald-200 dark:border-emerald-700">
-                  <p className="text-xs text-muted-foreground">Saldo a Favor Después</p>
-                  <p className="text-base font-semibold text-emerald-700 dark:text-emerald-300">
-                    {new Intl.NumberFormat('es-CO', {
-                      style: 'currency',
-                      currency: 'COP',
-                      minimumFractionDigits: 0,
-                    }).format(remainingBalanceInFavor)}
-                  </p>
-                </div>
-              </div>
-            )
-          })()}
-        </div>
-      )}
 
       {/* Insufficient Balance Warning */}
       {hasInsufficientBalance() && (
