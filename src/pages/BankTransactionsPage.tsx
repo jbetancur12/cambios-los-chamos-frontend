@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, DollarSign, ChevronDown } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from 'sonner'
@@ -112,8 +112,6 @@ export function BankTransactionsPage() {
     return date.toLocaleDateString('es-VE', {
       day: '2-digit',
       month: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
     }).replace(',', '')
   }
 
@@ -124,31 +122,7 @@ export function BankTransactionsPage() {
     }).format(amount)
   }
 
-  const getTransactionTypeLabel = (type: BankAccountTransactionType) => {
-    switch (type) {
-      case 'DEPOSIT':
-        return 'Depósito'
-      case 'WITHDRAWAL':
-        return 'Retiro'
-      case 'ADJUSTMENT':
-        return 'Ajuste'
-      default:
-        return type
-    }
-  }
 
-  const getTransactionTypeColor = (type: BankAccountTransactionType) => {
-    switch (type) {
-      case 'DEPOSIT':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-      case 'WITHDRAWAL':
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-      case 'ADJUSTMENT':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-      default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
-    }
-  }
 
   const isPositiveTransaction = (type: BankAccountTransactionType) => {
     return type === 'DEPOSIT'
@@ -358,7 +332,6 @@ export function BankTransactionsPage() {
                     <thead className="border-b">
                       <tr className="text-left text-sm text-muted-foreground">
                         <th className="pb-3 font-medium whitespace-nowrap">Fecha</th>
-                        <th className="pb-3 font-medium whitespace-nowrap">Tipo</th>
                         <th className="pb-3 font-medium text-right whitespace-nowrap">Monto</th>
                         <th className="pb-3 font-medium text-right whitespace-nowrap">Comisión</th>
                         <th className="pb-3 font-medium text-right pr-6 whitespace-nowrap">Dé</th>
@@ -371,9 +344,6 @@ export function BankTransactionsPage() {
                         <tr key={i} className="border-b">
                           <td className="py-3">
                             <Skeleton className="h-4 w-32" />
-                          </td>
-                          <td className="py-3">
-                            <Skeleton className="h-6 w-20 rounded-full" />
                           </td>
                           <td className="py-3 text-right">
                             <Skeleton className="h-4 w-24 ml-auto" />
@@ -404,14 +374,13 @@ export function BankTransactionsPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead className="border-b">
-                      <tr className="text-left text-xs text-muted-foreground">
-                        <th className="pb-2 font-medium whitespace-nowrap">Fecha</th>
-                        <th className="pb-2 font-medium whitespace-nowrap">Tipo</th>
-                        <th className="pb-2 font-medium text-right whitespace-nowrap">Monto</th>
-                        <th className="pb-2 font-medium text-right whitespace-nowrap">Comisión</th>
-                        <th className="pb-2 font-medium text-right pr-4 whitespace-nowrap">Dé</th>
-                        <th className="pb-2 font-medium text-right pr-4 whitespace-nowrap">Ahora</th>
-                        <th className="pb-2 font-medium pl-2 whitespace-nowrap">Creado por</th>
+                      <tr className="text-center text-xs text-muted-foreground">
+                        <th className="pb-2 font-medium whitespace-nowrap px-2">Fecha</th>
+                        <th className="pb-2 font-medium whitespace-nowrap px-2">Monto</th>
+                        <th className="pb-2 font-medium whitespace-nowrap px-2">Comisión</th>
+                        <th className="pb-2 font-medium whitespace-nowrap px-2">Dé</th>
+                        <th className="pb-2 font-medium whitespace-nowrap px-2">Ahora</th>
+                        <th className="pb-2 font-medium whitespace-nowrap px-2">Creado por</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -420,30 +389,25 @@ export function BankTransactionsPage() {
                         const displayAmount = isPositive ? transaction.amount : -transaction.amount
 
                         return (
-                          <tr key={transaction.id} className="border-b last:border-0 hover:bg-muted/50 text-xs">
-                            <td className="py-2 whitespace-nowrap">{formatCompactDate(transaction.createdAt)}</td>
-                            <td className="py-2 whitespace-nowrap">
-                              <Badge variant="outline" className={`${getTransactionTypeColor(transaction.type)} text-[10px] px-1 py-0 h-5`}>
-                                {getTransactionTypeLabel(transaction.type)}
-                              </Badge>
-                            </td>
+                          <tr key={transaction.id} className="border-b last:border-0 hover:bg-muted/50 text-xs text-center">
+                            <td className="py-2 whitespace-nowrap px-2">{formatCompactDate(transaction.createdAt)}</td>
                             <td
-                              className={`py-2 text-right font-semibold whitespace-nowrap ${isPositive ? 'text-green-600' : 'text-red-600'
+                              className={`py-2 font-semibold whitespace-nowrap px-2 ${isPositive ? 'text-green-600' : 'text-red-600'
                                 }`}
                             >
                               {isPositive && '+'}
                               {formatNumber(displayAmount)}
                             </td>
-                            <td className="py-2 text-right text-muted-foreground pr-4 whitespace-nowrap">
+                            <td className="py-2 text-muted-foreground whitespace-nowrap px-2">
                               {formatNumber(transaction.fee)}
                             </td>
-                            <td className="py-2 text-right text-muted-foreground pr-4 whitespace-nowrap">
+                            <td className="py-2 text-muted-foreground whitespace-nowrap px-2">
                               {formatNumber(transaction.previousBalance)}
                             </td>
-                            <td className="py-2 text-right font-semibold pr-4 whitespace-nowrap">
+                            <td className="py-2 font-semibold whitespace-nowrap px-2">
                               {formatNumber(transaction.currentBalance)}
                             </td>
-                            <td className="py-2 pl-2 whitespace-nowrap">{transaction.createdBy.fullName}</td>
+                            <td className="py-2 whitespace-nowrap px-2">{transaction.createdBy.fullName}</td>
                           </tr>
                         )
                       })}
