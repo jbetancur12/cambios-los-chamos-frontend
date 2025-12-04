@@ -105,15 +105,23 @@ export function BankTransactionsPage() {
     }).format(amount)
   }
 
-  const formatDate = (dateString: string) => {
+
+
+  const formatCompactDate = (dateString: string) => {
     const date = new Date(dateString)
     return date.toLocaleDateString('es-VE', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
+      day: '2-digit',
+      month: '2-digit',
       hour: '2-digit',
       minute: '2-digit',
-    })
+    }).replace(',', '')
+  }
+
+  const formatNumber = (amount: number) => {
+    return new Intl.NumberFormat('es-VE', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(amount)
   }
 
   const getTransactionTypeLabel = (type: BankAccountTransactionType) => {
@@ -396,14 +404,14 @@ export function BankTransactionsPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead className="border-b">
-                      <tr className="text-left text-sm text-muted-foreground">
-                        <th className="pb-3 font-medium whitespace-nowrap">Fecha</th>
-                        <th className="pb-3 font-medium whitespace-nowrap">Tipo</th>
-                        <th className="pb-3 font-medium text-right whitespace-nowrap">Monto</th>
-                        <th className="pb-3 font-medium text-right whitespace-nowrap">Comisión</th>
-                        <th className="pb-3 font-medium text-right pr-6 whitespace-nowrap">Dé</th>
-                        <th className="pb-3 font-medium text-right pr-6 whitespace-nowrap">Ahora</th>
-                        <th className="pb-3 font-medium pl-4 whitespace-nowrap">Creado por</th>
+                      <tr className="text-left text-xs text-muted-foreground">
+                        <th className="pb-2 font-medium whitespace-nowrap">Fecha</th>
+                        <th className="pb-2 font-medium whitespace-nowrap">Tipo</th>
+                        <th className="pb-2 font-medium text-right whitespace-nowrap">Monto</th>
+                        <th className="pb-2 font-medium text-right whitespace-nowrap">Comisión</th>
+                        <th className="pb-2 font-medium text-right pr-4 whitespace-nowrap">Dé</th>
+                        <th className="pb-2 font-medium text-right pr-4 whitespace-nowrap">Ahora</th>
+                        <th className="pb-2 font-medium pl-2 whitespace-nowrap">Creado por</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -412,30 +420,30 @@ export function BankTransactionsPage() {
                         const displayAmount = isPositive ? transaction.amount : -transaction.amount
 
                         return (
-                          <tr key={transaction.id} className="border-b last:border-0 hover:bg-muted/50">
-                            <td className="py-3 text-sm whitespace-nowrap">{formatDate(transaction.createdAt)}</td>
-                            <td className="py-3 whitespace-nowrap">
-                              <Badge variant="outline" className={getTransactionTypeColor(transaction.type)}>
+                          <tr key={transaction.id} className="border-b last:border-0 hover:bg-muted/50 text-xs">
+                            <td className="py-2 whitespace-nowrap">{formatCompactDate(transaction.createdAt)}</td>
+                            <td className="py-2 whitespace-nowrap">
+                              <Badge variant="outline" className={`${getTransactionTypeColor(transaction.type)} text-[10px] px-1 py-0 h-5`}>
                                 {getTransactionTypeLabel(transaction.type)}
                               </Badge>
                             </td>
                             <td
-                              className={`py-3 text-right font-semibold whitespace-nowrap ${isPositive ? 'text-green-600' : 'text-red-600'
+                              className={`py-2 text-right font-semibold whitespace-nowrap ${isPositive ? 'text-green-600' : 'text-red-600'
                                 }`}
                             >
                               {isPositive && '+'}
-                              {formatCurrency(displayAmount)}
+                              {formatNumber(displayAmount)}
                             </td>
-                            <td className="py-3 text-right text-sm text-muted-foreground pr-6 whitespace-nowrap">
-                              {formatCurrency(transaction.fee)}
+                            <td className="py-2 text-right text-muted-foreground pr-4 whitespace-nowrap">
+                              {formatNumber(transaction.fee)}
                             </td>
-                            <td className="py-3 text-right text-sm text-muted-foreground pr-6 whitespace-nowrap">
-                              {formatCurrency(transaction.previousBalance)}
+                            <td className="py-2 text-right text-muted-foreground pr-4 whitespace-nowrap">
+                              {formatNumber(transaction.previousBalance)}
                             </td>
-                            <td className="py-3 text-right font-semibold pr-6 whitespace-nowrap">
-                              {formatCurrency(transaction.currentBalance)}
+                            <td className="py-2 text-right font-semibold pr-4 whitespace-nowrap">
+                              {formatNumber(transaction.currentBalance)}
                             </td>
-                            <td className="py-3 text-sm pl-4 whitespace-nowrap">{transaction.createdBy.fullName}</td>
+                            <td className="py-2 pl-2 whitespace-nowrap">{transaction.createdBy.fullName}</td>
                           </tr>
                         )
                       })}
