@@ -37,7 +37,7 @@ export default defineConfig({
       // Manifest Web App
       manifest: {
         name: 'Cambios los Chamos',
-        short_name: 'Chamos',
+        short_name: 'Cambios los Chamos',
         description: 'PWA para gestionar giros y transferencias',
         theme_color: '#000000',
         background_color: '#ffffff',
