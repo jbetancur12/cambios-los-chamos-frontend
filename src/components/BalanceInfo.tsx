@@ -1,4 +1,5 @@
-import { AlertCircle, Wallet } from 'lucide-react'
+import { AlertCircle, Wallet, ChevronDown, ChevronUp } from 'lucide-react'
+import { useState } from 'react'
 
 interface BalanceInfoProps {
   minoristaBalance: number | null
@@ -17,6 +18,8 @@ export function BalanceInfo({
   getRemainingBalance,
   hasInsufficientBalance,
 }: BalanceInfoProps) {
+  const [isBreakdownOpen, setIsBreakdownOpen] = useState(false)
+
   // Calculate how much will be consumed from each balance type
   const calculateConsumption = () => {
     const amount = parseFloat(amountInput) || 0
@@ -73,36 +76,48 @@ export function BalanceInfo({
 
       {/* Consumption Breakdown when amount is entered */}
       {amountInput && parseFloat(amountInput) > 0 && (
-        <div className="p-3 bg-amber-50 dark:bg-amber-950 rounded-lg space-y-2">
-          <p className="text-sm font-medium text-amber-900 dark:text-amber-100">Desglose del Consumo</p>
-          <div className="space-y-2 text-sm">
-            {consumption.fromBalanceInFavor > 0 && (
-              <div className="p-2 bg-white dark:bg-slate-900 rounded border border-emerald-200 dark:border-emerald-700">
-                <p className="text-xs text-muted-foreground">Del Saldo a Favor</p>
-                <p className="text-base font-semibold text-emerald-700 dark:text-emerald-300">
-                  {new Intl.NumberFormat('es-CO', {
-                    style: 'currency',
-                    currency: 'COP',
-                    minimumFractionDigits: 0,
-                  }).format(consumption.fromBalanceInFavor)}
-                </p>
+        <div className="bg-amber-50 dark:bg-amber-950 rounded-lg overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setIsBreakdownOpen(!isBreakdownOpen)}
+            className="w-full flex items-center justify-between p-3 text-sm font-medium text-amber-900 dark:text-amber-100 hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-colors"
+          >
+            <span>Desglose del Consumo</span>
+            {isBreakdownOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </button>
+
+          {isBreakdownOpen && (
+            <div className="p-3 pt-0 space-y-2">
+              <div className="space-y-2 text-sm">
+                {consumption.fromBalanceInFavor > 0 && (
+                  <div className="p-2 bg-white dark:bg-slate-900 rounded border border-emerald-200 dark:border-emerald-700">
+                    <p className="text-xs text-muted-foreground">Del Saldo a Favor</p>
+                    <p className="text-base font-semibold text-emerald-700 dark:text-emerald-300">
+                      {new Intl.NumberFormat('es-CO', {
+                        style: 'currency',
+                        currency: 'COP',
+                        minimumFractionDigits: 0,
+                      }).format(consumption.fromBalanceInFavor)}
+                    </p>
+                  </div>
+                )}
+                {consumption.fromCredit > 0 && (
+                  <div className="p-2 bg-white dark:bg-slate-900 rounded border border-blue-200 dark:border-blue-700">
+                    <p className="text-xs text-muted-foreground">Del Crédito Disponible</p>
+                    <p className="text-base font-semibold text-blue-700 dark:text-blue-300">
+                      {new Intl.NumberFormat('es-CO', {
+                        style: 'currency',
+                        currency: 'COP',
+                        minimumFractionDigits: 0,
+                      }).format(consumption.fromCredit)}
+                    </p>
+                  </div>
+                )}
               </div>
-            )}
-            {consumption.fromCredit > 0 && (
-              <div className="p-2 bg-white dark:bg-slate-900 rounded border border-blue-200 dark:border-blue-700">
-                <p className="text-xs text-muted-foreground">Del Crédito Disponible</p>
-                <p className="text-base font-semibold text-blue-700 dark:text-blue-300">
-                  {new Intl.NumberFormat('es-CO', {
-                    style: 'currency',
-                    currency: 'COP',
-                    minimumFractionDigits: 0,
-                  }).format(consumption.fromCredit)}
-                </p>
-              </div>
-            )}
-          </div>
-          {consumption.fromBalanceInFavor > 0 && (
-            <p className="text-xs text-amber-700 dark:text-amber-300 mt-2">💡 El saldo a favor se consume primero</p>
+              {consumption.fromBalanceInFavor > 0 && (
+                <p className="text-xs text-amber-700 dark:text-amber-300 mt-2">💡 El saldo a favor se consume primero</p>
+              )}
+            </div>
           )}
         </div>
       )}
@@ -124,9 +139,8 @@ export function BalanceInfo({
             <div>
               <p className="text-xs text-muted-foreground">Balance Total Después</p>
               <p
-                className={`text-lg font-semibold ${
-                  hasInsufficientBalance() ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'
-                }`}
+                className={`text-lg font-semibold ${hasInsufficientBalance() ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'
+                  }`}
               >
                 {new Intl.NumberFormat('es-CO', {
                   style: 'currency',
