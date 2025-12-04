@@ -36,6 +36,7 @@ import {
   Upload,
 } from 'lucide-react'
 import type { GiroStatus } from '@/types/api'
+import { getExecutionTypeBadge } from '@/pages/GirosPage'
 
 interface GiroDetailSheetProps {
   open: boolean
@@ -371,11 +372,22 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
   const statusBadge = giro ? getStatusBadge(giro.status) : null
   const StatusIcon = statusBadge?.icon
 
+
+
+  const executionTypeBadge = getExecutionTypeBadge(giro?.executionType)
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent>
         <SheetHeader onClose={() => onOpenChange(false)}>
-          <SheetTitle>Detalles del Giro</SheetTitle>
+          <div className="flex gap-5">
+            <SheetTitle>Detalles del Giro</SheetTitle>
+            <span
+              className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium whitespace-nowrap ${executionTypeBadge.className}`}
+            >
+              {executionTypeBadge.label}
+            </span>
+          </div>
         </SheetHeader>
 
         <SheetBody>
