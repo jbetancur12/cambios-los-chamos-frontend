@@ -99,10 +99,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
     return item.roles?.includes(role)
   })
 
-  const visibleSideItems = sideMenuItems.filter((item) => {
-    if (!role) return false
-    return item.roles?.includes(role)
-  })
+
 
   // Close side menu when route changes
   useEffect(() => {
@@ -192,7 +189,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
 
           {/* Navigation */}
           <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-            {visibleSideItems.map((item) => {
+            {visibleDesktopItems.map((item) => {
               const Icon = item.icon
               const isActive = location.pathname === item.href
               return (
