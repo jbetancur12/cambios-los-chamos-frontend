@@ -59,10 +59,7 @@ export function MinoristaSimpleTransactionTable({
     }
   }
 
-  const isPositiveTransaction = (type: MinoristaTransactionType, amount: number) => {
-    if (type === 'RECHARGE') return amount >= 0
-    return false
-  }
+
 
   if (transactions.length === 0) {
     return <div className="text-center py-8 text-muted-foreground">No hay transacciones registradas</div>
@@ -92,7 +89,6 @@ export function MinoristaSimpleTransactionTable({
           </thead>
           <tbody>
             {filteredTransactions.map((transaction) => {
-              const isPositive = isPositiveTransaction(transaction.type, transaction.amount)
               // Para RECHARGE, mostrar el monto tal cual (puede ser negativo). Para otros, invertir si es necesario.
               // DISCOUNT siempre es negativo en lógica, pero se muestra positivo o negativo según contexto?
               // Original logic: isPositive ? amount : -amount.
