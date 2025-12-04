@@ -9,7 +9,7 @@ import { Plus, TrendingUp, Calendar, Eye, Share2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useSiaRateImage } from '@/hooks/useSiaRateImage'
 import { useCurrentExchangeRate, useExchangeRateHistory } from '@/hooks/queries/useExchangeRateQueries'
-import { useCreateExchangeRate } from '@/hooks/mutations/useExchangeRateMutations'
+import { useCreateExchangeRate, useUpdateExchangeRate } from '@/hooks/mutations/useExchangeRateMutations'
 
 export function ExchangeRatePage() {
   const { user } = useAuth()
@@ -87,6 +87,62 @@ export function ExchangeRatePage() {
     }).format(date)
   }
 
+  // Edit state
+  const [editSheetOpen, setEditSheetOpen] = useState(false)
+  const [editRateId, setEditRateId] = useState('')
+
+  const updateExchangeRateMutation = useUpdateExchangeRate()
+
+  const handleEdit = (rate: any) => {
+    setEditRateId(rate.id)
+    setBuyRate(rate.buyRate.toString())
+    setSellRate(rate.sellRate.toString())
+    setUsd(rate.usd.toString())
+    setBcv(rate.bcv.toString())
+    setEditSheetOpen(true)
+  }
+
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    const buyRateNum = parseFloat(buyRate)
+    const sellRateNum = parseFloat(sellRate)
+    const usdNum = parseFloat(usd)
+    const bcvNum = parseFloat(bcv)
+
+    if (isNaN(buyRateNum) || isNaN(sellRateNum) || isNaN(usdNum) || isNaN(bcvNum)) {
+      toast.error('Todos los campos deben ser números válidos')
+      return
+    }
+
+    if (buyRateNum <= 0 || sellRateNum <= 0 || usdNum <= 0 || bcvNum <= 0) {
+      toast.error('Todos los valores deben ser mayores a 0')
+      return
+    }
+
+    updateExchangeRateMutation.mutate(
+      {
+        rateId: editRateId,
+        data: {
+          buyRate: buyRateNum,
+          sellRate: sellRateNum,
+          usd: usdNum,
+          bcv: bcvNum,
+        },
+      },
+      {
+        onSuccess: (data) => {
+          toast.success(data.message || 'Tasa de cambio actualizada exitosamente')
+          resetForm()
+          setEditSheetOpen(false)
+        },
+        onError: (error: any) => {
+          toast.error(error.message || 'Error al actualizar tasa de cambio')
+        },
+      }
+    )
+  }
+
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
       {/* Header */}
@@ -99,10 +155,17 @@ export function ExchangeRatePage() {
       {currentRate && (
         <Card className="mb-6 border-primary">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <TrendingUp className="h-5 w-5 text-primary" />
-              Tasa Actual
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <TrendingUp className="h-5 w-5 text-primary" />
+                Tasa Actual
+              </CardTitle>
+              {canCreateRate && (
+                <Button variant="ghost" size="sm" onClick={() => handleEdit(currentRate)}>
+                  Editar
+                </Button>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -287,7 +350,6 @@ export function ExchangeRatePage() {
                   placeholder="Ej: 45.50"
                   required
                 />
-                {/* <p className="text-xs text-muted-foreground">Precio del dólar en el mercado (Bs)</p> */}
               </div>
 
               <div className="space-y-2">
@@ -301,7 +363,6 @@ export function ExchangeRatePage() {
                   placeholder="Ej: 36.50"
                   required
                 />
-                {/* <p className="text-xs text-muted-foreground">Precio oficial del dólar según BCV (Bs)</p> */}
               </div>
 
               {/* Preview */}
@@ -325,6 +386,95 @@ export function ExchangeRatePage() {
                   className="flex-1 bg-[linear-gradient(to_right,#136BBC,#274565)]"
                 >
                   {createExchangeRateMutation.isPending ? 'Creando...' : 'Crear Tasa'}
+                </Button>
+              </div>
+            </form>
+          </SheetBody>
+        </SheetContent>
+      </Sheet>
+
+      {/* Edit Rate Sheet */}
+      <Sheet open={editSheetOpen} onOpenChange={setEditSheetOpen}>
+        <SheetContent>
+          <SheetHeader onClose={() => setEditSheetOpen(false)}>
+            <SheetTitle>Editar Tasa de Cambio</SheetTitle>
+          </SheetHeader>
+
+          <SheetBody>
+            <form onSubmit={handleUpdate} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="editBuyRate">Tasa de Compra</Label>
+                <Input
+                  id="editBuyRate"
+                  type="number"
+                  step="0.01"
+                  value={buyRate}
+                  onChange={(e) => setBuyRate(e.target.value)}
+                  placeholder="Ej: 1.05"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="editSellRate">Tasa de Venta</Label>
+                <Input
+                  id="editSellRate"
+                  type="number"
+                  step="0.01"
+                  value={sellRate}
+                  onChange={(e) => setSellRate(e.target.value)}
+                  placeholder="Ej: 0.95"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="editUsd">Dólar (USD)</Label>
+                <Input
+                  id="editUsd"
+                  type="number"
+                  step="0.01"
+                  value={usd}
+                  onChange={(e) => setUsd(e.target.value)}
+                  placeholder="Ej: 45.50"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="editBcv">Dólar BCV (Oficial)</Label>
+                <Input
+                  id="editBcv"
+                  type="number"
+                  step="0.01"
+                  value={bcv}
+                  onChange={(e) => setBcv(e.target.value)}
+                  placeholder="Ej: 36.50"
+                  required
+                />
+              </div>
+
+              {/* Preview */}
+              {buyRate && sellRate && (
+                <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-lg space-y-2">
+                  <p className="text-sm font-medium">Vista Previa</p>
+                  <div className="space-y-1 text-xs">
+                    <p>1.000 COP = {(1000 / parseFloat(sellRate || '1')).toFixed(2)} VES</p>
+                    <p>1.000 VES = {(1000 * parseFloat(buyRate || '1')).toFixed(2)} COP</p>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-3 pt-4">
+                <Button type="button" variant="outline" onClick={() => setEditSheetOpen(false)} className="flex-1">
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={updateExchangeRateMutation.isPending}
+                  className="flex-1 bg-[linear-gradient(to_right,#136BBC,#274565)]"
+                >
+                  {updateExchangeRateMutation.isPending ? 'Guardando...' : 'Guardar Cambios'}
                 </Button>
               </div>
             </form>

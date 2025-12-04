@@ -23,8 +23,8 @@ import {
   Clock,
   CheckCircle,
   XCircle,
-  User,
-  Building,
+
+
   CreditCard,
   DollarSign,
   Calendar,

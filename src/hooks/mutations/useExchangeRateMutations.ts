@@ -24,3 +24,23 @@ export function useCreateExchangeRate() {
     },
   })
 }
+
+interface UpdateExchangeRateInput {
+  rateId: string
+  data: Partial<CreateExchangeRateInput>
+}
+
+export function useUpdateExchangeRate() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ rateId, data }: UpdateExchangeRateInput) => {
+      const response = await api.put<{ data: ExchangeRate; message: string }>(`/exchange-rate/${rateId}`, data)
+      return { rate: response.data, message: response.message }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['exchangeRate', 'current'] })
+      queryClient.invalidateQueries({ queryKey: ['exchangeRate', 'history'] })
+    },
+  })
+}
