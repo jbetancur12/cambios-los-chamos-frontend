@@ -208,10 +208,10 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
     const rate =
       useCustomRate && isSuperAdmin
         ? {
-            buyRate: parseFloat(customBuyRate) || currentRate.buyRate,
-            sellRate: parseFloat(customSellRate) || currentRate.sellRate,
-            bcv: parseFloat(customBcv) || currentRate.bcv,
-          }
+          buyRate: parseFloat(customBuyRate) || currentRate.buyRate,
+          sellRate: parseFloat(customSellRate) || currentRate.sellRate,
+          bcv: parseFloat(customBcv) || currentRate.bcv,
+        }
         : currentRate
 
     if (currencyInput === 'USD') {
@@ -302,7 +302,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="p-6 space-y-4">
+    <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-3 w-full">
       {/* Beneficiary Info */}
       <div className="space-y-2">
         <BeneficiaryAutocomplete
@@ -314,11 +314,12 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
           placeholder="Nombre completo"
           displayField="name"
           required
+          className="text-base md:text-lg h-10 md:h-12"
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="beneficiaryId" className="hidden md:block">
+        <Label htmlFor="beneficiaryId" className="hidden md:block text-sm md:text-base">
           Cédula del Beneficiario
         </Label>
         <Input
@@ -327,19 +328,20 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
           onChange={(e) => setBeneficiaryId(e.target.value)}
           placeholder="Cédula del Beneficiario"
           required
+          className="text-base md:text-lg h-10 md:h-12"
         />
       </div>
 
       {/* Bank Info */}
       <div className="space-y-2">
-        <Label htmlFor="bank" className="hidden md:block">
-          Banco Destino
+        <Label htmlFor="bank" className="hidden md:block text-sm md:text-base">
+          Banco
         </Label>
         <select
           id="bank"
           value={bankId}
           onChange={(e) => setBankId(e.target.value)}
-          className="flex h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex h-10 md:h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-base md:text-lg ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           required
         >
           <option value="">Banco Destino</option>
@@ -352,7 +354,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="accountNumber" className="hidden md:block">
+        <Label htmlFor="accountNumber" className="hidden md:block text-sm md:text-base">
           Número de Cuenta
         </Label>
         <Input
@@ -361,13 +363,14 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
           onChange={(e) => setAccountNumber(e.target.value)}
           placeholder="Número de Cuenta"
           required
+          className="text-sm md:text-lg h-10 md:h-12"
         />
       </div>
 
       {/* Amount & Currency */}
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
-          <Label htmlFor="amount" className="hidden md:block">
+          <Label htmlFor="amount" className="hidden md:block text-sm md:text-base">
             Monto
           </Label>
           <NumericFormat
@@ -385,18 +388,19 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
             placeholder="Monto"
             allowNegative={false}
             required
+            className="text-sm md:text-lg h-10 md:h-12"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="currency" className="hidden md:block">
+          <Label htmlFor="currency" className="hidden md:block text-sm md:text-base">
             Moneda
           </Label>
           <select
             id="currency"
             value={currencyInput}
             onChange={(e) => setCurrencyInput(e.target.value as Currency)}
-            className="flex h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="flex h-10 md:h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-sm md:text-lg ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             required
           >
             <option value="">Moneda</option>
@@ -437,17 +441,17 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
         </div>
       ) : currentRate ? (
         <div className="bg-gray-100 rounded-lg p-4 mb-5">
-          <p className="text-sm font-semibold text-gray-700 mb-3">Tasa de Cambio Actual</p>
+          {/* <p className="text-sm md:text-base font-semibold text-gray-700 mb-3">Tasa de Cambio Actual</p> */}
 
           {isMinorista ? (
-            <div className="grid grid-cols-1 gap-3 text-base">
+            <div className="grid grid-cols-1 gap-3 text-xs md:text-lg">
               <div>
                 <span className="text-gray-600">Tasa de Venta: </span>
                 <span className="font-bold text-blue-700">{currentRate.sellRate.toFixed(2)}</span>
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-3 text-base">
+            <div className="grid grid-cols-2 gap-2 text-xs md:text-lg">
               <div>
                 <span className="text-gray-600">Compra: </span>
                 <span className="font-bold text-blue-700">{currentRate.buyRate.toFixed(2)}</span>
@@ -471,24 +475,24 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
 
       {/* Custom Rate Override (SUPER_ADMIN only) */}
       {isSuperAdmin && (
-        <div className="space-y-3">
+        <div className="space-y-2">
           <div className="flex items-center gap-2">
             <input
               type="checkbox"
               id="useCustomRate"
               checked={useCustomRate}
               onChange={(e) => setUseCustomRate(e.target.checked)}
-              className="h-4 w-4 rounded border-gray-300"
+              className="h-5 w-5 rounded border-gray-300"
             />
-            <Label htmlFor="useCustomRate" className="cursor-pointer">
+            <Label htmlFor="useCustomRate" className="cursor-pointer text-sm md:text-base">
               Usar tasa personalizada
             </Label>
           </div>
 
           {useCustomRate && (
-            <div className="grid grid-cols-2 gap-3 p-3 bg-yellow-50 dark:bg-yellow-950 rounded-lg">
+            <div className="grid grid-cols-2 gap-3 p-2 bg-yellow-50 dark:bg-yellow-950 rounded-lg">
               <div className="space-y-1">
-                <Label htmlFor="customBuyRate" className="text-xs">
+                <Label htmlFor="customBuyRate" className="text-xs md:text-sm">
                   Compra
                 </Label>
                 <Input
@@ -497,10 +501,11 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
                   step="0.01"
                   value={customBuyRate}
                   onChange={(e) => setCustomBuyRate(e.target.value)}
+                  className="text-base md:text-lg h-10 md:h-12"
                 />
               </div>
               <div className="space-y-1">
-                <Label htmlFor="customSellRate" className="text-xs">
+                <Label htmlFor="customSellRate" className="text-xs md:text-sm">
                   Venta
                 </Label>
                 <Input
@@ -509,10 +514,11 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
                   step="0.01"
                   value={customSellRate}
                   onChange={(e) => setCustomSellRate(e.target.value)}
+                  className="text-base md:text-lg h-10 md:h-12"
                 />
               </div>
               <div className="space-y-1">
-                <Label htmlFor="customUsd" className="text-xs">
+                <Label htmlFor="customUsd" className="text-xs md:text-sm">
                   USD
                 </Label>
                 <Input
@@ -521,10 +527,11 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
                   step="0.01"
                   value={customUsd}
                   onChange={(e) => setCustomUsd(e.target.value)}
+                  className="text-base md:text-lg h-10 md:h-12"
                 />
               </div>
               <div className="space-y-1">
-                <Label htmlFor="customBcv" className="text-xs">
+                <Label htmlFor="customBcv" className="text-xs md:text-sm">
                   BCV
                 </Label>
                 <Input
@@ -533,6 +540,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
                   step="0.01"
                   value={customBcv}
                   onChange={(e) => setCustomBcv(e.target.value)}
+                  className="text-base md:text-lg h-10 md:h-12"
                 />
               </div>
             </div>
@@ -542,9 +550,9 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
 
       {/* Calculated Amount in Bs */}
       {amountInput && (
-        <div className="p-3 bg-green-50 dark:bg-green-950 rounded-lg">
-          <p className="text-sm text-muted-foreground">Monto a Recibir en Venezuela</p>
-          <p className="text-2xl font-bold text-green-700 dark:text-green-400">
+        <div className="p-2 bg-green-50 dark:bg-green-950 rounded-lg">
+          <p className="text-sm md:text-base text-muted-foreground">Monto a Recibir en Venezuela</p>
+          <p className="text-2xl md:text-3xl font-bold text-green-700 dark:text-green-400">
             {new Intl.NumberFormat('es-VE', {
               style: 'currency',
               currency: 'VES',
@@ -555,11 +563,11 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
       )}
 
       {/* Submit */}
-      <div className="flex gap-3 pt-4">
+      <div className="flex gap-3 pt-2">
         <Button
           type="submit"
           disabled={loading || hasInsufficientBalance()}
-          className="w-full bg-[linear-gradient(to_right,#136BBC,#274565)]"
+          className="w-full h-10 md:h-12 text-base md:text-lg bg-[linear-gradient(to_right,#136BBC,#274565)]"
         >
           {loading ? 'Creando...' : 'Enviar Giro'}
         </Button>

@@ -168,16 +168,49 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="p-6 space-y-4">
+    <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-2 md:space-y-4">
       {/* Información del Beneficiario */}
-      <div className="bg-blue-50 p-3 rounded mb-4 border border-blue-200">
-        <p className="text-xs font-semibold text-blue-900 mb-3">Datos del Beneficiario</p>
+      <div className="bg-blue-50 p-3 rounded mb-2 md:mb-4 border border-blue-200">
+        <p className="text-xs font-semibold text-blue-900 mb-2 md:mb-3">Datos del Beneficiario</p>
+
+        <div className="space-y-1 md:space-y-2 mt-1 md:mt-3">
+          <Label htmlFor="cedula" className="hidden md:block">
+            Cédula del Beneficiario
+          </Label>
+          <Input
+            id="cedula"
+            placeholder="Cédula del Beneficiario"
+            value={cedula}
+            onChange={(e) => setCedula(e.target.value)}
+            required
+          />
+        </div>
+
+        <div className="space-y-1 md:space-y-2">
+          <Label htmlFor="bank" className="hidden md:block">
+            Banco
+          </Label>
+          <select
+            id="bank"
+            value={selectedBank}
+            onChange={(e) => setSelectedBank(e.target.value)}
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            required
+          >
+            <option value="">Banco Origen</option>
+            {banks.map((bank) => (
+              <option key={bank.id} value={bank.id}>
+                {`${bank.code} - ${bank.name}`}
+              </option>
+            ))}
+          </select>
+        </div>
 
         <div>
           <Label htmlFor="phone" className="hidden md:block">
             Teléfono del Beneficiario
           </Label>
-          <div className="relative">
+          <div className="relative py-1 md:py-3">
             <Input
               id="phone"
               placeholder="Teléfono del Beneficiario"
@@ -205,23 +238,13 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
           </div>
         </div>
 
-        <div className="space-y-2 mt-3">
-          <Label htmlFor="cedula" className="hidden md:block">
-            Cédula del Beneficiario
-          </Label>
-          <Input
-            id="cedula"
-            placeholder="Cédula del Beneficiario"
-            value={cedula}
-            onChange={(e) => setCedula(e.target.value)}
-            required
-          />
-        </div>
 
-        <div className="space-y-2 mt-3">
+
+        <div className="space-y-1 md:space-y-2">
           <Label htmlFor="senderName" className="hidden md:block">
             Contacto que Envía
           </Label>
+
           <Input
             id="senderName"
             placeholder="Contacto que Envía"
@@ -233,27 +256,9 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
       </div>
 
       {/* Bank and Amount Info */}
-      <div className="space-y-2">
-        <Label htmlFor="bank" className="hidden md:block">
-          Banco Origen
-        </Label>
-        <select
-          id="bank"
-          value={selectedBank}
-          onChange={(e) => setSelectedBank(e.target.value)}
-          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          required
-        >
-          <option value="">Banco Origen</option>
-          {banks.map((bank) => (
-            <option key={bank.id} value={bank.id}>
-              {`${bank.code} - ${bank.name}`}
-            </option>
-          ))}
-        </select>
-      </div>
 
-      <div className="space-y-2">
+
+      <div className="space-y-1 md:space-y-2">
         <Label htmlFor="amount" className="hidden md:block">
           Monto (COP)
         </Label>

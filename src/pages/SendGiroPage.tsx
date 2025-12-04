@@ -47,7 +47,7 @@ export function SendGiroPage() {
   const currentTypeLabel = giroTypes.find((t) => t.value === selectedType)?.label || ''
 
   return (
-    <div className="container mx-auto max-w-2xl px-4 py-4">
+    <div className="container mx-auto max-w-5xl px-4 py-4">
       {/* Header */}
       <div className="mb-3">
         {/* <h1 className="text-xl text-center font-bold text-gray-900">Enviar giro</h1> */}
@@ -74,9 +74,8 @@ export function SendGiroPage() {
                     setSelectedType(type.value)
                     setDropdownOpen(false)
                   }}
-                  className={`flex w-full flex-col gap-1 border-b border-gray-100 px-6 py-2 text-left transition-colors last:border-0 ${
-                    selectedType === type.value ? 'bg-blue-50' : 'hover:bg-gray-50'
-                  }`}
+                  className={`flex w-full flex-col gap-1 border-b border-gray-100 px-6 py-2 text-left transition-colors last:border-0 ${selectedType === type.value ? 'bg-blue-50' : 'hover:bg-gray-50'
+                    }`}
                 >
                   <span className={`font-medium ${selectedType === type.value ? 'text-blue-600' : 'text-gray-900'}`}>
                     {type.label}

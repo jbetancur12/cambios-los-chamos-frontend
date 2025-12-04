@@ -12,6 +12,7 @@ interface BeneficiaryAutocompleteProps {
   label?: string
   required?: boolean
   displayField?: 'name' | 'id' | 'phone'
+  className?: string
 }
 
 export function BeneficiaryAutocomplete({
@@ -23,6 +24,7 @@ export function BeneficiaryAutocomplete({
   label = '',
   required = false,
   displayField = 'name',
+  className,
 }: BeneficiaryAutocompleteProps) {
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -71,7 +73,7 @@ export function BeneficiaryAutocomplete({
 
   return (
     <div ref={containerRef} className="relative w-full">
-      {label && <label className="text-sm font-medium text-foreground mb-1 block hidden md:block">{label}</label>}
+      {label && <label className="text-sm md:text-base font-medium text-foreground mb-1 block hidden md:block">{label}</label>}
       <div className="relative">
         <Input
           value={value}
@@ -80,6 +82,7 @@ export function BeneficiaryAutocomplete({
           placeholder={placeholder || label}
           required={required}
           autoComplete="off"
+          className={className}
         />
         {value && (
           <button

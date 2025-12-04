@@ -236,16 +236,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
       {/* Main Content */}
       <div className="md:pl-64 flex flex-col min-h-screen">
         {/* Mobile Header */}
-        <header
-          className="sticky top-0 z-40 flex h-16 items-center gap-3 px-4 md:hidden text-white"
-          style={{
-            background: 'linear-gradient(to right, #136BBC, #274565)',
-            borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-          }}
-        >
-          <img src="/LogoLosChamos.avif" alt="Logo" className="h-20 w-20" />
-          <h1 className="text-lg font-semibold">Cambios los Chamos</h1>
-        </header>
+
 
         {/* Page Content */}
         <main className="flex-1 pb-24 md:pb-6">{children}</main>

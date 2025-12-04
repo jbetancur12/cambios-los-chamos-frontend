@@ -273,7 +273,7 @@ function App() {
       </BrowserRouter>
 
       {/* Development Tools - only visible in development */}
-      <ReactQueryDevtools initialIsOpen={false} />
+      {/* <ReactQueryDevtools initialIsOpen={false} /> */}
     </QueryClientProvider>
   )
 }
