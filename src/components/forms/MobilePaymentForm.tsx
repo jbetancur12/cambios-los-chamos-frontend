@@ -135,6 +135,9 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
       })
       toast.success('Pago móvil registrado exitosamente')
       resetForm()
+      if (isMinorista) {
+        fetchMinoristaBalance()
+      }
       onSuccess()
     } catch (error: any) {
       toast.error(error.message || 'Error al procesar el pago móvil')

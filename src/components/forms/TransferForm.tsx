@@ -186,6 +186,9 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
 
           toast.success('Giro creado exitosamente')
           resetForm()
+          if (isMinorista) {
+            fetchMinoristaBalance()
+          }
           onSuccess()
         },
         onError: (error: any) => {

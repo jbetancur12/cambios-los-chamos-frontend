@@ -167,6 +167,9 @@ export function RechargeForm({ onSuccess }: RechargeFormProps) {
       })
       toast.success('Recarga registrada exitosamente')
       resetForm()
+      if (isMinorista) {
+        fetchMinoristaBalance()
+      }
       onSuccess()
     } catch (error: any) {
       toast.error(error.message || 'Error al procesar la recarga')
