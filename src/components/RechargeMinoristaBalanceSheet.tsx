@@ -92,7 +92,7 @@ export function RechargeMinoristaBalanceSheet({
       fetchTransactions()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, activeTab, page, dateRange])
+  }, [open, activeTab, page, dateRange, localMinorista])
 
   const handlePayDebt = async (e: React.FormEvent) => {
     e.preventDefault()
