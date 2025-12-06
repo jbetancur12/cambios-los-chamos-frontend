@@ -68,7 +68,43 @@ export function MinoristaSimpleTransactionTable({
   // Filtrar por tipo si se especifica
   const filteredTransactions = typeFilter === 'ALL' ? transactions : transactions.filter((t) => t.type === typeFilter)
 
-  if (filteredTransactions.length === 0) {
+  // Agrupar transacciones de abono (RECHARGE) que ocurrieron en el mismo instante (split por deuda/saldo a favor)
+  const groupedTransactions: MinoristaTransaction[] = []
+
+  for (let i = 0; i < filteredTransactions.length; i++) {
+    const current = filteredTransactions[i]
+    const next = filteredTransactions[i + 1]
+
+    // Verificar si podemos agrupar con la siguiente (que es más antigua en la lista descendente)
+    // Criterios:
+    // 1. Ambas son RECHARGE
+    // 2. La siguiente existe
+    // 3. Ocurrieron con menos de 2 segundos de diferencia
+    if (
+      current.type === 'RECHARGE' &&
+      next &&
+      next.type === 'RECHARGE' &&
+      Math.abs(new Date(current.createdAt).getTime() - new Date(next.createdAt).getTime()) < 2000
+    ) {
+      // Crear transacción fusionada
+      const merged: MinoristaTransaction = {
+        ...current,
+        amount: Number(current.amount) + Number(next.amount),
+        // Mantener el saldo final de la más reciente (current)
+        accumulatedDebt: current.accumulatedDebt,
+        // Mantener el estado inicial de la más antigua (next)
+        previousAvailableCredit: next.previousAvailableCredit,
+        // Sumar ganancias si las hubiera (aunque en recargas suele ser 0)
+        profitEarned: (Number(current.profitEarned) || 0) + (Number(next.profitEarned) || 0),
+      }
+      groupedTransactions.push(merged)
+      i++ // Saltar la siguiente transacción ya que fue fusionada
+    } else {
+      groupedTransactions.push(current)
+    }
+  }
+
+  if (groupedTransactions.length === 0) {
     return <div className="text-center py-8 text-muted-foreground">No hay transacciones de este tipo</div>
   }
 
@@ -88,7 +124,7 @@ export function MinoristaSimpleTransactionTable({
             </tr>
           </thead>
           <tbody>
-            {filteredTransactions.map((transaction) => {
+            {groupedTransactions.map((transaction) => {
               // Para RECHARGE, mostrar el monto tal cual (puede ser negativo). Para otros, invertir si es necesario.
               // DISCOUNT siempre es negativo en lógica, pero se muestra positivo o negativo según contexto?
               // Original logic: isPositive ? amount : -amount.
@@ -138,7 +174,7 @@ export function MinoristaSimpleTransactionTable({
                     className={`py-3 text-right font-semibold pr-6 whitespace-nowrap ${isBalanceInFavor ? 'text-green-600' : 'text-red-600'
                       }`}
                   >
-                    {formatCurrency(transaction.accumulatedDebt as number)}
+                    {formatCurrency(isBalanceInFavor ? balanceQueda : (transaction.accumulatedDebt as number))}
                   </td>
                 </tr>
               )
@@ -149,7 +185,7 @@ export function MinoristaSimpleTransactionTable({
 
       {/* Mobile Cards */}
       <div className="md:hidden space-y-3">
-        {filteredTransactions.map((transaction) => {
+        {groupedTransactions.map((transaction) => {
           let displayAmount = transaction.amount
           if (transaction.type !== 'RECHARGE' && transaction.type !== 'ADJUSTMENT') {
             displayAmount = -transaction.amount
@@ -196,7 +232,7 @@ export function MinoristaSimpleTransactionTable({
                   className={`flex justify-between font-semibold ${isBalanceInFavor ? 'text-green-600' : 'text-red-600'}`}
                 >
                   <span>Saldo</span>
-                  <span>{formatCurrency(transaction.accumulatedDebt as number)}</span>
+                  <span>{formatCurrency(isBalanceInFavor ? balanceQueda : (transaction.accumulatedDebt as number))}</span>
                 </div>
               </div>
             </Card>
