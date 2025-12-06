@@ -272,13 +272,13 @@ export function UsersPage() {
                     <CardContent className="px-4 py-1">
                       {/* Balance Display */}
                       <div className="flex items-center justify-between p-1 rounded-md bg-muted">
-                        <span className="text-sm text-muted-foreground hidden md:inline">Saldo Disponible:</span>
-                        <span className="font-bold text-green-600">
+                        <span className="text-sm text-muted-foreground hidden md:inline">Deuda Actual:</span>
+                        <span className="font-bold text-red-600">
                           {new Intl.NumberFormat('es-CO', {
                             style: 'currency',
                             currency: 'COP',
                             minimumFractionDigits: 0,
-                          }).format(user.availableCredit || 0)}
+                          }).format(Math.max(0, (user.creditLimit || 0) - (user.availableCredit || 0)))}
                         </span>
                       </div>
                     </CardContent>
