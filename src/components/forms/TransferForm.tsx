@@ -321,12 +321,12 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
           placeholder="Nombre completo"
           displayField="name"
           required
-          className="text-base md:text-lg h-10 md:h-12"
+          className="text-xl md:text-xl h-10 md:h-12"
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="beneficiaryId" className="hidden md:block text-sm md:text-base">
+        <Label htmlFor="beneficiaryId" className="hidden md:block text-xl md:text-xl">
           Cédula del Beneficiario
         </Label>
         <Input
@@ -453,8 +453,8 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
           {isMinorista ? (
             <div className="grid grid-cols-1 gap-3 text-xs md:text-lg">
               <div>
-                <span className="text-gray-600">Tasa de Venta: </span>
-                <span className="font-bold text-blue-700">{currentRate.sellRate.toFixed(2)}</span>
+                <span className="text-gray-600 text-lg">Tasa: </span>
+                <span className="font-bold text-blue-700 text-lg">{currentRate.sellRate.toFixed(2)}</span>
               </div>
             </div>
           ) : (

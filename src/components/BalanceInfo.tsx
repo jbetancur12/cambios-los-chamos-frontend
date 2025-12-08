@@ -18,6 +18,7 @@ export function BalanceInfo({
   getRemainingBalance,
   hasInsufficientBalance,
 }: BalanceInfoProps) {
+  const [isBalanceOpen, setIsBalanceOpen] = useState(false)
   const [isBreakdownOpen, setIsBreakdownOpen] = useState(false)
 
   // Calculate how much will be consumed from each balance type
@@ -40,38 +41,49 @@ export function BalanceInfo({
   return (
     <div className="space-y-2 md:space-y-3">
       {/* Balances Available */}
-      <div className="p-2 md:p-3 bg-blue-50 dark:bg-blue-950 rounded-lg space-y-2 md:space-y-3">
-        <div className="flex items-center gap-2">
-          <Wallet className="h-4 w-4 text-blue-600" />
-          <p className="text-sm font-medium text-blue-900 dark:text-blue-100">Tu Balance</p>
-        </div>
-
-        {/* Two column layout for balances */}
-        <div className="grid grid-cols-2 gap-2 md:gap-3">
-          {/* Crédito Disponible */}
-          <div className="p-2 bg-white dark:bg-slate-900 rounded border border-blue-200 dark:border-blue-700">
-            <p className="text-xs text-muted-foreground mb-1">Crédito Disponible</p>
-            <p className="text-base md:text-lg font-semibold text-blue-700 dark:text-blue-300">
-              {new Intl.NumberFormat('es-CO', {
-                style: 'currency',
-                currency: 'COP',
-                minimumFractionDigits: 0,
-              }).format(minoristaBalance ?? 0)}
-            </p>
+      <div className="bg-blue-50 dark:bg-blue-950 rounded-lg overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setIsBalanceOpen(!isBalanceOpen)}
+          className="w-full flex items-center justify-between p-3 text-sm font-medium text-blue-900 dark:text-blue-100 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+        >
+          <div className="flex items-center gap-2">
+            <Wallet className="h-4 w-4 text-blue-600" />
+            <span>Tu Balance</span>
           </div>
+          {isBalanceOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+        </button>
 
-          {/* Saldo a Favor */}
-          <div className="p-2 bg-white dark:bg-slate-900 rounded border border-emerald-200 dark:border-emerald-700">
-            <p className="text-xs text-muted-foreground mb-1">Saldo a Favor</p>
-            <p className="text-base md:text-lg font-semibold text-emerald-700 dark:text-emerald-300">
-              {new Intl.NumberFormat('es-CO', {
-                style: 'currency',
-                currency: 'COP',
-                minimumFractionDigits: 0,
-              }).format(minoristaBalanceInFavor ?? 0)}
-            </p>
+        {isBalanceOpen && (
+          <div className="p-3 pt-0 border-t border-blue-200 dark:border-blue-800 mt-2">
+            {/* Two column layout for balances */}
+            <div className="grid grid-cols-2 gap-2 md:gap-3">
+              {/* Crédito Disponible */}
+              <div className="p-2 bg-white dark:bg-slate-900 rounded border border-blue-200 dark:border-blue-700">
+                <p className="text-xs text-muted-foreground mb-1">Crédito Disponible</p>
+                <p className="text-base md:text-lg font-semibold text-blue-700 dark:text-blue-300">
+                  {new Intl.NumberFormat('es-CO', {
+                    style: 'currency',
+                    currency: 'COP',
+                    minimumFractionDigits: 0,
+                  }).format(minoristaBalance ?? 0)}
+                </p>
+              </div>
+
+              {/* Saldo a Favor */}
+              <div className="p-2 bg-white dark:bg-slate-900 rounded border border-emerald-200 dark:border-emerald-700">
+                <p className="text-xs text-muted-foreground mb-1">Saldo a Favor</p>
+                <p className="text-base md:text-lg font-semibold text-emerald-700 dark:text-emerald-300">
+                  {new Intl.NumberFormat('es-CO', {
+                    style: 'currency',
+                    currency: 'COP',
+                    minimumFractionDigits: 0,
+                  }).format(minoristaBalanceInFavor ?? 0)}
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Consumption Breakdown when amount is entered */}
