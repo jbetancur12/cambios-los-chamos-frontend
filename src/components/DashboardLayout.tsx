@@ -48,7 +48,7 @@ const bottomNavItems: NavItem[] = [
 
 // Additional items for side menu
 const sideMenuItems: NavItem[] = [
-  { icon: DollarSign, label: 'Tasas', href: '/tasas', roles: ['SUPER_ADMIN'] },
+  { icon: DollarSign, label: 'Tasas', href: '/tasas', roles: ['SUPER_ADMIN', 'ADMIN', 'TRANSFERENCISTA', 'MINORISTA'] },
   {
     icon: Calculator,
     label: 'Calculadora',

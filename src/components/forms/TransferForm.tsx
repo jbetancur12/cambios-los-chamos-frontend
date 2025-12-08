@@ -202,25 +202,26 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
     }
   }
 
+  const effectiveRate =
+    useCustomRate && isSuperAdmin
+      ? {
+        buyRate: parseFloat(customBuyRate) || (currentRate?.buyRate || 0),
+        sellRate: parseFloat(customSellRate) || (currentRate?.sellRate || 0),
+        bcv: parseFloat(customBcv) || (currentRate?.bcv || 0),
+        usd: parseFloat(customUsd) || (currentRate?.usd || 0),
+      }
+      : currentRate
+
   const calculateAmountBs = () => {
-    if (!currentRate || !amountInput) return 0
+    if (!effectiveRate || !amountInput) return 0
 
     const amount = parseFloat(amountInput)
     if (isNaN(amount)) return 0
 
-    const rate =
-      useCustomRate && isSuperAdmin
-        ? {
-          buyRate: parseFloat(customBuyRate) || currentRate.buyRate,
-          sellRate: parseFloat(customSellRate) || currentRate.sellRate,
-          bcv: parseFloat(customBcv) || currentRate.bcv,
-        }
-        : currentRate
-
     if (currencyInput === 'USD') {
-      return amount * rate.bcv
+      return amount * effectiveRate.bcv
     } else if (currencyInput === 'COP') {
-      return amount / rate.sellRate
+      return amount / effectiveRate.sellRate
     } else {
       return amount
     }
@@ -303,6 +304,9 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
 
     return unpaidDebt > 0 || totalFinalBalance < 0
   }
+
+  const amountBs = calculateAmountBs()
+  const amountBcv = effectiveRate && effectiveRate.bcv > 0 ? amountBs / effectiveRate.bcv : 0
 
   return (
     <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-3 w-full">
@@ -551,17 +555,29 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
         </div>
       )}
 
-      {/* Calculated Amount in Bs */}
+      {/* Calculated Amount in Bs & BCV */}
       {amountInput && (
-        <div className="p-2 bg-green-50 dark:bg-green-950 rounded-lg">
-          <p className="text-sm md:text-base text-muted-foreground">Monto a Recibir en Venezuela</p>
-          <p className="text-2xl md:text-3xl font-bold text-green-700 dark:text-green-400">
-            {new Intl.NumberFormat('es-VE', {
-              style: 'currency',
-              currency: 'VES',
-              minimumFractionDigits: 2,
-            }).format(calculateAmountBs())}
-          </p>
+        <div className="p-3 bg-green-50 dark:bg-green-950 rounded-lg">
+          <div className="grid grid-cols-2 gap-4 text-center">
+            <div>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Bolivares</p>
+              <p className="text-xl md:text-2xl font-bold text-green-700 dark:text-green-400">
+                {new Intl.NumberFormat('es-VE', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                }).format(amountBs)}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">BCV</p>
+              <p className="text-xl md:text-2xl font-bold text-blue-700 dark:text-blue-400">
+                {new Intl.NumberFormat('en-US', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                }).format(amountBcv)}
+              </p>
+            </div>
+          </div>
         </div>
       )}
 

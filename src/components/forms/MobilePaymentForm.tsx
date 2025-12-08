@@ -9,7 +9,6 @@ import { useBeneficiarySuggestions, type BeneficiaryData } from '@/hooks/useBene
 import type { ExchangeRate, Minorista } from '@/types/api'
 import { BalanceInfo } from '@/components/BalanceInfo'
 import { NumericFormat } from 'react-number-format'
-import { formatDecimal } from '@/lib/formatCurrency'
 
 interface Bank {
   id: string
@@ -108,7 +107,6 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   }
 
   const amountBs = exchangeRate && amountCop ? (Number(amountCop) / Number(exchangeRate.sellRate)).toFixed(2) : '0.00'
-  const amountBCV = exchangeRate && (Number(amountBs) / exchangeRate.usd).toFixed(2)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -299,15 +297,24 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
       {/* Exchange Rate Info */}
       {exchangeRate && amountCop && (
         <div className="p-3 bg-green-50 dark:bg-green-950 rounded-lg">
-          <p className="text-sm font-medium mb-2">Monto a Recibir en Venezuela</p>
-          <div className="space-y-1">
-            <div className="text-xs">
-              <span className="text-muted-foreground">En VES: </span>
-              <span className="font-semibold text-lg">{formatDecimal(Number(amountBs), 'VES')}</span>
+          <div className="grid grid-cols-2 gap-4 text-center">
+            <div>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Bolivares</p>
+              <p className="text-xl font-bold text-green-700 dark:text-green-400">
+                {new Intl.NumberFormat('es-VE', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                }).format(Number(amountBs))}
+              </p>
             </div>
-            <div className="text-xs">
-              <span className="text-muted-foreground">En BCV: </span>
-              <span className="font-semibold">{formatDecimal(Number(amountBCV), 'USD')}</span>
+            <div>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">BCV</p>
+              <p className="text-xl font-bold text-blue-700 dark:text-blue-400">
+                {new Intl.NumberFormat('en-US', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                }).format(Number(amountBs) / exchangeRate.bcv)}
+              </p>
             </div>
           </div>
         </div>

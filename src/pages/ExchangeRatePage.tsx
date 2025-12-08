@@ -232,77 +232,79 @@ export function ExchangeRatePage() {
       )}
 
       {/* Rates History */}
-      <div className="space-y-4">
-        <h2 className="text-lg font-semibold">Historial de Tasas</h2>
+      {canCreateRate && (
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold">Historial de Tasas</h2>
 
-        {isLoading ? (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">Cargando tasas...</p>
-          </div>
-        ) : error ? (
-          <Card>
-            <CardContent className="p-8 text-center">
-              <p className="text-sm text-destructive">
-                {error instanceof Error ? error.message : 'Error al cargar tasas de cambio'}
-              </p>
-            </CardContent>
-          </Card>
-        ) : rates.length === 0 ? (
-          <Card>
-            <CardContent className="p-12 text-center">
-              <TrendingUp className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <p className="text-muted-foreground mb-4">No hay tasas de cambio registradas</p>
-              {canCreateRate && (
-                <Button
-                  onClick={() => setCreateSheetOpen(true)}
-                  className="bg-[linear-gradient(to_right,#136BBC,#274565)] mx-auto"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Crear primera tasa
-                </Button>
-              )}
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid gap-4">
-            {rates.map((rate) => (
-              <Card key={rate.id} className={rate.id === currentRate?.id ? 'border-primary' : ''}>
-                <CardContent className="p-4">
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div>
-                      <p className="text-xs text-muted-foreground">Compra</p>
-                      <p className="text-lg font-semibold text-green-600">{rate.buyRate.toFixed(2)}</p>
+          {isLoading ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">Cargando tasas...</p>
+            </div>
+          ) : error ? (
+            <Card>
+              <CardContent className="p-8 text-center">
+                <p className="text-sm text-destructive">
+                  {error instanceof Error ? error.message : 'Error al cargar tasas de cambio'}
+                </p>
+              </CardContent>
+            </Card>
+          ) : rates.length === 0 ? (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <TrendingUp className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                <p className="text-muted-foreground mb-4">No hay tasas de cambio registradas</p>
+                {canCreateRate && (
+                  <Button
+                    onClick={() => setCreateSheetOpen(true)}
+                    className="bg-[linear-gradient(to_right,#136BBC,#274565)] mx-auto"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Crear primera tasa
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-4">
+              {rates.map((rate) => (
+                <Card key={rate.id} className={rate.id === currentRate?.id ? 'border-primary' : ''}>
+                  <CardContent className="p-4">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div>
+                        <p className="text-xs text-muted-foreground">Compra</p>
+                        <p className="text-lg font-semibold text-green-600">{rate.buyRate.toFixed(2)}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Venta</p>
+                        <p className="text-lg font-semibold text-blue-600">{rate.sellRate.toFixed(2)}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">USD</p>
+                        <p className="text-lg font-semibold text-purple-600">{rate.usd.toFixed(2)}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">BCV</p>
+                        <p className="text-lg font-semibold text-orange-600">{rate.bcv.toFixed(2)}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Venta</p>
-                      <p className="text-lg font-semibold text-blue-600">{rate.sellRate.toFixed(2)}</p>
+                    <div className="mt-3 pt-3 border-t flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Calendar className="h-3 w-3" />
+                        <span>{formatDate(rate.createdAt)}</span>
+                      </div>
+                      {rate.id === currentRate?.id && (
+                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-primary text-primary-foreground bg-[linear-gradient(to_right,#136BBC,#274565)]">
+                          Actual
+                        </span>
+                      )}
                     </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">USD</p>
-                      <p className="text-lg font-semibold text-purple-600">{rate.usd.toFixed(2)}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">BCV</p>
-                      <p className="text-lg font-semibold text-orange-600">{rate.bcv.toFixed(2)}</p>
-                    </div>
-                  </div>
-                  <div className="mt-3 pt-3 border-t flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <Calendar className="h-3 w-3" />
-                      <span>{formatDate(rate.createdAt)}</span>
-                    </div>
-                    {rate.id === currentRate?.id && (
-                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-primary text-primary-foreground bg-[linear-gradient(to_right,#136BBC,#274565)]">
-                        Actual
-                      </span>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Create Rate Sheet */}
       <Sheet open={createSheetOpen} onOpenChange={setCreateSheetOpen}>
