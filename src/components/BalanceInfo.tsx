@@ -181,7 +181,7 @@ export function BalanceInfo({
                   const profit = getEarnedProfit() || 0
 
                   // Apply processTransfer logic
-                  let userBalance = balanceInFavor
+                  const userBalance = balanceInFavor
                   let remainingAmount = amount
                   let externalDebt = 0
                   let remainingBalanceInFavor = 0

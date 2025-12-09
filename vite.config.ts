@@ -31,7 +31,7 @@ export default defineConfig({
         'icons/icon-256x256.png',
         'icons/icon-384x384.png',
         'icons/icon-512x512.png',
-        'apple-touch-icon.png'
+        'apple-touch-icon.png',
       ],
 
       // Manifest Web App
@@ -66,23 +66,23 @@ export default defineConfig({
         runtimeCaching: [
           {
             urlPattern: ({ url }) => url.port === '3000' || url.hostname === 'localhost',
-            handler: 'NetworkOnly'
+            handler: 'NetworkOnly',
           },
           {
             urlPattern: ({ url }) => url.pathname.startsWith('/api/'),
-            handler: 'NetworkOnly'
+            handler: 'NetworkOnly',
           },
           {
             urlPattern: ({ url }) => url.origin.includes('firebase.googleapis.com'),
-            handler: 'NetworkOnly'
+            handler: 'NetworkOnly',
           },
           {
             urlPattern: ({ url }) => url.origin.includes('fcm.googleapis.com'),
-            handler: 'NetworkOnly'
+            handler: 'NetworkOnly',
           },
           {
             urlPattern: ({ url }) => url.origin.includes('googletagmanager.com'),
-            handler: 'NetworkOnly'
+            handler: 'NetworkOnly',
           },
         ],
         globIgnores: ['firebase-messaging-sw/**'],
