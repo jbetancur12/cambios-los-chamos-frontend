@@ -105,14 +105,14 @@ export function BankTransactionsPage() {
     }).format(amount)
   }
 
-
-
   const formatCompactDate = (dateString: string) => {
     const date = new Date(dateString)
-    return date.toLocaleDateString('es-VE', {
-      day: '2-digit',
-      month: '2-digit',
-    }).replace(',', '')
+    return date
+      .toLocaleDateString('es-VE', {
+        day: '2-digit',
+        month: '2-digit',
+      })
+      .replace(',', '')
   }
 
   const formatNumber = (amount: number) => {
@@ -121,8 +121,6 @@ export function BankTransactionsPage() {
       maximumFractionDigits: 2,
     }).format(amount)
   }
-
-
 
   const isPositiveTransaction = (type: BankAccountTransactionType) => {
     return type === 'DEPOSIT'
@@ -389,11 +387,15 @@ export function BankTransactionsPage() {
                         const displayAmount = isPositive ? transaction.amount : -transaction.amount
 
                         return (
-                          <tr key={transaction.id} className="border-b last:border-0 hover:bg-muted/50 text-xs text-center">
+                          <tr
+                            key={transaction.id}
+                            className="border-b last:border-0 hover:bg-muted/50 text-xs text-center"
+                          >
                             <td className="py-2 whitespace-nowrap px-1">{formatCompactDate(transaction.createdAt)}</td>
                             <td
-                              className={`py-2 font-semibold whitespace-nowrap px-1 ${isPositive ? 'text-green-600' : 'text-red-600'
-                                }`}
+                              className={`py-2 font-semibold whitespace-nowrap px-1 ${
+                                isPositive ? 'text-green-600' : 'text-red-600'
+                              }`}
                             >
                               {isPositive && '+'}
                               {formatNumber(displayAmount)}

@@ -23,8 +23,6 @@ import {
   Clock,
   CheckCircle,
   XCircle,
-
-
   CreditCard,
   DollarSign,
   Calendar,
@@ -372,8 +370,6 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
   const statusBadge = giro ? getStatusBadge(giro.status) : null
   const StatusIcon = statusBadge?.icon
 
-
-
   const executionTypeBadge = getExecutionTypeBadge(giro?.executionType)
 
   return (
@@ -571,8 +567,6 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                   ) : null}
                 </div>
               </div>
-
-
 
               {/* Amounts */}
               <div className="p-2 bg-muted rounded text-xs space-y-1">
@@ -899,10 +893,11 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                     <Button
                       type="button"
                       variant="ghost"
-                      className={`flex-1 ${!showReturnForm
-                        ? 'bg-green-600 hover:bg-green-700 text-white'
-                        : 'hover:bg-muted text-muted-foreground'
-                        }`}
+                      className={`flex-1 ${
+                        !showReturnForm
+                          ? 'bg-green-600 hover:bg-green-700 text-white'
+                          : 'hover:bg-muted text-muted-foreground'
+                      }`}
                       onClick={() => setShowReturnForm(false)}
                     >
                       Ejecutar
@@ -910,10 +905,11 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                     <Button
                       type="button"
                       variant="ghost"
-                      className={`flex-1 ${showReturnForm
-                        ? 'bg-orange-600 hover:bg-orange-700 text-white'
-                        : 'hover:bg-muted text-muted-foreground'
-                        }`}
+                      className={`flex-1 ${
+                        showReturnForm
+                          ? 'bg-orange-600 hover:bg-orange-700 text-white'
+                          : 'hover:bg-muted text-muted-foreground'
+                      }`}
                       onClick={() => setShowReturnForm(true)}
                     >
                       Devolver

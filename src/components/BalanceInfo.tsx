@@ -158,10 +158,11 @@ export function BalanceInfo({
                   <div className="p-2 bg-white dark:bg-slate-900 rounded border border-amber-200 dark:border-amber-800">
                     <p className="text-xs text-muted-foreground">Balance Total Después</p>
                     <p
-                      className={`text-lg font-semibold ${hasInsufficientBalance()
-                        ? 'text-red-600 dark:text-red-400'
-                        : 'text-green-600 dark:text-green-400'
-                        }`}
+                      className={`text-lg font-semibold ${
+                        hasInsufficientBalance()
+                          ? 'text-red-600 dark:text-red-400'
+                          : 'text-green-600 dark:text-green-400'
+                      }`}
                     >
                       {new Intl.NumberFormat('es-CO', {
                         style: 'currency',
@@ -262,8 +263,6 @@ export function BalanceInfo({
           )}
         </div>
       )}
-
-
 
       {/* Insufficient Balance Warning */}
       {hasInsufficientBalance() && (

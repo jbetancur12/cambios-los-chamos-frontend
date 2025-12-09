@@ -122,11 +122,11 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   const effectiveRate =
     useCustomRate && (isSuperAdmin || isAdmin)
       ? {
-        buyRate: parseFloat(customBuyRate) || (exchangeRate?.buyRate || 0),
-        sellRate: parseFloat(customSellRate) || (exchangeRate?.sellRate || 0),
-        bcv: parseFloat(customBcv) || (exchangeRate?.bcv || 0),
-        usd: parseFloat(customUsd) || (exchangeRate?.usd || 0),
-      }
+          buyRate: parseFloat(customBuyRate) || exchangeRate?.buyRate || 0,
+          sellRate: parseFloat(customSellRate) || exchangeRate?.sellRate || 0,
+          bcv: parseFloat(customBcv) || exchangeRate?.bcv || 0,
+          usd: parseFloat(customUsd) || exchangeRate?.usd || 0,
+        }
       : exchangeRate
 
   const amountBs = effectiveRate && amountCop ? (Number(amountCop) / effectiveRate.sellRate).toFixed(2) : '0.00'
@@ -280,8 +280,6 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
           </div>
         </div>
 
-
-
         <div className="space-y-1 md:space-y-2">
           <Label htmlFor="senderName" className="hidden md:block">
             Contacto que Envía
@@ -406,7 +404,6 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
       )}
 
       {/* Bank and Amount Info */}
-
 
       <div className="space-y-1 md:space-y-2">
         <Label htmlFor="amount" className="hidden md:block">

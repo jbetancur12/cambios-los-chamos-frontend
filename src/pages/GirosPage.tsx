@@ -27,7 +27,6 @@ import type { GiroStatus, Currency, ExecutionType } from '@/types/api'
 
 type DateFilterType = 'TODAY' | 'YESTERDAY' | 'THIS_WEEK' | 'LAST_WEEK' | 'THIS_MONTH' | 'LAST_MONTH' | 'CUSTOM' | 'ALL'
 
-
 export const getExecutionTypeBadge = (executionType?: ExecutionType) => {
   const typeMap: Record<ExecutionType, { label: string; className: string; icon: any }> = {
     TRANSFERENCIA: {
@@ -158,7 +157,6 @@ export function GirosPage() {
     }
     return statusMap[status] || { label: status, className: 'bg-gray-100 text-gray-800', icon: Clock }
   }
-
 
   const formatCurrency = (amount: number, currency: Currency) => {
     if (currency === 'COP') {
@@ -320,8 +318,9 @@ export function GirosPage() {
           >
             <p className="text-xs font-semibold text-muted-foreground">Tipo de Usuario</p>
             <ChevronDown
-              className={`h-4 w-4 text-muted-foreground transition-transform ${userFiltersExpanded ? 'rotate-180' : ''
-                }`}
+              className={`h-4 w-4 text-muted-foreground transition-transform ${
+                userFiltersExpanded ? 'rotate-180' : ''
+              }`}
             />
           </button>
 
@@ -765,8 +764,9 @@ export function GirosPage() {
                 <button
                   key={pageNum}
                   onClick={() => setPage(pageNum)}
-                  className={`px-2 py-0.5 text-xs border rounded ${page === pageNum ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
-                    }`}
+                  className={`px-2 py-0.5 text-xs border rounded ${
+                    page === pageNum ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+                  }`}
                 >
                   {pageNum}
                 </button>
@@ -900,7 +900,7 @@ export function GirosPage() {
           open={detailSheetOpen}
           onOpenChange={setDetailSheetOpen}
           giroId={selectedGiroId}
-          onUpdate={() => { }}
+          onUpdate={() => {}}
         />
       )}
 

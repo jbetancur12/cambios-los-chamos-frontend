@@ -51,20 +51,20 @@ export function BankAccountsPage() {
     searchTerm.trim() === ''
       ? accounts
       : accounts.filter(
-        (account) =>
-          account.bank.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          account.accountHolder.toLowerCase().includes(searchTerm.toLowerCase())
-      )
+          (account) =>
+            account.bank.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            account.accountHolder.toLowerCase().includes(searchTerm.toLowerCase())
+        )
 
   // Client-side filtering for trasferencistas
   const filteredTrasferencistas =
     searchTransferencistasTerm.trim() === ''
       ? trasferencistas
       : trasferencistas.filter(
-        (t) =>
-          t.fullName.toLowerCase().includes(searchTransferencistasTerm.toLowerCase()) ||
-          t.email.toLowerCase().includes(searchTransferencistasTerm.toLowerCase())
-      )
+          (t) =>
+            t.fullName.toLowerCase().includes(searchTransferencistasTerm.toLowerCase()) ||
+            t.email.toLowerCase().includes(searchTransferencistasTerm.toLowerCase())
+        )
 
   // Handle errors
   if (accountsQuery.error) {

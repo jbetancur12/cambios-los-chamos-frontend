@@ -206,11 +206,11 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
   const effectiveRate =
     useCustomRate && (isSuperAdmin || isAdmin)
       ? {
-        buyRate: parseFloat(customBuyRate) || (currentRate?.buyRate || 0),
-        sellRate: parseFloat(customSellRate) || (currentRate?.sellRate || 0),
-        bcv: parseFloat(customBcv) || (currentRate?.bcv || 0),
-        usd: parseFloat(customUsd) || (currentRate?.usd || 0),
-      }
+          buyRate: parseFloat(customBuyRate) || currentRate?.buyRate || 0,
+          sellRate: parseFloat(customSellRate) || currentRate?.sellRate || 0,
+          bcv: parseFloat(customBcv) || currentRate?.bcv || 0,
+          usd: parseFloat(customUsd) || currentRate?.usd || 0,
+        }
       : currentRate
 
   const calculateAmountBs = () => {
@@ -349,10 +349,12 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
           id="bank"
           value={bankId}
           onChange={(e) => setBankId(e.target.value)}
-          className={`flex h-10 md:h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-base md:text-lg ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 font-medium ${bankId === "" ? "md:text-transparent" : ""}`}
+          className={`flex h-10 md:h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-base md:text-lg ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 font-medium ${bankId === '' ? 'md:text-transparent' : ''}`}
           required
         >
-          <option value="" className="text-muted-foreground">Banco</option>
+          <option value="" className="text-muted-foreground">
+            Banco
+          </option>
           {banks.map((bank) => (
             <option key={bank.id} value={bank.id} className="font-medium text-foreground">
               {`0${bank.code} - ${bank.name}`}
@@ -482,79 +484,80 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
       ) : null}
 
       {/* Custom Rate Override (SUPER_ADMIN only) */}
-      {isSuperAdmin || isAdmin && (
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="useCustomRate"
-              checked={useCustomRate}
-              onChange={(e) => setUseCustomRate(e.target.checked)}
-              className="h-5 w-5 rounded border-gray-300"
-            />
-            <Label htmlFor="useCustomRate" className="cursor-pointer text-sm md:text-base">
-              Usar tasa personalizada
-            </Label>
-          </div>
-
-          {useCustomRate && (
-            <div className="grid grid-cols-2 gap-3 p-2 bg-yellow-50 dark:bg-yellow-950 rounded-lg">
-              <div className="space-y-1">
-                <Label htmlFor="customBuyRate" className="text-xs md:text-sm">
-                  Compra
-                </Label>
-                <Input
-                  id="customBuyRate"
-                  type="number"
-                  step="0.01"
-                  value={customBuyRate}
-                  onChange={(e) => setCustomBuyRate(e.target.value)}
-                  className="text-base md:text-lg h-10 md:h-12"
-                />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="customSellRate" className="text-xs md:text-sm">
-                  Venta
-                </Label>
-                <Input
-                  id="customSellRate"
-                  type="number"
-                  step="0.01"
-                  value={customSellRate}
-                  onChange={(e) => setCustomSellRate(e.target.value)}
-                  className="text-base md:text-lg h-10 md:h-12"
-                />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="customUsd" className="text-xs md:text-sm">
-                  USD
-                </Label>
-                <Input
-                  id="customUsd"
-                  type="number"
-                  step="0.01"
-                  value={customUsd}
-                  onChange={(e) => setCustomUsd(e.target.value)}
-                  className="text-base md:text-lg h-10 md:h-12"
-                />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="customBcv" className="text-xs md:text-sm">
-                  BCV
-                </Label>
-                <Input
-                  id="customBcv"
-                  type="number"
-                  step="0.01"
-                  value={customBcv}
-                  onChange={(e) => setCustomBcv(e.target.value)}
-                  className="text-base md:text-lg h-10 md:h-12"
-                />
-              </div>
+      {isSuperAdmin ||
+        (isAdmin && (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="useCustomRate"
+                checked={useCustomRate}
+                onChange={(e) => setUseCustomRate(e.target.checked)}
+                className="h-5 w-5 rounded border-gray-300"
+              />
+              <Label htmlFor="useCustomRate" className="cursor-pointer text-sm md:text-base">
+                Usar tasa personalizada
+              </Label>
             </div>
-          )}
-        </div>
-      )}
+
+            {useCustomRate && (
+              <div className="grid grid-cols-2 gap-3 p-2 bg-yellow-50 dark:bg-yellow-950 rounded-lg">
+                <div className="space-y-1">
+                  <Label htmlFor="customBuyRate" className="text-xs md:text-sm">
+                    Compra
+                  </Label>
+                  <Input
+                    id="customBuyRate"
+                    type="number"
+                    step="0.01"
+                    value={customBuyRate}
+                    onChange={(e) => setCustomBuyRate(e.target.value)}
+                    className="text-base md:text-lg h-10 md:h-12"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="customSellRate" className="text-xs md:text-sm">
+                    Venta
+                  </Label>
+                  <Input
+                    id="customSellRate"
+                    type="number"
+                    step="0.01"
+                    value={customSellRate}
+                    onChange={(e) => setCustomSellRate(e.target.value)}
+                    className="text-base md:text-lg h-10 md:h-12"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="customUsd" className="text-xs md:text-sm">
+                    USD
+                  </Label>
+                  <Input
+                    id="customUsd"
+                    type="number"
+                    step="0.01"
+                    value={customUsd}
+                    onChange={(e) => setCustomUsd(e.target.value)}
+                    className="text-base md:text-lg h-10 md:h-12"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="customBcv" className="text-xs md:text-sm">
+                    BCV
+                  </Label>
+                  <Input
+                    id="customBcv"
+                    type="number"
+                    step="0.01"
+                    value={customBcv}
+                    onChange={(e) => setCustomBcv(e.target.value)}
+                    className="text-base md:text-lg h-10 md:h-12"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
 
       {/* Calculated Amount in Bs & BCV */}
       {amountInput && (

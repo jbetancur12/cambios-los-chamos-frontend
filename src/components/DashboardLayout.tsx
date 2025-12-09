@@ -99,8 +99,6 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
     return item.roles?.includes(role)
   })
 
-
-
   // Close side menu when route changes
   useEffect(() => {
     setSideMenuOpen(false)
@@ -233,7 +231,6 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
       {/* Main Content */}
       <div className="md:pl-64 flex flex-col min-h-screen">
         {/* Mobile Header */}
-
 
         {/* Page Content */}
         <main className="flex-1 pb-24 md:pb-6">{children}</main>
