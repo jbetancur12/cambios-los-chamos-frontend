@@ -59,10 +59,10 @@ export function SendGiroPage() {
         <div className="relative">
           <Button
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="w-full justify-between rounded-none border-0 bg-white px-6 py-4 text-left font-semibold text-gray-900 hover:bg-gray-50"
+            className="w-full justify-between rounded-none border-0 bg-white px-6 py-4 text-left font-semibold text-gray-900 hover:bg-gray-50 h-auto"
           >
-            <span>{currentTypeLabel}</span>
-            <ChevronDown className={`h-5 w-5 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
+            <span className="text-lg md:text-lg">{currentTypeLabel}</span>
+            <ChevronDown className={`h-6 w-6 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
           </Button>
 
           {dropdownOpen && (
@@ -74,11 +74,10 @@ export function SendGiroPage() {
                     setSelectedType(type.value)
                     setDropdownOpen(false)
                   }}
-                  className={`flex w-full flex-col gap-1 border-b border-gray-100 px-6 py-2 text-left transition-colors last:border-0 ${
-                    selectedType === type.value ? 'bg-blue-50' : 'hover:bg-gray-50'
-                  }`}
+                  className={`flex w-full flex-col gap-1 border-b border-gray-100 px-6 py-4 text-left transition-colors last:border-0 ${selectedType === type.value ? 'bg-blue-50' : 'hover:bg-gray-50'
+                    }`}
                 >
-                  <span className={`font-medium ${selectedType === type.value ? 'text-blue-600' : 'text-gray-900'}`}>
+                  <span className={`font-medium text-lg md:text-lg ${selectedType === type.value ? 'text-blue-600' : 'text-gray-900'}`}>
                     {type.label}
                   </span>
                   {/* <span className="text-sm text-gray-500">{type.description}</span> */}

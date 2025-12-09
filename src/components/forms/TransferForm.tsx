@@ -206,11 +206,11 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
   const effectiveRate =
     useCustomRate && (isSuperAdmin || isAdmin)
       ? {
-          buyRate: parseFloat(customBuyRate) || currentRate?.buyRate || 0,
-          sellRate: parseFloat(customSellRate) || currentRate?.sellRate || 0,
-          bcv: parseFloat(customBcv) || currentRate?.bcv || 0,
-          usd: parseFloat(customUsd) || currentRate?.usd || 0,
-        }
+        buyRate: parseFloat(customBuyRate) || currentRate?.buyRate || 0,
+        sellRate: parseFloat(customSellRate) || currentRate?.sellRate || 0,
+        bcv: parseFloat(customBcv) || currentRate?.bcv || 0,
+        usd: parseFloat(customUsd) || currentRate?.usd || 0,
+      }
       : currentRate
 
   const calculateAmountBs = () => {
@@ -322,12 +322,12 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
           placeholder="Nombre del Beneficiario"
           displayField="name"
           required
-          className="text-xl md:text-xl h-10 md:h-12 font-medium placeholder:text-muted-foreground md:placeholder:text-transparent"
+          className="text-lg md:text-lg h-10 md:h-12 font-medium placeholder:text-muted-foreground md:placeholder:text-transparent"
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="beneficiaryId" className="hidden md:block text-xl md:text-xl">
+        <Label htmlFor="beneficiaryId" className="hidden md:block text-md md:text-md">
           Cédula del Beneficiario
         </Label>
         <Input
@@ -336,13 +336,13 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
           onChange={(e) => setBeneficiaryId(e.target.value)}
           placeholder="Cédula del Beneficiario"
           required
-          className="text-base md:text-lg h-10 md:h-12 font-medium placeholder:text-muted-foreground md:placeholder:text-transparent"
+          className="text-base md:text-md h-10 md:h-12 font-medium placeholder:text-muted-foreground md:placeholder:text-transparent"
         />
       </div>
 
       {/* Bank Info */}
       <div className="space-y-2">
-        <Label htmlFor="bank" className="hidden md:block text-xl md:text-xl">
+        <Label htmlFor="bank" className="hidden md:block text-md md:text-md">
           Banco
         </Label>
         <select
@@ -364,7 +364,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="accountNumber" className="hidden md:block text-xl md:text-xl">
+        <Label htmlFor="accountNumber" className="hidden md:block text-md md:text-md">
           Número de Cuenta
         </Label>
         <Input
@@ -380,7 +380,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
       {/* Amount & Currency */}
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
-          <Label htmlFor="amount" className="hidden md:block text-xl md:text-xl">
+          <Label htmlFor="amount" className="hidden md:block text-md md:text-md">
             Monto
           </Label>
           <NumericFormat
@@ -565,7 +565,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
           <div className="grid grid-cols-2 gap-4 text-center">
             <div>
               <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Bolivares</p>
-              <p className="text-xl md:text-2xl font-bold text-green-700 dark:text-green-400">
+              <p className="text-lg md:text-2lg font-bold text-green-700 dark:text-green-400">
                 {new Intl.NumberFormat('es-VE', {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
@@ -574,7 +574,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
             </div>
             <div>
               <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">BCV</p>
-              <p className="text-xl md:text-2xl font-bold text-blue-700 dark:text-blue-400">
+              <p className="text-lg md:text-2lg font-bold text-blue-700 dark:text-blue-400">
                 {new Intl.NumberFormat('en-US', {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,

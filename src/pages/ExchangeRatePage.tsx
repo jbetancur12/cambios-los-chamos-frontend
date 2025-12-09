@@ -168,19 +168,23 @@ export function ExchangeRatePage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="space-y-1">
-                <p className="text-xs text-muted-foreground">Tasa de Compra</p>
-                <p className="text-2xl font-bold text-green-600">{currentRate.buyRate.toFixed(2)}</p>
-              </div>
+            <div className={`grid grid-cols-2 ${user?.role !== 'MINORISTA' ? 'md:grid-cols-4' : ''} gap-4`}>
+              {user?.role !== 'MINORISTA' && (
+                <div className="space-y-1">
+                  <p className="text-xs text-muted-foreground">Tasa de Compra</p>
+                  <p className="text-2xl font-bold text-green-600">{currentRate.buyRate.toFixed(2)}</p>
+                </div>
+              )}
               <div className="space-y-1">
                 <p className="text-xs text-muted-foreground">Tasa de Venta</p>
                 <p className="text-2xl font-bold text-blue-600">{currentRate.sellRate.toFixed(2)}</p>
               </div>
-              <div className="space-y-1">
-                <p className="text-xs text-muted-foreground">USD</p>
-                <p className="text-2xl font-bold text-purple-600">{currentRate.usd.toFixed(2)}</p>
-              </div>
+              {user?.role !== 'MINORISTA' && (
+                <div className="space-y-1">
+                  <p className="text-xs text-muted-foreground">USD</p>
+                  <p className="text-2xl font-bold text-purple-600">{currentRate.usd.toFixed(2)}</p>
+                </div>
+              )}
               <div className="space-y-1">
                 <p className="text-xs text-muted-foreground">BCV</p>
                 <p className="text-2xl font-bold text-orange-600">{currentRate.bcv.toFixed(2)}</p>

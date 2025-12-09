@@ -122,11 +122,11 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   const effectiveRate =
     useCustomRate && (isSuperAdmin || isAdmin)
       ? {
-          buyRate: parseFloat(customBuyRate) || exchangeRate?.buyRate || 0,
-          sellRate: parseFloat(customSellRate) || exchangeRate?.sellRate || 0,
-          bcv: parseFloat(customBcv) || exchangeRate?.bcv || 0,
-          usd: parseFloat(customUsd) || exchangeRate?.usd || 0,
-        }
+        buyRate: parseFloat(customBuyRate) || exchangeRate?.buyRate || 0,
+        sellRate: parseFloat(customSellRate) || exchangeRate?.sellRate || 0,
+        bcv: parseFloat(customBcv) || exchangeRate?.bcv || 0,
+        usd: parseFloat(customUsd) || exchangeRate?.usd || 0,
+      }
       : exchangeRate
 
   const amountBs = effectiveRate && amountCop ? (Number(amountCop) / effectiveRate.sellRate).toFixed(2) : '0.00'
@@ -213,10 +213,10 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
     <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-2 md:space-y-4">
       {/* Información del Beneficiario */}
       <div className="bg-blue-50 p-3 rounded mb-2 md:mb-4 border border-blue-200">
-        <p className="text-xs font-semibold text-blue-900 mb-2 md:mb-3">Datos del Beneficiario</p>
+        {/* <p className="text-sm font-semibold text-blue-900 mb-2 md:mb-3">Datos del Beneficiario</p> */}
 
         <div className="space-y-1 md:space-y-2 mt-1 md:mt-3">
-          <Label htmlFor="cedula" className="hidden md:block">
+          <Label htmlFor="cedula" className="hidden md:block text-md">
             Cédula del Beneficiario
           </Label>
           <Input
@@ -225,23 +225,26 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
             value={cedula}
             onChange={(e) => setCedula(e.target.value)}
             required
+            className="font-medium placeholder:text-muted-foreground md:placeholder:text-transparent"
           />
         </div>
 
         <div className="space-y-1 md:space-y-2">
-          <Label htmlFor="bank" className="hidden md:block">
+          <Label htmlFor="bank" className="hidden md:block text-md">
             Banco
           </Label>
           <select
             id="bank"
             value={selectedBank}
             onChange={(e) => setSelectedBank(e.target.value)}
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 font-medium ${selectedBank === '' ? 'md:text-transparent' : ''}`}
             required
           >
-            <option value="">Banco Origen</option>
+            <option value="" className="text-muted-foreground">
+              Banco Origen
+            </option>
             {banks.map((bank) => (
-              <option key={bank.id} value={bank.id}>
+              <option key={bank.id} value={bank.id} className="font-medium text-foreground">
                 {`${bank.code} - ${bank.name}`}
               </option>
             ))}
@@ -249,7 +252,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
         </div>
 
         <div>
-          <Label htmlFor="phone" className="hidden md:block">
+          <Label htmlFor="phone" className="hidden md:block text-md">
             Teléfono del Beneficiario
           </Label>
           <div className="relative py-1 md:py-3">
@@ -259,6 +262,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
               value={phone}
               onChange={handlePhoneChange}
               onFocus={() => phone && setShowSuggestions(true)}
+              className="font-medium placeholder:text-muted-foreground md:placeholder:text-transparent"
             />
             {showSuggestions && filteredSuggestions.length > 0 && (
               <div className="absolute top-full left-0 right-0 mt-1 bg-card border rounded-md shadow-lg z-50 max-h-48 overflow-y-auto">
@@ -281,7 +285,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
         </div>
 
         <div className="space-y-1 md:space-y-2">
-          <Label htmlFor="senderName" className="hidden md:block">
+          <Label htmlFor="senderName" className="hidden md:block text-md">
             Contacto que Envía
           </Label>
 
@@ -291,6 +295,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
             value={senderName}
             onChange={(e) => setSenderName(e.target.value)}
             required
+            className="font-medium placeholder:text-muted-foreground md:placeholder:text-transparent"
           />
         </div>
       </div>
@@ -425,6 +430,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
           placeholder="Monto"
           allowNegative={false}
           required
+          className="font-medium placeholder:text-muted-foreground md:placeholder:text-transparent"
         />
       </div>
 
