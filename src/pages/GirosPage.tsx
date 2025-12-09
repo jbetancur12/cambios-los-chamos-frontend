@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -25,7 +25,7 @@ import { useGirosList } from '@/hooks/queries/useGiroQueries'
 import { useAllUsers } from '@/hooks/queries/useUserQueries'
 import type { GiroStatus, Currency, ExecutionType } from '@/types/api'
 
-type DateFilterType = 'TODAY' | 'YESTERDAY' | 'THIS_WEEK' | 'LAST_WEEK' | 'THIS_MONTH' | 'LAST_MONTH' | 'CUSTOM' | 'ALL'
+type DateFilterType = 'SINGLE_DATE' | 'YESTERDAY' | 'THIS_WEEK' | 'LAST_WEEK' | 'THIS_MONTH' | 'LAST_MONTH' | 'CUSTOM' | 'ALL'
 
 export const getExecutionTypeBadge = (executionType?: ExecutionType) => {
   const typeMap: Record<ExecutionType, { label: string; className: string; icon: any }> = {
@@ -62,7 +62,8 @@ export function GirosPage() {
 
   // Filter states
   const [filterStatus, setFilterStatus] = useState<GiroStatus | 'ALL'>('ASIGNADO')
-  const [filterDate, setFilterDate] = useState<DateFilterType>('TODAY')
+  const [filterDate, setFilterDate] = useState<DateFilterType>('SINGLE_DATE')
+  const [singleDate, setSingleDate] = useState(new Date().toISOString().split('T')[0])
   const [filterUserType, setFilterUserType] = useState<'MINORISTA' | 'TRANSFERENCISTA' | 'ALL'>('MINORISTA')
   const [selectedTransferencistaId, setSelectedTransferencistaId] = useState<string | 'ALL'>('ALL')
   const [customDateRange, setCustomDateRange] = useState<{ from: string; to: string }>({
@@ -71,6 +72,7 @@ export function GirosPage() {
   })
 
   // UI states
+  const dateInputRef = useRef<HTMLInputElement>(null)
   const [customDateModalOpen, setCustomDateModalOpen] = useState(false)
   const [dateFiltersExpanded, setDateFiltersExpanded] = useState(false)
   const [userFiltersExpanded, setUserFiltersExpanded] = useState(false)
@@ -89,11 +91,11 @@ export function GirosPage() {
     let dateTo = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999)
 
     switch (filterType) {
-      case 'TODAY':
-        break
-      case 'YESTERDAY':
-        dateFrom.setDate(dateFrom.getDate() - 1)
-        dateTo.setDate(dateTo.getDate() - 1)
+      case 'SINGLE_DATE':
+        const [year, month, day] = singleDate.split('-').map(Number)
+        // Note: Months in JS Date are 0-indexed, but input type="date" returns YYYY-MM-DD (1-indexed months)
+        dateFrom = new Date(year, month - 1, day, 0, 0, 0, 0)
+        dateTo = new Date(year, month - 1, day, 23, 59, 59, 999)
         break
       case 'THIS_WEEK':
         dateFrom.setDate(dateFrom.getDate() - dateFrom.getDay())
@@ -318,9 +320,8 @@ export function GirosPage() {
           >
             <p className="text-xs font-semibold text-muted-foreground">Tipo de Usuario</p>
             <ChevronDown
-              className={`h-4 w-4 text-muted-foreground transition-transform ${
-                userFiltersExpanded ? 'rotate-180' : ''
-              }`}
+              className={`h-4 w-4 text-muted-foreground transition-transform ${userFiltersExpanded ? 'rotate-180' : ''
+                }`}
             />
           </button>
 
@@ -400,14 +401,29 @@ export function GirosPage() {
           <div className="border-t p-3 space-y-3">
             <div className="flex gap-2 overflow-x-auto pb-2 flex-wrap">
               <Button
-                variant={filterDate === 'TODAY' ? 'default' : 'outline'}
+                variant={filterDate === 'SINGLE_DATE' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setFilterDate('TODAY')}
-                className={filterDate === 'TODAY' ? 'text-white' : ''}
-                style={filterDate === 'TODAY' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+                className={`relative overflow-hidden ${filterDate === 'SINGLE_DATE' ? 'text-white' : ''}`}
+                style={filterDate === 'SINGLE_DATE' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+                onClick={() => dateInputRef.current?.showPicker()}
               >
-                Hoy
+                <Calendar className="mr-2 h-3 w-3" />
+                {singleDate === new Date().toISOString().split('T')[0] ? 'Ver día (Hoy)' : `Ver día: ${singleDate}`}
               </Button>
+              <input
+                ref={dateInputRef}
+                type="date"
+                value={singleDate}
+                onChange={(e) => {
+                  if (e.target.value) {
+                    setSingleDate(e.target.value)
+                    setFilterDate('SINGLE_DATE')
+                  }
+                }}
+                className="absolute opacity-0 pointer-events-none w-0 h-0"
+                tabIndex={-1}
+                title="Seleccionar día"
+              />
               {/* <Button
                 variant={filterDate === 'YESTERDAY' ? 'default' : 'outline'}
                 size="sm"
@@ -764,9 +780,8 @@ export function GirosPage() {
                 <button
                   key={pageNum}
                   onClick={() => setPage(pageNum)}
-                  className={`px-2 py-0.5 text-xs border rounded ${
-                    page === pageNum ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
-                  }`}
+                  className={`px-2 py-0.5 text-xs border rounded ${page === pageNum ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+                    }`}
                 >
                   {pageNum}
                 </button>
@@ -900,7 +915,7 @@ export function GirosPage() {
           open={detailSheetOpen}
           onOpenChange={setDetailSheetOpen}
           giroId={selectedGiroId}
-          onUpdate={() => {}}
+          onUpdate={() => { }}
         />
       )}
 
