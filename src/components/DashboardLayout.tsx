@@ -42,7 +42,7 @@ const bottomNavItems: NavItem[] = [
     href: '/giros',
     roles: ['SUPER_ADMIN', 'ADMIN', 'TRANSFERENCISTA', 'MINORISTA'],
   },
-  { icon: Users, label: 'Usuarios', href: '/usuarios', roles: ['SUPER_ADMIN'] },
+  { icon: Users, label: 'Usuarios', href: '/usuarios', roles: ['SUPER_ADMIN', 'ADMIN'] },
   { icon: Building, label: 'Cuentas', href: '/cuentas-bancarias', roles: ['SUPER_ADMIN', 'ADMIN'] },
 ]
 
