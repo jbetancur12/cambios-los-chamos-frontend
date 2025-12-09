@@ -243,7 +243,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
             borderTopColor: 'rgba(255, 255, 255, 0.1)',
           }}
         >
-          <div className="flex h-20 items-center justify-around">
+          <div className="flex h-18 items-center justify-around">
             {/* Solicitudes */}
             {visibleBottomItems.find((item) => item.href === '/giros') && (
               <Link

@@ -310,7 +310,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
   const amountBcv = effectiveRate && effectiveRate.bcv > 0 ? amountBs / effectiveRate.bcv : 0
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-3 w-full">
+    <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-2 w-full">
       {/* Beneficiary Info */}
       <div className="space-y-2">
         <BeneficiaryAutocomplete
@@ -420,6 +420,32 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
         </div>
       </div>
 
+      {/* Calculated Amount in Bs & BCV - Moved here for visibility */}
+      {amountInput && (
+        <div className="p-1 bg-green-50 dark:bg-green-950 rounded-lg">
+          <div className="grid grid-cols-2 gap-4 text-center">
+            <div>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Bolivares</p>
+              <p className="text-lg md:text-xl font-bold text-green-700 dark:text-green-400">
+                {new Intl.NumberFormat('es-VE', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                }).format(amountBs)}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">BCV</p>
+              <p className="text-lg md:text-xl font-bold text-blue-700 dark:text-blue-400">
+                {new Intl.NumberFormat('en-US', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                }).format(amountBcv)}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Minorista Balance Info */}
       {isMinorista && !loadingBalance && minoristaBalance !== null && (
         <BalanceInfo
@@ -450,7 +476,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
           )}
         </div>
       ) : effectiveRate ? (
-        <div className="bg-gray-100 rounded-lg p-4 mb-5">
+        <div className="bg-gray-100 rounded-lg p-1 mb-5">
           {/* <p className="text-sm md:text-base font-semibold text-gray-700 mb-3">Tasa de Cambio Actual</p> */}
 
           {isMinorista || isAdmin ? (
@@ -559,31 +585,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
           </div>
         ))}
 
-      {/* Calculated Amount in Bs & BCV */}
-      {amountInput && (
-        <div className="p-3 bg-green-50 dark:bg-green-950 rounded-lg">
-          <div className="grid grid-cols-2 gap-4 text-center">
-            <div>
-              <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Bolivares</p>
-              <p className="text-lg md:text-2lg font-bold text-green-700 dark:text-green-400">
-                {new Intl.NumberFormat('es-VE', {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                }).format(amountBs)}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">BCV</p>
-              <p className="text-lg md:text-2lg font-bold text-blue-700 dark:text-blue-400">
-                {new Intl.NumberFormat('en-US', {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                }).format(amountBcv)}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
+
 
       {/* Submit */}
       <div className="flex gap-3 pt-2">

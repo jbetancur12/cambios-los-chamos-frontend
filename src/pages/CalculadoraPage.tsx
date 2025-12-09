@@ -90,10 +90,10 @@ export function CalculadoraPage() {
           <Card className="mb-6">
             <CardContent className="pt-6">
               <div className="grid grid-cols-2 gap-4 text-center">
-                <div>
-                  <p className="text-sm text-gray-600">BCV (Compra)</p>
+                <div className="flex items-center justify-center gap-2">
+                  <img src="/bcv.png" alt="BCV Logo" className="w-8 h-auto" />
                   <p className="text-xl font-bold" style={{ color: '#136BBC' }}>
-                    {formatCurrency(rate.usd)}
+                    {formatCurrency(rate.bcv)}
                   </p>
                 </div>
                 <div>
@@ -109,27 +109,24 @@ export function CalculadoraPage() {
         <div className="flex gap-2 mb-6 overflow-x-auto">
           <button
             onClick={() => setActiveTab('bcv')}
-            className={`flex-1 py-3 rounded-lg font-medium transition-colors whitespace-nowrap ${
-              activeTab === 'bcv' ? 'text-white' : 'bg-white text-gray-700 border hover:bg-gray-50'
-            }`}
+            className={`flex-1 py-3 rounded-lg font-medium transition-colors whitespace-nowrap ${activeTab === 'bcv' ? 'text-white' : 'bg-white text-gray-700 border hover:bg-gray-50'
+              }`}
             style={activeTab === 'bcv' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             Tasa BCV
           </button>
           <button
             onClick={() => setActiveTab('manual')}
-            className={`flex-1 py-3 rounded-lg font-medium transition-colors whitespace-nowrap ${
-              activeTab === 'manual' ? 'text-white' : 'bg-white text-gray-700 border hover:bg-gray-50'
-            }`}
+            className={`flex-1 py-3 rounded-lg font-medium transition-colors whitespace-nowrap ${activeTab === 'manual' ? 'text-white' : 'bg-white text-gray-700 border hover:bg-gray-50'
+              }`}
             style={activeTab === 'manual' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             Precio Manual
           </button>
           <button
             onClick={() => setActiveTab('ves')}
-            className={`flex-1 py-3 rounded-lg font-medium transition-colors whitespace-nowrap ${
-              activeTab === 'ves' ? 'text-white' : 'bg-white text-gray-700 border hover:bg-gray-50'
-            }`}
+            className={`flex-1 py-3 rounded-lg font-medium transition-colors whitespace-nowrap ${activeTab === 'ves' ? 'text-white' : 'bg-white text-gray-700 border hover:bg-gray-50'
+              }`}
             style={activeTab === 'ves' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             VES a COP

@@ -210,7 +210,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-2 md:space-y-4">
+    <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-2">
       {/* Información del Beneficiario */}
       <div className="bg-blue-50 p-3 rounded mb-2 md:mb-4 border border-blue-200">
         {/* <p className="text-sm font-semibold text-blue-900 mb-2 md:mb-3">Datos del Beneficiario</p> */}
@@ -300,9 +300,77 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
         </div>
       </div>
 
-      {/* Exchange Rate Info Display */}
+
+
+      {/* Bank and Amount Info */}
+
+      <div className="space-y-1 md:space-y-2">
+        <Label htmlFor="amount" className="hidden md:block">
+          Monto (COP)
+        </Label>
+
+        <NumericFormat
+          id="amount"
+          customInput={Input}
+          thousandSeparator="."
+          decimalSeparator=","
+          decimalScale={2}
+          fixedDecimalScale={false}
+          prefix=""
+          value={amountCop}
+          onValueChange={(values) => {
+            setAmountCop(values.floatValue ? values.floatValue.toString() : '')
+          }}
+          placeholder="Monto"
+          allowNegative={false}
+          required
+          className="font-medium placeholder:text-muted-foreground md:placeholder:text-transparent"
+        />
+      </div>
+
+      {/* Exchange Rate Info - Moved here for visibility */}
+      {effectiveRate && amountCop && (
+        <div className="p-1 bg-green-50 dark:bg-green-950 rounded-lg">
+          <div className="grid grid-cols-2 gap-4 text-center">
+            <div>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Bolivares</p>
+              <p className="text-lg md:text-xl font-bold text-green-700 dark:text-green-400">
+                {new Intl.NumberFormat('es-VE', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                }).format(Number(amountBs))}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">BCV</p>
+              <p className="text-lg md:text-xl font-bold text-blue-700 dark:text-blue-400">
+                {new Intl.NumberFormat('en-US', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                }).format(Number(amountBs) / effectiveRate.bcv)}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Balance Info */}
+      {!loadingBalance && minoristaBalance !== null && (
+        <BalanceInfo
+          minoristaBalance={minoristaBalance}
+          minoristaBalanceInFavor={minoristaBalanceInFavor}
+          amountInput={amountCop}
+          getEarnedProfit={getEarnedProfit}
+          getRemainingBalance={getRemainingBalance}
+          hasInsufficientBalance={hasInsufficientBalance}
+        />
+      )}
+
+
+
+      {/* Submit */}
       {effectiveRate ? (
-        <div className="bg-gray-100 rounded-lg p-4 mb-5">
+        <div className="bg-gray-100 rounded-lg p-1 mb-5">
           {isMinorista || isAdmin ? (
             <div className="grid grid-cols-1 gap-3 text-xs md:text-lg">
               <div>
@@ -405,70 +473,6 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
               </div>
             </div>
           )}
-        </div>
-      )}
-
-      {/* Bank and Amount Info */}
-
-      <div className="space-y-1 md:space-y-2">
-        <Label htmlFor="amount" className="hidden md:block">
-          Monto (COP)
-        </Label>
-
-        <NumericFormat
-          id="amount"
-          customInput={Input}
-          thousandSeparator="."
-          decimalSeparator=","
-          decimalScale={2}
-          fixedDecimalScale={false}
-          prefix=""
-          value={amountCop}
-          onValueChange={(values) => {
-            setAmountCop(values.floatValue ? values.floatValue.toString() : '')
-          }}
-          placeholder="Monto"
-          allowNegative={false}
-          required
-          className="font-medium placeholder:text-muted-foreground md:placeholder:text-transparent"
-        />
-      </div>
-
-      {/* Balance Info */}
-      {!loadingBalance && minoristaBalance !== null && (
-        <BalanceInfo
-          minoristaBalance={minoristaBalance}
-          minoristaBalanceInFavor={minoristaBalanceInFavor}
-          amountInput={amountCop}
-          getEarnedProfit={getEarnedProfit}
-          getRemainingBalance={getRemainingBalance}
-          hasInsufficientBalance={hasInsufficientBalance}
-        />
-      )}
-
-      {/* Exchange Rate Info */}
-      {effectiveRate && amountCop && (
-        <div className="p-3 bg-green-50 dark:bg-green-950 rounded-lg">
-          <div className="grid grid-cols-2 gap-4 text-center">
-            <div>
-              <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Bolivares</p>
-              <p className="text-xl font-bold text-green-700 dark:text-green-400">
-                {new Intl.NumberFormat('es-VE', {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                }).format(Number(amountBs))}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">BCV</p>
-              <p className="text-xl font-bold text-blue-700 dark:text-blue-400">
-                {new Intl.NumberFormat('en-US', {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                }).format(Number(amountBs) / effectiveRate.bcv)}
-              </p>
-            </div>
-          </div>
         </div>
       )}
 

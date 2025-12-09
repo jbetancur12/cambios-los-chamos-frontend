@@ -48,11 +48,7 @@ export function SendGiroPage() {
 
   return (
     <div className="container mx-auto max-w-5xl px-4 py-4">
-      {/* Header */}
-      <div className="mb-3">
-        {/* <h1 className="text-xl text-center font-bold text-gray-900">Enviar giro</h1> */}
-        {/* <p className="mt-1 text-gray-600">Completa el formulario para enviar un giro</p> */}
-      </div>
+      {/* Header - Removed empty headers and spacing */}
 
       {/* Type Selector Dropdown */}
       <Card className="mb-2 overflow-hidden border border-gray-200">

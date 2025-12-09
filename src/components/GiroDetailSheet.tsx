@@ -635,7 +635,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                 <div className="p-2 bg-muted rounded text-xs space-y-1">
                   <h3 className="font-semibold flex items-center gap-1">
                     <TrendingUp className="h-3 w-3" />
-                    Tasa
+                    Tasa: <span className="text-blue-600 ml-1">{giro.rateApplied?.sellRate?.toFixed(2) || '0.00'}</span>
                   </h3>
 
                   {isEditingRate ? (
@@ -713,7 +713,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                   ) : (
                     // VISTA ESTÁTICA PARA ADMIN/SUPER_ADMIN
                     <>
-                      <div className="space-y-0.5">
+                      {/* <div className="space-y-0.5">
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Compra:</span>
                           <span className="font-medium">{giro.rateApplied?.buyRate?.toFixed(2) || '0.00'}</span>
@@ -730,7 +730,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                           <span className="text-muted-foreground">BCV:</span>
                           <span className="font-medium">{giro.rateApplied?.bcv?.toFixed(2) || '0.00'}</span>
                         </div>
-                      </div>
+                      </div> */}
                       {!isNotEditableStatus && (
                         <Button
                           onClick={() => setIsEditingRate(true)}
@@ -893,11 +893,10 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                     <Button
                       type="button"
                       variant="ghost"
-                      className={`flex-1 ${
-                        !showReturnForm
+                      className={`flex-1 ${!showReturnForm
                           ? 'bg-green-600 hover:bg-green-700 text-white'
                           : 'hover:bg-muted text-muted-foreground'
-                      }`}
+                        }`}
                       onClick={() => setShowReturnForm(false)}
                     >
                       Ejecutar
@@ -905,11 +904,10 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                     <Button
                       type="button"
                       variant="ghost"
-                      className={`flex-1 ${
-                        showReturnForm
+                      className={`flex-1 ${showReturnForm
                           ? 'bg-orange-600 hover:bg-orange-700 text-white'
                           : 'hover:bg-muted text-muted-foreground'
-                      }`}
+                        }`}
                       onClick={() => setShowReturnForm(true)}
                     >
                       Devolver
