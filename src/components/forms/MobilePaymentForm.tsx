@@ -37,7 +37,16 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   const { getSuggestions } = useBeneficiarySuggestions()
 
   const isMinorista = user?.role === 'MINORISTA'
+  const isSuperAdmin = user?.role === 'SUPER_ADMIN'
+  const isAdmin = user?.role === 'ADMIN'
   const filteredSuggestions = getSuggestions(phone, 'PAGO_MOVIL')
+
+  // Custom rate override
+  const [useCustomRate, setUseCustomRate] = useState(false)
+  const [customBuyRate, setCustomBuyRate] = useState('')
+  const [customSellRate, setCustomSellRate] = useState('')
+  const [customUsd, setCustomUsd] = useState('')
+  const [customBcv, setCustomBcv] = useState('')
 
   useEffect(() => {
     loadBanks()
@@ -61,6 +70,10 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
     try {
       const response = await api.get<{ rate: ExchangeRate }>('/exchange-rate/current')
       setExchangeRate(response.rate)
+      setCustomBuyRate(response.rate.buyRate.toString())
+      setCustomSellRate(response.rate.sellRate.toString())
+      setCustomUsd(response.rate.usd.toString())
+      setCustomBcv(response.rate.bcv.toString())
     } catch (error) {
       console.error('Error loading exchange rate:', error)
       toast.error('Error al cargar la tasa BCV')
@@ -106,7 +119,17 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
     return totalBalance < amount
   }
 
-  const amountBs = exchangeRate && amountCop ? (Number(amountCop) / Number(exchangeRate.sellRate)).toFixed(2) : '0.00'
+  const effectiveRate =
+    useCustomRate && (isSuperAdmin || isAdmin)
+      ? {
+        buyRate: parseFloat(customBuyRate) || (exchangeRate?.buyRate || 0),
+        sellRate: parseFloat(customSellRate) || (exchangeRate?.sellRate || 0),
+        bcv: parseFloat(customBcv) || (exchangeRate?.bcv || 0),
+        usd: parseFloat(customUsd) || (exchangeRate?.usd || 0),
+      }
+      : exchangeRate
+
+  const amountBs = effectiveRate && amountCop ? (Number(amountCop) / effectiveRate.sellRate).toFixed(2) : '0.00'
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -124,13 +147,30 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
 
     setLoading(true)
     try {
-      await api.post('/giro/mobile-payment/create', {
+      const payload: any = {
         cedula,
         bankId: selectedBank,
         phone,
         contactoEnvia: senderName,
         amountCop: Number(amountCop),
-      })
+      }
+
+      if ((isSuperAdmin || isAdmin) && useCustomRate) {
+        const buyRate = parseFloat(customBuyRate)
+        const sellRate = parseFloat(customSellRate)
+        const usd = parseFloat(customUsd)
+        const bcv = parseFloat(customBcv)
+
+        if (isNaN(buyRate) || isNaN(sellRate) || isNaN(usd) || isNaN(bcv)) {
+          toast.error('Valores de tasa personalizada inválidos')
+          setLoading(false)
+          return
+        }
+
+        payload.customRate = { buyRate, sellRate, usd, bcv }
+      }
+
+      await api.post('/giro/mobile-payment/create', payload)
       toast.success('Pago móvil registrado exitosamente')
       resetForm()
       if (isMinorista) {
@@ -151,6 +191,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
     setSenderName('')
     setAmountCop('')
     setShowSuggestions(false)
+    setUseCustomRate(false)
   }
 
   const handleSelectBeneficiary = (beneficiary: BeneficiaryData) => {
@@ -256,6 +297,114 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
         </div>
       </div>
 
+      {/* Exchange Rate Info Display */}
+      {effectiveRate ? (
+        <div className="bg-gray-100 rounded-lg p-4 mb-5">
+          {isMinorista || isAdmin ? (
+            <div className="grid grid-cols-1 gap-3 text-xs md:text-lg">
+              <div>
+                <span className="text-gray-600 text-lg">Tasa: </span>
+                <span className="font-bold text-blue-700 text-lg">{effectiveRate.sellRate.toFixed(2)}</span>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-2 text-xs md:text-lg">
+              <div>
+                <span className="text-gray-600">Compra: </span>
+                <span className="font-bold text-blue-700">{effectiveRate.buyRate.toFixed(2)}</span>
+              </div>
+              <div>
+                <span className="text-gray-600">Venta: </span>
+                <span className="font-bold text-blue-700">{effectiveRate.sellRate.toFixed(2)}</span>
+              </div>
+              <div>
+                <span className="text-gray-600">USD: </span>
+                <span className="font-bold text-blue-700">{effectiveRate.usd.toFixed(2)}</span>
+              </div>
+              <div>
+                <span className="text-gray-600">BCV: </span>
+                <span className="font-bold text-blue-700">{effectiveRate.bcv.toFixed(2)}</span>
+              </div>
+            </div>
+          )}
+        </div>
+      ) : null}
+
+      {/* Custom Rate Override (SUPER_ADMIN or ADMIN) */}
+      {(isSuperAdmin || isAdmin) && (
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="useCustomRate"
+              checked={useCustomRate}
+              onChange={(e) => setUseCustomRate(e.target.checked)}
+              className="h-5 w-5 rounded border-gray-300"
+            />
+            <Label htmlFor="useCustomRate" className="cursor-pointer text-sm md:text-base">
+              Usar tasa personalizada
+            </Label>
+          </div>
+
+          {useCustomRate && (
+            <div className="grid grid-cols-2 gap-3 p-2 bg-yellow-50 dark:bg-yellow-950 rounded-lg">
+              <div className="space-y-1">
+                <Label htmlFor="customBuyRate" className="text-xs md:text-sm">
+                  Compra
+                </Label>
+                <Input
+                  id="customBuyRate"
+                  type="number"
+                  step="0.01"
+                  value={customBuyRate}
+                  onChange={(e) => setCustomBuyRate(e.target.value)}
+                  className="text-base md:text-lg h-10 md:h-12"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="customSellRate" className="text-xs md:text-sm">
+                  Venta
+                </Label>
+                <Input
+                  id="customSellRate"
+                  type="number"
+                  step="0.01"
+                  value={customSellRate}
+                  onChange={(e) => setCustomSellRate(e.target.value)}
+                  className="text-base md:text-lg h-10 md:h-12"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="customUsd" className="text-xs md:text-sm">
+                  USD
+                </Label>
+                <Input
+                  id="customUsd"
+                  type="number"
+                  step="0.01"
+                  value={customUsd}
+                  onChange={(e) => setCustomUsd(e.target.value)}
+                  className="text-base md:text-lg h-10 md:h-12"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="customBcv" className="text-xs md:text-sm">
+                  BCV
+                </Label>
+                <Input
+                  id="customBcv"
+                  type="number"
+                  step="0.01"
+                  value={customBcv}
+                  onChange={(e) => setCustomBcv(e.target.value)}
+                  className="text-base md:text-lg h-10 md:h-12"
+                />
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Bank and Amount Info */}
 
 
@@ -295,7 +444,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
       )}
 
       {/* Exchange Rate Info */}
-      {exchangeRate && amountCop && (
+      {effectiveRate && amountCop && (
         <div className="p-3 bg-green-50 dark:bg-green-950 rounded-lg">
           <div className="grid grid-cols-2 gap-4 text-center">
             <div>
@@ -313,7 +462,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
                 {new Intl.NumberFormat('en-US', {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
-                }).format(Number(amountBs) / exchangeRate.bcv)}
+                }).format(Number(amountBs) / effectiveRate.bcv)}
               </p>
             </div>
           </div>

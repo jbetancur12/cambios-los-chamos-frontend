@@ -51,6 +51,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
   const [customBcv, setCustomBcv] = useState('')
 
   const isSuperAdmin = user?.role === 'SUPER_ADMIN'
+  const isAdmin = user?.role === 'ADMIN'
   const isMinorista = user?.role === 'MINORISTA'
 
   useEffect(() => {
@@ -157,7 +158,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
         currencyInput,
       }
 
-      if (isSuperAdmin && useCustomRate) {
+      if ((isSuperAdmin || isAdmin) && useCustomRate) {
         const buyRate = parseFloat(customBuyRate)
         const sellRate = parseFloat(customSellRate)
         const usd = parseFloat(customUsd)
@@ -203,7 +204,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
   }
 
   const effectiveRate =
-    useCustomRate && isSuperAdmin
+    useCustomRate && (isSuperAdmin || isAdmin)
       ? {
         buyRate: parseFloat(customBuyRate) || (currentRate?.buyRate || 0),
         sellRate: parseFloat(customSellRate) || (currentRate?.sellRate || 0),
@@ -318,10 +319,10 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
           onSelectSuggestion={handleSelectBeneficiaryFromName}
           suggestions={nameSuggestions}
           label="Nombre del Beneficiario"
-          placeholder="Nombre completo"
+          placeholder="Nombre del Beneficiario"
           displayField="name"
           required
-          className="text-xl md:text-xl h-10 md:h-12"
+          className="text-xl md:text-xl h-10 md:h-12 font-medium placeholder:text-muted-foreground md:placeholder:text-transparent"
         />
       </div>
 
@@ -335,25 +336,25 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
           onChange={(e) => setBeneficiaryId(e.target.value)}
           placeholder="Cédula del Beneficiario"
           required
-          className="text-base md:text-lg h-10 md:h-12"
+          className="text-base md:text-lg h-10 md:h-12 font-medium placeholder:text-muted-foreground md:placeholder:text-transparent"
         />
       </div>
 
       {/* Bank Info */}
       <div className="space-y-2">
-        <Label htmlFor="bank" className="hidden md:block text-sm md:text-base">
+        <Label htmlFor="bank" className="hidden md:block text-xl md:text-xl">
           Banco
         </Label>
         <select
           id="bank"
           value={bankId}
           onChange={(e) => setBankId(e.target.value)}
-          className="flex h-10 md:h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-base md:text-lg ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          className={`flex h-10 md:h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-base md:text-lg ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 font-medium ${bankId === "" ? "md:text-transparent" : ""}`}
           required
         >
-          <option value="">Banco Destino</option>
+          <option value="" className="text-muted-foreground">Banco</option>
           {banks.map((bank) => (
-            <option key={bank.id} value={bank.id}>
+            <option key={bank.id} value={bank.id} className="font-medium text-foreground">
               {`0${bank.code} - ${bank.name}`}
             </option>
           ))}
@@ -361,7 +362,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="accountNumber" className="hidden md:block text-sm md:text-base">
+        <Label htmlFor="accountNumber" className="hidden md:block text-xl md:text-xl">
           Número de Cuenta
         </Label>
         <Input
@@ -370,14 +371,14 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
           onChange={(e) => setAccountNumber(e.target.value)}
           placeholder="Número de Cuenta"
           required
-          className="text-sm md:text-lg h-10 md:h-12"
+          className="text-sm md:text-lg h-10 md:h-12 font-medium placeholder:text-muted-foreground md:placeholder:text-transparent"
         />
       </div>
 
       {/* Amount & Currency */}
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
-          <Label htmlFor="amount" className="hidden md:block text-sm md:text-base">
+          <Label htmlFor="amount" className="hidden md:block text-xl md:text-xl">
             Monto
           </Label>
           <NumericFormat
@@ -395,7 +396,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
             placeholder="Monto"
             allowNegative={false}
             required
-            className="text-sm md:text-lg h-10 md:h-12"
+            className="text-sm md:text-lg h-10 md:h-12 font-medium placeholder:text-muted-foreground md:placeholder:text-transparent"
           />
         </div>
 
@@ -446,34 +447,34 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
             </div>
           )}
         </div>
-      ) : currentRate ? (
+      ) : effectiveRate ? (
         <div className="bg-gray-100 rounded-lg p-4 mb-5">
           {/* <p className="text-sm md:text-base font-semibold text-gray-700 mb-3">Tasa de Cambio Actual</p> */}
 
-          {isMinorista ? (
+          {isMinorista || isAdmin ? (
             <div className="grid grid-cols-1 gap-3 text-xs md:text-lg">
               <div>
                 <span className="text-gray-600 text-lg">Tasa: </span>
-                <span className="font-bold text-blue-700 text-lg">{currentRate.sellRate.toFixed(2)}</span>
+                <span className="font-bold text-blue-700 text-lg">{effectiveRate.sellRate.toFixed(2)}</span>
               </div>
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-2 text-xs md:text-lg">
               <div>
                 <span className="text-gray-600">Compra: </span>
-                <span className="font-bold text-blue-700">{currentRate.buyRate.toFixed(2)}</span>
+                <span className="font-bold text-blue-700">{effectiveRate.buyRate.toFixed(2)}</span>
               </div>
               <div>
                 <span className="text-gray-600">Venta: </span>
-                <span className="font-bold text-blue-700">{currentRate.sellRate.toFixed(2)}</span>
+                <span className="font-bold text-blue-700">{effectiveRate.sellRate.toFixed(2)}</span>
               </div>
               <div>
                 <span className="text-gray-600">USD: </span>
-                <span className="font-bold text-blue-700">{currentRate.usd.toFixed(2)}</span>
+                <span className="font-bold text-blue-700">{effectiveRate.usd.toFixed(2)}</span>
               </div>
               <div>
                 <span className="text-gray-600">BCV: </span>
-                <span className="font-bold text-blue-700">{currentRate.bcv.toFixed(2)}</span>
+                <span className="font-bold text-blue-700">{effectiveRate.bcv.toFixed(2)}</span>
               </div>
             </div>
           )}
@@ -481,7 +482,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
       ) : null}
 
       {/* Custom Rate Override (SUPER_ADMIN only) */}
-      {isSuperAdmin && (
+      {isSuperAdmin || isAdmin && (
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <input

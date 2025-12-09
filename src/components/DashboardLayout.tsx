@@ -132,14 +132,14 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
                   key={item.href}
                   to={item.href}
                   className={cn(
-                    'flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-all duration-200',
+                    'flex items-center gap-3 px-3 py-2 text-base font-medium rounded-md transition-all duration-200',
                     isActive ? 'text-white' : 'text-blue-100 hover:text-white'
                   )}
                   style={
                     isActive ? { backgroundColor: 'rgba(255, 255, 255, 0.15)' } : { backgroundColor: 'transparent' }
                   }
                 >
-                  <Icon className="w-5 h-5" />
+                  <Icon className="w-6 h-6" />
                   <span>{item.label}</span>
                 </Link>
               )
@@ -149,15 +149,15 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
           {/* User Info & Logout */}
           <div className="p-4 border-t" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
             <div className="mb-3 px-3">
-              <p className="text-sm font-medium text-white">{user?.fullName}</p>
-              <p className="text-xs text-blue-100">{user?.email}</p>
+              <p className="text-base font-medium text-white">{user?.fullName}</p>
+              <p className="text-sm text-blue-100">{user?.email}</p>
             </div>
             <Button
-              className="w-full justify-start gap-2 text-white hover:text-white bg-[linear-gradient(to_right,#510200,#f80000)]"
+              className="w-full justify-start gap-2 text-white hover:text-white bg-[linear-gradient(to_right,#510200,#f80000)] text-base"
               style={{ border: 'none' }}
               onClick={handleLogout}
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="w-5 h-5" />
               Cerrar Sesión
             </Button>
           </div>

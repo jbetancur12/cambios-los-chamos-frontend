@@ -73,13 +73,13 @@ export function BeneficiaryAutocomplete({
 
   return (
     <div ref={containerRef} className="relative w-full">
-      {label && <label className="text-sm md:text-base font-medium text-foreground mb-1 block hidden md:block">{label}</label>}
+      {label && <label className="text-xl md:text-xl font-medium text-foreground mb-1 block hidden md:block">{label}</label>}
       <div className="relative">
         <Input
           value={value}
           onChange={handleInputChange}
           onFocus={() => value && setIsOpen(true)}
-          placeholder={placeholder || label}
+          placeholder={placeholder}
           required={required}
           autoComplete="off"
           className={className}

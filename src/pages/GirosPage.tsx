@@ -409,7 +409,7 @@ export function GirosPage() {
               >
                 Hoy
               </Button>
-              <Button
+              {/* <Button
                 variant={filterDate === 'YESTERDAY' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterDate('YESTERDAY')}
@@ -453,7 +453,7 @@ export function GirosPage() {
                 style={filterDate === 'LAST_MONTH' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
               >
                 Mes Pasado
-              </Button>
+              </Button> */}
               <Button
                 variant={filterDate === 'CUSTOM' ? 'default' : 'outline'}
                 size="sm"
@@ -464,7 +464,7 @@ export function GirosPage() {
                 <Calendar className="h-3 w-3 mr-1" />
                 Personalizado
               </Button>
-              <Button
+              {/* <Button
                 variant={filterDate === 'ALL' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilterDate('ALL')}
@@ -472,7 +472,7 @@ export function GirosPage() {
                 style={filterDate === 'ALL' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
               >
                 Todos
-              </Button>
+              </Button> */}
             </div>
           </div>
         )}
