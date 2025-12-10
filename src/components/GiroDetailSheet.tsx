@@ -934,14 +934,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                               {account.bank.name} ({formatCurrency(account.balance, 'VES')})
                             </option>
                           ))}
-                        </select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label>Tipo de Ejecución</Label>
-                        <div className="p-2 bg-muted rounded text-sm font-medium">
-                          {giro.executionType ? giro.executionType.replace(/_/g, ' ') : 'No definido'}
-                        </div>
+                        </select>{' '}
                       </div>
 
                       <div className="space-y-2">
