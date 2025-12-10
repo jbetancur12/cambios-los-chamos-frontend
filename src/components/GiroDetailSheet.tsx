@@ -374,7 +374,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent>
+      <SheetContent className="lg:max-w-2xl">
         <SheetHeader onClose={() => onOpenChange(false)}>
           <div className="flex gap-5">
             <SheetTitle>Detalles del Giro</SheetTitle>
@@ -396,9 +396,9 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
               {/* Status Badge */}
               {statusBadge && StatusIcon && (
                 <div
-                  className={`flex items-center justify-center gap-1 py-1 px-3 rounded text-xs font-semibold ${statusBadge.className}`}
+                  className={`flex items-center justify-center gap-1 py-1 px-3 rounded text-xs lg:text-base font-semibold ${statusBadge.className}`}
                 >
-                  <StatusIcon className="h-3 w-3" />
+                  <StatusIcon className="h-3 w-3 lg:h-4 lg:w-4" />
                   <span>{statusBadge.label}</span>
                 </div>
               )}
@@ -414,7 +414,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
               )}
 
               {/* Beneficiary Info */}
-              <div className="p-2 bg-muted rounded text-sm space-y-1">
+              <div className="p-2 bg-muted rounded text-sm lg:text-lg space-y-1">
                 {/* <h3 className="font-semibold flex items-center gap-1">
                   <User className="h-3 w-3" />
                   Beneficiario
@@ -569,18 +569,18 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
               </div>
 
               {/* Amounts */}
-              <div className="p-2 bg-muted rounded text-xs space-y-1">
+              <div className="p-2 bg-muted rounded text-xs lg:text-lg space-y-1">
                 <h3 className="font-semibold flex items-center gap-1">
                   <DollarSign className="h-3 w-3" />
                   Montos
                 </h3>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <p className="text-muted-foreground text-xs">Enviado</p>
+                    <p className="text-muted-foreground text-xs lg:text-base">Enviado</p>
                     <p className="font-semibold">{formatCurrency(giro.amountInput, giro.currencyInput)}</p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground text-xs">Bs</p>
+                    <p className="text-muted-foreground text-xs lg:text-base">Bs</p>
                     <p className="font-semibold text-green-600">{formatCurrency(giro.amountBs, 'VES')}</p>
                   </div>
                 </div>
@@ -589,14 +589,14 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
               {/* Consumption Breakdown for Minorista - Only shown when viewing their giro */}
               {isMinorista && minoristaTransaction && (
                 <div className="space-y-3 p-4 bg-emerald-50 dark:bg-emerald-950 rounded-lg border border-emerald-200 dark:border-emerald-800">
-                  <h3 className="font-semibold flex items-center gap-2 text-emerald-700 dark:text-emerald-300">
+                  <h3 className="font-semibold flex items-center gap-2 text-emerald-700 dark:text-emerald-300 lg:text-lg">
                     <CreditCard className="h-4 w-4" />
                     Desglose del Consumo
                   </h3>
                   <p className="text-xs text-emerald-600 dark:text-emerald-400 mb-2">
                     Cómo se descontó el cupo de este giro
                   </p>
-                  <div className="space-y-2 text-sm">
+                  <div className="space-y-2 text-sm lg:text-base">
                     {minoristaTransaction.balanceInFavorUsed !== undefined &&
                       minoristaTransaction.balanceInFavorUsed > 0 && (
                         <div className="p-3 bg-white dark:bg-slate-900 rounded border border-emerald-200 dark:border-emerald-700">
@@ -632,7 +632,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
 
               {/* Exchange Rate Applied - Only shown to Admins */}
               {isAdmin && (
-                <div className="p-2 bg-muted rounded text-xs space-y-1">
+                <div className="p-2 bg-muted rounded text-xs lg:text-base space-y-1">
                   <h3 className="font-semibold flex items-center gap-1">
                     <TrendingUp className="h-3 w-3" />
                     Tasa: <span className="text-blue-600 ml-1">{giro.rateApplied?.sellRate?.toFixed(2) || '0.00'}</span>
@@ -894,8 +894,8 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                       type="button"
                       variant="ghost"
                       className={`flex-1 ${!showReturnForm
-                          ? 'bg-green-600 hover:bg-green-700 text-white'
-                          : 'hover:bg-muted text-muted-foreground'
+                        ? 'bg-green-600 hover:bg-green-700 text-white'
+                        : 'hover:bg-muted text-muted-foreground'
                         }`}
                       onClick={() => setShowReturnForm(false)}
                     >
@@ -905,8 +905,8 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                       type="button"
                       variant="ghost"
                       className={`flex-1 ${showReturnForm
-                          ? 'bg-orange-600 hover:bg-orange-700 text-white'
-                          : 'hover:bg-muted text-muted-foreground'
+                        ? 'bg-orange-600 hover:bg-orange-700 text-white'
+                        : 'hover:bg-muted text-muted-foreground'
                         }`}
                       onClick={() => setShowReturnForm(true)}
                     >

@@ -38,11 +38,13 @@ export function Sheet({ open, onOpenChange, children }: SheetProps) {
   )
 }
 
-export function SheetContent({ children }: { children: React.ReactNode }) {
+export function SheetContent({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
     <div
-      className="bg-background rounded-t-3xl shadow-2xl max-h-[90vh] overflow-y-auto w-full
-                 lg:rounded-xl  lg:max-h-[90vh] lg:m-auto"
+      className={cn(
+        'bg-background rounded-t-3xl shadow-2xl max-h-[90vh] overflow-y-auto w-full lg:rounded-xl  lg:max-h-[90vh] lg:m-auto',
+        className
+      )}
       onClick={(e) => e.stopPropagation()}
     >
       {children}

@@ -186,12 +186,14 @@ async function fetchUsersByRole(role?: UserRole | 'ALL' | null): Promise<UserDat
 
   // Fetch all roles
   const [
+    superAdminsResponse,
     adminsResponse,
     transferencistasResponse,
     minoristasResponse,
     transferencistaListResponse,
     minoristaListResponse,
   ] = await Promise.all([
+    api.get<AdminResponse>('/user/by-role/SUPER_ADMIN').catch(() => ({ users: [] })),
     api.get<AdminResponse>('/user/by-role/ADMIN'),
     api.get<AdminResponse>('/user/by-role/TRANSFERENCISTA'),
     api.get<AdminResponse>('/user/by-role/MINORISTA'),
@@ -237,5 +239,5 @@ async function fetchUsersByRole(role?: UserRole | 'ALL' | null): Promise<UserDat
     }
   })
 
-  return [...adminsResponse.users, ...transferencistasData, ...minoristasData]
+  return [...superAdminsResponse.users, ...adminsResponse.users, ...transferencistasData, ...minoristasData]
 }

@@ -19,7 +19,8 @@ import { api } from '@/lib/api'
 export function ConfigPage() {
   const { user } = useAuth()
   const queryClient = useQueryClient()
-  const canAccessOperatorTab = user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN'
+  const canAccessOperatorTab =
+    user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN' || user?.role === 'TRANSFERENCISTA'
   const [activeTab, setActiveTab] = useState<'operador' | 'admins' | 'impresora'>(
     canAccessOperatorTab ? 'operador' : 'impresora'
   )
