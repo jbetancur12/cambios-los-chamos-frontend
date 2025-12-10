@@ -1013,10 +1013,11 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                 </div>
               )}
 
-              {/* Delete Button - Only for creator and only for PENDIENTE, ASIGNADO or DEVUELTO */}
+              {/* Delete Button - Creator (PENDIENTE/ASIGNADO/DEVUELTO) or Admin (DEVUELTO) */}
               {giro &&
-                giro.createdBy?.id === user?.id &&
-                (giro.status === 'PENDIENTE' || giro.status === 'ASIGNADO' || giro.status === 'DEVUELTO') && (
+                ((giro.createdBy?.id === user?.id &&
+                  (giro.status === 'PENDIENTE' || giro.status === 'ASIGNADO' || giro.status === 'DEVUELTO')) ||
+                  (isAdmin && giro.status === 'DEVUELTO')) && (
                   <Button
                     onClick={handleDeleteGiro}
                     disabled={isProcessing}
