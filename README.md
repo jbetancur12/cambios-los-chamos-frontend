@@ -1,73 +1,61 @@
-# React + TypeScript + Vite
+# Frontend - Cambios Los Chamos
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Aplicación web para la gestión de remesas "Cambios Los Chamos". Desarrollada con React, Vite y TypeScript, enfocada en una experiencia de usuario rápida y moderna.
 
-Currently, two official plugins are available:
+## 🛠 Tecnologías Principales
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Framework:** React + Vite
+- **Lenguaje:** TypeScript
+- **Estilos:** Tailwind CSS
+- **UI Kit:** Shadcn UI (Radix UI + Lucide Icons)
+- **Gestión de Estado/Data:** TanStack Query (React Query)
+- **Formularios:** React Hook Form + Zod
+- **Gráficos:** Recharts
+- **Notificaciones:** Sonner (Toasts)
 
-## React Compiler
+## 🚀 Requisitos Previos
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Node.js (v18 o superior)
 
-## Expanding the ESLint configuration
+## 📦 Instalación
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+1.  Navegar a la carpeta `frontend`.
+2.  Instalar dependencias:
+    ```bash
+    npm install
+    ```
+3.  Configurar variables de entorno:
+    - Crear un archivo `.env` basado en `.env.example` si es necesario (generalmente para definir la URL del API).
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 🏃‍♂️ Ejecución
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Desarrollo
+Para iniciar el servidor de desarrollo local:
+```bash
+npm run dev
+```
+La aplicación estará disponible típicamente en `http://localhost:5173`.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Producción
+Para construir la aplicación para producción:
+```bash
+npm run build
+```
+Para previsualizar la build localmente:
+```bash
+npm run preview
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🧩 Estructura del Proyecto
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- `src/components`: Componentes reutilizables (Botones, Inputs, Layouts).
+- `src/pages`: Componentes de página (Vistas principales).
+- `src/hooks`: Hooks personalizados (Lógica de negocio, React Query).
+- `src/context`: Contextos de React (Auth, Theme).
+- `src/lib`: Utilidades y configuraciones (Axios client, utils).
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## 🧪 Calidad de Código
+
+- **Linting:** `npm run lint`
+- **Formateo:** `npm run format`
+- **Chequeo de Tipos:** `npm run ts-check`
