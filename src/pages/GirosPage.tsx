@@ -615,7 +615,7 @@ export function GirosPage() {
           {/* Desktop: Compact Table */}
           <div className="hidden md:block border rounded-lg overflow-hidden bg-card">
             <div className="overflow-x-auto">
-              <table className="w-full text-xs">
+              <table className="w-full text-xs md:text-sm">
                 <thead>
                   <tr className="border-b bg-muted/50">
                     {user?.role !== 'MINORISTA' && (
@@ -798,21 +798,21 @@ export function GirosPage() {
 
           {/* Compact Summary Footer */}
           <div
-            className="mt-3 rounded border text-white text-xs"
+            className="mt-3 rounded border text-white text-xs md:text-base"
             style={{ background: 'linear-gradient(to right, #136BBC, #274565)', borderColor: '#136BBC' }}
           >
             <div className="p-3 flex justify-between items-center gap-4">
               <div>
-                <span className="font-semibold">{totals.count}</span>
+                <span className="font-semibold md:text-lg">{totals.count}</span>
                 <span className="ml-1">giro{totals.count !== 1 ? 's' : ''}</span>
               </div>
               <div className="text-right">
                 <span className="font-semibold">COP: </span>
-                <span className="font-mono">{formatCurrency(totals.cop, 'COP')}</span>
+                <span className="font-mono md:text-lg">{formatCurrency(totals.cop, 'COP')}</span>
               </div>
               <div className="text-right">
                 <span className="font-semibold">Bs: </span>
-                <span className="font-mono">{totals.bs.toLocaleString('es-VE')}</span>
+                <span className="font-mono md:text-lg">{totals.bs.toLocaleString('es-VE')}</span>
               </div>
             </div>
 
