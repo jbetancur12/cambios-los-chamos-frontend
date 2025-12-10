@@ -76,13 +76,17 @@ export function ResetPasswordPage() {
       <Card className="w-full max-w-md dark:border-border">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl dark:text-foreground">Restablecer Contraseña</CardTitle>
-          <CardDescription className="dark:text-muted-foreground">Ingresa tu nueva contraseña para recuperar tu cuenta</CardDescription>
+          <CardDescription className="dark:text-muted-foreground">
+            Ingresa tu nueva contraseña para recuperar tu cuenta
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Nueva Contraseña */}
             <div>
-              <label className="text-sm font-medium text-gray-700 dark:text-foreground block mb-2">Nueva Contraseña</label>
+              <label className="text-sm font-medium text-gray-700 dark:text-foreground block mb-2">
+                Nueva Contraseña
+              </label>
               <div className="relative">
                 <Input
                   type={showPassword ? 'text' : 'password'}
@@ -106,7 +110,9 @@ export function ResetPasswordPage() {
 
             {/* Confirmar Nueva Contraseña */}
             <div>
-              <label className="text-sm font-medium text-gray-700 dark:text-foreground block mb-2">Confirmar Nueva Contraseña</label>
+              <label className="text-sm font-medium text-gray-700 dark:text-foreground block mb-2">
+                Confirmar Nueva Contraseña
+              </label>
               <div className="relative">
                 <Input
                   type={showPasswordConfirm ? 'text' : 'password'}

@@ -50,8 +50,12 @@ export function LoginPage() {
           <div className="flex justify-center mb-4">
             <img src="/icons/icon-192x192.png" alt="Cambios los Chamos" className="h-16 w-16 rounded-lg shadow-md" />
           </div>
-          <CardTitle className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-foreground">Cambios los Chamos</CardTitle>
-          <CardDescription className="text-gray-600 dark:text-muted-foreground">Ingresa tus credenciales para acceder</CardDescription>
+          <CardTitle className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-foreground">
+            Cambios los Chamos
+          </CardTitle>
+          <CardDescription className="text-gray-600 dark:text-muted-foreground">
+            Ingresa tus credenciales para acceder
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

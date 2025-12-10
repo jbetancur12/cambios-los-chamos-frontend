@@ -70,10 +70,13 @@ export function SendGiroPage() {
                     setSelectedType(type.value)
                     setDropdownOpen(false)
                   }}
-                  className={`flex w-full flex-col gap-1 border-b border-border px-4 py-3 text-left transition-colors last:border-0 ${selectedType === type.value ? 'bg-accent/50' : 'hover:bg-accent'
-                    }`}
+                  className={`flex w-full flex-col gap-1 border-b border-border px-4 py-3 text-left transition-colors last:border-0 ${
+                    selectedType === type.value ? 'bg-accent/50' : 'hover:bg-accent'
+                  }`}
                 >
-                  <span className={`font-medium text-base md:text-lg ${selectedType === type.value ? 'text-primary' : 'text-foreground'}`}>
+                  <span
+                    className={`font-medium text-base md:text-lg ${selectedType === type.value ? 'text-primary' : 'text-foreground'}`}
+                  >
                     {type.label}
                   </span>
                   {/* <span className="text-sm text-gray-500">{type.description}</span> */}

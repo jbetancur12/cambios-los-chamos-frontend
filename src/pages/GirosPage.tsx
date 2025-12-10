@@ -25,7 +25,15 @@ import { useGirosList } from '@/hooks/queries/useGiroQueries'
 import { useAllUsers } from '@/hooks/queries/useUserQueries'
 import type { GiroStatus, Currency, ExecutionType } from '@/types/api'
 
-type DateFilterType = 'SINGLE_DATE' | 'YESTERDAY' | 'THIS_WEEK' | 'LAST_WEEK' | 'THIS_MONTH' | 'LAST_MONTH' | 'CUSTOM' | 'ALL'
+type DateFilterType =
+  | 'SINGLE_DATE'
+  | 'YESTERDAY'
+  | 'THIS_WEEK'
+  | 'LAST_WEEK'
+  | 'THIS_MONTH'
+  | 'LAST_MONTH'
+  | 'CUSTOM'
+  | 'ALL'
 
 export const getExecutionTypeBadge = (executionType?: ExecutionType) => {
   const typeMap: Record<ExecutionType, { label: string; className: string; icon: any }> = {
@@ -326,8 +334,9 @@ export function GirosPage() {
           >
             <p className="text-xs font-semibold text-muted-foreground">Tipo de Usuario</p>
             <ChevronDown
-              className={`h-4 w-4 text-muted-foreground transition-transform ${userFiltersExpanded ? 'rotate-180' : ''
-                }`}
+              className={`h-4 w-4 text-muted-foreground transition-transform ${
+                userFiltersExpanded ? 'rotate-180' : ''
+              }`}
             />
           </button>
 
@@ -410,7 +419,9 @@ export function GirosPage() {
                 variant={filterDate === 'SINGLE_DATE' ? 'default' : 'outline'}
                 size="sm"
                 className={`relative overflow-hidden ${filterDate === 'SINGLE_DATE' ? 'text-white' : ''}`}
-                style={filterDate === 'SINGLE_DATE' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+                style={
+                  filterDate === 'SINGLE_DATE' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}
+                }
                 onClick={() => dateInputRef.current?.showPicker()}
               >
                 <Calendar className="mr-2 h-3 w-3" />
@@ -640,7 +651,9 @@ export function GirosPage() {
                 <tbody>
                   {paginatedGiros.map((giro) => {
                     const statusBadge = getStatusBadge(giro.status)
-                    {/* const executionTypeBadge = getExecutionTypeBadge(giro.executionType) */ }
+                    {
+                      /* const executionTypeBadge = getExecutionTypeBadge(giro.executionType) */
+                    }
                     const copAmount = giro.currencyInput === 'COP' ? giro.amountInput : 0
                     const userName =
                       filterUserType === 'TRANSFERENCISTA'
@@ -786,8 +799,9 @@ export function GirosPage() {
                 <button
                   key={pageNum}
                   onClick={() => setPage(pageNum)}
-                  className={`px-2 py-0.5 text-xs border rounded ${page === pageNum ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
-                    }`}
+                  className={`px-2 py-0.5 text-xs border rounded ${
+                    page === pageNum ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+                  }`}
                 >
                   {pageNum}
                 </button>
@@ -864,84 +878,77 @@ export function GirosPage() {
             )}
           </div>
         </>
-      )
-      }
+      )}
 
       {/* Custom Date Range Modal */}
-      {
-        customDateModalOpen && (
-          <div
-            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
-            onClick={(e) => {
-              if (e.target === e.currentTarget) {
-                setCustomDateModalOpen(false)
-              }
-            }}
-          >
-            <Card className="w-full max-w-sm">
-              <div className="p-6 space-y-4">
-                <h2 className="text-lg font-semibold">Rango de Fechas Personalizado</h2>
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold">Desde</label>
-                  <Input
-                    type="date"
-                    value={customDateRange.from}
-                    onChange={(e) => setCustomDateRange({ ...customDateRange, from: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold">Hasta</label>
-                  <Input
-                    type="date"
-                    value={customDateRange.to}
-                    onChange={(e) => setCustomDateRange({ ...customDateRange, to: e.target.value })}
-                  />
-                </div>
-                <div className="flex gap-2 pt-4">
-                  <Button
-                    onClick={() => {
-                      setFilterDate('CUSTOM')
-                      setCustomDateModalOpen(false)
-                    }}
-                    className="flex-1"
-                    size="sm"
-                  >
-                    Aplicar
-                  </Button>
-                  <Button onClick={() => setCustomDateModalOpen(false)} variant="outline" className="flex-1" size="sm">
-                    Cancelar
-                  </Button>
-                </div>
+      {customDateModalOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setCustomDateModalOpen(false)
+            }
+          }}
+        >
+          <Card className="w-full max-w-sm">
+            <div className="p-6 space-y-4">
+              <h2 className="text-lg font-semibold">Rango de Fechas Personalizado</h2>
+              <div className="space-y-2">
+                <label className="text-xs font-semibold">Desde</label>
+                <Input
+                  type="date"
+                  value={customDateRange.from}
+                  onChange={(e) => setCustomDateRange({ ...customDateRange, from: e.target.value })}
+                />
               </div>
-            </Card>
-          </div>
-        )
-      }
+              <div className="space-y-2">
+                <label className="text-xs font-semibold">Hasta</label>
+                <Input
+                  type="date"
+                  value={customDateRange.to}
+                  onChange={(e) => setCustomDateRange({ ...customDateRange, to: e.target.value })}
+                />
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button
+                  onClick={() => {
+                    setFilterDate('CUSTOM')
+                    setCustomDateModalOpen(false)
+                  }}
+                  className="flex-1"
+                  size="sm"
+                >
+                  Aplicar
+                </Button>
+                <Button onClick={() => setCustomDateModalOpen(false)} variant="outline" className="flex-1" size="sm">
+                  Cancelar
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
 
       {/* Giro Detail Sheet */}
-      {
-        selectedGiroId && (
-          <GiroDetailSheet
-            open={detailSheetOpen}
-            onOpenChange={setDetailSheetOpen}
-            giroId={selectedGiroId}
-            onUpdate={() => { }}
-          />
-        )
-      }
+      {selectedGiroId && (
+        <GiroDetailSheet
+          open={detailSheetOpen}
+          onOpenChange={setDetailSheetOpen}
+          giroId={selectedGiroId}
+          onUpdate={() => {}}
+        />
+      )}
 
       {/* Print Modal */}
-      {
-        selectedGiroForPrint && (
-          <PrintTicketModal
-            giroId={selectedGiroForPrint}
-            open={showPrintModal}
-            onOpenChange={(open) => {
-              setShowPrintModal(open)
-            }}
-          />
-        )
-      }
-    </div >
+      {selectedGiroForPrint && (
+        <PrintTicketModal
+          giroId={selectedGiroForPrint}
+          open={showPrintModal}
+          onOpenChange={(open) => {
+            setShowPrintModal(open)
+          }}
+        />
+      )}
+    </div>
   )
 }

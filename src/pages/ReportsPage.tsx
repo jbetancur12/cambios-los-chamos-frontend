@@ -190,32 +190,36 @@ export function ReportsPage() {
         <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
           <button
             onClick={() => handleTabChange('system')}
-            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${activeTab === 'system' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
-              }`}
+            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${
+              activeTab === 'system' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
+            }`}
             style={activeTab === 'system' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             Ganancias del Sistema
           </button>
           <button
             onClick={() => handleTabChange('minoristas')}
-            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${activeTab === 'minoristas' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
-              }`}
+            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${
+              activeTab === 'minoristas' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
+            }`}
             style={activeTab === 'minoristas' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             Top Minoristas
           </button>
           <button
             onClick={() => handleTabChange('bank')}
-            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${activeTab === 'bank' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
-              }`}
+            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${
+              activeTab === 'bank' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
+            }`}
             style={activeTab === 'bank' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             Transacciones Bancarias
           </button>
           <button
             onClick={() => handleTabChange('minoristaTransactions')}
-            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${activeTab === 'minoristaTransactions' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
-              }`}
+            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${
+              activeTab === 'minoristaTransactions' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
+            }`}
             style={
               activeTab === 'minoristaTransactions' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}
             }
@@ -232,7 +236,11 @@ export function ReportsPage() {
               value={`$${systemReportQuery.data.totalProfit.toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
               color="bg-green-100 dark:bg-green-900/20"
             />
-            <StatCard label="Giros Totales" value={systemReportQuery.data.totalGiros.toString()} color="bg-blue-100 dark:bg-blue-900/20" />
+            <StatCard
+              label="Giros Totales"
+              value={systemReportQuery.data.totalGiros.toString()}
+              color="bg-blue-100 dark:bg-blue-900/20"
+            />
             <StatCard
               label="Giros Completados"
               value={systemReportQuery.data.completedGiros.toString()}
@@ -257,7 +265,14 @@ export function ReportsPage() {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="date" />
                   <YAxis />
-                  <Tooltip formatter={(value) => `$${value.toLocaleString()}`} contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }} />
+                  <Tooltip
+                    formatter={(value) => `$${value.toLocaleString()}`}
+                    contentStyle={{
+                      backgroundColor: 'var(--card)',
+                      borderColor: 'var(--border)',
+                      color: 'var(--foreground)',
+                    }}
+                  />
                   <Legend />
                   <Line
                     type="monotone"
@@ -331,7 +346,14 @@ export function ReportsPage() {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="minoristaName" angle={-45} textAnchor="end" height={80} />
                       <YAxis />
-                      <Tooltip formatter={(value) => `$${value.toLocaleString()}`} contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }} />
+                      <Tooltip
+                        formatter={(value) => `$${value.toLocaleString()}`}
+                        contentStyle={{
+                          backgroundColor: 'var(--card)',
+                          borderColor: 'var(--border)',
+                          color: 'var(--foreground)',
+                        }}
+                      />
                       <Bar dataKey="totalProfit" fill="#10b981" name="Ganancia" />
                     </BarChart>
                   </ResponsiveContainer>
@@ -399,7 +421,11 @@ export function ReportsPage() {
               <StatCard
                 label="Neto"
                 value={`$${bankReportQuery.data.netAmount.toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
-                color={bankReportQuery.data.netAmount >= 0 ? 'bg-blue-100 dark:bg-blue-900/20' : 'bg-orange-100 dark:bg-orange-900/20'}
+                color={
+                  bankReportQuery.data.netAmount >= 0
+                    ? 'bg-blue-100 dark:bg-blue-900/20'
+                    : 'bg-orange-100 dark:bg-orange-900/20'
+                }
               />
             </div>
 
@@ -424,7 +450,13 @@ export function ReportsPage() {
                         <Cell key={`cell-${index}`} fill={CHART_COLORS[index]} />
                       ))}
                     </Pie>
-                    <Tooltip contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'var(--card)',
+                        borderColor: 'var(--border)',
+                        color: 'var(--foreground)',
+                      }}
+                    />
                     <Legend />
                   </PieChart>
                 </ResponsiveContainer>
@@ -511,7 +543,13 @@ export function ReportsPage() {
                         <Cell key={`cell-${index}`} fill={CHART_COLORS[index]} />
                       ))}
                     </Pie>
-                    <Tooltip contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'var(--card)',
+                        borderColor: 'var(--border)',
+                        color: 'var(--foreground)',
+                      }}
+                    />
                     <Legend />
                   </PieChart>
                 </ResponsiveContainer>

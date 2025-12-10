@@ -49,7 +49,7 @@ export function RechargeMinoristaBalanceSheet({
     from: startOfDay,
     to: endOfDay,
     startDate: today.toISOString().split('T')[0],
-    endDate: today.toISOString().split('T')[0]
+    endDate: today.toISOString().split('T')[0],
   })
   const [typeFilter, setTypeFilter] = useState<MinoristaTransactionType | 'ALL'>('ALL')
 
@@ -65,7 +65,7 @@ export function RechargeMinoristaBalanceSheet({
       from: fromDate.toISOString(),
       to: toDate.toISOString(),
       startDate: date,
-      endDate: date
+      endDate: date,
     })
     setPage(1)
   }
@@ -215,30 +215,33 @@ export function RechargeMinoristaBalanceSheet({
           <div className="flex gap-2 border-b">
             <button
               onClick={() => setActiveTab('view')}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'view'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-muted-foreground hover:text-foreground'
-                }`}
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === 'view'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
+              }`}
             >
               <Eye className="h-4 w-4 inline mr-2" />
               Ver
             </button>
             <button
               onClick={() => setActiveTab('assign')}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'assign'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-muted-foreground hover:text-foreground'
-                }`}
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === 'assign'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
+              }`}
             >
               <DollarSign className="h-4 w-4 inline mr-2" />
               Asignar Cupo
             </button>
             <button
               onClick={() => setActiveTab('pay')}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'pay'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-muted-foreground hover:text-foreground'
-                }`}
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === 'pay'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
+              }`}
             >
               <DollarSign className="h-4 w-4 inline mr-2" />
               Pagar Deuda
@@ -348,7 +351,9 @@ export function RechargeMinoristaBalanceSheet({
                             size="sm"
                             className={`relative overflow-hidden ${filterType === 'SINGLE' ? 'text-white' : ''}`}
                             style={
-                              filterType === 'SINGLE' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}
+                              filterType === 'SINGLE'
+                                ? { background: 'linear-gradient(to right, #136BBC, #274565)' }
+                                : {}
                             }
                             onClick={() => dateInputRef.current?.showPicker()}
                           >
@@ -375,7 +380,9 @@ export function RechargeMinoristaBalanceSheet({
                             onClick={() => setFilterType('CUSTOM')}
                             className={filterType === 'CUSTOM' ? 'text-white' : ''}
                             style={
-                              filterType === 'CUSTOM' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}
+                              filterType === 'CUSTOM'
+                                ? { background: 'linear-gradient(to right, #136BBC, #274565)' }
+                                : {}
                             }
                           >
                             <Calendar className="h-3 w-3 mr-1" />

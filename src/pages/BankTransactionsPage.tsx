@@ -10,8 +10,6 @@ import { toast } from 'sonner'
 import { useBankAccountDetail, useBankAccountTransactions } from '@/hooks/queries/useBankQueries'
 import type { BankAccountTransactionType } from '@/types/api'
 
-
-
 export function BankTransactionsPage() {
   const { bankAccountId } = useParams<{ bankAccountId: string }>()
   const navigate = useNavigate()
@@ -43,12 +41,10 @@ export function BankTransactionsPage() {
 
     setDateRange({
       from: fromDate.toISOString(),
-      to: toDate.toISOString()
+      to: toDate.toISOString(),
     })
     setPage(1)
   }
-
-
 
   // React Query hooks for bank account and transactions
   const bankAccountQuery = useBankAccountDetail(bankAccountId || null)
@@ -162,9 +158,7 @@ export function BankTransactionsPage() {
                   onClick={() => dateInputRef.current?.showPicker()}
                 >
                   <Calendar className="mr-2 h-3 w-3" />
-                  {singleDate === new Date().toISOString().split('T')[0]
-                    ? 'Ver día (Hoy)'
-                    : `Ver día: ${singleDate}`}
+                  {singleDate === new Date().toISOString().split('T')[0] ? 'Ver día (Hoy)' : `Ver día: ${singleDate}`}
                 </Button>
 
                 <input
@@ -201,7 +195,7 @@ export function BankTransactionsPage() {
                         const val = e.target.value
                         if (val) {
                           const [y, m, d] = val.split('-').map(Number)
-                          setDateRange(prev => ({ ...prev, from: new Date(y, m - 1, d, 0, 0, 0, 0).toISOString() }))
+                          setDateRange((prev) => ({ ...prev, from: new Date(y, m - 1, d, 0, 0, 0, 0).toISOString() }))
                         }
                       }}
                       className="w-full"
@@ -216,7 +210,10 @@ export function BankTransactionsPage() {
                         const val = e.target.value
                         if (val) {
                           const [y, m, d] = val.split('-').map(Number)
-                          setDateRange(prev => ({ ...prev, to: new Date(y, m - 1, d, 23, 59, 59, 999).toISOString() }))
+                          setDateRange((prev) => ({
+                            ...prev,
+                            to: new Date(y, m - 1, d, 23, 59, 59, 999).toISOString(),
+                          }))
                         }
                       }}
                       className="w-full"
@@ -312,8 +309,9 @@ export function BankTransactionsPage() {
                           >
                             <td className="py-2 whitespace-nowrap px-1">{formatCompactDate(transaction.createdAt)}</td>
                             <td
-                              className={`py-2 font-semibold whitespace-nowrap px-1 ${isPositive ? 'text-green-600' : 'text-red-600'
-                                }`}
+                              className={`py-2 font-semibold whitespace-nowrap px-1 ${
+                                isPositive ? 'text-green-600' : 'text-red-600'
+                              }`}
                             >
                               {isPositive && '+'}
                               {formatNumber(displayAmount)}

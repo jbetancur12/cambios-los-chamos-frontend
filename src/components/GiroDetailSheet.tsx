@@ -893,10 +893,11 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                     <Button
                       type="button"
                       variant="ghost"
-                      className={`flex-1 ${!showReturnForm
-                        ? 'bg-green-600 hover:bg-green-700 text-white'
-                        : 'hover:bg-muted text-muted-foreground'
-                        }`}
+                      className={`flex-1 ${
+                        !showReturnForm
+                          ? 'bg-green-600 hover:bg-green-700 text-white'
+                          : 'hover:bg-muted text-muted-foreground'
+                      }`}
                       onClick={() => setShowReturnForm(false)}
                     >
                       Ejecutar
@@ -904,10 +905,11 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                     <Button
                       type="button"
                       variant="ghost"
-                      className={`flex-1 ${showReturnForm
-                        ? 'bg-orange-600 hover:bg-orange-700 text-white'
-                        : 'hover:bg-muted text-muted-foreground'
-                        }`}
+                      className={`flex-1 ${
+                        showReturnForm
+                          ? 'bg-orange-600 hover:bg-orange-700 text-white'
+                          : 'hover:bg-muted text-muted-foreground'
+                      }`}
                       onClick={() => setShowReturnForm(true)}
                     >
                       Devolver

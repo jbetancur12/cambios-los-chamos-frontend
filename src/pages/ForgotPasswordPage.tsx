@@ -61,7 +61,9 @@ export function ForgotPasswordPage() {
           <div className="flex justify-center mb-4">
             <img src="/icons/icon-192x192.png" alt="Cambios los Chamos" className="h-16 w-16 rounded-lg shadow-md" />
           </div>
-          <CardTitle className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-foreground">Recuperar Contraseña</CardTitle>
+          <CardTitle className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-foreground">
+            Recuperar Contraseña
+          </CardTitle>
           <CardDescription className="text-gray-600 dark:text-muted-foreground">
             Ingresa tu email para recibir un enlace de recuperación
           </CardDescription>
@@ -113,7 +115,9 @@ export function ForgotPasswordPage() {
                 Revisa tu correo (incluyendo la carpeta de spam) para encontrar el enlace de recuperación.
               </p>
 
-              <div className="text-xs text-gray-500 dark:text-gray-400">Redirigiendo a inicio de sesión en 3 segundos...</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">
+                Redirigiendo a inicio de sesión en 3 segundos...
+              </div>
 
               <button
                 type="button"

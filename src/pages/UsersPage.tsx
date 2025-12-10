@@ -23,9 +23,7 @@ export function UsersPage() {
   const [searchQuery, setSearchQuery] = useState('')
 
   const isSuperAdmin =
-    currentUser?.role === 'SUPER_ADMIN' ||
-    currentUser?.role === 'ADMIN' ||
-    currentUser?.role === 'TRANSFERENCISTA'
+    currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ADMIN' || currentUser?.role === 'TRANSFERENCISTA'
 
   // React Query hook for fetching users - always fetch MINORISTA role
   const usersQuery = useAllUsers(isSuperAdmin ? 'MINORISTA' : null)

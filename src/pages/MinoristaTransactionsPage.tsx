@@ -32,7 +32,7 @@ export function MinoristaTransactionsPage() {
     from: startOfDay,
     to: endOfDay,
     startDate: today.toISOString().split('T')[0],
-    endDate: today.toISOString().split('T')[0]
+    endDate: today.toISOString().split('T')[0],
   })
   const [typeFilter, setTypeFilter] = useState<MinoristaTransactionType | 'ALL'>('ALL')
 
@@ -65,7 +65,7 @@ export function MinoristaTransactionsPage() {
       from: fromDate.toISOString(),
       to: toDate.toISOString(),
       startDate: date,
-      endDate: date
+      endDate: date,
     })
     setPage(1)
   }
@@ -223,15 +223,11 @@ export function MinoristaTransactionsPage() {
                     variant={filterType === 'SINGLE' ? 'default' : 'outline'}
                     size="sm"
                     className={`relative overflow-hidden ${filterType === 'SINGLE' ? 'text-white' : ''}`}
-                    style={
-                      filterType === 'SINGLE' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}
-                    }
+                    style={filterType === 'SINGLE' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
                     onClick={() => dateInputRef.current?.showPicker()}
                   >
                     <Calendar className="mr-2 h-3 w-3" />
-                    {singleDate === new Date().toISOString().split('T')[0]
-                      ? 'Ver día (Hoy)'
-                      : `Ver día: ${singleDate}`}
+                    {singleDate === new Date().toISOString().split('T')[0] ? 'Ver día (Hoy)' : `Ver día: ${singleDate}`}
                   </Button>
 
                   <input
@@ -250,9 +246,7 @@ export function MinoristaTransactionsPage() {
                     size="sm"
                     onClick={() => setFilterType('CUSTOM')}
                     className={filterType === 'CUSTOM' ? 'text-white' : ''}
-                    style={
-                      filterType === 'CUSTOM' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}
-                    }
+                    style={filterType === 'CUSTOM' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
                   >
                     <Calendar className="h-3 w-3 mr-1" />
                     Personalizado

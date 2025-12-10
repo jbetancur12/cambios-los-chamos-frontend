@@ -7,10 +7,6 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import { DollarSign, TrendingUp, CheckCircle, Activity, ChevronDown, ChevronUp, Calendar } from 'lucide-react'
 import { useMinoristaGiroReport, useMinoristaGiroTrendReport } from '@/hooks/queries/useReportQueries'
 
-
-
-
-
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat('es-CO', {
     style: 'currency',

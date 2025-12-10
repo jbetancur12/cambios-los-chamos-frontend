@@ -92,13 +92,13 @@ export function CalculadoraPage() {
               <div className="grid grid-cols-2 gap-4 text-center">
                 <div className="flex items-center justify-center gap-2">
                   <img src="/bcv.png" alt="BCV Logo" className="w-8 h-auto" />
-                  <p className="text-xl font-bold text-[#136BBC] dark:text-blue-400">
-                    {formatCurrency(rate.bcv)}
-                  </p>
+                  <p className="text-xl font-bold text-[#136BBC] dark:text-blue-400">{formatCurrency(rate.bcv)}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Tasa Venta</p>
-                  <p className="text-xl font-bold text-green-600 dark:text-green-400">{formatCurrency(rate.sellRate)}</p>
+                  <p className="text-xl font-bold text-green-600 dark:text-green-400">
+                    {formatCurrency(rate.sellRate)}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -109,24 +109,27 @@ export function CalculadoraPage() {
         <div className="flex gap-2 mb-6 overflow-x-auto">
           <button
             onClick={() => setActiveTab('bcv')}
-            className={`flex-1 py-3 rounded-lg font-medium transition-colors whitespace-nowrap ${activeTab === 'bcv' ? 'text-white' : 'bg-card text-foreground border hover:bg-accent'
-              }`}
+            className={`flex-1 py-3 rounded-lg font-medium transition-colors whitespace-nowrap ${
+              activeTab === 'bcv' ? 'text-white' : 'bg-card text-foreground border hover:bg-accent'
+            }`}
             style={activeTab === 'bcv' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             Tasa BCV
           </button>
           <button
             onClick={() => setActiveTab('manual')}
-            className={`flex-1 py-3 rounded-lg font-medium transition-colors whitespace-nowrap ${activeTab === 'manual' ? 'text-white' : 'bg-card text-foreground border hover:bg-accent'
-              }`}
+            className={`flex-1 py-3 rounded-lg font-medium transition-colors whitespace-nowrap ${
+              activeTab === 'manual' ? 'text-white' : 'bg-card text-foreground border hover:bg-accent'
+            }`}
             style={activeTab === 'manual' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             Precio Manual
           </button>
           <button
             onClick={() => setActiveTab('ves')}
-            className={`flex-1 py-3 rounded-lg font-medium transition-colors whitespace-nowrap ${activeTab === 'ves' ? 'text-white' : 'bg-card text-foreground border hover:bg-accent'
-              }`}
+            className={`flex-1 py-3 rounded-lg font-medium transition-colors whitespace-nowrap ${
+              activeTab === 'ves' ? 'text-white' : 'bg-card text-foreground border hover:bg-accent'
+            }`}
             style={activeTab === 'ves' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             VES a COP
@@ -161,7 +164,9 @@ export function CalculadoraPage() {
                   </div>
                   <div className="flex justify-between items-center py-2 border-t pt-3 border-border">
                     <p className="text-muted-foreground">COP a recibir</p>
-                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">{formatCurrency(resultBCV.cop)}</p>
+                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                      {formatCurrency(resultBCV.cop)}
+                    </p>
                   </div>
                 </div>
               )}
@@ -228,7 +233,9 @@ export function CalculadoraPage() {
                   </div>
                   <div className="flex justify-between items-center py-2 border-t pt-3 border-border">
                     <p className="text-muted-foreground">COP a recibir</p>
-                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">{formatCurrency(resultManual.cop)}</p>
+                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                      {formatCurrency(resultManual.cop)}
+                    </p>
                   </div>
                 </div>
               )}
