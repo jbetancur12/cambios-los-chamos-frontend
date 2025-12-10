@@ -329,12 +329,12 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
       </div>
 
       {/* Exchange Rate Info - Moved here for visibility */}
-      {effectiveRate && amountCop && (
+      {effectiveRate && (
         <div className="p-1 bg-green-50 dark:bg-green-950 rounded-lg">
           <div className="grid grid-cols-2 gap-4 text-center">
             <div>
-              <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Bolivares</p>
-              <p className="text-lg md:text-xl font-bold text-green-700 dark:text-green-400">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Bolivares</p>
+              <p className="text-base md:text-lg font-bold text-green-700 dark:text-green-400">
                 {new Intl.NumberFormat('es-VE', {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
@@ -342,8 +342,8 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
               </p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">BCV</p>
-              <p className="text-lg md:text-xl font-bold text-blue-700 dark:text-blue-400">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">BCV</p>
+              <p className="text-base md:text-lg font-bold text-blue-700 dark:text-blue-400">
                 {new Intl.NumberFormat('en-US', {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
@@ -372,14 +372,14 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
       {effectiveRate ? (
         <div className="bg-gray-100 rounded-lg p-1 mb-5">
           {isMinorista || isAdmin ? (
-            <div className="grid grid-cols-1 gap-3 text-xs md:text-lg">
+            <div className="grid grid-cols-1 gap-3 text-xs md:text-sm">
               <div>
-                <span className="text-gray-600 text-lg">Tasa: </span>
-                <span className="font-bold text-blue-700 text-lg">{effectiveRate.sellRate.toFixed(2)}</span>
+                <span className="text-gray-600 text-sm">Tasa: </span>
+                <span className="font-bold text-blue-700 text-sm">{effectiveRate.sellRate.toFixed(2)}</span>
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-2 text-xs md:text-lg">
+            <div className="grid grid-cols-2 gap-2 text-xs md:text-sm">
               <div>
                 <span className="text-gray-600">Compra: </span>
                 <span className="font-bold text-blue-700">{effectiveRate.buyRate.toFixed(2)}</span>
@@ -429,7 +429,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
                   step="0.01"
                   value={customBuyRate}
                   onChange={(e) => setCustomBuyRate(e.target.value)}
-                  className="text-base md:text-lg h-10 md:h-12"
+                  className="text-sm md:text-base h-8 md:h-10"
                 />
               </div>
               <div className="space-y-1">
@@ -442,7 +442,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
                   step="0.01"
                   value={customSellRate}
                   onChange={(e) => setCustomSellRate(e.target.value)}
-                  className="text-base md:text-lg h-10 md:h-12"
+                  className="text-sm md:text-base h-8 md:h-10"
                 />
               </div>
               <div className="space-y-1">
@@ -455,7 +455,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
                   step="0.01"
                   value={customUsd}
                   onChange={(e) => setCustomUsd(e.target.value)}
-                  className="text-base md:text-lg h-10 md:h-12"
+                  className="text-sm md:text-base h-8 md:h-10"
                 />
               </div>
               <div className="space-y-1">
@@ -468,7 +468,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
                   step="0.01"
                   value={customBcv}
                   onChange={(e) => setCustomBcv(e.target.value)}
-                  className="text-base md:text-lg h-10 md:h-12"
+                  className="text-sm md:text-base h-8 md:h-10"
                 />
               </div>
             </div>

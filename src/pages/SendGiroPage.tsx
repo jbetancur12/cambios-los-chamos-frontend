@@ -55,14 +55,14 @@ export function SendGiroPage() {
         <div className="relative">
           <Button
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="w-full justify-between rounded-none border-0 bg-white px-6 py-4 text-left font-semibold text-gray-900 hover:bg-gray-50 h-auto"
+            className="w-full justify-between rounded-none border-0 bg-card px-4 py-3 text-left font-semibold text-foreground hover:bg-accent h-auto"
           >
             <span className="text-lg md:text-lg">{currentTypeLabel}</span>
             <ChevronDown className={`h-6 w-6 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
           </Button>
 
           {dropdownOpen && (
-            <div className="border-t border-gray-200 bg-white">
+            <div className="border-t border-border bg-card">
               {giroTypes.map((type) => (
                 <button
                   key={type.value}
@@ -70,10 +70,10 @@ export function SendGiroPage() {
                     setSelectedType(type.value)
                     setDropdownOpen(false)
                   }}
-                  className={`flex w-full flex-col gap-1 border-b border-gray-100 px-6 py-4 text-left transition-colors last:border-0 ${selectedType === type.value ? 'bg-blue-50' : 'hover:bg-gray-50'
+                  className={`flex w-full flex-col gap-1 border-b border-border px-4 py-3 text-left transition-colors last:border-0 ${selectedType === type.value ? 'bg-accent/50' : 'hover:bg-accent'
                     }`}
                 >
-                  <span className={`font-medium text-lg md:text-lg ${selectedType === type.value ? 'text-blue-600' : 'text-gray-900'}`}>
+                  <span className={`font-medium text-base md:text-lg ${selectedType === type.value ? 'text-primary' : 'text-foreground'}`}>
                     {type.label}
                   </span>
                   {/* <span className="text-sm text-gray-500">{type.description}</span> */}
