@@ -42,7 +42,9 @@ export function BankAccountsPage() {
   const isLoading = accountsQuery.isLoading
 
   // React Query hook for trasferencistas
-  const transferencistaQuery = useAllUsers(user?.role === 'SUPER_ADMIN' ? 'TRANSFERENCISTA' : null)
+  const transferencistaQuery = useAllUsers(
+    user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN' ? 'TRANSFERENCISTA' : null
+  )
   const trasferencistas = transferencistaQuery.data || []
   const isLoadingTrasferencistas = transferencistaQuery.isLoading
 
@@ -51,20 +53,20 @@ export function BankAccountsPage() {
     searchTerm.trim() === ''
       ? accounts
       : accounts.filter(
-          (account) =>
-            account.bank.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            account.accountHolder.toLowerCase().includes(searchTerm.toLowerCase())
-        )
+        (account) =>
+          account.bank.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          account.accountHolder.toLowerCase().includes(searchTerm.toLowerCase())
+      )
 
   // Client-side filtering for trasferencistas
   const filteredTrasferencistas =
     searchTransferencistasTerm.trim() === ''
       ? trasferencistas
       : trasferencistas.filter(
-          (t) =>
-            t.fullName.toLowerCase().includes(searchTransferencistasTerm.toLowerCase()) ||
-            t.email.toLowerCase().includes(searchTransferencistasTerm.toLowerCase())
-        )
+        (t) =>
+          t.fullName.toLowerCase().includes(searchTransferencistasTerm.toLowerCase()) ||
+          t.email.toLowerCase().includes(searchTransferencistasTerm.toLowerCase())
+      )
 
   // Handle errors
   if (accountsQuery.error) {
@@ -160,8 +162,8 @@ export function BankAccountsPage() {
           <p className="text-muted-foreground">Gestiona cuentas bancarias y trasferencistas</p>
         </div>
 
-        {/* Tab Navigation - Only for SuperAdmin */}
-        {user?.role === 'SUPER_ADMIN' && (
+        {/* Tab Navigation - Only for SuperAdmin and Admin */}
+        {(user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN') && (
           <div className="flex gap-2 border-b">
             <button
               onClick={() => setActiveTab('cuentas')}
@@ -247,8 +249,8 @@ export function BankAccountsPage() {
                   <Building className="h-5 w-5" />
                   Cuentas Bancarias ({filteredAccounts.length})
                 </CardTitle>
-                {/* ✨ NUEVO: Botón para crear cuenta ADMIN solo visible para SUPERADMIN */}
-                {user?.role === 'SUPER_ADMIN' && (
+                {/* ✨ NUEVO: Botón para crear cuenta ADMIN visible para SUPERADMIN y ADMIN */}
+                {(user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN') && (
                   <Button
                     onClick={() => setCreateAdminBankAccountSheetOpen(true)}
                     className="gap-2 bg-[linear-gradient(to_right,#136BBC,#274565)] text-white"
@@ -387,7 +389,7 @@ export function BankAccountsPage() {
                                   <Eye className="h-4 w-4" />
                                   Ver Transacciones
                                 </Button>
-                                {user?.role === 'SUPER_ADMIN' && (
+                                {(user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN') && (
                                   <Button
                                     size="sm"
                                     onClick={() => handleRechargeBalance(account)}
@@ -447,7 +449,8 @@ export function BankAccountsPage() {
                               <Eye className="h-4 w-4" />
                               Ver Transacciones
                             </Button>
-                            {user?.role === 'SUPER_ADMIN' && (
+                            {/* Mobile Recharge Button */}
+                            {(user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN') && (
                               <Button
                                 size="sm"
                                 onClick={() => handleRechargeBalance(account)}
