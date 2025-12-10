@@ -120,11 +120,11 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
         usd: giro.rateApplied?.usd || 0,
         bcv: giro.rateApplied?.bcv || 0,
       })
-      if (bankAccounts.length > 0 && !selectedBankAccountId) {
-        setSelectedBankAccountId(bankAccounts[0].id)
-      }
+      // if (bankAccounts.length > 0 && !selectedBankAccountId) {
+      //   setSelectedBankAccountId(bankAccounts[0].id)
+      // }
     }
-  }, [giro?.id, bankAccounts.length])
+  }, [giro?.id])
 
   // Reset form when opening
   useEffect(() => {
@@ -893,11 +893,10 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                     <Button
                       type="button"
                       variant="ghost"
-                      className={`flex-1 ${
-                        !showReturnForm
+                      className={`flex-1 ${!showReturnForm
                           ? 'bg-green-600 hover:bg-green-700 text-white'
                           : 'hover:bg-muted text-muted-foreground'
-                      }`}
+                        }`}
                       onClick={() => setShowReturnForm(false)}
                     >
                       Ejecutar
@@ -905,11 +904,10 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                     <Button
                       type="button"
                       variant="ghost"
-                      className={`flex-1 ${
-                        showReturnForm
+                      className={`flex-1 ${showReturnForm
                           ? 'bg-orange-600 hover:bg-orange-700 text-white'
                           : 'hover:bg-muted text-muted-foreground'
-                      }`}
+                        }`}
                       onClick={() => setShowReturnForm(true)}
                     >
                       Devolver
