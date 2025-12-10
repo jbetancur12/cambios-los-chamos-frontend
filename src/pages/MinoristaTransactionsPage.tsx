@@ -61,7 +61,7 @@ export function MinoristaTransactionsPage() {
   }
 
   // Lógica UI/UX
-  const creditUsed = minorista.creditLimit - minorista.availableCredit
+  const creditUsed = Math.max(0, minorista.creditLimit - minorista.availableCredit)
   const percentAvailable = minorista.creditLimit > 0 ? (minorista.availableCredit / minorista.creditLimit) * 100 : 0
 
   return (
