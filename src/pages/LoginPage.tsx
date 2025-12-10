@@ -44,14 +44,14 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <Card className="w-full max-w-md shadow-xl">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-background dark:to-background p-4">
+      <Card className="w-full max-w-md shadow-xl dark:border-border">
         <CardHeader className="space-y-1 text-center pb-2">
           <div className="flex justify-center mb-4">
             <img src="/icons/icon-192x192.png" alt="Cambios los Chamos" className="h-16 w-16 rounded-lg shadow-md" />
           </div>
-          <CardTitle className="text-2xl md:text-3xl font-bold text-gray-900">Cambios los Chamos</CardTitle>
-          <CardDescription className="text-gray-600">Ingresa tus credenciales para acceder</CardDescription>
+          <CardTitle className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-foreground">Cambios los Chamos</CardTitle>
+          <CardDescription className="text-gray-600 dark:text-muted-foreground">Ingresa tus credenciales para acceder</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -65,7 +65,7 @@ export function LoginPage() {
                 placeholder="tu@email.com"
                 {...register('email')}
                 aria-invalid={!!errors.email}
-                className="border-gray-300"
+                className="border-gray-300 dark:border-input"
               />
               {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
             </div>
@@ -78,8 +78,7 @@ export function LoginPage() {
                 <button
                   type="button"
                   onClick={() => navigate('/forgot-password')}
-                  className="text-xs font-medium"
-                  style={{ color: '#136BBC' }}
+                  className="text-xs font-medium text-[#136BBC] dark:text-primary hover:underline"
                 >
                   ¿Olvidaste tu contraseña?
                 </button>
@@ -90,15 +89,14 @@ export function LoginPage() {
                 placeholder="••••••••"
                 {...register('password')}
                 aria-invalid={!!errors.password}
-                className="border-gray-300"
+                className="border-gray-300 dark:border-input"
               />
               {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
             </div>
 
             <Button
               type="submit"
-              className="w-full text-white font-semibold"
-              style={{ background: 'linear-gradient(to right, #136BBC, #274565)' }}
+              className="w-full text-white font-semibold bg-[linear-gradient(to_right,#136BBC,#274565)]"
               disabled={isSubmitting}
             >
               {isSubmitting ? 'Iniciando sesión...' : 'Iniciar Sesión'}

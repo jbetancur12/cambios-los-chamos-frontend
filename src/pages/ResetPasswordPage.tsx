@@ -72,54 +72,54 @@ export function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-600 to-green-800 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-to-br from-green-600 to-green-800 dark:from-background dark:to-background flex items-center justify-center p-4">
+      <Card className="w-full max-w-md dark:border-border">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Restablecer Contraseña</CardTitle>
-          <CardDescription>Ingresa tu nueva contraseña para recuperar tu cuenta</CardDescription>
+          <CardTitle className="text-2xl dark:text-foreground">Restablecer Contraseña</CardTitle>
+          <CardDescription className="dark:text-muted-foreground">Ingresa tu nueva contraseña para recuperar tu cuenta</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Nueva Contraseña */}
             <div>
-              <label className="text-sm font-medium text-gray-700 block mb-2">Nueva Contraseña</label>
+              <label className="text-sm font-medium text-gray-700 dark:text-foreground block mb-2">Nueva Contraseña</label>
               <div className="relative">
                 <Input
                   type={showPassword ? 'text' : 'password'}
                   placeholder="Ingresa tu nueva contraseña"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pr-10"
+                  className="pr-10 dark:border-input"
                   disabled={loading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-muted-foreground dark:hover:text-foreground"
                   disabled={loading}
                 >
                   {showPassword ? '👁️' : '👁️‍🗨️'}
                 </button>
               </div>
-              <p className="text-xs text-gray-500 mt-1">Mínimo 6 caracteres</p>
+              <p className="text-xs text-gray-500 dark:text-muted-foreground mt-1">Mínimo 6 caracteres</p>
             </div>
 
             {/* Confirmar Nueva Contraseña */}
             <div>
-              <label className="text-sm font-medium text-gray-700 block mb-2">Confirmar Nueva Contraseña</label>
+              <label className="text-sm font-medium text-gray-700 dark:text-foreground block mb-2">Confirmar Nueva Contraseña</label>
               <div className="relative">
                 <Input
                   type={showPasswordConfirm ? 'text' : 'password'}
                   placeholder="Confirma tu nueva contraseña"
                   value={passwordConfirm}
                   onChange={(e) => setPasswordConfirm(e.target.value)}
-                  className="pr-10"
+                  className="pr-10 dark:border-input"
                   disabled={loading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-muted-foreground dark:hover:text-foreground"
                   disabled={loading}
                 >
                   {showPasswordConfirm ? '👁️' : '👁️‍🗨️'}
@@ -131,14 +131,14 @@ export function ResetPasswordPage() {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold"
+              className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold dark:bg-green-700 dark:hover:bg-green-600"
             >
               {loading ? 'Restableciendo...' : 'Restablecer Contraseña'}
             </Button>
 
             {/* Información */}
-            <div className="bg-green-50 border border-green-200 rounded-lg p-3 mt-4">
-              <p className="text-sm text-gray-700">
+            <div className="bg-green-50 border border-green-200 dark:bg-green-900/20 dark:border-green-800 rounded-lg p-3 mt-4">
+              <p className="text-sm text-gray-700 dark:text-green-300">
                 ✅ Tu contraseña será restablecida y podrás iniciar sesión inmediatamente después.
               </p>
             </div>
@@ -148,7 +148,7 @@ export function ResetPasswordPage() {
               <button
                 type="button"
                 onClick={() => navigate('/login')}
-                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                className="text-sm text-blue-600 hover:text-blue-700 font-medium dark:text-primary dark:hover:text-primary/80"
               >
                 Volver a iniciar sesión
               </button>

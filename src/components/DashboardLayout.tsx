@@ -19,6 +19,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
+import { ModeToggle } from './ModeToggle'
 
 interface NavItem {
   icon: typeof Home
@@ -109,13 +110,11 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
       {/* Desktop Sidebar */}
       <aside className="hidden md:fixed md:inset-y-0 md:flex md:w-64 md:flex-col">
         <div
-          className="flex flex-col flex-1 min-h-0 border-r"
-          style={{ background: 'linear-gradient(to bottom, #136BBC, #274565)' }}
+          className="flex flex-col flex-1 min-h-0 border-r bg-[linear-gradient(to_bottom,#136BBC,#274565)] dark:bg-none dark:bg-background"
         >
           {/* Header */}
           <div
-            className="flex items-center gap-3 h-40 px-6 border-b"
-            style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}
+            className="flex items-center gap-3 h-40 px-6 border-b border-white/10 dark:border-border"
           >
             <img src="/LogoLosChamos.avif" alt="Logo" className="h-30 w-30" />
           </div>
@@ -131,11 +130,10 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
                   to={item.href}
                   className={cn(
                     'flex items-center gap-3 px-3 py-2 text-base font-medium rounded-md transition-all duration-200',
-                    isActive ? 'text-white' : 'text-blue-100 hover:text-white'
+                    isActive
+                      ? 'text-white bg-white/15 dark:bg-muted dark:text-foreground'
+                      : 'text-blue-100 hover:text-white hover:bg-white/5 dark:text-muted-foreground dark:hover:text-foreground dark:hover:bg-muted/50'
                   )}
-                  style={
-                    isActive ? { backgroundColor: 'rgba(255, 255, 255, 0.15)' } : { backgroundColor: 'transparent' }
-                  }
                 >
                   <Icon className="w-6 h-6" />
                   <span>{item.label}</span>
@@ -145,19 +143,24 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
           </nav>
 
           {/* User Info & Logout */}
-          <div className="p-4 border-t" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+          <div className="p-4 border-t border-white/10 dark:border-border">
             <div className="mb-3 px-3">
-              <p className="text-base font-medium text-white">{user?.fullName}</p>
-              <p className="text-sm text-blue-100">{user?.email}</p>
+              <p className="text-base font-medium text-white dark:text-foreground">{user?.fullName}</p>
+              <p className="text-sm text-blue-100 dark:text-muted-foreground">{user?.email}</p>
             </div>
-            <Button
-              className="w-full justify-start gap-2 text-white hover:text-white bg-[linear-gradient(to_right,#510200,#f80000)] text-base"
-              style={{ border: 'none' }}
-              onClick={handleLogout}
-            >
-              <LogOut className="w-5 h-5" />
-              Cerrar Sesión
-            </Button>
+            <div className="flex gap-2">
+              <div className="flex-1">
+                <Button
+                  className="w-full justify-start gap-2 text-white hover:text-white bg-[linear-gradient(to_right,#510200,#f80000)] text-base"
+                  style={{ border: 'none' }}
+                  onClick={handleLogout}
+                >
+                  <LogOut className="w-5 h-5" />
+                  Cerrar Sesión
+                </Button>
+              </div>
+              <ModeToggle />
+            </div>
           </div>
         </div>
       </aside>
@@ -168,19 +171,17 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
       )}
       <aside
         className={cn(
-          'fixed left-0 top-0 h-screen w-64 z-50 md:hidden transform transition-transform duration-300',
+          'fixed left-0 top-0 h-screen w-64 z-50 md:hidden transform transition-transform duration-300 bg-[linear-gradient(to_bottom,#136BBC,#274565)] dark:bg-none dark:bg-background',
           sideMenuOpen ? 'translate-x-0' : '-translate-x-full'
         )}
-        style={{ background: 'linear-gradient(to bottom, #136BBC, #274565)' }}
       >
         <div className="flex flex-col h-full">
           {/* Header */}
           <div
-            className="flex items-center justify-between h-16 px-4 border-b"
-            style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}
+            className="flex items-center justify-between h-16 px-4 border-b border-white/10 dark:border-border"
           >
             <img src="/LogoLosChamos.avif" alt="Logo" className="h-10 w-10" />
-            <button onClick={() => setSideMenuOpen(false)} className="text-white hover:text-blue-200">
+            <button onClick={() => setSideMenuOpen(false)} className="text-white hover:text-blue-200 dark:text-foreground dark:hover:text-muted-foreground">
               <X className="w-6 h-6" />
             </button>
           </div>
@@ -197,11 +198,10 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
                   onClick={() => setSideMenuOpen(false)}
                   className={cn(
                     'flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-all duration-200',
-                    isActive ? 'text-white' : 'text-blue-100 hover:text-white'
+                    isActive
+                      ? 'text-white bg-white/15 dark:bg-muted dark:text-foreground'
+                      : 'text-blue-100 hover:text-white hover:bg-white/5 dark:text-muted-foreground dark:hover:text-foreground dark:hover:bg-muted/50'
                   )}
-                  style={
-                    isActive ? { backgroundColor: 'rgba(255, 255, 255, 0.15)' } : { backgroundColor: 'transparent' }
-                  }
                 >
                   <Icon className="w-5 h-5" />
                   <span>{item.label}</span>
@@ -211,19 +211,24 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
           </nav>
 
           {/* User Info & Logout */}
-          <div className="p-4 border-t" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+          <div className="p-4 border-t border-white/10 dark:border-border">
             <div className="mb-3 px-3">
-              <p className="text-sm font-medium text-white">{user?.fullName}</p>
-              <p className="text-xs text-blue-100 truncate">{user?.email}</p>
+              <p className="text-sm font-medium text-white dark:text-foreground">{user?.fullName}</p>
+              <p className="text-xs text-blue-100 truncate dark:text-muted-foreground">{user?.email}</p>
             </div>
-            <Button
-              className="w-full justify-start gap-2 text-white hover:text-white text-sm bg-[linear-gradient(to_right,#510200,#f80000)]"
-              style={{ border: 'none' }}
-              onClick={handleLogout}
-            >
-              <LogOut className="w-4 h-4" />
-              Cerrar Sesión
-            </Button>
+            <div className="flex gap-2">
+              <div className="flex-1">
+                <Button
+                  className="w-full justify-start gap-2 text-white hover:text-white text-sm bg-[linear-gradient(to_right,#510200,#f80000)]"
+                  style={{ border: 'none' }}
+                  onClick={handleLogout}
+                >
+                  <LogOut className="w-4 h-4" />
+                  Cerrar Sesión
+                </Button>
+              </div>
+              <ModeToggle />
+            </div>
           </div>
         </div>
       </aside>
@@ -237,11 +242,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
 
         {/* Mobile Bottom Navigation - 5 icons */}
         <nav
-          className="fixed bottom-0 left-0 right-0 z-40 md:hidden border-t text-white"
-          style={{
-            background: 'linear-gradient(to right, #136BBC, #274565)',
-            borderTopColor: 'rgba(255, 255, 255, 0.1)',
-          }}
+          className="fixed bottom-0 left-0 right-0 z-40 md:hidden border-t text-white bg-[linear-gradient(to_right,#136BBC,#274565)] border-white/10 dark:bg-none dark:bg-background dark:border-border"
         >
           <div className="flex h-18 items-center justify-around">
             {/* Solicitudes */}

@@ -63,217 +63,218 @@ function PushInitializer() {
   return null
 }
 
+import { ThemeProvider } from '@/components/ThemeProvider'
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <QueryMonitorInitializer />
       <WebSocketSyncInitializer />
-      <BrowserRouter>
-        <AuthProvider>
-          {/* <PushInitializer /> */}
-          <PushInitializer />
-          <ErrorBoundary>
-            <Routes>
-              {/* Public Routes */}
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-              <Route path="/verify-email" element={<VerifyEmailPage />} />
-              <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+        <BrowserRouter>
+          <AuthProvider>
+            {/* <PushInitializer /> */}
+            <PushInitializer />
+            <ErrorBoundary>
+              <Routes>
+                {/* Public Routes */}
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                <Route path="/verify-email" element={<VerifyEmailPage />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
 
-              {/* Protected Routes */}
-              <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <ErrorBoundary>
-                      <DashboardLayout>
-                        <DashboardPage />
-                      </DashboardLayout>
-                    </ErrorBoundary>
-                  </ProtectedRoute>
-                }
-              />
+                {/* Protected Routes */}
+                <Route
+                  path="/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <ErrorBoundary>
+                        <DashboardLayout>
+                          <DashboardPage />
+                        </DashboardLayout>
+                      </ErrorBoundary>
+                    </ProtectedRoute>
+                  }
+                />
 
-              {/* Giros */}
-              <Route
-                path="/giros"
-                element={
-                  <ProtectedRoute>
-                    <ErrorBoundary>
-                      <DashboardLayout>
-                        <GirosPage />
-                      </DashboardLayout>
-                    </ErrorBoundary>
-                  </ProtectedRoute>
-                }
-              />
+                {/* Giros */}
+                <Route
+                  path="/giros"
+                  element={
+                    <ProtectedRoute>
+                      <ErrorBoundary>
+                        <DashboardLayout>
+                          <GirosPage />
+                        </DashboardLayout>
+                      </ErrorBoundary>
+                    </ProtectedRoute>
+                  }
+                />
 
-              {/* Enviar Giro */}
-              <Route
-                path="/enviar-giro"
-                element={
-                  <ProtectedRoute>
-                    <ErrorBoundary>
-                      <DashboardLayout>
-                        <SendGiroPage />
-                      </DashboardLayout>
-                    </ErrorBoundary>
-                  </ProtectedRoute>
-                }
-              />
+                {/* Enviar Giro */}
+                <Route
+                  path="/enviar-giro"
+                  element={
+                    <ProtectedRoute>
+                      <ErrorBoundary>
+                        <DashboardLayout>
+                          <SendGiroPage />
+                        </DashboardLayout>
+                      </ErrorBoundary>
+                    </ProtectedRoute>
+                  }
+                />
 
-              <Route
-                path="/usuarios"
-                element={
-                  <ProtectedRoute>
-                    <ErrorBoundary>
-                      <DashboardLayout>
-                        <UsersPage />
-                      </DashboardLayout>
-                    </ErrorBoundary>
-                  </ProtectedRoute>
-                }
-              />
+                <Route
+                  path="/usuarios"
+                  element={
+                    <ProtectedRoute>
+                      <ErrorBoundary>
+                        <DashboardLayout>
+                          <UsersPage />
+                        </DashboardLayout>
+                      </ErrorBoundary>
+                    </ProtectedRoute>
+                  }
+                />
 
-              <Route
-                path="/tasas"
-                element={
-                  <ProtectedRoute>
-                    <ErrorBoundary>
-                      <DashboardLayout>
-                        <ExchangeRatePage />
-                      </DashboardLayout>
-                    </ErrorBoundary>
-                  </ProtectedRoute>
-                }
-              />
+                <Route
+                  path="/tasas"
+                  element={
+                    <ProtectedRoute>
+                      <ErrorBoundary>
+                        <DashboardLayout>
+                          <ExchangeRatePage />
+                        </DashboardLayout>
+                      </ErrorBoundary>
+                    </ProtectedRoute>
+                  }
+                />
 
-              {/* Transaciones Minorista*/}
-              <Route
-                path="/transacciones-minorista"
-                element={
-                  <ProtectedRoute>
-                    <ErrorBoundary>
-                      <DashboardLayout>
-                        <MinoristaTransactionsPage />
-                      </DashboardLayout>
-                    </ErrorBoundary>
-                  </ProtectedRoute>
-                }
-              />
+                {/* Transaciones Minorista*/}
+                <Route
+                  path="/transacciones-minorista"
+                  element={
+                    <ProtectedRoute>
+                      <ErrorBoundary>
+                        <DashboardLayout>
+                          <MinoristaTransactionsPage />
+                        </DashboardLayout>
+                      </ErrorBoundary>
+                    </ProtectedRoute>
+                  }
+                />
 
-              {/* Calculadora*/}
-              <Route
-                path="/calculadora"
-                element={
-                  <ProtectedRoute>
-                    <ErrorBoundary>
-                      <DashboardLayout>
-                        <CalculadoraPage />
-                      </DashboardLayout>
-                    </ErrorBoundary>
-                  </ProtectedRoute>
-                }
-              />
+                {/* Calculadora*/}
+                <Route
+                  path="/calculadora"
+                  element={
+                    <ProtectedRoute>
+                      <ErrorBoundary>
+                        <DashboardLayout>
+                          <CalculadoraPage />
+                        </DashboardLayout>
+                      </ErrorBoundary>
+                    </ProtectedRoute>
+                  }
+                />
 
-              {/* Calculadora VES Compra (Super Admin) */}
-              <Route
-                path="/calculadora-ves-compra"
-                element={
-                  <ProtectedRoute requiredRole="SUPER_ADMIN">
-                    <ErrorBoundary>
-                      <DashboardLayout>
-                        <CalculadoraVesCompraPage />
-                      </DashboardLayout>
-                    </ErrorBoundary>
-                  </ProtectedRoute>
-                }
-              />
+                {/* Calculadora VES Compra (Super Admin) */}
+                <Route
+                  path="/calculadora-ves-compra"
+                  element={
+                    <ProtectedRoute requiredRole="SUPER_ADMIN">
+                      <ErrorBoundary>
+                        <DashboardLayout>
+                          <CalculadoraVesCompraPage />
+                        </DashboardLayout>
+                      </ErrorBoundary>
+                    </ProtectedRoute>
+                  }
+                />
 
-              {/* Bank Accounts */}
-              <Route
-                path="/cuentas-bancarias"
-                element={
-                  <ProtectedRoute>
-                    <ErrorBoundary>
-                      <DashboardLayout>
-                        <BankAccountsPage />
-                      </DashboardLayout>
-                    </ErrorBoundary>
-                  </ProtectedRoute>
-                }
-              />
+                {/* Bank Accounts */}
+                <Route
+                  path="/cuentas-bancarias"
+                  element={
+                    <ProtectedRoute>
+                      <ErrorBoundary>
+                        <DashboardLayout>
+                          <BankAccountsPage />
+                        </DashboardLayout>
+                      </ErrorBoundary>
+                    </ProtectedRoute>
+                  }
+                />
 
-              {/* Bank Transactions */}
-              <Route
-                path="/bank-account/:bankAccountId/transactions"
-                element={
-                  <ProtectedRoute>
-                    <ErrorBoundary>
-                      <DashboardLayout>
-                        <BankTransactionsPage />
-                      </DashboardLayout>
-                    </ErrorBoundary>
-                  </ProtectedRoute>
-                }
-              />
+                {/* Bank Transactions */}
+                <Route
+                  path="/bank-account/:bankAccountId/transactions"
+                  element={
+                    <ProtectedRoute>
+                      <ErrorBoundary>
+                        <DashboardLayout>
+                          <BankTransactionsPage />
+                        </DashboardLayout>
+                      </ErrorBoundary>
+                    </ProtectedRoute>
+                  }
+                />
 
-              {/* Reports */}
-              <Route
-                path="/reportes"
-                element={
-                  <ProtectedRoute>
-                    <ErrorBoundary>
-                      <DashboardLayout>
-                        <ReportsPage />
-                      </DashboardLayout>
-                    </ErrorBoundary>
-                  </ProtectedRoute>
-                }
-              />
+                {/* Reports */}
+                <Route
+                  path="/reportes"
+                  element={
+                    <ProtectedRoute>
+                      <ErrorBoundary>
+                        <DashboardLayout>
+                          <ReportsPage />
+                        </DashboardLayout>
+                      </ErrorBoundary>
+                    </ProtectedRoute>
+                  }
+                />
 
-              {/* Minorista Reports */}
-              <Route
-                path="/mis-reportes"
-                element={
-                  <ProtectedRoute requiredRole="MINORISTA">
-                    <ErrorBoundary>
-                      <DashboardLayout>
-                        <MinoristaReportsPage />
-                      </DashboardLayout>
-                    </ErrorBoundary>
-                  </ProtectedRoute>
-                }
-              />
+                {/* Minorista Reports */}
+                <Route
+                  path="/mis-reportes"
+                  element={
+                    <ProtectedRoute requiredRole="MINORISTA">
+                      <ErrorBoundary>
+                        <DashboardLayout>
+                          <MinoristaReportsPage />
+                        </DashboardLayout>
+                      </ErrorBoundary>
+                    </ProtectedRoute>
+                  }
+                />
 
-              <Route
-                path="/configuracion"
-                element={
-                  <ProtectedRoute requiredRole={['SUPER_ADMIN', 'ADMIN', 'TRANSFERENCISTA']}>
-                    <ErrorBoundary>
-                      <DashboardLayout>
-                        <ConfigPage />
-                      </DashboardLayout>
-                    </ErrorBoundary>
-                  </ProtectedRoute>
-                }
-              />
+                <Route
+                  path="/configuracion"
+                  element={
+                    <ProtectedRoute requiredRole={['SUPER_ADMIN', 'ADMIN', 'TRANSFERENCISTA']}>
+                      <ErrorBoundary>
+                        <DashboardLayout>
+                          <ConfigPage />
+                        </DashboardLayout>
+                      </ErrorBoundary>
+                    </ProtectedRoute>
+                  }
+                />
 
-              {/* Redirect root to enviar-giro */}
-              <Route path="/" element={<Navigate to="/enviar-giro" replace />} />
+                {/* Redirect root to enviar-giro */}
+                <Route path="/" element={<Navigate to="/enviar-giro" replace />} />
 
-              {/* 404 */}
-              <Route path="*" element={<Navigate to="/dashboard" replace />} />
-            </Routes>
-          </ErrorBoundary>
+                {/* 404 */}
+                <Route path="*" element={<Navigate to="/dashboard" replace />} />
+              </Routes>
+            </ErrorBoundary>
 
-          <Toaster position="top-center" richColors />
-          <UpdatePrompt />
-        </AuthProvider>
-      </BrowserRouter>
-
-      {/* Development Tools - only visible in development */}
-      {/* <ReactQueryDevtools initialIsOpen={false} /> */}
+            <Toaster position="top-center" richColors />
+            <UpdatePrompt />
+          </AuthProvider>
+        </BrowserRouter>
+      </ThemeProvider>
     </QueryClientProvider>
   )
 }

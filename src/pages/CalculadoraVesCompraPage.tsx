@@ -55,9 +55,9 @@ export function CalculadoraVesCompraPage() {
   }
 
   return (
-    <div className="min-h-screen p-4 md:p-8 bg-gray-50">
+    <div className="min-h-screen p-4 md:p-8 bg-background">
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8 text-center">💱 Calculadora de Compra VES</h1>
+        <h1 className="text-3xl font-bold mb-8 text-center text-foreground">💱 Calculadora de Compra VES</h1>
 
         <Card>
           <CardHeader>
@@ -65,7 +65,7 @@ export function CalculadoraVesCompraPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Bolivares (VES) a comprar</label>
+              <label className="block text-sm font-medium mb-2 text-foreground">Bolivares (VES) a comprar</label>
               <NumericFormat
                 id="amount"
                 customInput={Input}
@@ -86,10 +86,10 @@ export function CalculadoraVesCompraPage() {
 
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-medium">Tasa de compra (COP por VES)</label>
+                <label className="block text-sm font-medium text-foreground">Tasa de compra (COP por VES)</label>
                 {savedRate && (
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-500">Guardada: {formatNumber(savedRate)}</span>
+                    <span className="text-xs text-muted-foreground">Guardada: {formatNumber(savedRate)}</span>
                     <Button
                       type="button"
                       size="sm"
@@ -126,10 +126,10 @@ export function CalculadoraVesCompraPage() {
             </div>
 
             {result !== null && (
-              <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+              <div className="mt-6 p-4 bg-muted/50 rounded-lg">
                 <div className="flex justify-between items-center">
-                  <p className="text-gray-600">COP a pagar</p>
-                  <p className="text-2xl font-bold text-green-600">{formatCurrency(result)}</p>
+                  <p className="text-muted-foreground">COP a pagar</p>
+                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">{formatCurrency(result)}</p>
                 </div>
               </div>
             )}

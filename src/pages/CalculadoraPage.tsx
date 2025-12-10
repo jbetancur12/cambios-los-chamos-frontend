@@ -81,24 +81,24 @@ export function CalculadoraPage() {
   }
 
   return (
-    <div className="min-h-screen p-4 md:p-8 bg-gray-50">
+    <div className="min-h-screen p-4 md:p-8 bg-background">
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8 text-center">💱 Calculadora de Giros</h1>
+        <h1 className="text-3xl font-bold mb-8 text-center text-foreground">💱 Calculadora de Giros</h1>
 
         {/* Tasas actuales */}
         {rate && (
-          <Card className="mb-6">
+          <Card className="mb-6 bg-card">
             <CardContent className="pt-6">
               <div className="grid grid-cols-2 gap-4 text-center">
                 <div className="flex items-center justify-center gap-2">
                   <img src="/bcv.png" alt="BCV Logo" className="w-8 h-auto" />
-                  <p className="text-xl font-bold" style={{ color: '#136BBC' }}>
+                  <p className="text-xl font-bold text-[#136BBC] dark:text-blue-400">
                     {formatCurrency(rate.bcv)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Tasa Venta</p>
-                  <p className="text-xl font-bold text-green-600">{formatCurrency(rate.sellRate)}</p>
+                  <p className="text-sm text-muted-foreground">Tasa Venta</p>
+                  <p className="text-xl font-bold text-green-600 dark:text-green-400">{formatCurrency(rate.sellRate)}</p>
                 </div>
               </div>
             </CardContent>
@@ -109,7 +109,7 @@ export function CalculadoraPage() {
         <div className="flex gap-2 mb-6 overflow-x-auto">
           <button
             onClick={() => setActiveTab('bcv')}
-            className={`flex-1 py-3 rounded-lg font-medium transition-colors whitespace-nowrap ${activeTab === 'bcv' ? 'text-white' : 'bg-white text-gray-700 border hover:bg-gray-50'
+            className={`flex-1 py-3 rounded-lg font-medium transition-colors whitespace-nowrap ${activeTab === 'bcv' ? 'text-white' : 'bg-card text-foreground border hover:bg-accent'
               }`}
             style={activeTab === 'bcv' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
@@ -117,7 +117,7 @@ export function CalculadoraPage() {
           </button>
           <button
             onClick={() => setActiveTab('manual')}
-            className={`flex-1 py-3 rounded-lg font-medium transition-colors whitespace-nowrap ${activeTab === 'manual' ? 'text-white' : 'bg-white text-gray-700 border hover:bg-gray-50'
+            className={`flex-1 py-3 rounded-lg font-medium transition-colors whitespace-nowrap ${activeTab === 'manual' ? 'text-white' : 'bg-card text-foreground border hover:bg-accent'
               }`}
             style={activeTab === 'manual' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
@@ -125,7 +125,7 @@ export function CalculadoraPage() {
           </button>
           <button
             onClick={() => setActiveTab('ves')}
-            className={`flex-1 py-3 rounded-lg font-medium transition-colors whitespace-nowrap ${activeTab === 'ves' ? 'text-white' : 'bg-white text-gray-700 border hover:bg-gray-50'
+            className={`flex-1 py-3 rounded-lg font-medium transition-colors whitespace-nowrap ${activeTab === 'ves' ? 'text-white' : 'bg-card text-foreground border hover:bg-accent'
               }`}
             style={activeTab === 'ves' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
@@ -141,7 +141,7 @@ export function CalculadoraPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2">USD a enviar</label>
+                <label className="block text-sm font-medium mb-2 text-foreground">USD a enviar</label>
                 <Input
                   type="number"
                   placeholder="Ej: 100"
@@ -152,16 +152,16 @@ export function CalculadoraPage() {
               </div>
 
               {resultBCV && (
-                <div className="mt-6 p-4 bg-gray-50 rounded-lg space-y-3">
+                <div className="mt-6 p-4 bg-muted/50 rounded-lg space-y-3">
                   <div className="flex justify-between items-center py-2">
-                    <p className="text-gray-600">VES</p>
-                    <p className="text-xl font-bold" style={{ color: '#136BBC' }}>
+                    <p className="text-muted-foreground">VES</p>
+                    <p className="text-xl font-bold text-[#136BBC] dark:text-blue-400">
                       {formatCurrency(resultBCV.ves)}
                     </p>
                   </div>
-                  <div className="flex justify-between items-center py-2 border-t pt-3">
-                    <p className="text-gray-600">COP a recibir</p>
-                    <p className="text-2xl font-bold text-green-600">{formatCurrency(resultBCV.cop)}</p>
+                  <div className="flex justify-between items-center py-2 border-t pt-3 border-border">
+                    <p className="text-muted-foreground">COP a recibir</p>
+                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">{formatCurrency(resultBCV.cop)}</p>
                   </div>
                 </div>
               )}
@@ -177,7 +177,7 @@ export function CalculadoraPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2">USD a enviar</label>
+                <label className="block text-sm font-medium mb-2 text-foreground">USD a enviar</label>
 
                 <NumericFormat
                   id="amount"
@@ -198,7 +198,7 @@ export function CalculadoraPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Precio en VES por USD (manual)</label>
+                <label className="block text-sm font-medium mb-2 text-foreground">Precio en VES por USD (manual)</label>
 
                 <NumericFormat
                   id="amount"
@@ -219,16 +219,16 @@ export function CalculadoraPage() {
               </div>
 
               {resultManual && (
-                <div className="mt-6 p-4 bg-gray-50 rounded-lg space-y-3">
+                <div className="mt-6 p-4 bg-muted/50 rounded-lg space-y-3">
                   <div className="flex justify-between items-center py-2">
-                    <p className="text-gray-600">VES</p>
-                    <p className="text-xl font-bold" style={{ color: '#136BBC' }}>
+                    <p className="text-muted-foreground">VES</p>
+                    <p className="text-xl font-bold text-[#136BBC] dark:text-blue-400">
                       {formatCurrency(resultManual.ves)}
                     </p>
                   </div>
-                  <div className="flex justify-between items-center py-2 border-t pt-3">
-                    <p className="text-gray-600">COP a recibir</p>
-                    <p className="text-2xl font-bold text-green-600">{formatCurrency(resultManual.cop)}</p>
+                  <div className="flex justify-between items-center py-2 border-t pt-3 border-border">
+                    <p className="text-muted-foreground">COP a recibir</p>
+                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">{formatCurrency(resultManual.cop)}</p>
                   </div>
                 </div>
               )}
@@ -244,7 +244,7 @@ export function CalculadoraPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Bolivares (VES)</label>
+                <label className="block text-sm font-medium mb-2 text-foreground">Bolivares (VES)</label>
                 <NumericFormat
                   id="amount"
                   customInput={Input}
@@ -264,10 +264,10 @@ export function CalculadoraPage() {
               </div>
 
               {resultVES !== null && (
-                <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                <div className="mt-6 p-4 bg-muted/50 rounded-lg">
                   <div className="flex justify-between items-center">
-                    <p className="text-gray-600">COP</p>
-                    <p className="text-2xl font-bold text-green-600">{formatCurrency(resultVES)}</p>
+                    <p className="text-muted-foreground">COP</p>
+                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">{formatCurrency(resultVES)}</p>
                   </div>
                 </div>
               )}
