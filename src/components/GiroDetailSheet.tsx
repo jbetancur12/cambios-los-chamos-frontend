@@ -1070,15 +1070,29 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                     )
 
                     if (isMobileOrTablet && navigator.share) {
+                      // Detectar tipo MIME basado en la extensión
+                      let mimeType = 'image/jpeg' // Default seguro para imágenes
+                      const lowerFilename = proofPreviewFilename.toLowerCase()
+                      if (lowerFilename.endsWith('.png')) mimeType = 'image/png'
+                      else if (lowerFilename.endsWith('.pdf')) mimeType = 'application/pdf'
+                      else if (lowerFilename.endsWith('.jpg') || lowerFilename.endsWith('.jpeg'))
+                        mimeType = 'image/jpeg'
+
                       // Mobile: Use Web Share API
                       const file = new File([proofPreviewBlob], proofPreviewFilename, {
-                        type: 'application/octet-stream',
+                        type: mimeType,
                       })
-                      await navigator.share({
-                        files: [file],
-                        title: 'Comprobante de Pago',
-                        text: 'Compartir comprobante de pago',
-                      })
+
+                      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        await navigator.share({
+                          files: [file],
+                          title: 'Comprobante de Pago',
+                          text: 'Compartir comprobante de pago',
+                        })
+                      } else {
+                        // Fallback si no se puede compartir este tipo de archivo específico
+                        throw new Error('Tu dispositivo no permite compartir este tipo de archivo.')
+                      }
                     } else {
                       // Desktop: Download normally
                       const url = URL.createObjectURL(proofPreviewBlob)
