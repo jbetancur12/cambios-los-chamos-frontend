@@ -14,6 +14,9 @@ import { useAllUsers } from '@/hooks/queries/useUserQueries'
 import type { Minorista } from '@/types/api'
 import { Switch } from '@/components/ui/switch'
 
+import { useEffect } from 'react'
+import { useGiroWebSocket } from '@/hooks/useGiroWebSocket'
+
 export function UsersPage() {
   const { user: currentUser } = useAuth()
   const queryClient = useQueryClient()
@@ -21,6 +24,32 @@ export function UsersPage() {
   const [rechargeMinoristaSheetOpen, setRechargeMinoristaSheetOpen] = useState(false)
   const [selectedMinorista, setSelectedMinorista] = useState<Minorista | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
+
+  // WebSocket for real-time updates
+  const { subscribe } = useGiroWebSocket()
+
+  useEffect(() => {
+    const handleGiroChange = () => {
+      // Invalidate users query to update balances/debts
+      queryClient.invalidateQueries({ queryKey: ['users'] })
+    }
+
+    const unsubCreated = subscribe('giro:created', handleGiroChange)
+    const unsubUpdated = subscribe('giro:updated', handleGiroChange)
+    const unsubExecuted = subscribe('giro:executed', handleGiroChange)
+    const unsubDeleted = subscribe('giro:deleted', handleGiroChange)
+    const unsubProcessing = subscribe('giro:processing', handleGiroChange)
+    const unsubReturned = subscribe('giro:returned', handleGiroChange)
+
+    return () => {
+      unsubCreated()
+      unsubUpdated()
+      unsubExecuted()
+      unsubDeleted()
+      unsubProcessing()
+      unsubReturned()
+    }
+  }, [subscribe, queryClient])
 
   const isSuperAdmin =
     currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ADMIN' || currentUser?.role === 'TRANSFERENCISTA'
