@@ -274,15 +274,19 @@ export function UsersPage() {
                   {user.minoristaId && (
                     <CardContent className="px-4 py-1">
                       {/* Balance Display */}
-                      <div className="flex items-center justify-between p-1 rounded-md bg-muted">
-                        <span className="text-sm text-muted-foreground hidden md:inline">Deuda Actual:</span>
-                        <span className="font-bold text-red-600">
-                          {new Intl.NumberFormat('es-CO', {
-                            style: 'currency',
-                            currency: 'COP',
-                            minimumFractionDigits: 0,
-                          }).format(Math.max(0, (user.creditLimit || 0) - (user.availableCredit || 0)))}
-                        </span>
+                      <div className="flex flex-col md:flex-row md:items-center md:justify-between p-1.5 rounded-md bg-muted gap-1 md:gap-0">
+                        <div className="flex items-center justify-between w-full md:w-auto md:justify-start md:gap-2">
+                          <span className="text-xs text-muted-foreground md:text-sm">Cupo:</span>
+                          <span className="font-bold text-green-600 text-xs md:text-sm">
+                            {formatCurrency(user.creditLimit || 0)}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between w-full md:w-auto md:justify-start md:gap-2">
+                          <span className="text-xs text-muted-foreground md:text-sm">Deuda:</span>
+                          <span className="font-bold text-red-600 text-xs md:text-sm">
+                            {formatCurrency(Math.max(0, (user.creditLimit || 0) - (user.availableCredit || 0)))}
+                          </span>
+                        </div>
                       </div>
                     </CardContent>
                   )}
