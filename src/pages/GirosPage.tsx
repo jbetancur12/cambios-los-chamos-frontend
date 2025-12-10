@@ -134,12 +134,18 @@ export function GirosPage() {
   }
 
   // Build query params
+  // Build query params
   const dateRange = getDateRange(filterDate)
+
+  // For ASIGNADO and PROCESANDO, we want to see ALL active giros regardless of date
+  // For other statuses (COMPLETADO, CANCELADO, etc), we respect the date filter
+  const ignoreDateFilter = filterStatus === 'ASIGNADO' || filterStatus === 'PROCESANDO'
+
   const queryParams = {
     // Cuando es ASIGNADO, no enviamos filtro para obtener todos y filtrar en frontend (incluir DEVUELTO)
     status: filterStatus !== 'ALL' && filterStatus !== 'ASIGNADO' ? filterStatus : undefined,
-    dateFrom: dateRange?.from,
-    dateTo: dateRange?.to,
+    dateFrom: ignoreDateFilter ? undefined : dateRange?.from,
+    dateTo: ignoreDateFilter ? undefined : dateRange?.to,
   }
 
   // React Query hooks
