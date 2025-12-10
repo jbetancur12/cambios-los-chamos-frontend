@@ -60,7 +60,7 @@ export function useCreateGiro() {
       // Invalidar y refetchear inmediatamente las queries activas
       queryClient.invalidateQueries({ queryKey: ['giros'], exact: false, refetchType: 'all' })
       queryClient.invalidateQueries({ queryKey: ['dashboard'], exact: false, refetchType: 'all' })
-      queryClient.invalidateQueries({ queryKey: ['minorista'], exact: false, refetchType: 'active' })
+      queryClient.invalidateQueries({ queryKey: ['minorista'], exact: false, refetchType: 'all' })
       queryClient.invalidateQueries({ queryKey: ['bankAccounts'], exact: false, refetchType: 'active' })
     },
   })
