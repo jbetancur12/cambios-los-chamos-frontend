@@ -40,7 +40,7 @@ export function CalculadoraPage() {
       return
     }
 
-    const ves = usdNum * rate.usd
+    const ves = usdNum * rate.bcv
     const cop = ves * rate.sellRate
     setResultBCV({ ves, cop })
   }, [usdBCV, rate])
