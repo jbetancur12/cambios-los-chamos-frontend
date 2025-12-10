@@ -162,29 +162,7 @@ export function BankAccountsPage() {
           <p className="text-muted-foreground">Gestiona cuentas bancarias y trasferencistas</p>
         </div>
 
-        {/* Totalizers - Only for SuperAdmin and Admin */}
-        {(user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN') && activeTab === 'cuentas' && (
-          <div className="grid grid-cols-2 gap-4">
-            <Card>
-              <CardContent className="p-4 md:p-6">
-                <div className="flex flex-col gap-1">
-                  <span className="text-sm font-medium text-muted-foreground">Bancos Registrados</span>
-                  <span className="text-2xl font-bold">{filteredAccounts.length}</span>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 md:p-6">
-                <div className="flex flex-col gap-1">
-                  <span className="text-sm font-medium text-muted-foreground">Total en Bolívares</span>
-                  <span className="text-2xl font-bold">
-                    {formatCurrency(filteredAccounts.reduce((acc, curr) => acc + curr.balance, 0))}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
+
 
         {/* Tab Navigation - Only for SuperAdmin and Admin */}
         {(user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN') && (
@@ -494,6 +472,27 @@ export function BankAccountsPage() {
             </CardContent>
           </Card>
         )}
+
+        {(user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN') && (
+          <div
+            className="mt-3 rounded border text-white text-xs md:text-base"
+            style={{ background: 'linear-gradient(to right, #136BBC, #274565)', borderColor: '#136BBC' }}
+          >
+            <div className="p-3 flex justify-between items-center gap-4">
+              <div>
+                <span className="font-semibold md:text-lg">{filteredAccounts.length}</span>
+                <span className="ml-1">cuenta{filteredAccounts.length !== 1 ? 's' : ''}</span>
+              </div>
+              <div className="text-right">
+                <span className="font-semibold">Total: </span>
+                <span className="font-mono md:text-lg">
+                  {formatCurrency(filteredAccounts.reduce((acc, curr) => acc + curr.balance, 0))}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
 
         {/* Trasferencistas List - Tab Trasferencistas */}
         {activeTab === 'trasferencistas' && (
