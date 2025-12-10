@@ -59,19 +59,23 @@ const getBackendUrl = () => {
     return import.meta.env.VITE_API_URL
   }
 
+  // Si no hay VITE_API_URL, intentar usar una URL relativa o el mismo origen
+  // Esto es útil para entornos donde el frontend y el backend están en el mismo dominio
+  // o detrás de un proxy que maneja el enrutamiento.
+  // Para desarrollo local, si el frontend está en 5173 y el backend en 3000,
+  // se puede usar una URL absoluta con el puerto 3000.
   const hostname = window.location.hostname
   const protocol = window.location.protocol
 
-  // Si está en DevTunnel, usa el mismo dominio sin puerto
-  if (hostname.includes('devtunnels.ms')) {
-    return `${protocol}//${hostname}`
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    // En desarrollo local, asumir que el backend está en el puerto 3000
+    return `${protocol}//${hostname}:3000`
   }
 
-  // Si accedes desde localhost, usa localhost:3000
-  // Si accedes desde una IP (ej: 192.168.40.15), usa esa IP:3000
-  // Usa el protocolo de la página actual para que HTTPS use WSS y HTTP use WS
-  // return `${protocol}//${hostname}:3000`
-  return `${protocol}//${hostname}`
+  // Para otros entornos (incluyendo devtunnels.ms o producción),
+  // usar el mismo origen. Esto asume que el backend está disponible
+  // en el mismo dominio/puerto que el frontend, posiblemente a través de un proxy.
+  return window.location.origin
 }
 
 export function useGiroWebSocket() {
