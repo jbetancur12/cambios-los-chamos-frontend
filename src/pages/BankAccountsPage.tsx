@@ -162,6 +162,30 @@ export function BankAccountsPage() {
           <p className="text-muted-foreground">Gestiona cuentas bancarias y trasferencistas</p>
         </div>
 
+        {/* Totalizers - Only for SuperAdmin and Admin */}
+        {(user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN') && activeTab === 'cuentas' && (
+          <div className="grid grid-cols-2 gap-4">
+            <Card>
+              <CardContent className="p-4 md:p-6">
+                <div className="flex flex-col gap-1">
+                  <span className="text-sm font-medium text-muted-foreground">Bancos Registrados</span>
+                  <span className="text-2xl font-bold">{filteredAccounts.length}</span>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4 md:p-6">
+                <div className="flex flex-col gap-1">
+                  <span className="text-sm font-medium text-muted-foreground">Total en Bolívares</span>
+                  <span className="text-2xl font-bold">
+                    {formatCurrency(filteredAccounts.reduce((acc, curr) => acc + curr.balance, 0))}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         {/* Tab Navigation - Only for SuperAdmin and Admin */}
         {(user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN') && (
           <div className="flex gap-2 border-b">
