@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, DollarSign, ChevronDown } from 'lucide-react'
+import { ArrowLeft, DollarSign, ChevronDown, Calendar } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 
@@ -10,69 +10,45 @@ import { toast } from 'sonner'
 import { useBankAccountDetail, useBankAccountTransactions } from '@/hooks/queries/useBankQueries'
 import type { BankAccountTransactionType } from '@/types/api'
 
-type DateFilterType = 'TODAY' | 'YESTERDAY' | 'THIS_WEEK' | 'LAST_WEEK' | 'THIS_MONTH' | 'LAST_MONTH' | 'CUSTOM' | 'ALL'
+
 
 export function BankTransactionsPage() {
   const { bankAccountId } = useParams<{ bankAccountId: string }>()
   const navigate = useNavigate()
   const [page, setPage] = useState(1)
-  const [filterDate, setFilterDate] = useState<DateFilterType>('ALL')
-  const [customDateRange, setCustomDateRange] = useState<{ from: string; to: string }>({
-    from: new Date().toISOString().split('T')[0],
-    to: new Date().toISOString().split('T')[0],
-  })
+
+  // Standardized Date Filter State
+  const dateInputRef = useRef<HTMLInputElement>(null)
+  const [filterType, setFilterType] = useState<'SINGLE' | 'CUSTOM'>('SINGLE')
+  const [singleDate, setSingleDate] = useState(new Date().toISOString().split('T')[0])
   const [dateFiltersExpanded, setDateFiltersExpanded] = useState(false)
 
-  // Calculate date range based on filter
-  const getDateRange = (filterType: DateFilterType) => {
-    const today = new Date()
-    let dateFrom = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0, 0)
-    let dateTo = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999)
+  const today = new Date()
+  const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0, 0).toISOString()
+  const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999).toISOString()
 
-    switch (filterType) {
-      case 'TODAY':
-        break
-      case 'YESTERDAY':
-        dateFrom.setDate(dateFrom.getDate() - 1)
-        dateTo.setDate(dateTo.getDate() - 1)
-        break
-      case 'THIS_WEEK':
-        dateFrom.setDate(dateFrom.getDate() - dateFrom.getDay())
-        break
-      case 'LAST_WEEK':
-        const dayOfWeekLast = today.getDay()
-        const endOfLastWeek = new Date(today)
-        endOfLastWeek.setDate(today.getDate() - dayOfWeekLast - 1)
-        endOfLastWeek.setHours(23, 59, 59, 999)
-        const startOfLastWeek = new Date(endOfLastWeek)
-        startOfLastWeek.setDate(endOfLastWeek.getDate() - 6)
-        startOfLastWeek.setHours(0, 0, 0, 0)
-        dateFrom = startOfLastWeek
-        dateTo = endOfLastWeek
-        break
-      case 'THIS_MONTH':
-        dateFrom.setDate(1)
-        break
-      case 'LAST_MONTH':
-        dateFrom = new Date(today.getFullYear(), today.getMonth() - 1, 1)
-        dateTo = new Date(today.getFullYear(), today.getMonth(), 0)
-        dateTo.setHours(23, 59, 59, 999)
-        break
-      case 'CUSTOM':
-        const [customFromYear, customFromMonth, customFromDay] = customDateRange.from.split('-').map(Number)
-        const [customToYear, customToMonth, customToDay] = customDateRange.to.split('-').map(Number)
-        dateFrom = new Date(customFromYear, customFromMonth - 1, customFromDay, 0, 0, 0, 0)
-        dateTo = new Date(customToYear, customToMonth - 1, customToDay, 23, 59, 59, 999)
-        break
-      default:
-        return undefined
-    }
+  const [dateRange, setDateRange] = useState<{ from: string; to: string }>({
+    from: startOfDay,
+    to: endOfDay,
+  })
 
-    return { from: dateFrom.toISOString(), to: dateTo.toISOString() }
+  // Helper to handle single date selection
+  const handleSingleDateChange = (date: string) => {
+    setSingleDate(date)
+    setFilterType('SINGLE')
+
+    const [year, month, day] = date.split('-').map(Number)
+    const fromDate = new Date(year, month - 1, day, 0, 0, 0, 0)
+    const toDate = new Date(year, month - 1, day, 23, 59, 59, 999)
+
+    setDateRange({
+      from: fromDate.toISOString(),
+      to: toDate.toISOString()
+    })
+    setPage(1)
   }
 
-  // Build query params
-  const dateRange = filterDate !== 'ALL' ? getDateRange(filterDate) : undefined
+
 
   // React Query hooks for bank account and transactions
   const bankAccountQuery = useBankAccountDetail(bankAccountId || null)
@@ -179,118 +155,55 @@ export function BankTransactionsPage() {
             <div className="border-t p-3 space-y-3">
               <div className="flex gap-2 overflow-x-auto pb-2 flex-wrap">
                 <Button
-                  variant={filterDate === 'TODAY' ? 'default' : 'outline'}
+                  variant={filterType === 'SINGLE' ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => {
-                    setFilterDate('TODAY')
-                    setPage(1)
-                  }}
-                  className={filterDate === 'TODAY' ? 'text-white' : ''}
-                  style={filterDate === 'TODAY' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+                  className={`relative overflow-hidden ${filterType === 'SINGLE' ? 'text-white' : ''}`}
+                  style={filterType === 'SINGLE' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+                  onClick={() => dateInputRef.current?.showPicker()}
                 >
-                  Hoy
+                  <Calendar className="mr-2 h-3 w-3" />
+                  {singleDate === new Date().toISOString().split('T')[0]
+                    ? 'Ver día (Hoy)'
+                    : `Ver día: ${singleDate}`}
                 </Button>
-                <Button
-                  variant={filterDate === 'YESTERDAY' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => {
-                    setFilterDate('YESTERDAY')
-                    setPage(1)
+
+                <input
+                  ref={dateInputRef}
+                  type="date"
+                  value={singleDate}
+                  onChange={(e) => {
+                    if (e.target.value) handleSingleDateChange(e.target.value)
                   }}
-                  className={filterDate === 'YESTERDAY' ? 'text-white' : ''}
-                  style={
-                    filterDate === 'YESTERDAY' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}
-                  }
-                >
-                  Ayer
-                </Button>
+                  className="absolute opacity-0 pointer-events-none w-0 h-0"
+                  tabIndex={-1}
+                />
+
                 <Button
-                  variant={filterDate === 'THIS_WEEK' ? 'default' : 'outline'}
+                  variant={filterType === 'CUSTOM' ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => {
-                    setFilterDate('THIS_WEEK')
-                    setPage(1)
-                  }}
-                  className={filterDate === 'THIS_WEEK' ? 'text-white' : ''}
-                  style={
-                    filterDate === 'THIS_WEEK' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}
-                  }
+                  onClick={() => setFilterType('CUSTOM')}
+                  className={filterType === 'CUSTOM' ? 'text-white' : ''}
+                  style={filterType === 'CUSTOM' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
                 >
-                  Esta Semana
-                </Button>
-                <Button
-                  variant={filterDate === 'LAST_WEEK' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => {
-                    setFilterDate('LAST_WEEK')
-                    setPage(1)
-                  }}
-                  className={filterDate === 'LAST_WEEK' ? 'text-white' : ''}
-                  style={
-                    filterDate === 'LAST_WEEK' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}
-                  }
-                >
-                  Semana Pasada
-                </Button>
-                <Button
-                  variant={filterDate === 'THIS_MONTH' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => {
-                    setFilterDate('THIS_MONTH')
-                    setPage(1)
-                  }}
-                  className={filterDate === 'THIS_MONTH' ? 'text-white' : ''}
-                  style={
-                    filterDate === 'THIS_MONTH' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}
-                  }
-                >
-                  Este Mes
-                </Button>
-                <Button
-                  variant={filterDate === 'LAST_MONTH' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => {
-                    setFilterDate('LAST_MONTH')
-                    setPage(1)
-                  }}
-                  className={filterDate === 'LAST_MONTH' ? 'text-white' : ''}
-                  style={
-                    filterDate === 'LAST_MONTH' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}
-                  }
-                >
-                  Mes Pasado
-                </Button>
-                <Button
-                  variant={filterDate === 'CUSTOM' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setFilterDate('CUSTOM')}
-                  className={filterDate === 'CUSTOM' ? 'text-white' : ''}
-                  style={filterDate === 'CUSTOM' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
-                >
+                  <Calendar className="h-3 w-3 mr-1" />
                   Personalizado
-                </Button>
-                <Button
-                  variant={filterDate === 'ALL' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => {
-                    setFilterDate('ALL')
-                    setPage(1)
-                  }}
-                  className={filterDate === 'ALL' ? 'text-white' : ''}
-                  style={filterDate === 'ALL' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
-                >
-                  Todos
                 </Button>
               </div>
 
-              {filterDate === 'CUSTOM' && (
+              {filterType === 'CUSTOM' && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end pt-2 border-t">
                   <div>
                     <label className="block text-sm font-medium mb-2">Desde</label>
                     <Input
                       type="date"
-                      value={customDateRange.from}
-                      onChange={(e) => setCustomDateRange({ ...customDateRange, from: e.target.value })}
+                      value={dateRange.from.split('T')[0]} // Display simplified date
+                      onChange={(e) => {
+                        const val = e.target.value
+                        if (val) {
+                          const [y, m, d] = val.split('-').map(Number)
+                          setDateRange(prev => ({ ...prev, from: new Date(y, m - 1, d, 0, 0, 0, 0).toISOString() }))
+                        }
+                      }}
                       className="w-full"
                     />
                   </div>
@@ -298,8 +211,14 @@ export function BankTransactionsPage() {
                     <label className="block text-sm font-medium mb-2">Hasta</label>
                     <Input
                       type="date"
-                      value={customDateRange.to}
-                      onChange={(e) => setCustomDateRange({ ...customDateRange, to: e.target.value })}
+                      value={dateRange.to.split('T')[0]}
+                      onChange={(e) => {
+                        const val = e.target.value
+                        if (val) {
+                          const [y, m, d] = val.split('-').map(Number)
+                          setDateRange(prev => ({ ...prev, to: new Date(y, m - 1, d, 23, 59, 59, 999).toISOString() }))
+                        }
+                      }}
                       className="w-full"
                     />
                   </div>
@@ -393,9 +312,8 @@ export function BankTransactionsPage() {
                           >
                             <td className="py-2 whitespace-nowrap px-1">{formatCompactDate(transaction.createdAt)}</td>
                             <td
-                              className={`py-2 font-semibold whitespace-nowrap px-1 ${
-                                isPositive ? 'text-green-600' : 'text-red-600'
-                              }`}
+                              className={`py-2 font-semibold whitespace-nowrap px-1 ${isPositive ? 'text-green-600' : 'text-red-600'
+                                }`}
                             >
                               {isPositive && '+'}
                               {formatNumber(displayAmount)}

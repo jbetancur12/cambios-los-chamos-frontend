@@ -1,10 +1,9 @@
 import type { ReactNode } from 'react'
-import { useState, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { toast } from 'sonner'
 import {
   useSystemProfitReport,
   useSystemProfitTrendReport,
@@ -27,64 +26,26 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts'
-import { ChevronDown, ChevronUp } from 'lucide-react'
+import { ChevronDown, ChevronUp, Calendar } from 'lucide-react'
 
 type TabType = 'system' | 'minoristas' | 'bank' | 'minoristaTransactions'
 
-const formatDateForInput = (date: Date) =>
-  new Date(date.getFullYear(), date.getMonth(), date.getDate()).toISOString().slice(0, 10)
-
-const getDateRange = (range: 'today' | 'yesterday' | 'week' | 'lastWeek' | 'month' | 'lastMonth' | 'year') => {
-  const today = new Date()
-  let dateFrom = new Date(today.setHours(0, 0, 0, 0))
-  let dateTo = new Date(today.setHours(23, 59, 59, 999))
-
-  switch (range) {
-    case 'today':
-      break
-    case 'yesterday':
-      dateFrom.setDate(dateFrom.getDate() - 1)
-      dateTo.setDate(dateTo.getDate() - 1)
-      break
-    case 'week':
-      dateFrom.setDate(dateFrom.getDate() - dateFrom.getDay())
-      break
-    case 'lastWeek':
-      // Semana pasada: desde hace 14 días hasta hace 8 días (7 días completos)
-      dateFrom.setDate(dateFrom.getDate() - 14)
-      dateTo.setDate(dateTo.getDate() - 8)
-      break
-    case 'month':
-      dateFrom.setDate(1)
-      break
-    case 'lastMonth':
-      // Mes pasado: primer día del mes anterior hasta último día
-      dateFrom = new Date(today.getFullYear(), today.getMonth() - 1, 1)
-      dateTo = new Date(today.getFullYear(), today.getMonth(), 0)
-      dateTo.setHours(23, 59, 59, 999)
-      break
-    case 'year':
-      dateFrom = new Date(today.getFullYear(), 0, 1)
-      break
-  }
-
-  console.log('🚀 ~ getDateRange ~ dateFrom:', dateFrom)
-
-  return {
-    from: dateFrom.toISOString(),
-    to: dateTo.toISOString(),
-  }
-}
-
 const CHART_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899']
-
-type DateRangeFilter = 'today' | 'yesterday' | 'week' | 'lastWeek' | 'month' | 'lastMonth' | 'year' | null
 
 export function ReportsPage() {
   const [activeTab, setActiveTab] = useState<TabType>('system')
-  const [dateFrom, setDateFrom] = useState<string>('')
-  const [dateTo, setDateTo] = useState<string>('')
-  const [selectedDateRange, setSelectedDateRange] = useState<DateRangeFilter>('today')
+
+  // Standardized Date Filter State
+  const dateInputRef = useRef<HTMLInputElement>(null)
+  const [filterType, setFilterType] = useState<'SINGLE' | 'CUSTOM'>('SINGLE')
+  const [singleDate, setSingleDate] = useState(new Date().toISOString().split('T')[0])
+
+  const today = new Date()
+  const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0, 0).toISOString()
+  const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999).toISOString()
+
+  const [dateFrom, setDateFrom] = useState<string>(startOfDay)
+  const [dateTo, setDateTo] = useState<string>(endOfDay)
   const [filterOpen, setFilterOpen] = useState(false)
 
   // React Query hooks for each report type
@@ -112,28 +73,16 @@ export function ReportsPage() {
 
   const { isLoading } = getActiveQueryState()
 
-  // Load today's data on component mount
-  useEffect(() => {
-    const dates = getDateRange('today')
-    setDateFrom(dates.from)
-    setDateTo(dates.to)
-  }, [])
+  const handleSingleDateChange = (date: string) => {
+    setSingleDate(date)
+    setFilterType('SINGLE')
 
-  const handleQuickDateRange = (
-    range: 'today' | 'yesterday' | 'week' | 'lastWeek' | 'month' | 'lastMonth' | 'year'
-  ) => {
-    const dates = getDateRange(range)
-    setDateFrom(dates.from)
-    setDateTo(dates.to)
-    setSelectedDateRange(range)
-  }
+    const [year, month, day] = date.split('-').map(Number)
+    const fromDate = new Date(year, month - 1, day, 0, 0, 0, 0)
+    const toDate = new Date(year, month - 1, day, 23, 59, 59, 999)
 
-  const handleLoadReports = async () => {
-    if (!dateFrom || !dateTo) {
-      toast.error('Por favor selecciona un rango de fechas')
-      return
-    }
-    // React Query automatically refetches when dates/tab changes
+    setDateFrom(fromDate.toISOString())
+    setDateTo(toDate.toISOString())
   }
 
   const handleTabChange = (tab: TabType) => {
@@ -158,135 +107,80 @@ export function ReportsPage() {
           </CardHeader>
           {filterOpen && (
             <CardContent className="space-y-4">
-              {/* Quick Date Range Buttons */}
-              <div className="flex gap-2 flex-wrap">
-                <Button
-                  size="sm"
-                  onClick={() => handleQuickDateRange('today')}
-                  className={selectedDateRange === 'today' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'}
-                  style={
-                    selectedDateRange === 'today' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}
-                  }
-                >
-                  Hoy
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={() => handleQuickDateRange('yesterday')}
-                  variant={selectedDateRange === 'yesterday' ? undefined : 'outline'}
-                  className={
-                    selectedDateRange === 'yesterday' ? 'text-white' : 'bg-card text-foreground hover:bg-accent'
-                  }
-                  style={
-                    selectedDateRange === 'yesterday'
-                      ? { background: 'linear-gradient(to right, #136BBC, #274565)' }
-                      : {}
-                  }
-                >
-                  Ayer
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={() => handleQuickDateRange('week')}
-                  variant={selectedDateRange === 'week' ? undefined : 'outline'}
-                  className={selectedDateRange === 'week' ? 'text-white' : 'bg-card text-foreground hover:bg-accent'}
-                  style={
-                    selectedDateRange === 'week' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}
-                  }
-                >
-                  Esta Semana
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={() => handleQuickDateRange('lastWeek')}
-                  variant={selectedDateRange === 'lastWeek' ? undefined : 'outline'}
-                  className={
-                    selectedDateRange === 'lastWeek' ? 'text-white' : 'bg-card text-foreground hover:bg-accent'
-                  }
-                  style={
-                    selectedDateRange === 'lastWeek'
-                      ? { background: 'linear-gradient(to right, #136BBC, #274565)' }
-                      : {}
-                  }
-                >
-                  Semana Pasada
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={() => handleQuickDateRange('month')}
-                  variant={selectedDateRange === 'month' ? undefined : 'outline'}
-                  className={selectedDateRange === 'month' ? 'text-white' : 'bg-card text-foreground hover:bg-accent'}
-                  style={
-                    selectedDateRange === 'month' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}
-                  }
-                >
-                  Este Mes
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={() => handleQuickDateRange('lastMonth')}
-                  variant={selectedDateRange === 'lastMonth' ? undefined : 'outline'}
-                  className={
-                    selectedDateRange === 'lastMonth' ? 'text-white' : 'bg-card text-foreground hover:bg-accent'
-                  }
-                  style={
-                    selectedDateRange === 'lastMonth'
-                      ? { background: 'linear-gradient(to right, #136BBC, #274565)' }
-                      : {}
-                  }
-                >
-                  Mes Pasado
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={() => handleQuickDateRange('year')}
-                  variant={selectedDateRange === 'year' ? undefined : 'outline'}
-                  className={selectedDateRange === 'year' ? 'text-white' : 'bg-card text-foreground hover:bg-accent'}
-                  style={
-                    selectedDateRange === 'year' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}
-                  }
-                >
-                  Este Año
-                </Button>
-              </div>
+              <div className="flex flex-col gap-4">
+                <div className="flex gap-2 overflow-x-auto pb-2 flex-wrap">
+                  <Button
+                    variant={filterType === 'SINGLE' ? 'default' : 'outline'}
+                    size="sm"
+                    className={`relative overflow-hidden ${filterType === 'SINGLE' ? 'text-white' : ''}`}
+                    style={filterType === 'SINGLE' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+                    onClick={() => dateInputRef.current?.showPicker()}
+                  >
+                    <Calendar className="mr-2 h-3 w-3" />
+                    {singleDate === new Date().toISOString().split('T')[0] ? 'Ver día (Hoy)' : `Ver día: ${singleDate}`}
+                  </Button>
 
-              {/* Manual Date Range */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                <div>
-                  <label className="block text-sm font-medium mb-2 text-foreground">Desde</label>
-                  <Input
+                  <input
+                    ref={dateInputRef}
                     type="date"
-                    value={formatDateForInput(new Date(dateFrom))}
+                    value={singleDate}
                     onChange={(e) => {
-                      const [year, month, day] = e.target.value.split('-').map(Number)
-                      const localDate = new Date(year, month - 1, day, 0, 0, 0)
-                      setDateFrom(localDate.toISOString())
-                      setSelectedDateRange(null)
+                      if (e.target.value) handleSingleDateChange(e.target.value)
                     }}
-                    className="w-full"
+                    className="absolute opacity-0 pointer-events-none w-0 h-0"
+                    tabIndex={-1}
                   />
+
+                  <Button
+                    variant={filterType === 'CUSTOM' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setFilterType('CUSTOM')}
+                    className={filterType === 'CUSTOM' ? 'text-white' : ''}
+                    style={filterType === 'CUSTOM' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+                  >
+                    <Calendar className="h-3 w-3 mr-1" />
+                    Personalizado
+                  </Button>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2 text-foreground">Hasta</label>
-                  <Input
-                    type="date"
-                    value={formatDateForInput(new Date(dateTo))}
-                    onChange={(e) => {
-                      const [year, month, day] = e.target.value.split('-').map(Number)
-                      const localDate = new Date(year, month - 1, day, 23, 59, 59)
-                      setDateTo(localDate.toISOString())
-                      setSelectedDateRange(null)
-                    }}
-                    className="w-full"
-                  />
-                </div>
-                <Button
-                  onClick={handleLoadReports}
-                  disabled={isLoading}
-                  className="w-full bg-[linear-gradient(to_right,#136BBC,#274565)]"
-                >
-                  {isLoading ? 'Cargando...' : 'Cargar Reporte'}
-                </Button>
+
+                {filterType === 'CUSTOM' && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div>
+                      <label className="block text-sm font-medium mb-2 text-foreground">Desde</label>
+                      <Input
+                        type="date"
+                        value={dateFrom.split('T')[0]}
+                        onChange={(e) => {
+                          const val = e.target.value
+                          if (val) {
+                            const [y, m, d] = val.split('-').map(Number)
+                            setDateFrom(new Date(y, m - 1, d, 0, 0, 0, 0).toISOString())
+                          } else {
+                            setDateFrom('')
+                          }
+                        }}
+                        className="w-full"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2 text-foreground">Hasta</label>
+                      <Input
+                        type="date"
+                        value={dateTo.split('T')[0]}
+                        onChange={(e) => {
+                          const val = e.target.value
+                          if (val) {
+                            const [y, m, d] = val.split('-').map(Number)
+                            setDateTo(new Date(y, m - 1, d, 23, 59, 59, 999).toISOString())
+                          } else {
+                            setDateTo('')
+                          }
+                        }}
+                        className="w-full"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             </CardContent>
           )}

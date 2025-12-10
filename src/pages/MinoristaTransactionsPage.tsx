@@ -1,14 +1,15 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
 import type { MinoristaTransactionType } from '@/types/api'
-import { ArrowLeft, CreditCard, DollarSign, User } from 'lucide-react'
-import { useState } from 'react'
+import { ArrowLeft, CreditCard, DollarSign, User, Calendar, ChevronDown } from 'lucide-react'
+import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { useMinoristaBalance, useMinoristaTransactions } from '@/hooks/queries/useMinoristaQueries'
 import type { DateRange } from '@/components/DateRangeFilter'
-import { DateRangeFilter } from '@/components/DateRangeFilter'
+
 import { useAuth } from '@/contexts/AuthContext'
 import { MinoristaSimpleTransactionTable } from '@/components/MinoristaSimpleTransactionTable'
 
@@ -16,7 +17,23 @@ export function MinoristaTransactionsPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const [page, setPage] = useState(1)
-  const [dateRange, setDateRange] = useState<DateRange>({ from: null, to: null, startDate: null, endDate: null })
+  // New Filter State
+  const dateInputRef = useRef<HTMLInputElement>(null)
+  const [filterType, setFilterType] = useState<'SINGLE' | 'CUSTOM'>('SINGLE')
+  const [singleDate, setSingleDate] = useState(new Date().toISOString().split('T')[0])
+  const [isFilterExpanded, setIsFilterExpanded] = useState(false)
+
+  // Initialize with today's date for consistency with "Ver día" default
+  const today = new Date()
+  const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0, 0).toISOString()
+  const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999).toISOString()
+
+  const [dateRange, setDateRange] = useState<DateRange>({
+    from: startOfDay,
+    to: endOfDay,
+    startDate: today.toISOString().split('T')[0],
+    endDate: today.toISOString().split('T')[0]
+  })
   const [typeFilter, setTypeFilter] = useState<MinoristaTransactionType | 'ALL'>('ALL')
 
   // React Query hooks
@@ -34,6 +51,42 @@ export function MinoristaTransactionsPage() {
   const transactions = transactionsResponse?.transactions || []
   const totalPages = transactionsResponse?.pagination.totalPages || 1
   const isLoading = transactionsQuery.isLoading
+
+  // Handle Update Logic
+  const handleSingleDateChange = (date: string) => {
+    setSingleDate(date)
+    setFilterType('SINGLE')
+
+    const [year, month, day] = date.split('-').map(Number)
+    const fromDate = new Date(year, month - 1, day, 0, 0, 0, 0)
+    const toDate = new Date(year, month - 1, day, 23, 59, 59, 999)
+
+    setDateRange({
+      from: fromDate.toISOString(),
+      to: toDate.toISOString(),
+      startDate: date,
+      endDate: date
+    })
+    setPage(1)
+  }
+
+  const handleCustomDateChange = (field: 'startDate' | 'endDate', value: string) => {
+    const newRange = { ...dateRange, [field]: value }
+
+    if (newRange.startDate && newRange.endDate) {
+      const [fromYear, fromMonth, fromDay] = newRange.startDate.split('-').map(Number)
+      const [toYear, toMonth, toDay] = newRange.endDate.split('-').map(Number)
+
+      const fromDate = new Date(fromYear, fromMonth - 1, fromDay, 0, 0, 0, 0)
+      const toDate = new Date(toYear, toMonth - 1, toDay, 23, 59, 59, 999)
+
+      newRange.from = fromDate.toISOString()
+      newRange.to = toDate.toISOString()
+    }
+
+    setDateRange(newRange)
+    setPage(1)
+  }
 
   // Handle errors
   if (minoristaQuery.error) {
@@ -147,16 +200,91 @@ export function MinoristaTransactionsPage() {
 
       {/* Date Range Filter */}
       <div className="max-w-5xl mx-auto mt-6">
-        <DateRangeFilter
-          onDateRangeChange={(range) => {
-            setDateRange(range)
-            setPage(1)
-          }}
-          onClear={() => {
-            setDateRange({ from: null, to: null, startDate: null, endDate: null })
-            setPage(1)
-          }}
-        />
+        <Card className="mb-6">
+          <CardHeader
+            className="cursor-pointer hover:bg-accent/50 transition-colors py-4"
+            onClick={() => setIsFilterExpanded(!isFilterExpanded)}
+          >
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg">Filtrar por Fecha</CardTitle>
+              {isFilterExpanded ? (
+                <ChevronDown className="h-5 w-5 rotate-180 transition-transform" />
+              ) : (
+                <ChevronDown className="h-5 w-5 transition-transform" />
+              )}
+            </div>
+          </CardHeader>
+
+          {isFilterExpanded && (
+            <CardContent className="space-y-4 pt-0">
+              <div className="flex flex-col gap-4">
+                <div className="flex gap-2 overflow-x-auto pb-2 flex-wrap">
+                  <Button
+                    variant={filterType === 'SINGLE' ? 'default' : 'outline'}
+                    size="sm"
+                    className={`relative overflow-hidden ${filterType === 'SINGLE' ? 'text-white' : ''}`}
+                    style={
+                      filterType === 'SINGLE' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}
+                    }
+                    onClick={() => dateInputRef.current?.showPicker()}
+                  >
+                    <Calendar className="mr-2 h-3 w-3" />
+                    {singleDate === new Date().toISOString().split('T')[0]
+                      ? 'Ver día (Hoy)'
+                      : `Ver día: ${singleDate}`}
+                  </Button>
+
+                  <input
+                    ref={dateInputRef}
+                    type="date"
+                    value={singleDate}
+                    onChange={(e) => {
+                      if (e.target.value) handleSingleDateChange(e.target.value)
+                    }}
+                    className="absolute opacity-0 pointer-events-none w-0 h-0"
+                    tabIndex={-1}
+                  />
+
+                  <Button
+                    variant={filterType === 'CUSTOM' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setFilterType('CUSTOM')}
+                    className={filterType === 'CUSTOM' ? 'text-white' : ''}
+                    style={
+                      filterType === 'CUSTOM' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}
+                    }
+                  >
+                    <Calendar className="h-3 w-3 mr-1" />
+                    Personalizado
+                  </Button>
+                </div>
+
+                {filterType === 'CUSTOM' && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Desde</label>
+                      <Input
+                        type="date"
+                        value={dateRange.startDate || ''}
+                        onChange={(e) => handleCustomDateChange('startDate', e.target.value)}
+                        className="w-full"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Hasta</label>
+                      <Input
+                        type="date"
+                        value={dateRange.endDate || ''}
+                        onChange={(e) => handleCustomDateChange('endDate', e.target.value)}
+                        className="w-full"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          )}
+        </Card>
       </div>
 
       {/* Transactions Table */}

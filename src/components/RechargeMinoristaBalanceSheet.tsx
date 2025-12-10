@@ -1,14 +1,15 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
 import type { Minorista, MinoristaTransaction, MinoristaTransactionType } from '@/types/api'
-import { AlertCircle, Eye, DollarSign } from 'lucide-react'
+import { AlertCircle, Eye, DollarSign, Calendar, ChevronDown } from 'lucide-react'
 import { MinoristaSimpleTransactionTable } from './MinoristaSimpleTransactionTable'
-import { DateRangeFilter, type DateRange } from './DateRangeFilter'
+import { type DateRange } from './DateRangeFilter'
 import { NumericFormat } from 'react-number-format'
 
 interface RechargeMinoristaBalanceSheetProps {
@@ -33,8 +34,59 @@ export function RechargeMinoristaBalanceSheet({
   const [localMinorista, setLocalMinorista] = useState<Minorista | null>(minorista)
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
-  const [dateRange, setDateRange] = useState<DateRange>({ from: null, to: null, startDate: null, endDate: null })
+
+  // Standardized Date Filter State
+  const dateInputRef = useRef<HTMLInputElement>(null)
+  const [filterType, setFilterType] = useState<'SINGLE' | 'CUSTOM'>('SINGLE')
+  const [singleDate, setSingleDate] = useState(new Date().toISOString().split('T')[0])
+  const [isFilterExpanded, setIsFilterExpanded] = useState(false)
+
+  const today = new Date()
+  const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0, 0).toISOString()
+  const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999).toISOString()
+
+  const [dateRange, setDateRange] = useState<DateRange>({
+    from: startOfDay,
+    to: endOfDay,
+    startDate: today.toISOString().split('T')[0],
+    endDate: today.toISOString().split('T')[0]
+  })
   const [typeFilter, setTypeFilter] = useState<MinoristaTransactionType | 'ALL'>('ALL')
+
+  const handleSingleDateChange = (date: string) => {
+    setSingleDate(date)
+    setFilterType('SINGLE')
+
+    const [year, month, day] = date.split('-').map(Number)
+    const fromDate = new Date(year, month - 1, day, 0, 0, 0, 0)
+    const toDate = new Date(year, month - 1, day, 23, 59, 59, 999)
+
+    setDateRange({
+      from: fromDate.toISOString(),
+      to: toDate.toISOString(),
+      startDate: date,
+      endDate: date
+    })
+    setPage(1)
+  }
+
+  const handleCustomDateChange = (field: 'startDate' | 'endDate', value: string) => {
+    const newRange = { ...dateRange, [field]: value }
+
+    if (newRange.startDate && newRange.endDate) {
+      const [fromYear, fromMonth, fromDay] = newRange.startDate.split('-').map(Number)
+      const [toYear, toMonth, toDay] = newRange.endDate.split('-').map(Number)
+
+      const fromDate = new Date(fromYear, fromMonth - 1, fromDay, 0, 0, 0, 0)
+      const toDate = new Date(toYear, toMonth - 1, toDay, 23, 59, 59, 999)
+
+      newRange.from = fromDate.toISOString()
+      newRange.to = toDate.toISOString()
+    }
+
+    setDateRange(newRange)
+    setPage(1)
+  }
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('es-CO', {
@@ -163,33 +215,30 @@ export function RechargeMinoristaBalanceSheet({
           <div className="flex gap-2 border-b">
             <button
               onClick={() => setActiveTab('view')}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === 'view'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'view'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+                }`}
             >
               <Eye className="h-4 w-4 inline mr-2" />
               Ver
             </button>
             <button
               onClick={() => setActiveTab('assign')}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === 'assign'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'assign'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+                }`}
             >
               <DollarSign className="h-4 w-4 inline mr-2" />
               Asignar Cupo
             </button>
             <button
               onClick={() => setActiveTab('pay')}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === 'pay'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'pay'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+                }`}
             >
               <DollarSign className="h-4 w-4 inline mr-2" />
               Pagar Deuda
@@ -275,16 +324,91 @@ export function RechargeMinoristaBalanceSheet({
                 </div>
 
                 {/* Date Filter */}
-                <DateRangeFilter
-                  onDateRangeChange={(range) => {
-                    setDateRange(range)
-                    setPage(1)
-                  }}
-                  onClear={() => {
-                    setDateRange({ from: null, to: null, startDate: null, endDate: null })
-                    setPage(1)
-                  }}
-                />
+                <Card className="mb-4">
+                  <CardHeader
+                    className="cursor-pointer hover:bg-accent/50 transition-colors py-3 px-4"
+                    onClick={() => setIsFilterExpanded(!isFilterExpanded)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-base">Filtrar por Fecha</CardTitle>
+                      {isFilterExpanded ? (
+                        <ChevronDown className="h-4 w-4 rotate-180 transition-transform" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4 transition-transform" />
+                      )}
+                    </div>
+                  </CardHeader>
+
+                  {isFilterExpanded && (
+                    <CardContent className="space-y-4 pt-0 px-4 pb-4">
+                      <div className="flex flex-col gap-4">
+                        <div className="flex gap-2 overflow-x-auto pb-2 flex-wrap">
+                          <Button
+                            variant={filterType === 'SINGLE' ? 'default' : 'outline'}
+                            size="sm"
+                            className={`relative overflow-hidden ${filterType === 'SINGLE' ? 'text-white' : ''}`}
+                            style={
+                              filterType === 'SINGLE' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}
+                            }
+                            onClick={() => dateInputRef.current?.showPicker()}
+                          >
+                            <Calendar className="mr-2 h-3 w-3" />
+                            {singleDate === new Date().toISOString().split('T')[0]
+                              ? 'Ver día (Hoy)'
+                              : `Ver día: ${singleDate}`}
+                          </Button>
+
+                          <input
+                            ref={dateInputRef}
+                            type="date"
+                            value={singleDate}
+                            onChange={(e) => {
+                              if (e.target.value) handleSingleDateChange(e.target.value)
+                            }}
+                            className="absolute opacity-0 pointer-events-none w-0 h-0"
+                            tabIndex={-1}
+                          />
+
+                          <Button
+                            variant={filterType === 'CUSTOM' ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setFilterType('CUSTOM')}
+                            className={filterType === 'CUSTOM' ? 'text-white' : ''}
+                            style={
+                              filterType === 'CUSTOM' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}
+                            }
+                          >
+                            <Calendar className="h-3 w-3 mr-1" />
+                            Personalizado
+                          </Button>
+                        </div>
+
+                        {filterType === 'CUSTOM' && (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end animate-in fade-in slide-in-from-top-2 duration-200">
+                            <div>
+                              <Label className="mb-2 block">Desde</Label>
+                              <Input
+                                type="date"
+                                value={dateRange.startDate || ''}
+                                onChange={(e) => handleCustomDateChange('startDate', e.target.value)}
+                                className="w-full"
+                              />
+                            </div>
+                            <div>
+                              <Label className="mb-2 block">Hasta</Label>
+                              <Input
+                                type="date"
+                                value={dateRange.endDate || ''}
+                                onChange={(e) => handleCustomDateChange('endDate', e.target.value)}
+                                className="w-full"
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  )}
+                </Card>
 
                 {/* Transactions */}
                 {transactionsLoading ? (
