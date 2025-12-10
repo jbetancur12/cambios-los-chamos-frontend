@@ -835,9 +835,9 @@ export function GirosPage() {
             </div>
 
             {/* Additional info when viewing completed giros - only for Admin/SuperAdmin */}
-            {/* Additional info when viewing completed giros - only for Admin/SuperAdmin/Minorista */}
-            {filterStatus === 'COMPLETADO' &&
-              (user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN' || user?.role === 'MINORISTA') && (
+            {/* Additional info */}
+            {((filterStatus === 'COMPLETADO' && (user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN')) ||
+              user?.role === 'MINORISTA') && (
                 <div className="border-t border-white border-opacity-30 px-3 py-2">
                   {user?.role === 'SUPER_ADMIN' ? (
                     // SUPER_ADMIN: COP, BS, Ganancia Minoristas, Comisión Banco, Ganancias Sitio
