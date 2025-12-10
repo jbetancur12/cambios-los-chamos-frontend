@@ -1093,7 +1093,8 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                     setShowProofPreview(false)
                   } catch (error: any) {
                     if (error.name !== 'AbortError') {
-                      toast.error('Error al procesar el comprobante')
+                      console.error('Share/Download error:', error)
+                      toast.error(`Error: ${error.message || 'Error desconocido'}`)
                     }
                   }
                 }}
