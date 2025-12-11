@@ -79,7 +79,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
   const [editableAccountNumber, setEditableAccountNumber] = useState('')
   const [selectedBankAccountId, setSelectedBankAccountId] = useState('')
   const [proofUrl, setProofUrl] = useState('')
-  const [fee, setFee] = useState(0)
+  const [fee, setFee] = useState('')
   const [showReturnForm, setShowReturnForm] = useState(false)
   const [returnReason, setReturnReason] = useState('')
   const [isEditingRate, setIsEditingRate] = useState(false)
@@ -163,7 +163,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
     if (open && !giro) {
       setShowReturnForm(false)
       setReturnReason('')
-      setFee(0)
+      setFee('')
       setProofUrl('')
     }
   }, [open, giro])
@@ -240,7 +240,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
         data: {
           bankAccountId: selectedBankAccountId,
           executionType: giro.executionType,
-          fee,
+          fee: Number(fee) || 0,
           proofUrl: proofUrl || undefined,
         },
       },
@@ -792,7 +792,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
                       id="fee"
                       type="number"
                       value={fee}
-                      onChange={(e) => setFee(Number(e.target.value))}
+                      onChange={(e) => setFee(e.target.value)}
                       placeholder="0,00"
                       className="text-right"
                     />
