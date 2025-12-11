@@ -20,11 +20,14 @@ import { useQueryClient } from '@tanstack/react-query'
 import { PaymentProofUpload } from './PaymentProofUpload'
 import { PrintTicketModal } from './PrintTicketModal'
 import { XCircle, Copy, Share2, CreditCard, Download } from 'lucide-react'
+import { GiroDetailSkeleton } from './skeletons/GiroDetailSkeleton'
+import type { GiroStatus } from '@/types/api'
 
 interface GiroDetailSheetProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   giroId: string | null
+  initialStatus?: GiroStatus
   onUpdate: () => void
 }
 
@@ -35,7 +38,7 @@ const RETURN_REASON_OPTIONS = [
   'Otro motivo',
 ]
 
-export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDetailSheetProps) {
+export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onUpdate }: GiroDetailSheetProps) {
   const { user } = useAuth()
   const queryClient = useQueryClient()
 
@@ -516,9 +519,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
 
         <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
           {isLoading ? (
-            <div className="h-full flex items-center justify-center">
-              <p className="text-sm text-muted-foreground">Cargando...</p>
-            </div>
+            <GiroDetailSkeleton status={initialStatus} />
           ) : giro ? (
             <>
               {/* Minimalist Key-Value Pairs */}

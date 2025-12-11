@@ -87,6 +87,7 @@ export function GirosPage() {
   const [userFiltersExpanded, setUserFiltersExpanded] = useState(false)
   const [detailSheetOpen, setDetailSheetOpen] = useState(false)
   const [selectedGiroId, setSelectedGiroId] = useState<string | null>(null)
+  const [selectedGiroStatus, setSelectedGiroStatus] = useState<GiroStatus | undefined>(undefined)
   const [searchQuery] = useState('')
   const [page, setPage] = useState(1)
   const [showPrintModal, setShowPrintModal] = useState(false)
@@ -239,8 +240,9 @@ export function GirosPage() {
     }
   }
 
-  const handleGiroClick = (giroId: string) => {
-    setSelectedGiroId(giroId)
+  const handleGiroClick = (giro: any) => {
+    setSelectedGiroId(giro.id)
+    setSelectedGiroStatus(giro.status)
     setDetailSheetOpen(true)
   }
 
@@ -709,7 +711,7 @@ export function GirosPage() {
                       <tr
                         key={giro.id}
                         className="border-b hover:bg-muted/30 cursor-pointer transition-colors"
-                        onClick={() => handleGiroClick(giro.id)}
+                        onClick={() => handleGiroClick(giro)}
                       >
                         {user?.role !== 'MINORISTA' && (
                           <td className="px-3 py-2 truncate text-sm w-28">
@@ -786,7 +788,7 @@ export function GirosPage() {
                 <div
                   key={giro.id}
                   className="bg-card border rounded p-3 cursor-pointer hover:bg-muted/50 transition-colors"
-                  onClick={() => handleGiroClick(giro.id)}
+                  onClick={() => handleGiroClick(giro)}
                 >
                   <div className={`grid ${user?.role === 'MINORISTA' ? 'grid-cols-2' : 'grid-cols-2'} gap-2 text-xs`}>
                     {user?.role !== 'MINORISTA' && (
@@ -1010,6 +1012,7 @@ export function GirosPage() {
           open={detailSheetOpen}
           onOpenChange={setDetailSheetOpen}
           giroId={selectedGiroId}
+          initialStatus={selectedGiroStatus}
           onUpdate={() => {}}
         />
       )}
