@@ -88,6 +88,7 @@ export function PaymentProofUpload({
 
   const handleChangeProof = () => {
     setProof(null)
+    onProofUploaded?.('')
     // El usuario podrá seleccionar uno nuevo que reemplazará automáticamente el anterior
   }
 
