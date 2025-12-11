@@ -672,20 +672,11 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                     <span className="text-xs text-muted-foreground">Tasa Aplicada:</span>
                     <div className="flex items-center gap-2">
                       <span className="font-mono font-medium">{giro.rateApplied?.sellRate?.toFixed(2)}</span>
-                      {!isEditingRate &&
-                        giro.status !== 'COMPLETADO' &&
-                        giro.status !== 'CANCELADO' &&
-                        giro.status !== 'DEVUELTO' && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6"
-                            onClick={() => setIsEditingRate(true)}
-                          >
-                            <CreditCard className="h-3 w-3" />{' '}
-                            {/* Using CreditCard as generic edit icon or just text */}
-                          </Button>
-                        )}
+                      {!isEditingRate && giro.status === 'ASIGNADO' && (
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setIsEditingRate(true)}>
+                          <CreditCard className="h-3 w-3" /> {/* Using CreditCard as generic edit icon or just text */}
+                        </Button>
+                      )}
                     </div>
                   </div>
 
