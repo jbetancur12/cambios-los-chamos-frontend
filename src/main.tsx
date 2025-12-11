@@ -12,5 +12,5 @@ createRoot(document.getElementById('root')!).render(
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 reportWebVitals((metric: any) => {
-  console.log(metric)
+  console.log({ ...metric, path: window.location.pathname })
 })
