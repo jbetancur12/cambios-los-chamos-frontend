@@ -143,7 +143,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
     return () => {
       active = false
     }
-  }, [remoteProofUrl, giro?.status])
+  }, [remoteProofUrl, giro?.status, proofBlobUrl])
 
   // Cleanup blob url
   useEffect(() => {
@@ -867,6 +867,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                         giroId={giro.id}
                         onProofUploaded={() => {
                           setIsEditingCompletedProof(false)
+                          setProofBlobUrl(null) // Force refresh of the proof image
                           onUpdate()
                           toast.success('Comprobante actualizado exitosamente')
                         }}
