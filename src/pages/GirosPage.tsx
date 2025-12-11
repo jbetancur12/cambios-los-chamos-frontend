@@ -109,7 +109,7 @@ export function GirosPage() {
         dateToISO = getEndOfDayISO(singleDate)
         break
 
-      case 'YESTERDAY':
+      case 'YESTERDAY': {
         const today = new Date(todayStr)
         const yesterday = new Date(today)
         yesterday.setDate(yesterday.getDate() - 1)
@@ -117,8 +117,9 @@ export function GirosPage() {
         dateFromISO = getStartOfDayISO(yesterdayStr)
         dateToISO = getEndOfDayISO(yesterdayStr)
         break
+      }
 
-      case 'THIS_WEEK':
+      case 'THIS_WEEK': {
         // Logic: Start from Monday of this week
         const t = new Date(todayStr)
         const day = t.getDay() || 7 // 1 (Mon) to 7 (Sun)
@@ -127,8 +128,9 @@ export function GirosPage() {
         dateFromISO = getStartOfDayISO(startOfWeekStr)
         // dateTo uses default today end
         break
+      }
 
-      case 'LAST_WEEK':
+      case 'LAST_WEEK': {
         // Logic: Monday to Sunday of last week
         const t2 = new Date(todayStr)
         const day2 = t2.getDay() || 7
@@ -140,15 +142,17 @@ export function GirosPage() {
         dateFromISO = getStartOfDayISO(startOfLastWeek.toISOString().split('T')[0])
         dateToISO = getEndOfDayISO(endOfLastWeek.toISOString().split('T')[0])
         break
+      }
 
-      case 'THIS_MONTH':
+      case 'THIS_MONTH': {
         const t3 = new Date(todayStr)
         t3.setDate(1) // First day of month
         dateFromISO = getStartOfDayISO(t3.toISOString().split('T')[0])
         // dateTo is today (end of day)
         break
+      }
 
-      case 'LAST_MONTH':
+      case 'LAST_MONTH': {
         const t4 = new Date(todayStr) // Current day
         // Go to first day of current month, then subtract 1 day to get last day of prev month
         const firstOfCurrent = new Date(t4.getFullYear(), t4.getMonth(), 1)
@@ -158,6 +162,7 @@ export function GirosPage() {
         dateFromISO = getStartOfDayISO(firstOfPrev.toISOString().split('T')[0])
         dateToISO = getEndOfDayISO(lastOfPrev.toISOString().split('T')[0])
         break
+      }
 
       case 'CUSTOM':
         dateFromISO = getStartOfDayISO(customDateRange.from)

@@ -25,7 +25,7 @@ export function PrinterDetectionDialog({ open, onOpenChange, onSelectPrinter }: 
     try {
       // Usar la Web Print API si está disponible
       if ('getPrinters' in navigator) {
-        // @ts-ignore - Web Print API no está en los tipos de TypeScript
+        // @ts-expect-error - Web Print API no está en los tipos de TypeScript
         const detectedPrinters = await navigator.getPrinters?.()
         if (detectedPrinters && detectedPrinters.length > 0) {
           const printerNames = detectedPrinters.map((p: any) => p.name || p.displayName || 'Impresora desconocida')

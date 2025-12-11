@@ -20,8 +20,8 @@ export function useBeneficiarySuggestions() {
   const { data: suggestions = [], isLoading } = useQuery({
     queryKey: BENEFICIARY_SUGGESTIONS_QUERY_KEY,
     queryFn: async () => {
-      const data = await api.get<{ suggestions: any[] }>('/beneficiary-suggestion/list')
-      return data.suggestions.map((s: any) => ({
+      const data = await api.get<{ suggestions: Record<string, any>[] }>('/beneficiary-suggestion/list')
+      return data.suggestions.map((s) => ({
         name: s.beneficiaryName,
         id: s.beneficiaryId,
         phone: s.phone,

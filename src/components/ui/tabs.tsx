@@ -33,6 +33,7 @@ export const Tabs = forwardRef<HTMLDivElement, TabsProps>(
 )
 Tabs.displayName = 'Tabs'
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface TabsListProps extends HTMLAttributes<HTMLDivElement> {}
 
 export const TabsList = forwardRef<HTMLDivElement, TabsListProps>(({ className, ...props }, ref) => (

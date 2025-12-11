@@ -92,7 +92,7 @@ export function intelligentPrefetch(
     // No hay data, hacer prefetch
     return queryClient.prefetchQuery({
       queryKey,
-      queryFn: queryFn as any,
+      queryFn,
       staleTime,
     })
   }

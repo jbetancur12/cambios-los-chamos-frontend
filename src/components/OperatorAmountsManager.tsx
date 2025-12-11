@@ -103,8 +103,9 @@ export function OperatorAmountsManager() {
       await loadOperatorAmounts(selectedOperatorId)
       setNewAmountValue('')
       toast.success('Monto creado y asignado al operador exitosamente')
-    } catch (error: any) {
-      toast.error(error.message || 'Error al crear monto')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Error al crear monto'
+      toast.error(message)
     } finally {
       setSubmitting(false)
     }
@@ -129,8 +130,9 @@ export function OperatorAmountsManager() {
       setEditingAmountId(null)
       setEditingAmountValue('')
       toast.success('Monto actualizado exitosamente')
-    } catch (error: any) {
-      toast.error(error.message || 'Error al actualizar monto')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Error al actualizar monto'
+      toast.error(message)
     } finally {
       setSubmitting(false)
     }
@@ -145,8 +147,9 @@ export function OperatorAmountsManager() {
       await api.delete(`/operator-amounts/${operatorAmountId}`)
       await loadOperatorAmounts(selectedOperatorId)
       toast.success('Monto removido del operador')
-    } catch (error: any) {
-      toast.error(error.message || 'Error al remover monto')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Error al remover monto'
+      toast.error(message)
     }
   }
 

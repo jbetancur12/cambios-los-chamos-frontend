@@ -110,7 +110,7 @@ export function invalidateExchangeRateQueries(queryClient: QueryClient) {
  * Invalida una query específica
  * Con validación de parámetros básica
  */
-export async function smartInvalidateQuery(queryClient: QueryClient, queryKey: any[]) {
+export async function smartInvalidateQuery(queryClient: QueryClient, queryKey: unknown[]) {
   // Valida que queryKey no esté vacío
   if (!queryKey || queryKey.length === 0) {
     console.warn('smartInvalidateQuery: queryKey is empty')

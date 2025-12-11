@@ -285,7 +285,7 @@ export function MinoristaReportsPage() {
 }
 
 interface StatCardProps {
-  icon: any
+  icon: React.ElementType
   label: string
   value: string
   color: string

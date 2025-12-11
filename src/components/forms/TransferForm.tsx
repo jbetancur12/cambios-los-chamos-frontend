@@ -11,8 +11,8 @@ import { NumericFormat } from 'react-number-format'
 import type { Bank, ExchangeRate, Currency, Minorista } from '@/types/api'
 import { BalanceInfo } from '@/components/BalanceInfo'
 import { BeneficiaryAutocomplete } from '@/components/BeneficiaryAutocomplete'
-import { useBeneficiarySuggestions } from '@/hooks/useBeneficiarySuggestions'
-import { useCreateGiro } from '@/hooks/mutations/useGiroMutations'
+import { useBeneficiarySuggestions, type BeneficiaryData } from '@/hooks/useBeneficiarySuggestions'
+import { useCreateGiro, type CreateGiroInput } from '@/hooks/mutations/useGiroMutations'
 
 interface TransferFormProps {
   onSuccess: () => void
@@ -42,7 +42,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
   const [currencyInput, setCurrencyInput] = useState<Currency>('COP')
 
   // Suggestions
-  const [nameSuggestions, setNameSuggestions] = useState<any[]>([])
+  const [nameSuggestions, setNameSuggestions] = useState<BeneficiaryData[]>([])
 
   // Custom rate override (solo SUPER_ADMIN)
   const [useCustomRate, setUseCustomRate] = useState(false)
@@ -67,8 +67,9 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
     try {
       const response = await api.get<{ banks: Bank[] }>('/bank/all')
       setBanks(response.banks)
-    } catch (error: any) {
-      toast.error(error.message || 'Error al cargar bancos')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Error al cargar bancos'
+      toast.error(message)
     }
   }
 
@@ -81,7 +82,8 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
       setCustomSellRate(response.rate.sellRate.toString())
       setCustomUsd(response.rate.usd.toString())
       setCustomBcv(response.rate.bcv.toString())
-    } catch (error: any) {
+    } catch (error) {
+      console.error(error)
       toast.error('No hay tasa de cambio configurada. Contacte al administrador.')
     } finally {
       setLoadingRate(false)
@@ -95,8 +97,9 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
       setMinoristaBalance(response.minorista.availableCredit)
       setMinoristaBalanceInFavor(response.minorista.creditBalance || 0)
       setCreditLimit(response.minorista.creditLimit)
-    } catch (error: any) {
-      toast.error(error.message || 'Error al cargar balance')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Error al cargar balance'
+      toast.error(message)
     } finally {
       setLoadingBalance(false)
     }
@@ -124,7 +127,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
     }
   }
 
-  const handleSelectBeneficiaryFromName = (suggestion: any) => {
+  const handleSelectBeneficiaryFromName = (suggestion: BeneficiaryData) => {
     setBeneficiaryName(suggestion.name)
     setBeneficiaryId(suggestion.id)
     setBankId(suggestion.bankId)
@@ -149,7 +152,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
     try {
       setLoading(true)
 
-      const payload: any = {
+      const payload: CreateGiroInput = {
         beneficiaryName,
         beneficiaryId,
         phone,
@@ -192,8 +195,10 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
         fetchMinoristaBalance()
       }
       onSuccess()
-    } catch (error: any) {
-      toast.error(error.message || 'Error al crear giro')
+      onSuccess()
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Error al crear giro'
+      toast.error(message)
     } finally {
       setLoading(false)
     }
@@ -202,11 +207,11 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
   const effectiveRate =
     useCustomRate && (isSuperAdmin || isAdmin)
       ? {
-        buyRate: parseFloat(customBuyRate) || currentRate?.buyRate || 0,
-        sellRate: parseFloat(customSellRate) || currentRate?.sellRate || 0,
-        bcv: parseFloat(customBcv) || currentRate?.bcv || 0,
-        usd: parseFloat(customUsd) || currentRate?.usd || 0,
-      }
+          buyRate: parseFloat(customBuyRate) || currentRate?.buyRate || 0,
+          sellRate: parseFloat(customSellRate) || currentRate?.sellRate || 0,
+          bcv: parseFloat(customBcv) || currentRate?.bcv || 0,
+          usd: parseFloat(customUsd) || currentRate?.usd || 0,
+        }
       : currentRate
 
   const calculateAmountBs = () => {

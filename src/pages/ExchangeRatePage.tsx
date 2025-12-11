@@ -73,8 +73,9 @@ export function ExchangeRatePage() {
           resetForm()
           setCreateSheetOpen(false)
         },
-        onError: (error: any) => {
-          toast.error(error.message || 'Error al crear tasa de cambio')
+        onError: (error) => {
+          const message = error instanceof Error ? error.message : 'Error al crear tasa de cambio'
+          toast.error(message)
         },
       }
     )
@@ -94,7 +95,7 @@ export function ExchangeRatePage() {
 
   const updateExchangeRateMutation = useUpdateExchangeRate()
 
-  const handleEdit = (rate: any) => {
+  const handleEdit = (rate: { id: string; buyRate: number; sellRate: number; usd: number; bcv: number }) => {
     setEditRateId(rate.id)
     setBuyRate(rate.buyRate.toString())
     setSellRate(rate.sellRate.toString())
@@ -137,8 +138,9 @@ export function ExchangeRatePage() {
           resetForm()
           setEditSheetOpen(false)
         },
-        onError: (error: any) => {
-          toast.error(error.message || 'Error al actualizar tasa de cambio')
+        onError: (error) => {
+          const message = error instanceof Error ? error.message : 'Error al actualizar tasa de cambio'
+          toast.error(message)
         },
       }
     )
@@ -205,12 +207,12 @@ export function ExchangeRatePage() {
                       // Convertir URL a blob
                       const response = await fetch(imageUrl)
                       const blob = await response.blob()
-
                       setImagePreviewBlob(blob)
+
                       setImagePreviewFilename(`tasa - ${getTodayString()}.png`)
                       setShowImagePreview(true)
                     }
-                  } catch (error: any) {
+                  } catch {
                     toast.error('Error al generar la vista previa')
                   }
                 }}
@@ -545,8 +547,9 @@ export function ExchangeRatePage() {
                       document.body.removeChild(a)
                     }
                     setShowImagePreview(false)
-                  } catch (error: any) {
-                    if (error.name !== 'AbortError') {
+                  } catch (error) {
+                    const isAbort = error instanceof Error && error.name === 'AbortError'
+                    if (!isAbort) {
                       toast.error('Error al procesar la imagen')
                     }
                   }

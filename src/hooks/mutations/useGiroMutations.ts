@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import type { Giro, Currency } from '@/types/api'
 
-interface CreateGiroInput {
+export interface CreateGiroInput {
   beneficiaryName: string
   beneficiaryId: string
   phone: string
@@ -10,6 +10,12 @@ interface CreateGiroInput {
   accountNumber: string
   amountInput: number
   currencyInput: Currency
+  customRate?: {
+    buyRate: number
+    sellRate: number
+    usd: number
+    bcv: number
+  }
 }
 
 interface ExecuteGiroInput {
@@ -30,11 +36,12 @@ interface ReturnGiroInput {
 interface UpdateGiroInput {
   giroId: string
   data: {
-    beneficiaryName: string
-    beneficiaryId: string
-    phone: string
-    bankId: string
-    accountNumber: string
+    beneficiaryName?: string
+    beneficiaryId?: string
+    phone?: string
+    bankId?: string
+    accountNumber?: string
+    status?: string
   }
 }
 

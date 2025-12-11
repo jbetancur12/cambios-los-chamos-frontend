@@ -87,9 +87,10 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
       const response = await api.get<{ minorista: Minorista }>('/minorista/me')
       setMinoristaBalance(response.minorista.availableCredit)
       setMinoristaBalanceInFavor(response.minorista.creditBalance || 0)
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error loading balance:', error)
-      toast.error(error.message || 'Error al cargar balance')
+      const message = error instanceof Error ? error.message : 'Error al cargar balance'
+      toast.error(message)
     } finally {
       setLoadingBalance(false)
     }
@@ -148,7 +149,19 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
 
     setLoading(true)
     try {
-      const payload: any = {
+      const payload: {
+        cedula: string
+        bankId: string
+        phone: string
+        contactoEnvia: string
+        amountCop: number
+        customRate?: {
+          buyRate: number
+          sellRate: number
+          usd: number
+          bcv: number
+        }
+      } = {
         cedula,
         bankId: selectedBank,
         phone,
@@ -178,8 +191,9 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
         fetchMinoristaBalance()
       }
       onSuccess()
-    } catch (error: any) {
-      toast.error(error.message || 'Error al procesar el pago móvil')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Error al procesar el pago móvil'
+      toast.error(message)
     } finally {
       setLoading(false)
     }

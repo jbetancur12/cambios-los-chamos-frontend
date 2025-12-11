@@ -73,8 +73,8 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
     try {
       const ticketData = await api.get<ThermalTicketData>(`/giro/${giroId}/thermal-ticket`)
       setTicketData(ticketData)
-    } catch (err: any) {
-      const message = err.message || 'Error al cargar los datos del tiquete'
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error al cargar los datos del tiquete'
       setError(message)
       toast.error(message)
     } finally {
@@ -364,7 +364,7 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
         try {
           iframe.contentWindow?.print()
           toast.success(`Imprimiendo con ${printerName}...`)
-        } catch (err) {
+        } catch {
           toast.error(`Error: No se encontró la impresora "${printerName}". Se abrirá el diálogo de impresión.`)
           iframe.contentWindow?.print()
         }

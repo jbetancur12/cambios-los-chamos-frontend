@@ -1,0 +1,246 @@
+
+> frontend@0.0.0 lint
+> eslint .
+
+
+C:\Users\alejo\Documents\cambios-los-chamos\frontend\src\components\CreateUserSheet.tsx
+  55:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\alejo\Documents\cambios-los-chamos\frontend\src\components\ErrorBoundary.tsx
+  64:10  warning  Fast refresh only works when a file only exports components. Move your component(s) to a separate file  react-refresh/only-export-components
+
+C:\Users\alejo\Documents\cambios-los-chamos\frontend\src\components\GiroDetailSheet.tsx
+  124:6   warning  React Hook useEffect has a missing dependency: 'giro'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  184:24  warning  Unexpected any. Specify a different type                                                                 @typescript-eslint/no-explicit-any
+  221:26  warning  Unexpected any. Specify a different type                                                                 @typescript-eslint/no-explicit-any
+  253:26  warning  Unexpected any. Specify a different type                                                                 @typescript-eslint/no-explicit-any
+  276:26  warning  Unexpected any. Specify a different type                                                                 @typescript-eslint/no-explicit-any
+  294:41  warning  Unexpected any. Specify a different type                                                                 @typescript-eslint/no-explicit-any
+  301:26  warning  Unexpected any. Specify a different type                                                                 @typescript-eslint/no-explicit-any
+  319:24  warning  Unexpected any. Specify a different type                                                                 @typescript-eslint/no-explicit-any
+  347:26  warning  Unexpected any. Specify a different type                                                                 @typescript-eslint/no-explicit-any
+  414:21  warning  Unexpected any. Specify a different type                                                                 @typescript-eslint/no-explicit-any
+  453:21  warning  Unexpected any. Specify a different type                                                                 @typescript-eslint/no-explicit-any
+  477:21  warning  Unexpected any. Specify a different type                                                                 @typescript-eslint/no-explicit-any
+
+C:\Users\alejo\Documents\cambios-los-chamos\frontend\src\components\MobilePaymentSheet.tsx
+   73:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  133:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\alejo\Documents\cambios-los-chamos\frontend\src\components\OperatorAmountsManager.tsx
+   42:6   warning  React Hook useEffect has a missing dependency: 'loadOperatorsAndAmounts'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  106:21  warning  Unexpected any. Specify a different type                                                                                    @typescript-eslint/no-explicit-any
+  132:21  warning  Unexpected any. Specify a different type                                                                                    @typescript-eslint/no-explicit-any
+  148:21  warning  Unexpected any. Specify a different type                                                                                    @typescript-eslint/no-explicit-any
+
+C:\Users\alejo\Documents\cambios-los-chamos\frontend\src\components\PaymentProofUpload.tsx
+  53:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  66:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  82:14  warning  'error' is defined but never used         @typescript-eslint/no-unused-vars
+  82:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\alejo\Documents\cambios-los-chamos\frontend\src\components\PrintTicketModal.tsx
+   68:6   warning  React Hook useEffect has missing dependencies: 'fetchTicketData', 'getPrinterConfig', and 'ticketData'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+   76:19  warning  Unexpected any. Specify a different type                                                                                                                    @typescript-eslint/no-explicit-any
+  367:18  warning  'err' is defined but never used                                                                                                                             @typescript-eslint/no-unused-vars
+
+C:\Users\alejo\Documents\cambios-los-chamos\frontend\src\components\PrinterDetectionDialog.tsx
+  31:57  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  51:9   error    Replace `┬À┬À;┬À` with `;`                   prettier/prettier
+  51:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\alejo\Documents\cambios-los-chamos\frontend\src\components\RechargeAmountsManager.tsx
+  57:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  79:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  95:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\alejo\Documents\cambios-los-chamos\frontend\src\components\RechargeBalanceSheet.tsx
+  69:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\alejo\Documents\cambios-los-chamos\frontend\src\components\RechargeMinoristaBalanceSheet.tsx
+  139:6   warning  React Hook useEffect has a missing dependency: 'minorista'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  166:21  warning  Unexpected any. Specify a different type                                                                      @typescript-eslint/no-explicit-any
+  191:21  warning  Unexpected any. Specify a different type                                                                      @typescript-eslint/no-explicit-any
+
+C:\Users\alejo\Documents\cambios-los-chamos\frontend\src\components\RechargeOperatorsManager.tsx
+   62:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   86:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  102:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\alejo\Documents\cambios-los-chamos\frontend\src\components\RechargeSheet.tsx
+   54:6   warning  React Hook useEffect has a missing dependency: 'loadOperators'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  111:21  warning  Unexpected any. Specify a different type                                                                          @typescript-eslint/no-explicit-any
+  166:21  warning  Unexpected any. Specify a different type                                                                          @typescript-eslint/no-explicit-any
+
+C:\Users\alejo\Documents\cambios-los-chamos\frontend\src\components\ThemeProvider.tsx
+  52:14  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Users\alejo\Documents\cambios-los-chamos\frontend\src\components\TransferencistaAccountsSheet.tsx
+  40:21  warning  Unexpected any. Specify a different type                                                                          @typescript-eslint/no-explicit-any
+  52:6   warning  React Hook useEffect has a missing dependency: 'fetchAccounts'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\alejo\Documents\cambios-los-chamos\frontend\src\components\UpdatePrompt.tsx
+  55:6  warning  React Hook useEffect has a missing dependency: 'handleUpdate'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\alejo\Documents\cambios-los-chamos\frontend\src\components\forms\MobilePaymentForm.tsx
+   90:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  151:22  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  181:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\alejo\Documents\cambios-los-chamos\frontend\src\components\forms\RechargeForm.tsx
+   58:6   warning  React Hook useEffect has a missing dependency: 'loadOperators'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  114:21  warning  Unexpected any. Specify a different type                                                                          @typescript-eslint/no-explicit-any
+  175:21  warning  Unexpected any. Specify a different type                                                                          @typescript-eslint/no-explicit-any
+
+C:\Users\alejo\Documents\cambios-los-chamos\frontend\src\components\forms\TransferForm.tsx
+   45:58  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   70:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   84:14  warning  'error' is defined but never used         @typescript-eslint/no-unused-vars
+   84:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   98:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  127:56  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  152:22  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  195:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\alejo\Documents\cambios-los-chamos\frontend\src\components\ui\badge.tsx
+  29:17  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Users\alejo\Documents\cambios-los-chamos\frontend\src\components\ui\tabs.tsx
+  17:13  error    Insert `┬À┬À`                                                                  prettier/prettier
+  18:15  error    Insert `┬À┬À`                                                                  prettier/prettier
+  19:1   error    Insert `┬À┬À`                                                                  prettier/prettier
+  20:1   error    Replace `┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À` with `┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À`                         prettier/prettier
+  21:1   error    Insert `┬À┬À`                                                                  prettier/prettier
+  22:19  error    Insert `┬À┬À`                                                                  prettier/prettier
+  23:1   error    Replace `┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À` with `┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À`                     prettier/prettier
+  24:1   error    Insert `┬À┬À`                                                                  prettier/prettier
+  25:15  error    Insert `┬À┬À`                                                                  prettier/prettier
+  26:1   error    Replace `┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À` with `┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À`                                 prettier/prettier
+  27:1   error    Insert `┬À┬À`                                                                  prettier/prettier
+  28:1   error    Insert `┬À┬À`                                                                  prettier/prettier
+  37:65  error    Delete `┬À`                                                                   prettier/prettier
+  58:6   warning  'className' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\alejo\Documents\cambios-los-chamos\frontend\src\contexts\AuthContext.tsx
+  62:17  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Users\alejo\Documents\cambios-los-chamos\frontend\src\hooks\queries\useDashboardQueries.ts
+  34:65  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\alejo\Documents\cambios-los-chamos\frontend\src\hooks\queries\useGiroQueries.ts
+  32:67  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\alejo\Documents\cambios-los-chamos\frontend\src\hooks\queries\useUserQueries.ts
+  22:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\alejo\Documents\cambios-los-chamos\frontend\src\hooks\useBeneficiarySuggestions.ts
+  23:64  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\alejo\Documents\cambios-los-chamos\frontend\src\hooks\useGiroWebSocket.ts
+  152:6  warning  React Hook useEffect has a missing dependency: 'emitEvent'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\alejo\Documents\cambios-los-chamos\frontend\src\hooks\usePrefetchQueries.ts
+   98:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  109:54  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\alejo\Documents\cambios-los-chamos\frontend\src\pages\BankAccountsPage.tsx
+  56:9   error  Insert `┬À┬À`  prettier/prettier
+  57:1   error  Insert `┬À┬À`  prettier/prettier
+  58:11  error  Insert `┬À┬À`  prettier/prettier
+  59:1   error  Insert `┬À┬À`  prettier/prettier
+  66:9   error  Insert `┬À┬À`  prettier/prettier
+  67:1   error  Insert `┬À┬À`  prettier/prettier
+  68:11  error  Insert `┬À┬À`  prettier/prettier
+  69:1   error  Insert `┬À┬À`  prettier/prettier
+
+C:\Users\alejo\Documents\cambios-los-chamos\frontend\src\pages\ExchangeRatePage.tsx
+   76:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   97:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  140:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  213:28  warning  'error' is defined but never used         @typescript-eslint/no-unused-vars
+  213:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  548:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\alejo\Documents\cambios-los-chamos\frontend\src\pages\GirosPage.tsx
+    39:14  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+    40:82  warning  Unexpected any. Specify a different type                                                                                        @typescript-eslint/no-explicit-any
+   248:34  warning  Unexpected any. Specify a different type                                                                                        @typescript-eslint/no-explicit-any
+   388:80  error    Insert `ÔÅÄ┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À`                                                                                                      prettier/prettier
+   389:1   error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   731:31  error    Insert `┬À┬À`                                                                                                                     prettier/prettier
+   732:1   error    Insert `┬À┬À`                                                                                                                     prettier/prettier
+   733:1   error    Insert `┬À┬À`                                                                                                                     prettier/prettier
+   857:68  error    Insert `ÔÅÄ┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À`                                                                                                  prettier/prettier
+   858:1   error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   897:15  error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   898:1   error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   899:19  error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   900:1   error    Replace `┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À` with `┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À`                                                                        prettier/prettier
+   901:21  error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   902:1   error    Replace `┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À` with `┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À`                                                                prettier/prettier
+   903:1   error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   904:21  error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   905:1   error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   906:1   error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   907:1   error    Replace `┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À` with `┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À`                                                                prettier/prettier
+   908:21  error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   909:1   error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   910:1   error    Replace `┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À` with `┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À`                                                                prettier/prettier
+   911:1   error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   912:21  error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   913:1   error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   914:23  error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   915:23  error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   916:1   error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   917:23  error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   918:1   error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   919:19  error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   920:1   error    Replace `┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À` with `┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À`                                                                            prettier/prettier
+   921:1   error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   922:19  error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   923:1   error    Replace `┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À` with `┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À`                                                                    prettier/prettier
+   924:1   error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   925:23  error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   926:1   error    Replace `┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À` with `┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À`                                                                    prettier/prettier
+   927:1   error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   928:1   error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   929:23  error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   930:21  error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   931:1   error    Replace `┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À` with `┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À`                                                                        prettier/prettier
+   932:1   error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   933:1   error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   934:19  error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   935:21  error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   936:1   error    Replace `┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À` with `┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À`                                                                prettier/prettier
+   937:1   error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   938:1   error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   939:21  error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   940:1   error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   941:1   error    Replace `┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À` with `┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À`                                                                prettier/prettier
+   942:25  error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   943:1   error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   944:27  error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   945:1   error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   946:23  error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   947:1   error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   948:1   error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   949:23  error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   950:1   error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   951:21  error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   952:1   error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   953:1   error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   954:19  error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   955:19  error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   956:1   error    Replace `┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À` with `┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À`                                                                    prettier/prettier
+   957:1   error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   958:1   error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   959:21  error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   960:1   error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   961:17  error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   962:1   error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+   963:1   error    Delete `┬À┬À`                                                                                                                     prettier/prettier
+  1024:28  error    Delete `┬À`                                                                                                                      prettier/prettier
+
+Ô£û 176 problems (97 errors, 79 warnings)
+  97 errors and 0 warnings potentially fixable with the `--fix` option.
+

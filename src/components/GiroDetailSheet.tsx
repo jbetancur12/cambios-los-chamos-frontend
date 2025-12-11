@@ -181,8 +181,9 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
         toast.success('Giro marcado como procesando')
         onUpdate()
       },
-      onError: (error: any) => {
-        toast.error(error.message || 'Error al marcar giro como procesando')
+      onError: (error) => {
+        const message = error instanceof Error ? error.message : 'Error al marcar giro como procesando'
+        toast.error(message)
       },
     })
   }
@@ -218,8 +219,9 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
           setIsEditing(false)
           onUpdate()
         },
-        onError: (error: any) => {
-          toast.error(error.message || 'Error al actualizar el giro.')
+        onError: (error) => {
+          const message = error instanceof Error ? error.message : 'Error al actualizar el giro.'
+          toast.error(message)
         },
       }
     )
@@ -250,8 +252,9 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
             setShowPrintModal(true)
           }
         },
-        onError: (error: any) => {
-          toast.error(error.message || 'Error al ejecutar giro')
+        onError: (error) => {
+          const message = error instanceof Error ? error.message : 'Error al ejecutar giro'
+          toast.error(message)
         },
       }
     )
@@ -273,8 +276,9 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
           onUpdate()
           onOpenChange(false)
         },
-        onError: (error: any) => {
-          toast.error(error.message || 'Error al devolver el giro')
+        onError: (error) => {
+          const message = error instanceof Error ? error.message : 'Error al devolver el giro'
+          toast.error(message)
         },
       }
     )
@@ -291,15 +295,16 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
     updateGiroMutation.mutate(
       {
         giroId: giro.id,
-        data: { status: 'ASIGNADO' } as any,
+        data: { status: 'ASIGNADO' },
       },
       {
         onSuccess: () => {
           toast.success('Giro reenviado exitosamente.')
           onUpdate()
         },
-        onError: (error: any) => {
-          toast.error(error.message || 'Error al reenviar el giro')
+        onError: (error) => {
+          const message = error instanceof Error ? error.message : 'Error al reenviar el giro'
+          toast.error(message)
         },
       }
     )
@@ -316,8 +321,9 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
         onUpdate()
         onOpenChange(false)
       },
-      onError: (error: any) => {
-        toast.error(error.message || 'Error al eliminar el giro')
+      onError: (error) => {
+        const message = error instanceof Error ? error.message : 'Error al eliminar el giro'
+        toast.error(message)
       },
     })
   }
@@ -344,8 +350,9 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
           setIsEditingRate(false)
           onUpdate()
         },
-        onError: (error: any) => {
-          toast.error(error.message || 'Error al actualizar la tasa del giro.')
+        onError: (error) => {
+          const message = error instanceof Error ? error.message : 'Error al actualizar la tasa del giro.'
+          toast.error(message)
         },
       }
     )
@@ -411,9 +418,10 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
         if (result.filename) filename = result.filename
       }
       return { blob, filename }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error fetching proof:', error)
-      toast.error(`Error al obtener comprobante: ${error.message}`)
+      const message = error instanceof Error ? error.message : 'Error desconocido'
+      toast.error(`Error al obtener comprobante: ${message}`)
       return null
     }
   }
@@ -450,10 +458,12 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
       } else {
         toast.error('Tu dispositivo no permite compartir este tipo de archivo.')
       }
-    } catch (error: any) {
-      if (error.name !== 'AbortError') {
+    } catch (error) {
+      const isAbort = error instanceof Error && error.name === 'AbortError'
+      if (!isAbort) {
         console.error('Share error:', error)
-        toast.error(`Error al compartir: ${error.message}`)
+        const message = error instanceof Error ? error.message : 'Error desconocido'
+        toast.error(`Error al compartir: ${message}`)
       }
     }
   }
@@ -474,9 +484,10 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
       document.body.removeChild(link)
       window.URL.revokeObjectURL(url)
       toast.success('Descarga iniciada')
-    } catch (error: any) {
+    } catch (error) {
       console.error('Download error:', error)
-      toast.error(`Error al descargar: ${error.message}`)
+      const message = error instanceof Error ? error.message : 'Error desconocido'
+      toast.error(`Error al descargar: ${message}`)
     }
   }
 

@@ -122,8 +122,9 @@ export function UsersPage() {
 
       // Mostrar mensaje de éxito
       toast.success(response.message || (newValue ? 'Transferencista disponible' : 'Transferencista no disponible'))
-    } catch (error: any) {
-      toast.error(error.message || 'Error al cambiar disponibilidad')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Error al cambiar disponibilidad'
+      toast.error(message)
       console.error(error)
     }
   }

@@ -52,8 +52,10 @@ export function CreateUserSheet({ open, onOpenChange, onUserCreated, role }: Cre
       })
 
       onUserCreated()
-    } catch (error: any) {
-      toast.error(error.message || 'Error al crear usuario')
+      onUserCreated()
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Error al crear usuario'
+      toast.error(message)
     } finally {
       setLoading(false)
     }

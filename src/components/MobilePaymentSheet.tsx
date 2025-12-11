@@ -70,9 +70,10 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
       const response = await api.get<{ minorista: Minorista }>('/minorista/me')
       setMinoristaBalance(response.minorista.availableCredit)
       setMinoristaBalanceInFavor(response.minorista.creditBalance || 0)
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error loading balance:', error)
-      toast.error(error.message || 'Error al cargar balance')
+      const message = error instanceof Error ? error.message : 'Error al cargar balance'
+      toast.error(message)
     } finally {
       setLoadingBalance(false)
     }
@@ -130,8 +131,12 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
       toast.success('Pago móvil registrado exitosamente')
       onOpenChange(false)
       resetForm()
-    } catch (error: any) {
-      toast.error(error.message || 'Error al procesar el pago móvil')
+      toast.success('Pago móvil registrado exitosamente')
+      onOpenChange(false)
+      resetForm()
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Error al procesar el pago móvil'
+      toast.error(message)
     } finally {
       setLoading(false)
     }

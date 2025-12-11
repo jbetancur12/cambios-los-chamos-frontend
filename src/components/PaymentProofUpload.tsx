@@ -4,6 +4,7 @@ import { Label } from '@/components/ui/label'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
 import { Upload, Download, FileIcon } from 'lucide-react'
+import type { Giro } from '@/types/api'
 
 interface PaymentProofUploadProps {
   giroId: string
@@ -50,7 +51,7 @@ export function PaymentProofUpload({
       formData.append('file', file)
 
       const response = await api.post<{
-        giro: any
+        giro: Giro
         paymentProofUrl: string
         message: string
       }>(`/giro/${giroId}/payment-proof/upload`, formData)
@@ -63,8 +64,9 @@ export function PaymentProofUpload({
       setProof(newProof)
       onProofUploaded?.(response.paymentProofUrl)
       toast.success('Comprobante de pago subido exitosamente')
-    } catch (error: any) {
-      toast.error(error.message || 'Error al subir el comprobante')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Error al subir el comprobante'
+      toast.error(message)
     } finally {
       setUploading(false)
       // Reset file input
@@ -79,7 +81,7 @@ export function PaymentProofUpload({
 
     try {
       window.open(proof.url, '_blank')
-    } catch (error: any) {
+    } catch {
       toast.error('Error al descargar el comprobante')
     }
   }

@@ -112,8 +112,9 @@ export function BankAccountsPage() {
       })
       queryClient.invalidateQueries({ queryKey: ['users'] })
       toast.success(response.message || (newValue ? 'Trasferencista disponible' : 'Trasferencista no disponible'))
-    } catch (error: any) {
-      toast.error(error.message || 'Error al cambiar disponibilidad')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Error al cambiar disponibilidad'
+      toast.error(message)
       console.error(error)
     }
   }

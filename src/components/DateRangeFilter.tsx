@@ -34,14 +34,16 @@ export function DateRangeFilter({ onDateRangeChange, onClear }: DateRangeFilterP
     switch (filterType) {
       case 'TODAY':
         break
-      case 'YESTERDAY':
+      case 'YESTERDAY': {
         dateFrom.setDate(dateFrom.getDate() - 1)
         dateTo.setDate(dateTo.getDate() - 1)
         break
-      case 'THIS_WEEK':
+      }
+      case 'THIS_WEEK': {
         dateFrom.setDate(dateFrom.getDate() - dateFrom.getDay())
         break
-      case 'LAST_WEEK':
+      }
+      case 'LAST_WEEK': {
         const dayOfWeekLast = today.getDay()
         const endOfLastWeek = new Date(today)
         endOfLastWeek.setDate(today.getDate() - dayOfWeekLast - 1)
@@ -52,14 +54,17 @@ export function DateRangeFilter({ onDateRangeChange, onClear }: DateRangeFilterP
         dateFrom = startOfLastWeek
         dateTo = endOfLastWeek
         break
-      case 'THIS_MONTH':
+      }
+      case 'THIS_MONTH': {
         dateFrom.setDate(1)
         break
-      case 'LAST_MONTH':
+      }
+      case 'LAST_MONTH': {
         dateFrom = new Date(today.getFullYear(), today.getMonth() - 1, 1)
         dateTo = new Date(today.getFullYear(), today.getMonth(), 0)
         dateTo.setHours(23, 59, 59, 999)
         break
+      }
       default:
         return undefined
     }

@@ -65,7 +65,7 @@ export function CreateBankAccountSheet({
     try {
       setLoading(true)
 
-      const payload: any = {
+      const payload: Record<string, unknown> = {
         bankId: formData.bankId,
         accountHolder: formData.accountHolder,
         ownerType: formData.ownerType,
@@ -88,9 +88,10 @@ export function CreateBankAccountSheet({
       toast.success('Cuenta bancaria creada exitosamente')
       onAccountCreated()
       onOpenChange(false)
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error:', error)
-      toast.error(error.message || 'Error al crear cuenta bancaria')
+      const message = error instanceof Error ? error.message : 'Error al crear cuenta bancaria'
+      toast.error(message)
     } finally {
       setLoading(false)
     }

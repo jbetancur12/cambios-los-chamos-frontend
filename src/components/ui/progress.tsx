@@ -2,6 +2,7 @@ import * as React from 'react'
 import * as ProgressPrimitive from '@radix-ui/react-progress'
 import { cn } from '@/lib/utils'
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface ProgressProps extends React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root> {
   // Puedes extender las propiedades aquí si lo necesitas
 }

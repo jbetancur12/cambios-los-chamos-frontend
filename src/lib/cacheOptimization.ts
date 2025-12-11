@@ -97,7 +97,7 @@ export function updateQueryDataOptimistic<T>(
  * los refetches en paralelo
  */
 export async function batchInvalidateQueries(queryClient: QueryClient, queryKeys: unknown[][]) {
-  const promises = queryKeys.map((queryKey) => invalidateQueryByPattern(queryClient, queryKey as any))
+  const promises = queryKeys.map((queryKey) => invalidateQueryByPattern(queryClient, queryKey as string[]))
 
   return Promise.all(promises)
 }
