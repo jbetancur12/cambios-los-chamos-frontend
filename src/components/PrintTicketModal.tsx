@@ -258,16 +258,15 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
                 <span class="label">Creado:</span>
                 <span class="value">${data.createdAt}</span>
             </div>
-            ${
-              data.completedAt
-                ? `
+            ${data.completedAt
+        ? `
             <div class="row">
                 <span class="label">Ejecutado:</span>
                 <span class="value">${data.completedAt}</span>
             </div>
             `
-                : ''
-            }
+        : ''
+      }
         </div>
 
         <!-- DATOS DEL BENEFICIARIO -->
@@ -315,16 +314,15 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
                 <span class="label">Tipo:</span>
                 <span class="value">${data.executionType}</span>
             </div>
-            ${
-              data.executedByName
-                ? `
+            ${data.executedByName
+        ? `
             <div class="row">
                 <span class="label">Ejecutado por:</span>
                 <span class="value-1">${data.executedByName}</span>
             </div>
             `
-                : ''
-            }
+        : ''
+      }
         </div>
 
         <div class="status-completed">✓ GIRO COMPLETADO</div>
@@ -378,7 +376,7 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent>
+      <SheetContent className="sm:max-w-[360px]">
         <SheetHeader onClose={() => onOpenChange(false)}>
           <SheetTitle>Imprimir Tiquete</SheetTitle>
         </SheetHeader>
