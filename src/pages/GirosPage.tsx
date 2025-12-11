@@ -21,6 +21,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { GiroDetailSheet } from '@/components/GiroDetailSheet'
 import { PrintTicketModal } from '@/components/PrintTicketModal'
 import { useGirosList } from '@/hooks/queries/useGiroQueries'
+import { useMinoristaBalance } from '@/hooks/queries/useMinoristaQueries'
 import { useAllUsers } from '@/hooks/queries/useUserQueries'
 import type { GiroStatus, Currency, ExecutionType } from '@/types/api'
 import { getTodayString, getStartOfDayISO, getEndOfDayISO } from '@/lib/dateUtils'
@@ -183,6 +184,9 @@ export function GirosPage() {
 
   // Build query params
   // Build query params
+  // Fetch Minorista Balance if user is minorista
+  const { data: minoristaBalanceData } = useMinoristaBalance(user?.role)
+
   const dateRange = getDateRange(filterDate)
 
   // For ASIGNADO and PROCESANDO, we want to see ALL active giros regardless of date
@@ -915,8 +919,29 @@ export function GirosPage() {
                       <p className="font-semibold">{formatCurrency(totals.bankCommission, 'COP')}</p>
                     </div>
                   </div>
+                ) : user?.role === 'MINORISTA' && minoristaBalanceData ? (
+                  // MINORISTA: Deuda Actual, Crédito Asignado
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="text-left">
+                      <p className="text-xs opacity-80">Total Ganancia</p>
+                      <p className="font-semibold">{formatCurrency(totals.minoristaProfit, 'COP')}</p>
+                    </div>
+                    <div className="text-left">
+                      <p className="text-xs opacity-80">Deuda Actual</p>
+                      <p className="font-semibold text-red-100">
+                        {formatCurrency(
+                          Math.max(0, minoristaBalanceData.creditLimit - minoristaBalanceData.availableCredit),
+                          'COP'
+                        )}
+                      </p>
+                    </div>
+                    <div className="text-left">
+                      <p className="text-xs opacity-80">Crédito Asignado</p>
+                      <p className="font-semibold">{formatCurrency(minoristaBalanceData.creditLimit, 'COP')}</p>
+                    </div>
+                  </div>
                 ) : (
-                  // MINORISTA: Total Ganancia
+                  // Default fallback for Minorista if data not loaded or just showing profit if preferred
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     <div className="text-left">
                       <p className="text-xs opacity-80">Total Ganancia</p>

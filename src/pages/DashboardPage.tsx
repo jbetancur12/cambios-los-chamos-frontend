@@ -1,7 +1,8 @@
 import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { FileText, Users, TrendingUp, DollarSign, Wallet, Coins, Clock, ArrowRight, Building } from 'lucide-react'
-import { useDashboardStats, useMinoristaBalance } from '@/hooks/queries/useDashboardQueries'
+import { useDashboardStats } from '@/hooks/queries/useDashboardQueries'
+import { useMinoristaBalance } from '@/hooks/queries/useMinoristaQueries'
 import { useRecentGiros } from '@/hooks/queries/useGiroQueries'
 import { useBankAccountsList } from '@/hooks/queries/useBankQueries'
 import { GiroDetailSheet } from '@/components/GiroDetailSheet'
@@ -232,31 +233,45 @@ export function DashboardPage() {
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg md:text-xl flex items-center gap-2">
                 <Wallet className="h-5 w-5 text-blue-600" />
-                Saldo Disponible
+                Resumen de Cuenta
               </CardTitle>
             </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Crédito Disponible */}
               <div className="space-y-2">
                 <p className="text-xs md:text-sm font-medium text-muted-foreground uppercase tracking-wider">
                   Crédito Disponible
                 </p>
                 <div className="text-2xl md:text-3xl font-bold text-blue-600">
-                  {minoristaBalanceData?.balance ? formatCurrency(minoristaBalanceData.balance, 'COP') : '$ 0,00'}
+                  {formatCurrency(minoristaBalanceData.availableCredit, 'COP')}
                 </div>
                 <p className="text-xs text-muted-foreground">Para crear giros</p>
               </div>
 
-              {/* Saldo a Favor - Solo mostrar si existe */}
-              {minoristaBalanceData?.credit && minoristaBalanceData.credit > 0 && (
+              {/* Deuda Actual */}
+              <div className="space-y-2">
+                <p className="text-xs md:text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                  Deuda Actual
+                </p>
+                <div className="text-2xl md:text-3xl font-bold text-red-600">
+                  {formatCurrency(
+                    Math.max(0, minoristaBalanceData.creditLimit - minoristaBalanceData.availableCredit),
+                    'COP'
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">Crédito utilizado</p>
+              </div>
+
+              {/* Saldo a Favor - Solo mostrar si existe positivo */}
+              {minoristaBalanceData.creditBalance > 0 && (
                 <div className="space-y-2 bg-emerald-50 dark:bg-emerald-950 p-3 rounded-lg border border-emerald-200 dark:border-emerald-800">
                   <p className="text-xs md:text-sm font-medium text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
                     Saldo a Favor
                   </p>
                   <div className="text-2xl md:text-3xl font-bold text-emerald-700 dark:text-emerald-300">
-                    {formatCurrency(minoristaBalanceData.credit, 'COP')}
+                    {formatCurrency(minoristaBalanceData.creditBalance, 'COP')}
                   </div>
                   <p className="text-xs text-emerald-600 dark:text-emerald-400">Balance acreditado</p>
                 </div>
