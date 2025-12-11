@@ -8,7 +8,6 @@ import {
   CheckCircle,
   XCircle,
   Search,
-  X as XIcon,
   CreditCard,
   Calendar,
   ChevronDown,
@@ -87,7 +86,7 @@ export function GirosPage() {
   const [userFiltersExpanded, setUserFiltersExpanded] = useState(false)
   const [detailSheetOpen, setDetailSheetOpen] = useState(false)
   const [selectedGiroId, setSelectedGiroId] = useState<string | null>(null)
-  const [searchQuery, setSearchQuery] = useState('')
+  const [searchQuery] = useState('')
   const [page, setPage] = useState(1)
   const [showPrintModal, setShowPrintModal] = useState(false)
   const [selectedGiroForPrint, setSelectedGiroForPrint] = useState<string | null>(null)
