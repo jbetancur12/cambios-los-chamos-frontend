@@ -117,6 +117,8 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
             margin: 0;
             padding: 0;
             background: white;
+            font-weight: bold;
+            color: #000000;
         }
 
         .ticket {
