@@ -513,22 +513,17 @@ export function ReportsPage() {
                       data={[
                         {
                           name: 'Recargas',
-                          value: minoristaTransactionReportQuery.data.recharges,
+                          value: minoristaTransactionReportQuery.data?.recharges || 0,
                           fill: CHART_COLORS[0],
                         },
                         {
                           name: 'Descuentos',
-                          value: minoristaTransactionReportQuery.data.discounts,
+                          value: minoristaTransactionReportQuery.data?.discounts || 0,
                           fill: CHART_COLORS[1],
                         },
                         {
-                          name: 'Ganancias',
-                          value: minoristaTransactionReportQuery.data.profits,
-                          fill: CHART_COLORS[2],
-                        },
-                        {
                           name: 'Ajustes',
-                          value: minoristaTransactionReportQuery.data.adjustments,
+                          value: minoristaTransactionReportQuery.data?.adjustments || 0,
                           fill: CHART_COLORS[3],
                         },
                       ]}
@@ -560,12 +555,21 @@ export function ReportsPage() {
                 <div className="space-y-3">
                   <StatRow
                     label="Total de Transacciones"
-                    value={minoristaTransactionReportQuery.data.totalTransactions.toString()}
+                    value={(minoristaTransactionReportQuery.data?.totalTransactions || 0).toString()}
                   />
-                  <StatRow label="Recargas" value={minoristaTransactionReportQuery.data.recharges.toString()} />
-                  <StatRow label="Descuentos" value={minoristaTransactionReportQuery.data.discounts.toString()} />
-                  <StatRow label="Ajustes" value={minoristaTransactionReportQuery.data.adjustments.toString()} />
-                  <StatRow label="Ganancias" value={minoristaTransactionReportQuery.data.profits.toString()} />
+                  <StatRow label="Recargas" value={(minoristaTransactionReportQuery.data?.recharges || 0).toString()} />
+                  <StatRow
+                    label="Descuentos"
+                    value={(minoristaTransactionReportQuery.data?.discounts || 0).toString()}
+                  />
+                  <StatRow
+                    label="Ajustes"
+                    value={(minoristaTransactionReportQuery.data?.adjustments || 0).toString()}
+                  />
+                  <StatRow
+                    label="Ganancias Total"
+                    value={(minoristaTransactionReportQuery.data?.totalProfitAmount || 0).toFixed(2)}
+                  />
                 </div>
               </CardContent>
             </Card>

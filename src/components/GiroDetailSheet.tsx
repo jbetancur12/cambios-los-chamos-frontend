@@ -485,7 +485,15 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
           className="px-6 py-4 border-b flex flex-row items-center justify-between space-y-0"
           onClose={() => onOpenChange(false)}
         >
-          <SheetTitle className="text-lg font-bold">Giro a banco</SheetTitle>
+          <SheetTitle className="text-lg font-bold">
+            {giro?.executionType === 'TRANSFERENCIA' && 'Giro a banco'}
+            {giro?.executionType === 'PAGO_MOVIL' && 'Pago móvil'}
+            {giro?.executionType === 'EFECTIVO' && 'Pago en efectivo'}
+            {giro?.executionType === 'ZELLE' && 'Pago por Zelle'}
+            {giro?.executionType === 'RECARGA' && 'Recarga'}
+            {giro?.executionType === 'OTROS' && 'Otro tipo de pago'}
+            {!giro?.executionType && 'Detalle del giro'}
+          </SheetTitle>
         </SheetHeader>
 
         {/* Status Alarm Banner */}
