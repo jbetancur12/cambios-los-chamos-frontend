@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -588,9 +589,16 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
         <Button
           type="submit"
           disabled={loading || hasInsufficientBalance()}
-          className="w-full h-10 md:h-12 text-base md:text-lg bg-[linear-gradient(to_right,#136BBC,#274565)]"
+          className="w-full h-10 md:h-12 text-base md:text-lg bg-[linear-gradient(to_right,#136BBC,#274565)] hover:opacity-90 transition-opacity"
         >
-          {loading ? 'Creando...' : 'Enviar Giro'}
+          {loading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Creando...
+            </>
+          ) : (
+            'Enviar Giro'
+          )}
         </Button>
       </div>
     </form>
