@@ -49,7 +49,7 @@ export function ResetPasswordPage() {
       await api.post('/user/reset-password', {
         token,
         newPassword: password,
-        newPasswordConfirm: passwordConfirm,
+        confirmNewPassword: passwordConfirm,
       })
 
       toast.success('✅ Contraseña restablecida correctamente')
