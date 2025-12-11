@@ -252,43 +252,55 @@ export function GirosPage() {
   }
 
   // Filter giros based on search query and user type
-  const filteredGiros = giros.filter((giro) => {
-    const searchLower = searchQuery.toLowerCase()
+  const filteredGiros = giros
+    .filter((giro) => {
+      const searchLower = searchQuery.toLowerCase()
 
-    // Search filter
-    const matchesSearch =
-      giro.beneficiaryName.toLowerCase().includes(searchLower) ||
-      giro.beneficiaryId.toLowerCase().includes(searchLower) ||
-      giro.bankName.toLowerCase().includes(searchLower) ||
-      giro.accountNumber.includes(searchLower) ||
-      (giro.transferencista?.user.fullName.toLowerCase().includes(searchLower) ?? false) ||
-      (giro.minorista?.user.fullName.toLowerCase().includes(searchLower) ?? false)
+      // Search filter
+      const matchesSearch =
+        giro.beneficiaryName.toLowerCase().includes(searchLower) ||
+        giro.beneficiaryId.toLowerCase().includes(searchLower) ||
+        giro.bankName.toLowerCase().includes(searchLower) ||
+        giro.accountNumber.includes(searchLower) ||
+        (giro.transferencista?.user.fullName.toLowerCase().includes(searchLower) ?? false) ||
+        (giro.minorista?.user.fullName.toLowerCase().includes(searchLower) ?? false)
 
-    // User type filter
-    let matchesUserType = true
-    if (filterUserType === 'MINORISTA') {
-      // Mostrar giros con minorista asignado O giros creados por admin/super_admin
-      matchesUserType = !!giro.minorista || giro.createdBy?.role === 'ADMIN' || giro.createdBy?.role === 'SUPER_ADMIN'
-    } else if (filterUserType === 'TRANSFERENCISTA') {
-      matchesUserType = !!giro.transferencista
-    }
+      // User type filter
+      let matchesUserType = true
+      if (filterUserType === 'MINORISTA') {
+        // Mostrar giros con minorista asignado O giros creados por admin/super_admin
+        matchesUserType = !!giro.minorista || giro.createdBy?.role === 'ADMIN' || giro.createdBy?.role === 'SUPER_ADMIN'
+      } else if (filterUserType === 'TRANSFERENCISTA') {
+        matchesUserType = !!giro.transferencista
+      }
 
-    // Transferencista specific filter
-    let matchesTransferencista = true
-    if (filterUserType === 'TRANSFERENCISTA' && selectedTransferencistaId !== 'ALL') {
-      matchesTransferencista = giro.transferencista?.id === selectedTransferencistaId
-    }
+      // Transferencista specific filter
+      let matchesTransferencista = true
+      if (filterUserType === 'TRANSFERENCISTA' && selectedTransferencistaId !== 'ALL') {
+        matchesTransferencista = giro.transferencista?.id === selectedTransferencistaId
+      }
 
-    // Status filter - cuando es ASIGNADO, incluir también DEVUELTO
-    let matchesStatus = true
-    if (filterStatus === 'ASIGNADO') {
-      matchesStatus = giro.status === 'ASIGNADO' || giro.status === 'DEVUELTO'
-    } else if (filterStatus !== 'ALL') {
-      matchesStatus = giro.status === filterStatus
-    }
+      // Status filter - cuando es ASIGNADO, incluir también DEVUELTO
+      let matchesStatus = true
+      if (filterStatus === 'ASIGNADO') {
+        matchesStatus = giro.status === 'ASIGNADO' || giro.status === 'DEVUELTO'
+      } else if (filterStatus !== 'ALL') {
+        matchesStatus = giro.status === filterStatus
+      }
 
-    return matchesSearch && matchesUserType && matchesTransferencista && matchesStatus
-  })
+      return matchesSearch && matchesUserType && matchesTransferencista && matchesStatus
+    })
+    .sort((a, b) => {
+      const dateA = new Date(a.createdAt).getTime()
+      const dateB = new Date(b.createdAt).getTime()
+
+      // Para "Asignados", mostrar los más viejos primero (FIFO)
+      // Para otros estados, mostrar los más recientes primero
+      if (filterStatus === 'ASIGNADO') {
+        return dateA - dateB
+      }
+      return dateB - dateA
+    })
 
   // Pagination
   const totalPages = Math.ceil(filteredGiros.length / itemsPerPage)
