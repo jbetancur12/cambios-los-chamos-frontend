@@ -19,7 +19,7 @@ import {
 import { useQueryClient } from '@tanstack/react-query'
 import { PaymentProofUpload } from './PaymentProofUpload'
 import { PrintTicketModal } from './PrintTicketModal'
-import { XCircle, Copy, Share2, CreditCard } from 'lucide-react'
+import { XCircle, Copy, Share2, CreditCard, Download } from 'lucide-react'
 
 interface GiroDetailSheetProps {
   open: boolean
@@ -392,63 +392,76 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
     toast.success(`${label} copiado`)
   }
 
-  const handleDownloadProof = async () => {
-    if (!remoteProofUrl) return
+  const getProofBlob = async () => {
+    if (!remoteProofUrl) return null
 
     try {
       let blob: Blob
       let filename = `comprobante-${giro?.id || 'doc'}.jpg`
 
       if (proofBlobUrl) {
-        // If we already have the blob URL, fetch it to get the blob object
-        // (Blob URL is local, so this is fast and offline-capable)
         const response = await fetch(proofBlobUrl)
         blob = await response.blob()
       } else {
-        // Fallback: fetch using api with headers
         const result = await api.downloadFile(remoteProofUrl)
         blob = result.blob
         if (result.filename) filename = result.filename
       }
+      return { blob, filename }
+    } catch (error: any) {
+      console.error('Error fetching proof:', error)
+      toast.error(`Error al obtener comprobante: ${error.message}`)
+      return null
+    }
+  }
 
-      const isMobileOrTablet = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent
-      )
+  const handleShareProof = async () => {
+    const result = await getProofBlob()
+    if (!result) return
 
-      if (isMobileOrTablet && navigator.share) {
-        // Detectar tipo MIME basado en la extensión
-        let mimeType = 'image/jpeg' // Default seguro para imágenes
-        const lowerFilename = filename.toLowerCase()
-        if (lowerFilename.endsWith('.png')) mimeType = 'image/png'
-        else if (lowerFilename.endsWith('.pdf')) mimeType = 'application/pdf'
-        else if (lowerFilename.endsWith('.jpg') || lowerFilename.endsWith('.jpeg')) mimeType = 'image/jpeg'
+    const { blob, filename } = result
 
-        // Mobile: Use Web Share API
-        const file = new File([blob], filename, {
-          type: mimeType,
+    // Check if sharing is supported
+    if (!navigator.canShare || !navigator.share) {
+      toast.error('Tu dispositivo no soporta la función de compartir nativa.')
+      return
+    }
+
+    try {
+      // Detectar tipo MIME
+      let mimeType = 'image/jpeg'
+      const lowerFilename = filename.toLowerCase()
+      if (lowerFilename.endsWith('.png')) mimeType = 'image/png'
+      else if (lowerFilename.endsWith('.pdf')) mimeType = 'application/pdf'
+      else if (lowerFilename.endsWith('.jpg') || lowerFilename.endsWith('.jpeg')) mimeType = 'image/jpeg'
+
+      const file = new File([blob], filename, { type: mimeType })
+
+      if (navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: 'Comprobante de Pago',
+          text: 'Compartir comprobante de pago',
         })
-
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            files: [file],
-            title: 'Comprobante de Pago',
-            text: 'Compartir comprobante de pago',
-          })
-          toast.success('Compartido exitosamente')
-          return // Stop here if shared successfully
-        }
-        // If canShare returns false, we fall through to download logic (implied by execution flow or extensive else?
-        // User snippet threw error: throw new Error('Tu dispositivo no permite compartir este tipo de archivo.')
-        // I will follow user request to try share, else error/fallback?
-        // Actually, user snippet had an ELSE block for desktop.
-        // If I am inside `if (isMobile...)`, and canShare fails, user snippet threw error.
-        // Let's stick to user logic for consistency.
-        else {
-          throw new Error('Tu dispositivo no permite compartir este tipo de archivo.')
-        }
+        toast.success('Compartido exitosamente')
+      } else {
+        toast.error('Tu dispositivo no permite compartir este tipo de archivo.')
       }
+    } catch (error: any) {
+      if (error.name !== 'AbortError') {
+        console.error('Share error:', error)
+        toast.error(`Error al compartir: ${error.message}`)
+      }
+    }
+  }
 
-      // Desktop: Download normally (or fallback if not mobile/no share)
+  const handleDownloadProof = async () => {
+    const result = await getProofBlob()
+    if (!result) return
+
+    const { blob, filename } = result
+
+    try {
       const url = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
@@ -459,10 +472,8 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
       window.URL.revokeObjectURL(url)
       toast.success('Descarga iniciada')
     } catch (error: any) {
-      if (error.name !== 'AbortError') {
-        console.error('Share/Download error:', error)
-        toast.error(`Error: ${error.message || 'Error desconocido'}`)
-      }
+      console.error('Download error:', error)
+      toast.error(`Error al descargar: ${error.message}`)
     }
   }
 
@@ -999,9 +1010,17 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
               </button>
             </div>
             <div className="mt-4 flex gap-4">
+              {/* Force download button - visible on all devices */}
               <Button className="bg-white text-black hover:bg-gray-100" onClick={handleDownloadProof}>
-                <Share2 className="mr-2 h-4 w-4" /> Guardar
+                <Download className="mr-2 h-4 w-4" /> Bajar
               </Button>
+
+              {/* Share button - visible if sharing is supported (mostly mobile) */}
+              {!!navigator.share && (
+                <Button className="bg-white text-black hover:bg-gray-100" onClick={handleShareProof}>
+                  <Share2 className="mr-2 h-4 w-4" /> Compartir
+                </Button>
+              )}
             </div>
           </div>
         </div>
