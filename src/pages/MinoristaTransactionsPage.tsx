@@ -301,7 +301,7 @@ export function MinoristaTransactionsPage() {
                 size="sm"
                 onClick={() => setTypeFilter('RECHARGE')}
               >
-                Recargas
+                Abonos
               </Button>
             </div>
           </CardHeader>

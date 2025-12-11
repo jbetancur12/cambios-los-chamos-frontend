@@ -186,36 +186,32 @@ export function ReportsPage() {
         <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
           <button
             onClick={() => handleTabChange('system')}
-            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${
-              activeTab === 'system' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
-            }`}
+            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${activeTab === 'system' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
+              }`}
             style={activeTab === 'system' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             Ganancias del Sistema
           </button>
           <button
             onClick={() => handleTabChange('minoristas')}
-            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${
-              activeTab === 'minoristas' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
-            }`}
+            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${activeTab === 'minoristas' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
+              }`}
             style={activeTab === 'minoristas' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             Top Minoristas
           </button>
           <button
             onClick={() => handleTabChange('bank')}
-            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${
-              activeTab === 'bank' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
-            }`}
+            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${activeTab === 'bank' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
+              }`}
             style={activeTab === 'bank' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             Transacciones Bancarias
           </button>
           <button
             onClick={() => handleTabChange('minoristaTransactions')}
-            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${
-              activeTab === 'minoristaTransactions' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
-            }`}
+            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${activeTab === 'minoristaTransactions' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
+              }`}
             style={
               activeTab === 'minoristaTransactions' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}
             }
@@ -480,7 +476,7 @@ export function ReportsPage() {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
               <StatCard
-                label="Recargas"
+                label="Abonos"
                 value={`$${minoristaTransactionReportQuery.data.totalRechargeAmount.toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
                 color="bg-blue-100 dark:bg-blue-900/20"
               />
@@ -512,7 +508,7 @@ export function ReportsPage() {
                     <Pie
                       data={[
                         {
-                          name: 'Recargas',
+                          name: 'Abonos',
                           value: minoristaTransactionReportQuery.data?.recharges || 0,
                           fill: CHART_COLORS[0],
                         },
@@ -557,7 +553,7 @@ export function ReportsPage() {
                     label="Total de Transacciones"
                     value={(minoristaTransactionReportQuery.data?.totalTransactions || 0).toString()}
                   />
-                  <StatRow label="Recargas" value={(minoristaTransactionReportQuery.data?.recharges || 0).toString()} />
+                  <StatRow label="Abonos" value={(minoristaTransactionReportQuery.data?.recharges || 0).toString()} />
                   <StatRow
                     label="Descuentos"
                     value={(minoristaTransactionReportQuery.data?.discounts || 0).toString()}
