@@ -2,20 +2,7 @@ import { useState, useRef } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import {
-  ArrowRight,
-  Clock,
-  CheckCircle,
-  XCircle,
-  Search,
-  CreditCard,
-  Calendar,
-  ChevronDown,
-  Banknote,
-  Wallet,
-  Signal,
-  Printer,
-} from 'lucide-react'
+import { Search, Calendar, ChevronDown, ArrowRight, Printer } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { GiroDetailSheet } from '@/components/GiroDetailSheet'
@@ -23,8 +10,9 @@ import { PrintTicketModal } from '@/components/PrintTicketModal'
 import { useGirosList } from '@/hooks/queries/useGiroQueries'
 import { useMinoristaBalance } from '@/hooks/queries/useMinoristaQueries'
 import { useAllUsers } from '@/hooks/queries/useUserQueries'
-import type { GiroStatus, Currency, ExecutionType } from '@/types/api'
+import type { Giro, GiroStatus } from '@/types/api'
 import { getTodayString, getStartOfDayISO, getEndOfDayISO } from '@/lib/dateUtils'
+import { getExecutionTypeBadge, getGiroStatusBadge, formatGiroCurrency } from '@/lib/giroUtils'
 
 type DateFilterType =
   | 'SINGLE_DATE'
@@ -35,36 +23,6 @@ type DateFilterType =
   | 'LAST_MONTH'
   | 'CUSTOM'
   | 'ALL'
-
-export const getExecutionTypeBadge = (executionType?: ExecutionType) => {
-  const typeMap: Record<ExecutionType, { label: string; className: string; icon: any }> = {
-    TRANSFERENCIA: {
-      label: 'Transferencia',
-      className: 'bg-blue-50 text-blue-700 border border-blue-200',
-      icon: Banknote,
-    },
-    PAGO_MOVIL: {
-      label: 'Pago Móvil',
-      className: 'bg-green-50 text-green-700 border border-green-200',
-      icon: Wallet,
-    },
-    RECARGA: {
-      label: 'Recarga Celular',
-      className: 'bg-orange-50 text-orange-700 border border-orange-200',
-      icon: Signal,
-    },
-    EFECTIVO: {
-      label: 'Efectivo',
-      className: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
-      icon: CreditCard,
-    },
-    ZELLE: { label: 'Zelle', className: 'bg-purple-50 text-purple-700 border border-purple-200', icon: CreditCard },
-    OTROS: { label: 'Otros', className: 'bg-gray-50 text-gray-700 border border-gray-200', icon: ArrowRight },
-  }
-  return executionType && typeMap[executionType]
-    ? typeMap[executionType]
-    : { label: 'Desconocido', className: 'bg-gray-50 text-gray-700 border border-gray-200', icon: ArrowRight }
-}
 
 export function GirosPage() {
   const { user } = useAuth()
@@ -212,40 +170,7 @@ export function GirosPage() {
     user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN' ? 'TRANSFERENCISTA' : null
   )
 
-  const getStatusBadge = (status: GiroStatus) => {
-    const statusMap = {
-      PENDIENTE: { label: 'Pendiente', className: 'bg-yellow-100 text-yellow-800', icon: Clock },
-      ASIGNADO: { label: 'Asignado', className: 'bg-blue-100 text-blue-800', icon: ArrowRight },
-      PROCESANDO: { label: 'Procesando', className: 'bg-purple-100 text-purple-800', icon: Clock },
-      COMPLETADO: { label: 'Completado', className: 'bg-green-100 text-green-800', icon: CheckCircle },
-      CANCELADO: { label: 'Cancelado', className: 'bg-red-100 text-red-800', icon: XCircle },
-      DEVUELTO: { label: 'Devuelto', className: 'bg-orange-100 text-orange-800', icon: ArrowRight },
-    }
-    return statusMap[status] || { label: status, className: 'bg-gray-100 text-gray-800', icon: Clock }
-  }
-
-  const formatCurrency = (amount: number, currency: Currency) => {
-    if (currency === 'COP') {
-      return new Intl.NumberFormat('es-CO', {
-        style: 'currency',
-        currency: 'COP',
-        minimumFractionDigits: 0,
-      }).format(amount)
-    } else if (currency === 'USD') {
-      return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-      }).format(amount)
-    } else {
-      return new Intl.NumberFormat('es-VE', {
-        style: 'currency',
-        currency: 'VES',
-        minimumFractionDigits: 2,
-      }).format(amount)
-    }
-  }
-
-  const handleGiroClick = (giro: any) => {
+  const handleGiroClick = (giro: Giro) => {
     setSelectedGiroId(giro.id)
     setSelectedGiroStatus(giro.status)
     setDetailSheetOpen(true)
@@ -713,7 +638,7 @@ export function GirosPage() {
                 </thead>
                 <tbody>
                   {paginatedGiros.map((giro) => {
-                    const statusBadge = getStatusBadge(giro.status)
+                    const statusBadge = getGiroStatusBadge(giro.status)
                     {
                       /* const executionTypeBadge = getExecutionTypeBadge(giro.executionType) */
                     }
@@ -736,7 +661,7 @@ export function GirosPage() {
                           </td>
                         )}
                         <td className="px-3 py-2 text-right whitespace-nowrap font-semibold w-24">
-                          {copAmount > 0 ? formatCurrency(copAmount, 'COP') : '—'}
+                          {copAmount > 0 ? formatGiroCurrency(copAmount, 'COP') : '—'}
                         </td>
                         <td className="px-3 py-2 text-right whitespace-nowrap font-semibold w-20">
                           {giro.amountBs > 0
@@ -797,7 +722,7 @@ export function GirosPage() {
           {/* Mobile: Compact Cards */}
           <div className="md:hidden space-y-2">
             {paginatedGiros.map((giro) => {
-              const statusBadge = getStatusBadge(giro.status)
+              const statusBadge = getGiroStatusBadge(giro.status)
               const executionTypeBadge = getExecutionTypeBadge(giro.executionType)
               const copAmount = giro.currencyInput === 'COP' ? giro.amountInput : 0
               const userName =
@@ -823,7 +748,7 @@ export function GirosPage() {
                     )}
                     <div className={user?.role === 'MINORISTA' ? 'col-span-1' : ''}>
                       <p className="text-muted-foreground font-semibold">COP</p>
-                      <p className="font-semibold">{copAmount > 0 ? formatCurrency(copAmount, 'COP') : '—'}</p>
+                      <p className="font-semibold">{copAmount > 0 ? formatGiroCurrency(copAmount, 'COP') : '—'}</p>
                     </div>
                     <div>
                       <p className="text-muted-foreground font-semibold">Bs</p>
@@ -896,7 +821,7 @@ export function GirosPage() {
               </div>
               <div className="text-right">
                 <span className="font-semibold">COP: </span>
-                <span className="font-mono md:text-lg">{formatCurrency(totals.cop, 'COP')}</span>
+                <span className="font-mono md:text-lg">{formatGiroCurrency(totals.cop, 'COP')}</span>
               </div>
               <div className="text-right">
                 <span className="font-semibold">Bs: </span>
@@ -914,20 +839,20 @@ export function GirosPage() {
                   <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
                     <div className="text-left">
                       <p className="text-xs opacity-80">Ganancia Minoristas</p>
-                      <p className="font-semibold">{formatCurrency(totals.minoristaProfit, 'COP')}</p>
+                      <p className="font-semibold">{formatGiroCurrency(totals.minoristaProfit, 'COP')}</p>
                     </div>
                     <div className="text-left">
                       <p className="text-xs opacity-80">Comisión Banco</p>
-                      <p className="font-semibold">{formatCurrency(totals.bankCommission, 'VES')}</p>
+                      <p className="font-semibold">{formatGiroCurrency(totals.bankCommission, 'VES')}</p>
                     </div>
                     <div className="text-left">
                       <p className="text-xs opacity-80">Ganancia del Sitio</p>
-                      <p className="font-semibold">{formatCurrency(totals.systemProfit, 'COP')}</p>
+                      <p className="font-semibold">{formatGiroCurrency(totals.systemProfit, 'COP')}</p>
                     </div>
                     <div className="text-left">
                       <p className="text-xs opacity-80">Total Ganancias</p>
                       <p className="font-semibold">
-                        {formatCurrency(totals.minoristaProfit + totals.systemProfit, 'COP')}
+                        {formatGiroCurrency(totals.minoristaProfit + totals.systemProfit, 'COP')}
                       </p>
                     </div>
                   </div>
@@ -936,11 +861,11 @@ export function GirosPage() {
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                     <div className="text-left">
                       <p className="text-xs opacity-80">Ganancia Minoristas</p>
-                      <p className="font-semibold">{formatCurrency(totals.minoristaProfit, 'COP')}</p>
+                      <p className="font-semibold">{formatGiroCurrency(totals.minoristaProfit, 'COP')}</p>
                     </div>
                     <div className="text-left">
                       <p className="text-xs opacity-80">Comisión Banco</p>
-                      <p className="font-semibold">{formatCurrency(totals.bankCommission, 'COP')}</p>
+                      <p className="font-semibold">{formatGiroCurrency(totals.bankCommission, 'COP')}</p>
                     </div>
                   </div>
                 ) : user?.role === 'MINORISTA' && minoristaBalanceData ? (
@@ -948,12 +873,12 @@ export function GirosPage() {
                   <div className="grid grid-cols-3 gap-4">
                     <div className="text-left">
                       <p className="text-xs opacity-80">Total Ganancia</p>
-                      <p className="font-semibold">{formatCurrency(totals.minoristaProfit, 'COP')}</p>
+                      <p className="font-semibold">{formatGiroCurrency(totals.minoristaProfit, 'COP')}</p>
                     </div>
                     <div className="text-left">
                       <p className="text-xs opacity-80">Deuda Actual</p>
                       <p className="font-semibold text-red-100">
-                        {formatCurrency(
+                        {formatGiroCurrency(
                           Math.max(0, minoristaBalanceData.creditLimit - minoristaBalanceData.availableCredit),
                           'COP'
                         )}
@@ -961,7 +886,7 @@ export function GirosPage() {
                     </div>
                     <div className="text-left">
                       <p className="text-xs opacity-80">Crédito Asignado</p>
-                      <p className="font-semibold">{formatCurrency(minoristaBalanceData.creditLimit, 'COP')}</p>
+                      <p className="font-semibold">{formatGiroCurrency(minoristaBalanceData.creditLimit, 'COP')}</p>
                     </div>
                   </div>
                 ) : (
@@ -969,7 +894,7 @@ export function GirosPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     <div className="text-left">
                       <p className="text-xs opacity-80">Total Ganancia</p>
-                      <p className="font-semibold">{formatCurrency(totals.minoristaProfit, 'COP')}</p>
+                      <p className="font-semibold">{formatGiroCurrency(totals.minoristaProfit, 'COP')}</p>
                     </div>
                   </div>
                 )}

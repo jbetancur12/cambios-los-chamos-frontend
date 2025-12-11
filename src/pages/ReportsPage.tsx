@@ -186,32 +186,36 @@ export function ReportsPage() {
         <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
           <button
             onClick={() => handleTabChange('system')}
-            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${activeTab === 'system' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
-              }`}
+            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${
+              activeTab === 'system' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
+            }`}
             style={activeTab === 'system' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             Ganancias del Sistema
           </button>
           <button
             onClick={() => handleTabChange('minoristas')}
-            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${activeTab === 'minoristas' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
-              }`}
+            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${
+              activeTab === 'minoristas' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
+            }`}
             style={activeTab === 'minoristas' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             Top Minoristas
           </button>
           <button
             onClick={() => handleTabChange('bank')}
-            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${activeTab === 'bank' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
-              }`}
+            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${
+              activeTab === 'bank' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
+            }`}
             style={activeTab === 'bank' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             Transacciones Bancarias
           </button>
           <button
             onClick={() => handleTabChange('minoristaTransactions')}
-            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${activeTab === 'minoristaTransactions' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
-              }`}
+            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${
+              activeTab === 'minoristaTransactions' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
+            }`}
             style={
               activeTab === 'minoristaTransactions' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}
             }

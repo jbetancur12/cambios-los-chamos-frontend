@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { type ReactNode } from 'react'
 import { AlertCircle, RefreshCw, Home } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'

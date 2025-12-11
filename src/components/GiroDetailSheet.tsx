@@ -19,9 +19,10 @@ import {
 import { useQueryClient } from '@tanstack/react-query'
 import { PaymentProofUpload } from './PaymentProofUpload'
 import { PrintTicketModal } from './PrintTicketModal'
-import { XCircle, Copy, Share2, CreditCard, Download } from 'lucide-react'
+import { XCircle, Copy, Share2, Download, CreditCard } from 'lucide-react'
 import { GiroDetailSkeleton } from './skeletons/GiroDetailSkeleton'
 import type { GiroStatus } from '@/types/api'
+import { formatGiroCurrency } from '@/lib/giroUtils'
 
 interface GiroDetailSheetProps {
   open: boolean
@@ -57,7 +58,6 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
   const { data: giro, isLoading } = useGiroDetail(open ? giroId : null)
   const { data: bankAccounts = [] } = useBankAccountsList(user?.role, true)
   const { data: banks = [] } = useBanksList()
-
 
   const isOwner = giro?.createdBy?.id === user?.id
 
@@ -361,27 +361,6 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
     )
   }
 
-  const formatCurrency = (amount: number, currency: string) => {
-    if (currency === 'COP') {
-      return new Intl.NumberFormat('es-CO', {
-        style: 'currency',
-        currency: 'COP',
-        minimumFractionDigits: 0,
-      }).format(amount)
-    } else if (currency === 'USD') {
-      return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-      }).format(amount)
-    } else {
-      return new Intl.NumberFormat('es-VE', {
-        style: 'currency',
-        currency: 'VES',
-        minimumFractionDigits: 2,
-      }).format(amount)
-    }
-  }
-
   const formatDate = (dateString: string | undefined) => {
     if (!dateString) return '—'
     try {
@@ -597,7 +576,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
                 {/* Monto USD/COP */}
                 <div className="flex justify-between items-center pt-2">
                   <span className="text-muted-foreground">Monto {giro.currencyInput}:</span>
-                  <span className="font-medium">{formatCurrency(giro.amountInput, giro.currencyInput)}</span>
+                  <span className="font-medium">{formatGiroCurrency(giro.amountInput, giro.currencyInput)}</span>
                 </div>
 
                 {/* Bolívares */}

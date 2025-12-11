@@ -1,11 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Settings, Search, X, CheckCircle2, AlertCircle, ShieldCheck } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/contexts/AuthContext'
-import { usePrinterConfig } from '@/hooks/queries/usePrinterConfigQueries'
+import { usePrinterConfig } from '@/hooks/usePrinterConfig'
 import { PrinterDetectionDialog } from '@/components/PrinterDetectionDialog'
 import { RechargeOperatorsManager } from '@/components/RechargeOperatorsManager'
 import { OperatorAmountsManager } from '@/components/OperatorAmountsManager'
@@ -35,15 +35,16 @@ export function ConfigPage() {
   const admins = adminsQuery.data || []
   const isLoadingAdmins = adminsQuery.isLoading
 
-  // React Query hooks
-  const printerConfigQuery = usePrinterConfig()
-  const printerConfig = printerConfigQuery.data
+  const { getPrinterConfig } = usePrinterConfig()
 
   // Update form when config loads
-  if (printerConfig && (!printerName || !printerType)) {
-    if (!printerName) setPrinterName(printerConfig.name)
-    if (printerType === 'thermal') setPrinterType(printerConfig.type)
-  }
+  useEffect(() => {
+    const config = getPrinterConfig()
+    if (config) {
+      if (!printerName) setPrinterName(config.name)
+      if (printerType === 'thermal') setPrinterType(config.type)
+    }
+  }, [getPrinterConfig])
 
   const handleSelectPrinter = (printerName: string) => {
     setPrinterName(printerName)
