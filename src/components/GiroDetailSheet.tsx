@@ -589,7 +589,13 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
                 {/* Bolívares */}
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">Bolívares:</span>
-                  <span className="font-medium text-lg">{formatCurrency(giro.amountBs, 'VES')}</span>
+                  <span className="font-medium text-lg">
+                    {giro.amountBs.toLocaleString('es-VE', {
+                      style: 'currency',
+                      currency: 'VES',
+                      minimumFractionDigits: 2,
+                    })}
+                  </span>
                 </div>
               </div>
 

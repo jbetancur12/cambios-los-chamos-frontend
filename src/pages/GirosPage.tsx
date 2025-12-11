@@ -722,7 +722,12 @@ export function GirosPage() {
                           {copAmount > 0 ? formatCurrency(copAmount, 'COP') : '—'}
                         </td>
                         <td className="px-3 py-2 text-right whitespace-nowrap font-semibold w-20">
-                          {giro.amountBs > 0 ? giro.amountBs.toLocaleString('es-VE') : '—'}
+                          {giro.amountBs > 0
+                            ? giro.amountBs.toLocaleString('es-VE', {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })
+                            : '—'}
                         </td>
                         <td className="px-3 py-2 truncate w-32">
                           <div className="text-xs truncate" title={giro.bankName}>
