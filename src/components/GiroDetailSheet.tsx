@@ -19,12 +19,7 @@ import {
 import { useQueryClient } from '@tanstack/react-query'
 import { PaymentProofUpload } from './PaymentProofUpload'
 import { PrintTicketModal } from './PrintTicketModal'
-import {
-  XCircle,
-  Copy,
-  Share2,
-  CreditCard,
-} from 'lucide-react'
+import { XCircle, Copy, Share2, CreditCard } from 'lucide-react'
 
 interface GiroDetailSheetProps {
   open: boolean
@@ -110,7 +105,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
       setEditablePhone(giro.phone)
       setEditableAccountNumber(giro.accountNumber)
       if (giro.bankCode) {
-        // Optionally try to find the bank by code, but we don't have the list here conveniently mapped. 
+        // Optionally try to find the bank by code, but we don't have the list here conveniently mapped.
         // We'll skip auto-setting bank ID for now unless we do a lookup.
         // Leaving it empty enforces user to select if they want to edit.
       }
@@ -389,6 +384,44 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
         if (result.filename) filename = result.filename
       }
 
+      const isMobileOrTablet = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      )
+
+      if (isMobileOrTablet && navigator.share) {
+        // Detectar tipo MIME basado en la extensión
+        let mimeType = 'image/jpeg' // Default seguro para imágenes
+        const lowerFilename = filename.toLowerCase()
+        if (lowerFilename.endsWith('.png')) mimeType = 'image/png'
+        else if (lowerFilename.endsWith('.pdf')) mimeType = 'application/pdf'
+        else if (lowerFilename.endsWith('.jpg') || lowerFilename.endsWith('.jpeg')) mimeType = 'image/jpeg'
+
+        // Mobile: Use Web Share API
+        const file = new File([blob], filename, {
+          type: mimeType,
+        })
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: 'Comprobante de Pago',
+            text: 'Compartir comprobante de pago',
+          })
+          toast.success('Compartido exitosamente')
+          return // Stop here if shared successfully
+        }
+        // If canShare returns false, we fall through to download logic (implied by execution flow or extensive else?
+        // User snippet threw error: throw new Error('Tu dispositivo no permite compartir este tipo de archivo.')
+        // I will follow user request to try share, else error/fallback?
+        // Actually, user snippet had an ELSE block for desktop.
+        // If I am inside `if (isMobile...)`, and canShare fails, user snippet threw error.
+        // Let's stick to user logic for consistency.
+        else {
+          throw new Error('Tu dispositivo no permite compartir este tipo de archivo.')
+        }
+      }
+
+      // Desktop: Download normally (or fallback if not mobile/no share)
       const url = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
@@ -398,9 +431,11 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
       document.body.removeChild(link)
       window.URL.revokeObjectURL(url)
       toast.success('Descarga iniciada')
-    } catch (error) {
-      console.error('Error downloading proof:', error)
-      toast.error('Error al descargar el comprobante')
+    } catch (error: any) {
+      if (error.name !== 'AbortError') {
+        console.error('Share/Download error:', error)
+        toast.error(`Error: ${error.message || 'Error desconocido'}`)
+      }
     }
   }
 
@@ -419,7 +454,10 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-md p-0 gap-0 border-l overflow-hidden flex flex-col h-full bg-white dark:bg-slate-950">
-        <SheetHeader className="px-6 py-4 border-b flex flex-row items-center justify-between space-y-0" onClose={() => onOpenChange(false)}>
+        <SheetHeader
+          className="px-6 py-4 border-b flex flex-row items-center justify-between space-y-0"
+          onClose={() => onOpenChange(false)}
+        >
           <SheetTitle className="text-lg font-bold">Giro a banco</SheetTitle>
         </SheetHeader>
 
@@ -439,7 +477,6 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
             <>
               {/* Minimalist Key-Value Pairs */}
               <div className="space-y-4 text-sm">
-
                 {/* Cliente / Beneficiario Name */}
                 <div className="flex justify-between items-start">
                   <span className="text-muted-foreground">Cliente:</span>
@@ -477,9 +514,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                 {/* Banco */}
                 <div className="flex justify-between items-start">
                   <span className="text-muted-foreground">Banco:</span>
-                  <span className="font-medium text-right uppercase">
-                    {`0${giro.bankCode} - ${giro.bankName}`}
-                  </span>
+                  <span className="font-medium text-right uppercase">{`0${giro.bankCode} - ${giro.bankName}`}</span>
                 </div>
 
                 {/* CELULAR - SOLO PAGO MOVIL */}
@@ -497,7 +532,6 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                     </div>
                   </div>
                 )}
-
 
                 {/* Monto USD/COP */}
                 <div className="flex justify-between items-center pt-2">
@@ -521,39 +555,77 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                   <h3 className="font-semibold text-sm">Editar Datos</h3>
                   <div className="space-y-3">
                     <div className="grid gap-1">
-                      <Label htmlFor="editName" className="text-xs">Nombre</Label>
-                      <Input id="editName" value={editableBeneficiaryName} onChange={(e) => setEditableBeneficiaryName(e.target.value)} className="h-8" />
+                      <Label htmlFor="editName" className="text-xs">
+                        Nombre
+                      </Label>
+                      <Input
+                        id="editName"
+                        value={editableBeneficiaryName}
+                        onChange={(e) => setEditableBeneficiaryName(e.target.value)}
+                        className="h-8"
+                      />
                     </div>
                     <div className="grid gap-1">
-                      <Label htmlFor="editId" className="text-xs">Cédula</Label>
-                      <Input id="editId" value={editableBeneficiaryId} onChange={(e) => setEditableBeneficiaryId(e.target.value)} className="h-8" />
+                      <Label htmlFor="editId" className="text-xs">
+                        Cédula
+                      </Label>
+                      <Input
+                        id="editId"
+                        value={editableBeneficiaryId}
+                        onChange={(e) => setEditableBeneficiaryId(e.target.value)}
+                        className="h-8"
+                      />
                     </div>
                     <div className="grid gap-1">
-                      <Label htmlFor="editPhone" className="text-xs">Teléfono</Label>
-                      <Input id="editPhone" value={editablePhone} onChange={(e) => setEditablePhone(e.target.value)} className="h-8" />
+                      <Label htmlFor="editPhone" className="text-xs">
+                        Teléfono
+                      </Label>
+                      <Input
+                        id="editPhone"
+                        value={editablePhone}
+                        onChange={(e) => setEditablePhone(e.target.value)}
+                        className="h-8"
+                      />
                     </div>
                     <div className="grid gap-1">
-                      <Label htmlFor="editBankId" className="text-xs">Banco</Label>
+                      <Label htmlFor="editBankId" className="text-xs">
+                        Banco
+                      </Label>
                       <select
                         id="editBankId"
                         value={editableBankId}
                         onChange={(e) => setEditableBankId(e.target.value)}
                         className="flex h-8 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors"
                       >
-                        <option value="" disabled>Selecciona un banco</option>
+                        <option value="" disabled>
+                          Selecciona un banco
+                        </option>
                         {banks.map((bank) => (
-                          <option key={bank.id} value={bank.id}>{bank.name}</option>
+                          <option key={bank.id} value={bank.id}>
+                            {bank.name}
+                          </option>
                         ))}
                       </select>
                     </div>
                     <div className="grid gap-1">
-                      <Label htmlFor="editAccountNumber" className="text-xs">Cuenta</Label>
-                      <Input id="editAccountNumber" value={editableAccountNumber} onChange={(e) => setEditableAccountNumber(e.target.value)} className="h-8" />
+                      <Label htmlFor="editAccountNumber" className="text-xs">
+                        Cuenta
+                      </Label>
+                      <Input
+                        id="editAccountNumber"
+                        value={editableAccountNumber}
+                        onChange={(e) => setEditableAccountNumber(e.target.value)}
+                        className="h-8"
+                      />
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Button size="sm" onClick={handleSaveEdit} disabled={isProcessing}>Guardar</Button>
-                    <Button size="sm" variant="outline" onClick={() => setIsEditing(false)}>Cancelar</Button>
+                    <Button size="sm" onClick={handleSaveEdit} disabled={isProcessing}>
+                      Guardar
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => setIsEditing(false)}>
+                      Cancelar
+                    </Button>
                   </div>
                 </div>
               )}
@@ -565,11 +637,20 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                     <span className="text-xs text-muted-foreground">Tasa Aplicada:</span>
                     <div className="flex items-center gap-2">
                       <span className="font-mono font-medium">{giro.rateApplied?.sellRate?.toFixed(2)}</span>
-                      {!isEditingRate && giro.status !== 'COMPLETADO' && giro.status !== 'CANCELADO' && giro.status !== 'DEVUELTO' && (
-                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setIsEditingRate(true)}>
-                          <CreditCard className="h-3 w-3" /> {/* Using CreditCard as generic edit icon or just text */}
-                        </Button>
-                      )}
+                      {!isEditingRate &&
+                        giro.status !== 'COMPLETADO' &&
+                        giro.status !== 'CANCELADO' &&
+                        giro.status !== 'DEVUELTO' && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6"
+                            onClick={() => setIsEditingRate(true)}
+                          >
+                            <CreditCard className="h-3 w-3" />{' '}
+                            {/* Using CreditCard as generic edit icon or just text */}
+                          </Button>
+                        )}
                     </div>
                   </div>
 
@@ -578,30 +659,60 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         <div>
                           <Label className="text-[10px]">Compra</Label>
-                          <Input type="number" step="0.01" className="h-7" value={editableRate.buyRate} onChange={e => setEditableRate({ ...editableRate, buyRate: parseFloat(e.target.value) || 0 })} />
+                          <Input
+                            type="number"
+                            step="0.01"
+                            className="h-7"
+                            value={editableRate.buyRate}
+                            onChange={(e) =>
+                              setEditableRate({ ...editableRate, buyRate: parseFloat(e.target.value) || 0 })
+                            }
+                          />
                         </div>
                         <div>
                           <Label className="text-[10px]">Venta</Label>
-                          <Input type="number" step="0.01" className="h-7" value={editableRate.sellRate} onChange={e => setEditableRate({ ...editableRate, sellRate: parseFloat(e.target.value) || 0 })} />
+                          <Input
+                            type="number"
+                            step="0.01"
+                            className="h-7"
+                            value={editableRate.sellRate}
+                            onChange={(e) =>
+                              setEditableRate({ ...editableRate, sellRate: parseFloat(e.target.value) || 0 })
+                            }
+                          />
                         </div>
                       </div>
                       <div className="flex gap-2">
-                        <Button size="sm" onClick={handleSaveRateEdit} disabled={isProcessing} className="h-7 text-xs w-full">Guardar</Button>
-                        <Button size="sm" variant="ghost" onClick={() => setIsEditingRate(false)} className="h-7 text-xs w-full">Cancelar</Button>
+                        <Button
+                          size="sm"
+                          onClick={handleSaveRateEdit}
+                          disabled={isProcessing}
+                          className="h-7 text-xs w-full"
+                        >
+                          Guardar
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setIsEditingRate(false)}
+                          className="h-7 text-xs w-full"
+                        >
+                          Cancelar
+                        </Button>
                       </div>
                     </div>
                   )}
                 </div>
               )}
 
-
               {/* ACTIONS SECTION (Transferencista/Admin Processing) */}
               {(isTransferencista || isAdmin) && giro.status === 'PROCESANDO' && (
                 <div className="space-y-6 pt-2">
-
                   {/* "De que cuenta sale el dinero?" */}
                   <div className="space-y-2">
-                    <Label htmlFor="bankAccount" className="text-sm font-normal text-muted-foreground">De que cuenta sale el dinero?</Label>
+                    <Label htmlFor="bankAccount" className="text-sm font-normal text-muted-foreground">
+                      De que cuenta sale el dinero?
+                    </Label>
                     <select
                       id="bankAccount"
                       value={selectedBankAccountId}
@@ -618,7 +729,9 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="fee" className="text-sm font-normal text-muted-foreground">Comisión pago movil</Label>
+                    <Label htmlFor="fee" className="text-sm font-normal text-muted-foreground">
+                      Comisión pago movil
+                    </Label>
                     <Input
                       id="fee"
                       type="number"
@@ -673,7 +786,6 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                       Corregir
                     </Button>
                   </div>
-
                 </div>
               )}
 
@@ -696,17 +808,31 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                       onChange={(e) => setReturnReason(e.target.value)}
                       className="w-full h-10 px-3 py-2 border rounded-md"
                     >
-                      <option value="" disabled>Motivo</option>
-                      {RETURN_REASON_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                      <option value="" disabled>
+                        Motivo
+                      </option>
+                      {RETURN_REASON_OPTIONS.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
                     </select>
                     <div className="flex gap-2">
-                      <Button variant="outline" className="flex-1" onClick={() => setShowReturnForm(false)}>Cancelar</Button>
-                      <Button variant="destructive" className="flex-1" onClick={handleReturnGiro} disabled={!returnReason}>Confirmar</Button>
+                      <Button variant="outline" className="flex-1" onClick={() => setShowReturnForm(false)}>
+                        Cancelar
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        className="flex-1"
+                        onClick={handleReturnGiro}
+                        disabled={!returnReason}
+                      >
+                        Confirmar
+                      </Button>
                     </div>
                   </div>
                 </div>
               )}
-
 
               {/* Proof for Completed */}
               {giro.status === 'COMPLETADO' && (
@@ -719,7 +845,9 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                       className="h-32 w-auto object-contain border rounded shadow-sm hover:opacity-90 transition-opacity bg-gray-50 dark:bg-gray-800"
                     />
                     <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <div className="bg-black/50 p-2 rounded-full text-white"><Share2 className="h-5 w-5" /></div>
+                      <div className="bg-black/50 p-2 rounded-full text-white">
+                        <Share2 className="h-5 w-5" />
+                      </div>
                     </div>
                   </div>
                   {((isTransferencista && giro.transferencista?.user?.id === user?.id) || isAdmin) && (
@@ -744,12 +872,18 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                         }}
                         minimalist={true}
                       />
-                      <Button variant="ghost" size="sm" className="w-full mt-1 h-6 text-xs" onClick={() => setIsEditingCompletedProof(false)}>Cancelar</Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="w-full mt-1 h-6 text-xs"
+                        onClick={() => setIsEditingCompletedProof(false)}
+                      >
+                        Cancelar
+                      </Button>
                     </div>
                   )}
                 </div>
               )}
-
             </>
           ) : null}
         </div>
@@ -761,45 +895,36 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
             {giro.completedAt && <p>Transferencia: {formatDate(giro.completedAt)}</p>}
           </div>
         )}
-
       </SheetContent>
 
       {/* Modal de preview del comprobante */}
-      {
-        showProofPreview && giro?.paymentProofKey && (
-          <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm">
-            <div className="bg-transparent max-w-2xl w-full max-h-[90vh] flex flex-col items-center">
-              <div className="relative w-full text-center">
-                <img
-                  src={proofBlobUrl || fullProofUrl}
-                  alt="Comprobante de pago"
-                  className="max-w-full max-h-[80vh] w-auto h-auto rounded shadow-2xl mx-auto"
-                />
-                <button onClick={() => setShowProofPreview(false)} className="absolute -top-10 right-0 text-white hover:text-gray-300">
-                  <XCircle className="h-8 w-8" />
-                </button>
-              </div>
-              <div className="mt-4 flex gap-4">
-                <Button className="bg-white text-black hover:bg-gray-100" onClick={handleDownloadProof}>
-                  <Share2 className="mr-2 h-4 w-4" /> Guardar
-                </Button>
-              </div>
+      {showProofPreview && giro?.paymentProofKey && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-transparent max-w-2xl w-full max-h-[90vh] flex flex-col items-center">
+            <div className="relative w-full text-center">
+              <img
+                src={proofBlobUrl || fullProofUrl}
+                alt="Comprobante de pago"
+                className="max-w-full max-h-[80vh] w-auto h-auto rounded shadow-2xl mx-auto"
+              />
+              <button
+                onClick={() => setShowProofPreview(false)}
+                className="absolute -top-10 right-0 text-white hover:text-gray-300"
+              >
+                <XCircle className="h-8 w-8" />
+              </button>
+            </div>
+            <div className="mt-4 flex gap-4">
+              <Button className="bg-white text-black hover:bg-gray-100" onClick={handleDownloadProof}>
+                <Share2 className="mr-2 h-4 w-4" /> Guardar
+              </Button>
             </div>
           </div>
-        )
-      }
+        </div>
+      )}
 
       {/* Keep PrintTicketModal */}
-      {
-        giro && (
-          <PrintTicketModal
-            giroId={giro.id}
-            open={showPrintModal}
-            onOpenChange={setShowPrintModal}
-          />
-        )
-      }
-
-    </Sheet >
+      {giro && <PrintTicketModal giroId={giro.id} open={showPrintModal} onOpenChange={setShowPrintModal} />}
+    </Sheet>
   )
 }

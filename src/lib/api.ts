@@ -137,9 +137,8 @@ export const api = {
   },
 
   async downloadFile(endpoint: string): Promise<{ blob: Blob; filename: string }> {
-    const baseUrl = API_BASE_URL.endsWith('/api') && endpoint.startsWith('/api')
-      ? API_BASE_URL.slice(0, -4)
-      : API_BASE_URL
+    const baseUrl =
+      API_BASE_URL.endsWith('/api') && endpoint.startsWith('/api') ? API_BASE_URL.slice(0, -4) : API_BASE_URL
 
     const response = await fetch(`${baseUrl}${endpoint}`, {
       method: 'GET',
