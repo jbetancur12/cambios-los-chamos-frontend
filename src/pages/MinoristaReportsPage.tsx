@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { DollarSign, TrendingUp, CheckCircle, Activity, ChevronDown, ChevronUp, Calendar } from 'lucide-react'
 import { useMinoristaGiroReport, useMinoristaGiroTrendReport } from '@/hooks/queries/useReportQueries'
+import { getTodayString, getStartOfDayISO, getEndOfDayISO } from '@/lib/dateUtils'
 
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat('es-CO', {
@@ -16,13 +17,14 @@ const formatCurrency = (amount: number) => {
 }
 
 export function MinoristaReportsPage() {
+  // Standardized Date Filter State
   const dateInputRef = useRef<HTMLInputElement>(null)
   const [filterType, setFilterType] = useState<'SINGLE' | 'CUSTOM'>('SINGLE')
-  const [singleDate, setSingleDate] = useState(new Date().toISOString().split('T')[0])
+  const [singleDate, setSingleDate] = useState(getTodayString())
 
-  const today = new Date()
-  const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0, 0).toISOString()
-  const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999).toISOString()
+  const todayStr = getTodayString()
+  const startOfDay = getStartOfDayISO(todayStr)
+  const endOfDay = getEndOfDayISO(todayStr)
 
   const [dateFrom, setDateFrom] = useState<string>(startOfDay)
   const [dateTo, setDateTo] = useState<string>(endOfDay)
@@ -48,12 +50,8 @@ export function MinoristaReportsPage() {
     setSingleDate(date)
     setFilterType('SINGLE')
 
-    const [year, month, day] = date.split('-').map(Number)
-    const fromDate = new Date(year, month - 1, day, 0, 0, 0, 0)
-    const toDate = new Date(year, month - 1, day, 23, 59, 59, 999)
-
-    setDateFrom(fromDate.toISOString())
-    setDateTo(toDate.toISOString())
+    setDateFrom(getStartOfDayISO(date))
+    setDateTo(getEndOfDayISO(date))
   }
 
   return (
@@ -90,7 +88,7 @@ export function MinoristaReportsPage() {
                   onClick={() => dateInputRef.current?.showPicker()}
                 >
                   <Calendar className="mr-2 h-3 w-3" />
-                  {singleDate === new Date().toISOString().split('T')[0] ? 'Ver día (Hoy)' : `Ver día: ${singleDate}`}
+                  {singleDate === getTodayString() ? 'Ver día (Hoy)' : `Ver día: ${singleDate}`}
                 </Button>
 
                 {/* Hidden Date Input */}
@@ -132,8 +130,7 @@ export function MinoristaReportsPage() {
                       onChange={(e) => {
                         const val = e.target.value
                         if (val) {
-                          const [y, m, d] = val.split('-').map(Number)
-                          setDateFrom(new Date(y, m - 1, d, 0, 0, 0, 0).toISOString())
+                          setDateFrom(getStartOfDayISO(val))
                         } else {
                           setDateFrom('')
                         }
@@ -149,8 +146,7 @@ export function MinoristaReportsPage() {
                       onChange={(e) => {
                         const val = e.target.value
                         if (val) {
-                          const [y, m, d] = val.split('-').map(Number)
-                          setDateTo(new Date(y, m - 1, d, 23, 59, 59, 999).toISOString())
+                          setDateTo(getEndOfDayISO(val))
                         } else {
                           setDateTo('')
                         }

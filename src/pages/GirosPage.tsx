@@ -24,6 +24,7 @@ import { PrintTicketModal } from '@/components/PrintTicketModal'
 import { useGirosList } from '@/hooks/queries/useGiroQueries'
 import { useAllUsers } from '@/hooks/queries/useUserQueries'
 import type { GiroStatus, Currency, ExecutionType } from '@/types/api'
+import { getTodayString, getStartOfDayISO, getEndOfDayISO } from '@/lib/dateUtils'
 
 type DateFilterType =
   | 'SINGLE_DATE'
@@ -71,12 +72,12 @@ export function GirosPage() {
   // Filter states
   const [filterStatus, setFilterStatus] = useState<GiroStatus | 'ALL'>('ASIGNADO')
   const [filterDate, setFilterDate] = useState<DateFilterType>('SINGLE_DATE')
-  const [singleDate, setSingleDate] = useState(new Date().toISOString().split('T')[0])
+  const [singleDate, setSingleDate] = useState(getTodayString())
   const [filterUserType, setFilterUserType] = useState<'MINORISTA' | 'TRANSFERENCISTA' | 'ALL'>('MINORISTA')
   const [selectedTransferencistaId, setSelectedTransferencistaId] = useState<string | 'ALL'>('ALL')
   const [customDateRange, setCustomDateRange] = useState<{ from: string; to: string }>({
-    from: new Date().toISOString().split('T')[0],
-    to: new Date().toISOString().split('T')[0],
+    from: getTodayString(),
+    to: getTodayString(),
   })
 
   // UI states
@@ -94,51 +95,91 @@ export function GirosPage() {
 
   // Calculate date range based on filter
   const getDateRange = (filterType: DateFilterType) => {
-    const today = new Date()
-    let dateFrom = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0, 0)
-    let dateTo = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999)
+    // Get "today" in Venezuela timezone
+    const todayStr = getTodayString()
+
+    // Default to today
+    let dateFromISO = getStartOfDayISO(todayStr)
+    let dateToISO = getEndOfDayISO(todayStr)
 
     switch (filterType) {
       case 'SINGLE_DATE':
-        const [year, month, day] = singleDate.split('-').map(Number)
-        // Note: Months in JS Date are 0-indexed, but input type="date" returns YYYY-MM-DD (1-indexed months)
-        dateFrom = new Date(year, month - 1, day, 0, 0, 0, 0)
-        dateTo = new Date(year, month - 1, day, 23, 59, 59, 999)
+        dateFromISO = getStartOfDayISO(singleDate)
+        dateToISO = getEndOfDayISO(singleDate)
         break
+
+      case 'YESTERDAY':
+        const today = new Date(todayStr)
+        const yesterday = new Date(today)
+        yesterday.setDate(yesterday.getDate() - 1)
+        const yesterdayStr = yesterday.toISOString().split('T')[0]
+        dateFromISO = getStartOfDayISO(yesterdayStr)
+        dateToISO = getEndOfDayISO(yesterdayStr)
+        break
+
       case 'THIS_WEEK':
-        dateFrom.setDate(dateFrom.getDate() - dateFrom.getDay())
+        // Logic: Start from Monday of this week
+        const t = new Date(todayStr)
+        const day = t.getDay() || 7 // 1 (Mon) to 7 (Sun)
+        if (day !== 1) t.setHours(-24 * (day - 1))
+        const startOfWeekStr = t.toISOString().split('T')[0]
+        dateFromISO = getStartOfDayISO(startOfWeekStr)
+        // dateTo uses default today end
         break
+
       case 'LAST_WEEK':
-        const dayOfWeekLast = today.getDay()
-        const endOfLastWeek = new Date(today)
-        endOfLastWeek.setDate(today.getDate() - dayOfWeekLast - 1)
-        endOfLastWeek.setHours(23, 59, 59, 999)
+        // Logic: Monday to Sunday of last week
+        const t2 = new Date(todayStr)
+        const day2 = t2.getDay() || 7
+        const endOfLastWeek = new Date(t2)
+        endOfLastWeek.setDate(t2.getDate() - day2) // Last Sunday
         const startOfLastWeek = new Date(endOfLastWeek)
-        startOfLastWeek.setDate(endOfLastWeek.getDate() - 6)
-        startOfLastWeek.setHours(0, 0, 0, 0)
-        dateFrom = startOfLastWeek
-        dateTo = endOfLastWeek
+        startOfLastWeek.setDate(endOfLastWeek.getDate() - 6) // Last Monday
+
+        dateFromISO = getStartOfDayISO(startOfLastWeek.toISOString().split('T')[0])
+        dateToISO = getEndOfDayISO(endOfLastWeek.toISOString().split('T')[0])
         break
+
       case 'THIS_MONTH':
-        dateFrom.setDate(1)
+        const t3 = new Date(todayStr)
+        t3.setDate(1) // First day of month
+        dateFromISO = getStartOfDayISO(t3.toISOString().split('T')[0])
+        // dateTo is today (end of day)
         break
+
       case 'LAST_MONTH':
-        dateFrom = new Date(today.getFullYear(), today.getMonth() - 1, 1)
-        dateTo = new Date(today.getFullYear(), today.getMonth(), 0)
-        dateTo.setHours(23, 59, 59, 999)
+        const t4 = new Date(todayStr) // Current day
+        // Go to first day of current month, then subtract 1 day to get last day of prev month
+        const firstOfCurrent = new Date(t4.getFullYear(), t4.getMonth(), 1)
+        const lastOfPrev = new Date(firstOfCurrent.getTime() - 24 * 60 * 60 * 1000)
+        const firstOfPrev = new Date(lastOfPrev.getFullYear(), lastOfPrev.getMonth(), 1)
+
+        dateFromISO = getStartOfDayISO(firstOfPrev.toISOString().split('T')[0])
+        dateToISO = getEndOfDayISO(lastOfPrev.toISOString().split('T')[0])
         break
+
       case 'CUSTOM':
-        // Para fechas personalizadas, parseamos los strings YYYY-MM-DD
-        const [customFromYear, customFromMonth, customFromDay] = customDateRange.from.split('-').map(Number)
-        const [customToYear, customToMonth, customToDay] = customDateRange.to.split('-').map(Number)
-        dateFrom = new Date(customFromYear, customFromMonth - 1, customFromDay, 0, 0, 0, 0)
-        dateTo = new Date(customToYear, customToMonth - 1, customToDay, 23, 59, 59, 999)
+        dateFromISO = getStartOfDayISO(customDateRange.from)
+        dateToISO = getEndOfDayISO(customDateRange.to)
         break
-      default:
-        return undefined
+
+      case 'ALL':
+        // Optional: Return undefined or wide range. Current logic returned undefined default, so...
+        // But wait, existing code returns object with ISOs.
+        // If default returns undefined in original code, we should keep that behavior if 'ALL' mimics 'default' case?
+        // Existing code: switch default returns undefined.
+        // But 'ALL' case is not in the switch in original code?
+        // Ah, getDateRange is called with filterDate which is DateFilterType.
+        // And DateFilterType includes 'ALL'.
+        // The query param ignores date if 'ALL' might be passed?
+        // In original code:
+        // case 'ALL' was NOT handled in switch, so it fell to default -> returned undefined.
+
+        if (filterType === 'ALL') return undefined
+        return undefined // Should likely be covered by default
     }
 
-    return { from: dateFrom.toISOString(), to: dateTo.toISOString() }
+    return { from: dateFromISO, to: dateToISO }
   }
 
   // Build query params
@@ -264,7 +305,7 @@ export function GirosPage() {
       </div> */}
 
       {/* Search Bar */}
-      <div className="relative mb-6">
+      {/* <div className="relative mb-6">
         <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Buscar por nombre, beneficiario, banco, transferencista..."
@@ -280,7 +321,7 @@ export function GirosPage() {
             <XIcon className="h-4 w-4" />
           </button>
         )}
-      </div>
+      </div> */}
 
       {/* Status Filters */}
       <div className="mb-4">
@@ -334,8 +375,9 @@ export function GirosPage() {
           >
             <p className="text-xs font-semibold text-muted-foreground">Tipo de Usuario</p>
             <ChevronDown
-              className={`h-4 w-4 text-muted-foreground transition-transform ${userFiltersExpanded ? 'rotate-180' : ''
-                }`}
+              className={`h-4 w-4 text-muted-foreground transition-transform ${
+                userFiltersExpanded ? 'rotate-180' : ''
+              }`}
             />
           </button>
 
@@ -798,8 +840,9 @@ export function GirosPage() {
                 <button
                   key={pageNum}
                   onClick={() => setPage(pageNum)}
-                  className={`px-2 py-0.5 text-xs border rounded ${page === pageNum ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
-                    }`}
+                  className={`px-2 py-0.5 text-xs border rounded ${
+                    page === pageNum ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+                  }`}
                 >
                   {pageNum}
                 </button>
@@ -838,52 +881,52 @@ export function GirosPage() {
             {/* Additional info */}
             {((filterStatus === 'COMPLETADO' && (user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN')) ||
               user?.role === 'MINORISTA') && (
-                <div className="border-t border-white border-opacity-30 px-3 py-2">
-                  {user?.role === 'SUPER_ADMIN' ? (
-                    // SUPER_ADMIN: COP, BS, Ganancia Minoristas, Comisión Banco, Ganancias Sitio
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-                      <div className="text-left">
-                        <p className="text-xs opacity-80">Ganancia Minoristas</p>
-                        <p className="font-semibold">{formatCurrency(totals.minoristaProfit, 'COP')}</p>
-                      </div>
-                      <div className="text-left">
-                        <p className="text-xs opacity-80">Comisión Banco</p>
-                        <p className="font-semibold">{formatCurrency(totals.bankCommission, 'VES')}</p>
-                      </div>
-                      <div className="text-left">
-                        <p className="text-xs opacity-80">Ganancia del Sitio</p>
-                        <p className="font-semibold">{formatCurrency(totals.systemProfit, 'COP')}</p>
-                      </div>
-                      <div className="text-left">
-                        <p className="text-xs opacity-80">Total Ganancias</p>
-                        <p className="font-semibold">
-                          {formatCurrency(totals.minoristaProfit + totals.systemProfit, 'COP')}
-                        </p>
-                      </div>
+              <div className="border-t border-white border-opacity-30 px-3 py-2">
+                {user?.role === 'SUPER_ADMIN' ? (
+                  // SUPER_ADMIN: COP, BS, Ganancia Minoristas, Comisión Banco, Ganancias Sitio
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                    <div className="text-left">
+                      <p className="text-xs opacity-80">Ganancia Minoristas</p>
+                      <p className="font-semibold">{formatCurrency(totals.minoristaProfit, 'COP')}</p>
                     </div>
-                  ) : user?.role === 'ADMIN' ? (
-                    // ADMIN: COP, BS, Ganancia Minoristas, Comisión Banco
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                      <div className="text-left">
-                        <p className="text-xs opacity-80">Ganancia Minoristas</p>
-                        <p className="font-semibold">{formatCurrency(totals.minoristaProfit, 'COP')}</p>
-                      </div>
-                      <div className="text-left">
-                        <p className="text-xs opacity-80">Comisión Banco</p>
-                        <p className="font-semibold">{formatCurrency(totals.bankCommission, 'COP')}</p>
-                      </div>
+                    <div className="text-left">
+                      <p className="text-xs opacity-80">Comisión Banco</p>
+                      <p className="font-semibold">{formatCurrency(totals.bankCommission, 'VES')}</p>
                     </div>
-                  ) : (
-                    // MINORISTA: Total Ganancia
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                      <div className="text-left">
-                        <p className="text-xs opacity-80">Total Ganancia</p>
-                        <p className="font-semibold">{formatCurrency(totals.minoristaProfit, 'COP')}</p>
-                      </div>
+                    <div className="text-left">
+                      <p className="text-xs opacity-80">Ganancia del Sitio</p>
+                      <p className="font-semibold">{formatCurrency(totals.systemProfit, 'COP')}</p>
                     </div>
-                  )}
-                </div>
-              )}
+                    <div className="text-left">
+                      <p className="text-xs opacity-80">Total Ganancias</p>
+                      <p className="font-semibold">
+                        {formatCurrency(totals.minoristaProfit + totals.systemProfit, 'COP')}
+                      </p>
+                    </div>
+                  </div>
+                ) : user?.role === 'ADMIN' ? (
+                  // ADMIN: COP, BS, Ganancia Minoristas, Comisión Banco
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    <div className="text-left">
+                      <p className="text-xs opacity-80">Ganancia Minoristas</p>
+                      <p className="font-semibold">{formatCurrency(totals.minoristaProfit, 'COP')}</p>
+                    </div>
+                    <div className="text-left">
+                      <p className="text-xs opacity-80">Comisión Banco</p>
+                      <p className="font-semibold">{formatCurrency(totals.bankCommission, 'COP')}</p>
+                    </div>
+                  </div>
+                ) : (
+                  // MINORISTA: Total Ganancia
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <div className="text-left">
+                      <p className="text-xs opacity-80">Total Ganancia</p>
+                      <p className="font-semibold">{formatCurrency(totals.minoristaProfit, 'COP')}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </>
       )}
@@ -943,7 +986,7 @@ export function GirosPage() {
           open={detailSheetOpen}
           onOpenChange={setDetailSheetOpen}
           giroId={selectedGiroId}
-          onUpdate={() => { }}
+          onUpdate={() => {}}
         />
       )}
 

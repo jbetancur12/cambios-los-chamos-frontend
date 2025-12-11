@@ -341,9 +341,13 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
     try {
       const date = new Date(dateString)
       if (isNaN(date.getTime())) return '—'
-      return new Intl.DateTimeFormat('es-ES', {
-        dateStyle: 'medium',
-        timeStyle: 'short',
+      return new Intl.DateTimeFormat('es-VE', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: true,
       }).format(date)
     } catch {
       return '—'
@@ -893,10 +897,11 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                     <Button
                       type="button"
                       variant="ghost"
-                      className={`flex-1 ${!showReturnForm
+                      className={`flex-1 ${
+                        !showReturnForm
                           ? 'bg-green-600 hover:bg-green-700 text-white'
                           : 'hover:bg-muted text-muted-foreground'
-                        }`}
+                      }`}
                       onClick={() => setShowReturnForm(false)}
                     >
                       Ejecutar
@@ -904,10 +909,11 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                     <Button
                       type="button"
                       variant="ghost"
-                      className={`flex-1 ${showReturnForm
+                      className={`flex-1 ${
+                        showReturnForm
                           ? 'bg-orange-600 hover:bg-orange-700 text-white'
                           : 'hover:bg-muted text-muted-foreground'
-                        }`}
+                      }`}
                       onClick={() => setShowReturnForm(true)}
                     >
                       Devolver

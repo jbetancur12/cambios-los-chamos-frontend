@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { getTodayString, getStartOfDayISO, getEndOfDayISO } from '@/lib/dateUtils'
 import { ArrowLeft, DollarSign, ChevronDown, Calendar } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -18,12 +19,13 @@ export function BankTransactionsPage() {
   // Standardized Date Filter State
   const dateInputRef = useRef<HTMLInputElement>(null)
   const [filterType, setFilterType] = useState<'SINGLE' | 'CUSTOM'>('SINGLE')
-  const [singleDate, setSingleDate] = useState(new Date().toISOString().split('T')[0])
+  // Use today in Venezuela timezone
+  const todayStr = getTodayString()
+  const [singleDate, setSingleDate] = useState(todayStr)
   const [dateFiltersExpanded, setDateFiltersExpanded] = useState(false)
 
-  const today = new Date()
-  const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0, 0).toISOString()
-  const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999).toISOString()
+  const startOfDay = getStartOfDayISO(todayStr)
+  const endOfDay = getEndOfDayISO(todayStr)
 
   const [dateRange, setDateRange] = useState<{ from: string; to: string }>({
     from: startOfDay,
@@ -35,13 +37,9 @@ export function BankTransactionsPage() {
     setSingleDate(date)
     setFilterType('SINGLE')
 
-    const [year, month, day] = date.split('-').map(Number)
-    const fromDate = new Date(year, month - 1, day, 0, 0, 0, 0)
-    const toDate = new Date(year, month - 1, day, 23, 59, 59, 999)
-
     setDateRange({
-      from: fromDate.toISOString(),
-      to: toDate.toISOString(),
+      from: getStartOfDayISO(date),
+      to: getEndOfDayISO(date),
     })
     setPage(1)
   }

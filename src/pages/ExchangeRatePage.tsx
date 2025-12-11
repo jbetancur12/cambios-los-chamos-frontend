@@ -10,6 +10,7 @@ import { toast } from 'sonner'
 import { useSiaRateImage } from '@/hooks/useSiaRateImage'
 import { useCurrentExchangeRate, useExchangeRateHistory } from '@/hooks/queries/useExchangeRateQueries'
 import { useCreateExchangeRate, useUpdateExchangeRate } from '@/hooks/mutations/useExchangeRateMutations'
+import { getTodayString } from '@/lib/dateUtils'
 
 export function ExchangeRatePage() {
   const { user } = useAuth()
@@ -168,7 +169,7 @@ export function ExchangeRatePage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className={`grid grid-cols-2 ${user?.role !== 'MINORISTA' ? 'md:grid-cols-4' : ''} gap-4`}>
+            <div className={`grid grid - cols - 2 ${user?.role !== 'MINORISTA' ? 'md:grid-cols-4' : ''} gap - 4`}>
               {user?.role !== 'MINORISTA' && (
                 <div className="space-y-1">
                   <p className="text-xs text-muted-foreground">Tasa de Compra</p>
@@ -206,7 +207,7 @@ export function ExchangeRatePage() {
                       const blob = await response.blob()
 
                       setImagePreviewBlob(blob)
-                      setImagePreviewFilename(`tasa-${new Date().toISOString().split('T')[0]}.png`)
+                      setImagePreviewFilename(`tasa - ${getTodayString()}.png`)
                       setShowImagePreview(true)
                     }
                   } catch (error: any) {

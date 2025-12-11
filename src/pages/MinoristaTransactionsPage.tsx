@@ -12,6 +12,7 @@ import type { DateRange } from '@/components/DateRangeFilter'
 
 import { useAuth } from '@/contexts/AuthContext'
 import { MinoristaSimpleTransactionTable } from '@/components/MinoristaSimpleTransactionTable'
+import { getTodayString, getStartOfDayISO, getEndOfDayISO } from '@/lib/dateUtils'
 
 export function MinoristaTransactionsPage() {
   const navigate = useNavigate()
@@ -20,19 +21,20 @@ export function MinoristaTransactionsPage() {
   // New Filter State
   const dateInputRef = useRef<HTMLInputElement>(null)
   const [filterType, setFilterType] = useState<'SINGLE' | 'CUSTOM'>('SINGLE')
-  const [singleDate, setSingleDate] = useState(new Date().toISOString().split('T')[0])
+  // Use today in Venezuela timezone
+  const todayStr = getTodayString()
+  const [singleDate, setSingleDate] = useState(todayStr)
   const [isFilterExpanded, setIsFilterExpanded] = useState(false)
 
   // Initialize with today's date for consistency with "Ver día" default
-  const today = new Date()
-  const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0, 0).toISOString()
-  const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999).toISOString()
+  const startOfDay = getStartOfDayISO(todayStr)
+  const endOfDay = getEndOfDayISO(todayStr)
 
   const [dateRange, setDateRange] = useState<DateRange>({
     from: startOfDay,
     to: endOfDay,
-    startDate: today.toISOString().split('T')[0],
-    endDate: today.toISOString().split('T')[0],
+    startDate: todayStr,
+    endDate: todayStr,
   })
   const [typeFilter, setTypeFilter] = useState<MinoristaTransactionType | 'ALL'>('ALL')
 
@@ -57,13 +59,9 @@ export function MinoristaTransactionsPage() {
     setSingleDate(date)
     setFilterType('SINGLE')
 
-    const [year, month, day] = date.split('-').map(Number)
-    const fromDate = new Date(year, month - 1, day, 0, 0, 0, 0)
-    const toDate = new Date(year, month - 1, day, 23, 59, 59, 999)
-
     setDateRange({
-      from: fromDate.toISOString(),
-      to: toDate.toISOString(),
+      from: getStartOfDayISO(date),
+      to: getEndOfDayISO(date),
       startDate: date,
       endDate: date,
     })
@@ -74,14 +72,8 @@ export function MinoristaTransactionsPage() {
     const newRange = { ...dateRange, [field]: value }
 
     if (newRange.startDate && newRange.endDate) {
-      const [fromYear, fromMonth, fromDay] = newRange.startDate.split('-').map(Number)
-      const [toYear, toMonth, toDay] = newRange.endDate.split('-').map(Number)
-
-      const fromDate = new Date(fromYear, fromMonth - 1, fromDay, 0, 0, 0, 0)
-      const toDate = new Date(toYear, toMonth - 1, toDay, 23, 59, 59, 999)
-
-      newRange.from = fromDate.toISOString()
-      newRange.to = toDate.toISOString()
+      newRange.from = getStartOfDayISO(newRange.startDate)
+      newRange.to = getEndOfDayISO(newRange.endDate)
     }
 
     setDateRange(newRange)
@@ -227,7 +219,7 @@ export function MinoristaTransactionsPage() {
                     onClick={() => dateInputRef.current?.showPicker()}
                   >
                     <Calendar className="mr-2 h-3 w-3" />
-                    {singleDate === new Date().toISOString().split('T')[0] ? 'Ver día (Hoy)' : `Ver día: ${singleDate}`}
+                    {singleDate === getTodayString() ? 'Ver día (Hoy)' : `Ver día: ${singleDate}`}
                   </Button>
 
                   <input

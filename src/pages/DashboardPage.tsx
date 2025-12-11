@@ -127,7 +127,7 @@ export function DashboardPage() {
         </Card>
 
         {/* Users - Only Super Admin */}
-        {isSuperAdmin && stats?.fees !== undefined && (
+        {user?.role === 'SUPER_ADMIN' && stats?.fees !== undefined && (
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-5 md:p-6">
               <CardTitle className="text-xs md:text-sm font-medium">Comisión</CardTitle>
@@ -141,7 +141,7 @@ export function DashboardPage() {
         )}
 
         {/* Volume Bs - Only Super Admin */}
-        {isSuperAdmin && stats?.volumeBs !== undefined && (
+        {user?.role === 'SUPER_ADMIN' && stats?.volumeBs !== undefined && (
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-5 md:p-6">
               <CardTitle className="text-xs md:text-sm font-medium">Volumen Bs</CardTitle>
@@ -155,7 +155,7 @@ export function DashboardPage() {
         )}
 
         {/* Volume COP - Only Super Admin */}
-        {isSuperAdmin && stats?.volumeCOP !== undefined && (
+        {user?.role === 'SUPER_ADMIN' && stats?.volumeCOP !== undefined && (
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-5 md:p-6">
               <CardTitle className="text-xs md:text-sm font-medium">Volumen COP</CardTitle>
@@ -169,7 +169,7 @@ export function DashboardPage() {
         )}
 
         {/* Volume USD - Only Super Admin */}
-        {isSuperAdmin && stats?.volumeUSD !== undefined && (
+        {user?.role === 'SUPER_ADMIN' && stats?.volumeUSD !== undefined && (
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-5 md:p-6">
               <CardTitle className="text-xs md:text-sm font-medium">Volumen USD</CardTitle>
@@ -183,7 +183,7 @@ export function DashboardPage() {
         )}
 
         {/* System Earnings - Only Super Admin */}
-        {isSuperAdmin && stats?.systemEarnings !== undefined && (
+        {user?.role === 'SUPER_ADMIN' && stats?.systemEarnings !== undefined && (
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-5 md:p-6">
               <CardTitle className="text-xs md:text-sm font-medium">Ganancias Sistema</CardTitle>

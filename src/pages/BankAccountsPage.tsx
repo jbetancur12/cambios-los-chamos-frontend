@@ -53,20 +53,20 @@ export function BankAccountsPage() {
     searchTerm.trim() === ''
       ? accounts
       : accounts.filter(
-        (account) =>
-          account.bank.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          account.accountHolder.toLowerCase().includes(searchTerm.toLowerCase())
-      )
+          (account) =>
+            account.bank.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            account.accountHolder.toLowerCase().includes(searchTerm.toLowerCase())
+        )
 
   // Client-side filtering for trasferencistas
   const filteredTrasferencistas =
     searchTransferencistasTerm.trim() === ''
       ? trasferencistas
       : trasferencistas.filter(
-        (t) =>
-          t.fullName.toLowerCase().includes(searchTransferencistasTerm.toLowerCase()) ||
-          t.email.toLowerCase().includes(searchTransferencistasTerm.toLowerCase())
-      )
+          (t) =>
+            t.fullName.toLowerCase().includes(searchTransferencistasTerm.toLowerCase()) ||
+            t.email.toLowerCase().includes(searchTransferencistasTerm.toLowerCase())
+        )
 
   // Handle errors
   if (accountsQuery.error) {
@@ -161,8 +161,6 @@ export function BankAccountsPage() {
           <h1 className="text-2xl md:text-3xl font-bold mb-2">Cuentas</h1>
           <p className="text-muted-foreground">Gestiona cuentas bancarias y trasferencistas</p>
         </div>
-
-
 
         {/* Tab Navigation - Only for SuperAdmin and Admin */}
         {(user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN') && (
@@ -492,7 +490,6 @@ export function BankAccountsPage() {
             </div>
           </div>
         )}
-
 
         {/* Trasferencistas List - Tab Trasferencistas */}
         {activeTab === 'trasferencistas' && (
