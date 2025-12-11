@@ -112,6 +112,7 @@ export interface Giro {
   currencyInput: Currency
   amountBs: number
   bcvValueApplied: number
+  paymentProofKey: string
   systemProfit: number
   minoristaProfit: number
   commission: number | null

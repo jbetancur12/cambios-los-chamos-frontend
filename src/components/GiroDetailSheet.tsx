@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { API_BASE_URL, api } from '@/lib/api'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 import { useAuth } from '@/contexts/AuthContext'
@@ -58,6 +59,8 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
   const { data: bankAccounts = [] } = useBankAccountsList(user?.role, true)
   const { data: banks = [] } = useBanksList()
 
+  console.log(giro)
+
   // Mutations
   const executeGiroMutation = useExecuteGiro()
   const markProcessingMutation = useMarkGiroAsProcessing()
@@ -86,8 +89,18 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
     bcv: 0,
   })
   const [showProofPreview, setShowProofPreview] = useState(false)
+
   const [isEditingCompletedProof, setIsEditingCompletedProof] = useState(false)
   const [showPrintModal, setShowPrintModal] = useState(false)
+  const [proofBlobUrl, setProofBlobUrl] = useState<string | null>(null)
+
+  const remoteProofUrl = giro?.proofUrl || (giro?.paymentProofKey ? `/giro/${giro.id}/payment-proof/download` : '')
+
+  const fullProofUrl = remoteProofUrl
+    ? remoteProofUrl.startsWith('http')
+      ? remoteProofUrl
+      : `${API_BASE_URL.replace(/\/api\/?$/, '')}${remoteProofUrl}`
+    : ''
 
   // Initialize editable fields when giro data loads
   useEffect(() => {
@@ -109,6 +122,40 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
       })
     }
   }, [giro?.id])
+
+  // Fetch proof image securely (with auth headers)
+  useEffect(() => {
+    let active = true
+    const fetchProof = async () => {
+      // Fetch only if we have a valid URL and no blob yet
+      if (remoteProofUrl && giro?.status === 'COMPLETADO') {
+        try {
+          // Use api.downloadFile to get blob with auth headers
+          const { blob } = await api.downloadFile(remoteProofUrl)
+          const url = URL.createObjectURL(blob)
+          if (active) setProofBlobUrl(url)
+        } catch (error) {
+          console.error('Error fetching proof image:', error)
+        }
+      }
+    }
+
+    // Only fetch if we don't have a blob URL yet
+    if (remoteProofUrl && !proofBlobUrl) {
+      fetchProof()
+    }
+
+    return () => {
+      active = false
+    }
+  }, [remoteProofUrl, giro?.status])
+
+  // Cleanup blob url
+  useEffect(() => {
+    return () => {
+      if (proofBlobUrl) URL.revokeObjectURL(proofBlobUrl)
+    }
+  }, [proofBlobUrl])
 
   // Reset form when opening
   useEffect(() => {
@@ -321,6 +368,40 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text)
     toast.success(`${label} copiado`)
+  }
+
+  const handleDownloadProof = async () => {
+    if (!remoteProofUrl) return
+
+    try {
+      let blob: Blob
+      let filename = `comprobante-${giro?.id || 'doc'}.jpg`
+
+      if (proofBlobUrl) {
+        // If we already have the blob URL, fetch it to get the blob object
+        // (Blob URL is local, so this is fast and offline-capable)
+        const response = await fetch(proofBlobUrl)
+        blob = await response.blob()
+      } else {
+        // Fallback: fetch using api with headers
+        const result = await api.downloadFile(remoteProofUrl)
+        blob = result.blob
+        if (result.filename) filename = result.filename
+      }
+
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = filename
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+      toast.success('Descarga iniciada')
+    } catch (error) {
+      console.error('Error downloading proof:', error)
+      toast.error('Error al descargar el comprobante')
+    }
   }
 
   const isProcessing =
@@ -633,9 +714,9 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                   {/* Thumbnail of proof */}
                   <div className="relative group cursor-pointer" onClick={() => setShowProofPreview(true)}>
                     <img
-                      src={giro.proofUrl || '/placeholder.png'}
+                      src={proofBlobUrl || fullProofUrl || '/OIP.webp'}
                       alt="Comprobante"
-                      className="h-32 w-auto object-contain border rounded shadow-sm opacity-80 hover:opacity-100 transition-opacity"
+                      className="h-32 w-auto object-contain border rounded shadow-sm hover:opacity-90 transition-opacity bg-gray-50 dark:bg-gray-800"
                     />
                     <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <div className="bg-black/50 p-2 rounded-full text-white"><Share2 className="h-5 w-5" /></div>
@@ -685,12 +766,12 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
 
       {/* Modal de preview del comprobante */}
       {
-        showProofPreview && giro?.proofUrl && (
+        showProofPreview && giro?.paymentProofKey && (
           <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm">
             <div className="bg-transparent max-w-2xl w-full max-h-[90vh] flex flex-col items-center">
               <div className="relative w-full text-center">
                 <img
-                  src={giro.proofUrl}
+                  src={proofBlobUrl || fullProofUrl}
                   alt="Comprobante de pago"
                   className="max-w-full max-h-[80vh] w-auto h-auto rounded shadow-2xl mx-auto"
                 />
@@ -699,8 +780,8 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                 </button>
               </div>
               <div className="mt-4 flex gap-4">
-                <Button className="bg-white text-black hover:bg-gray-100" onClick={() => giro?.proofUrl && window.open(giro.proofUrl, '_blank')}>
-                  <Share2 className="mr-2 h-4 w-4" /> Abrir en nueva pestaña
+                <Button className="bg-white text-black hover:bg-gray-100" onClick={handleDownloadProof}>
+                  <Share2 className="mr-2 h-4 w-4" /> Guardar
                 </Button>
               </div>
             </div>

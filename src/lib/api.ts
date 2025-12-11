@@ -24,7 +24,7 @@ const getApiBaseUrl = () => {
   return `${protocol}//${hostname}/api`
 }
 
-const API_BASE_URL = getApiBaseUrl()
+export const API_BASE_URL = getApiBaseUrl()
 
 const getAuthHeaders = (): Record<string, string> => {
   const token = localStorage.getItem('authToken')
@@ -137,7 +137,11 @@ export const api = {
   },
 
   async downloadFile(endpoint: string): Promise<{ blob: Blob; filename: string }> {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    const baseUrl = API_BASE_URL.endsWith('/api') && endpoint.startsWith('/api')
+      ? API_BASE_URL.slice(0, -4)
+      : API_BASE_URL
+
+    const response = await fetch(`${baseUrl}${endpoint}`, {
       method: 'GET',
       credentials: 'include',
       headers: {
