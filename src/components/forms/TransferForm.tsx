@@ -174,29 +174,24 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
         payload.customRate = { buyRate, sellRate, usd, bcv }
       }
 
-      createGiroMutation.mutate(payload, {
-        onSuccess: () => {
-          // Save beneficiary suggestion for future use
-          addSuggestion({
-            name: beneficiaryName,
-            id: beneficiaryId,
-            phone,
-            bankId,
-            accountNumber,
-            executionType: 'TRANSFERENCIA',
-          })
+      await createGiroMutation.mutateAsync(payload)
 
-          toast.success('Giro creado exitosamente')
-          resetForm()
-          if (isMinorista) {
-            fetchMinoristaBalance()
-          }
-          onSuccess()
-        },
-        onError: (error: any) => {
-          toast.error(error.message || 'Error al crear giro')
-        },
+      // Save beneficiary suggestion for future use
+      addSuggestion({
+        name: beneficiaryName,
+        id: beneficiaryId,
+        phone,
+        bankId,
+        accountNumber,
+        executionType: 'TRANSFERENCIA',
       })
+
+      toast.success('Giro creado exitosamente')
+      resetForm()
+      if (isMinorista) {
+        fetchMinoristaBalance()
+      }
+      onSuccess()
     } catch (error: any) {
       toast.error(error.message || 'Error al crear giro')
     } finally {
@@ -207,11 +202,11 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
   const effectiveRate =
     useCustomRate && (isSuperAdmin || isAdmin)
       ? {
-          buyRate: parseFloat(customBuyRate) || currentRate?.buyRate || 0,
-          sellRate: parseFloat(customSellRate) || currentRate?.sellRate || 0,
-          bcv: parseFloat(customBcv) || currentRate?.bcv || 0,
-          usd: parseFloat(customUsd) || currentRate?.usd || 0,
-        }
+        buyRate: parseFloat(customBuyRate) || currentRate?.buyRate || 0,
+        sellRate: parseFloat(customSellRate) || currentRate?.sellRate || 0,
+        bcv: parseFloat(customBcv) || currentRate?.bcv || 0,
+        usd: parseFloat(customUsd) || currentRate?.usd || 0,
+      }
       : currentRate
 
   const calculateAmountBs = () => {

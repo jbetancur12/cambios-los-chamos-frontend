@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -271,9 +272,16 @@ export function RechargeForm({ onSuccess }: RechargeFormProps) {
         <Button
           type="submit"
           disabled={loading || hasInsufficientBalance()}
-          className="w-full bg-[linear-gradient(to_right,#136BBC,#274565)]"
+          className="w-full bg-[linear-gradient(to_right,#136BBC,#274565)] hover:opacity-90 transition-opacity"
         >
-          {loading ? 'Procesando...' : 'Enviar Recarga'}
+          {loading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Procesando...
+            </>
+          ) : (
+            'Enviar Recarga'
+          )}
         </Button>
       </div>
     </form>
