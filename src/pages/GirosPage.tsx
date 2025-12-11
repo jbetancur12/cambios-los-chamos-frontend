@@ -395,7 +395,7 @@ export function GirosPage() {
             onClick={() => setUserFiltersExpanded(!userFiltersExpanded)}
             className="w-full flex items-center justify-between p-3 hover:bg-muted/50 transition-colors"
           >
-            <p className="text-xs font-semibold text-muted-foreground">Tipo de Usuario</p>
+            <p className="text-base font-semibold ">Tipo de Usuario</p>
             <ChevronDown
               className={`h-4 w-4 text-muted-foreground transition-transform ${
                 userFiltersExpanded ? 'rotate-180' : ''
@@ -469,7 +469,7 @@ export function GirosPage() {
           onClick={() => setDateFiltersExpanded(!dateFiltersExpanded)}
           className="w-full flex items-center justify-between p-3 hover:bg-muted/50 transition-colors"
         >
-          <p className="text-xs font-semibold text-muted-foreground">Fecha</p>
+          <p className="text-base font-semibold ">Fecha</p>
           <ChevronDown
             className={`h-4 w-4 text-muted-foreground transition-transform ${dateFiltersExpanded ? 'rotate-180' : ''}`}
           />
@@ -579,7 +579,7 @@ export function GirosPage() {
           {/* Desktop Skeleton: Table */}
           <div className="hidden md:block border rounded-lg overflow-hidden bg-card">
             <div className="overflow-x-auto">
-              <table className="w-full text-xs">
+              <table className="w-full text-base">
                 <thead>
                   <tr className="border-b bg-muted/50">
                     {user?.role !== 'MINORISTA' && (
@@ -695,7 +695,7 @@ export function GirosPage() {
           {/* Desktop: Compact Table */}
           <div className="hidden md:block border rounded-lg overflow-hidden bg-card">
             <div className="overflow-x-auto">
-              <table className="w-full text-xs md:text-sm">
+              <table className="w-full text-xs md:text-base">
                 <thead>
                   <tr className="border-b bg-muted/50">
                     {user?.role !== 'MINORISTA' && (

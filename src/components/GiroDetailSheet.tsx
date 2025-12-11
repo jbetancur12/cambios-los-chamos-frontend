@@ -44,6 +44,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
 
   const isTransferencista = user?.role === 'TRANSFERENCISTA'
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN'
+  const canExecute = user?.role === 'TRANSFERENCISTA' || user?.role === 'SUPER_ADMIN'
 
   // Invalidate cache when giroId changes to force a fresh fetch
   useEffect(() => {
@@ -760,8 +761,8 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
                 </div>
               )}
 
-              {/* ACTIONS SECTION (Transferencista/Admin Processing) */}
-              {(isTransferencista || isAdmin) && giro.status === 'PROCESANDO' && (
+              {/* ACTIONS SECTION (Transferencista/SuperAdmin Processing) */}
+              {canExecute && giro.status === 'PROCESANDO' && (
                 <div className="space-y-6 pt-2">
                   {/* "De que cuenta sale el dinero?" */}
                   <div className="space-y-2">
@@ -845,7 +846,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
               )}
 
               {/* Asignado state: Start Processing */}
-              {(isTransferencista || isAdmin) && giro.status === 'ASIGNADO' && (
+              {canExecute && giro.status === 'ASIGNADO' && (
                 <div className="pt-4">
                   <Button onClick={handleMarkAsProcessing} disabled={isProcessing} className="w-full">
                     Marcar como Procesando
