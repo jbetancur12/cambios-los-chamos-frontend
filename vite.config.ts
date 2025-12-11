@@ -20,7 +20,7 @@ export default defineConfig({
 
       // Archivos estáticos incluidos en precache
       includeAssets: [
-        'firebase-messaging-sw/firebase-messaging-sw.js',
+        'custom-sw/firebase-messaging-sw.js',
         'icons/icon-48x48.png',
         'icons/icon-72x72.png',
         'icons/icon-96x96.png',
@@ -85,8 +85,8 @@ export default defineConfig({
             handler: 'NetworkOnly',
           },
         ],
-        globIgnores: ['firebase-messaging-sw/**'],
-        navigateFallbackDenylist: [/firebase-messaging-sw/],
+        globIgnores: ['custom-sw/**'],
+        navigateFallbackDenylist: [/custom-sw/],
         skipWaiting: false,
         clientsClaim: false,
       },
