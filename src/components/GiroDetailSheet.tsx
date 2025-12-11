@@ -121,6 +121,9 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
         usd: giro.rateApplied?.usd || 0,
         bcv: giro.rateApplied?.bcv || 0,
       })
+      setSelectedBankAccountId('')
+      setFee('')
+      setProofUrl('')
     }
   }, [giro?.id])
 
