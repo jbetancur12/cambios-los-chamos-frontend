@@ -163,8 +163,9 @@ export function RechargeMinoristaBalanceSheet({
       setPayAmount('')
       onBalanceUpdated()
       toast.success('Deuda pagada exitosamente')
-    } catch (error: any) {
-      toast.error(error.message || 'Error al pagar deuda')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Error al pagar deuda'
+      toast.error(message)
     } finally {
       setLoading(false)
     }
@@ -188,8 +189,9 @@ export function RechargeMinoristaBalanceSheet({
       setCreditLimitAmount('')
       onBalanceUpdated() // Invalidar query para actualizar la lista
       toast.success('Cupo de crédito asignado exitosamente')
-    } catch (error: any) {
-      toast.error(error.message || 'Error al asignar cupo')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Error al asignar cupo'
+      toast.error(message)
     } finally {
       setLoading(false)
     }

@@ -37,7 +37,7 @@ export function TransferencistaAccountsSheet({
         `/bank-account/transferencista/${transferencistaId}`
       )
       setAccounts(response.bankAccounts || [])
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error al cargar cuentas bancarias')
       console.error(error)
     } finally {

@@ -108,9 +108,10 @@ export function RechargeSheet({ open, onOpenChange }: RechargeSheetProps) {
       const response = await api.get<{ minorista: Minorista }>('/minorista/me')
       setMinoristaBalance(response.minorista.availableCredit)
       setMinoristaBalanceInFavor(response.minorista.creditBalance || 0)
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error loading balance:', error)
-      toast.error(error.message || 'Error al cargar balance')
+      const message = error instanceof Error ? error.message : 'Error al cargar balance'
+      toast.error(message)
     } finally {
       setLoadingBalance(false)
     }
@@ -163,8 +164,9 @@ export function RechargeSheet({ open, onOpenChange }: RechargeSheetProps) {
       toast.success('Recarga registrada exitosamente')
       onOpenChange(false)
       resetForm()
-    } catch (error: any) {
-      toast.error(error.message || 'Error al procesar la recarga')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Error al procesar la recarga'
+      toast.error(message)
     } finally {
       setLoading(false)
     }

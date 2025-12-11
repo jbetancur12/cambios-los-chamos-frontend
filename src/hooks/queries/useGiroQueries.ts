@@ -29,9 +29,10 @@ export function useGirosList(params?: GirosListParams) {
   return useQuery({
     queryKey: ['giros', params],
     queryFn: async () => {
-      const response = await api.get<{ giros: Giro[]; pagination: any }>(
-        `/giro/list${queryString ? `?${queryString}` : ''}`
-      )
+      const response = await api.get<{
+        giros: Giro[]
+        pagination: { total: number; page: number; limit: number; totalPages: number }
+      }>(`/giro/list${queryString ? `?${queryString}` : ''}`)
       return response.giros
     },
     ...applyDedupConfig('HIGH_PRIORITY'), // 30s - giros cambian rápido

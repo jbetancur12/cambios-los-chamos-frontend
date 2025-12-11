@@ -54,8 +54,9 @@ export function RechargeAmountsManager() {
       setAmounts([...amounts, newAmountData].sort((a, b) => a.amountBs - b.amountBs))
       setNewAmount('')
       toast.success('Monto creado exitosamente')
-    } catch (error: any) {
-      toast.error(error.message || 'Error al crear monto')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Error al crear monto'
+      toast.error(message)
     } finally {
       setSubmitting(false)
     }
@@ -76,8 +77,9 @@ export function RechargeAmountsManager() {
       setEditingId(null)
       setEditingAmount('')
       toast.success('Monto actualizado exitosamente')
-    } catch (error: any) {
-      toast.error(error.message || 'Error al actualizar monto')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Error al actualizar monto'
+      toast.error(message)
     } finally {
       setSubmitting(false)
     }
@@ -92,8 +94,9 @@ export function RechargeAmountsManager() {
       await api.delete(`/recharge-amounts/${id}`)
       setAmounts(amounts.filter((amt) => amt.id !== id))
       toast.success('Monto eliminado exitosamente')
-    } catch (error: any) {
-      toast.error(error.message || 'Error al eliminar monto')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Error al eliminar monto'
+      toast.error(message)
     }
   }
 

@@ -59,8 +59,9 @@ export function RechargeOperatorsManager() {
       setNewOperatorName('')
       setNewOperatorType('')
       toast.success('Operador creado exitosamente')
-    } catch (error: any) {
-      toast.error(error.message || 'Error al crear operador')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Error al crear operador'
+      toast.error(message)
     } finally {
       setSubmitting(false)
     }
@@ -83,8 +84,9 @@ export function RechargeOperatorsManager() {
       setEditingName('')
       setEditingType('')
       toast.success('Operador actualizado exitosamente')
-    } catch (error: any) {
-      toast.error(error.message || 'Error al actualizar operador')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Error al actualizar operador'
+      toast.error(message)
     } finally {
       setSubmitting(false)
     }
@@ -99,8 +101,9 @@ export function RechargeOperatorsManager() {
       await api.delete(`/recharge-operators/${id}`)
       setOperators(operators.filter((op) => op.id !== id))
       toast.success('Operador eliminado exitosamente')
-    } catch (error: any) {
-      toast.error(error.message || 'Error al eliminar operador')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Error al eliminar operador'
+      toast.error(message)
     }
   }
 

@@ -19,7 +19,7 @@ export interface UserData {
 }
 
 interface AdminResponse {
-  users: any[]
+  users: UserData[]
 }
 
 interface TransferencistaResponse {

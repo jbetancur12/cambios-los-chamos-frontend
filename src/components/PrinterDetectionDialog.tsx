@@ -28,7 +28,9 @@ export function PrinterDetectionDialog({ open, onOpenChange, onSelectPrinter }: 
         // @ts-expect-error - Web Print API no está en los tipos de TypeScript
         const detectedPrinters = await navigator.getPrinters?.()
         if (detectedPrinters && detectedPrinters.length > 0) {
-          const printerNames = detectedPrinters.map((p: any) => p.name || p.displayName || 'Impresora desconocida')
+          const printerNames = detectedPrinters.map(
+            (p: { name?: string; displayName?: string }) => p.name || p.displayName || 'Impresora desconocida'
+          )
           setPrinters(printerNames)
           if (printerNames.length === 0) {
             toast.info('No se detectaron impresoras disponibles')
@@ -48,7 +50,7 @@ export function PrinterDetectionDialog({ open, onOpenChange, onSelectPrinter }: 
         // Crear un iframe invisible para abrir el diálogo de impresión
         const iframe = document.createElement('iframe')
         iframe.style.display = 'none'
-        ;(iframe as any).srcDoc = '<html><body>Detectando impresoras...</body></html>'
+        iframe.setAttribute('srcdoc', '<html><body>Detectando impresoras...</body></html>')
         document.body.appendChild(iframe)
 
         setTimeout(() => {

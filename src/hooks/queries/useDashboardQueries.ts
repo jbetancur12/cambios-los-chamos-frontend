@@ -31,7 +31,7 @@ export function useMinoristaBalance(userRole?: string) {
   return useQuery({
     queryKey: ['minorista', 'balance'],
     queryFn: async () => {
-      const response = await api.get<{ balance: number; credit: any }>('/minorista/me')
+      const response = await api.get<{ balance: number; credit: Record<string, unknown> }>('/minorista/me')
       return response
     },
     ...applyDedupConfig('NORMAL'), // 5 min - balance actualiza regularmente

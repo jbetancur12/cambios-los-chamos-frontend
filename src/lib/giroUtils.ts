@@ -1,8 +1,18 @@
-import { Banknote, Wallet, Signal, CreditCard, ArrowRight, Clock, CheckCircle, XCircle } from 'lucide-react'
+import {
+  Banknote,
+  Wallet,
+  Signal,
+  CreditCard,
+  ArrowRight,
+  Clock,
+  CheckCircle,
+  XCircle,
+  type LucideIcon,
+} from 'lucide-react'
 import type { ExecutionType, GiroStatus, Currency } from '@/types/api'
 
 export const getExecutionTypeBadge = (executionType?: ExecutionType) => {
-  const typeMap: Record<ExecutionType, { label: string; className: string; icon: any }> = {
+  const typeMap: Record<ExecutionType, { label: string; className: string; icon: LucideIcon }> = {
     TRANSFERENCIA: {
       label: 'Transferencia',
       className: 'bg-blue-50 text-blue-700 border border-blue-200',
@@ -32,7 +42,7 @@ export const getExecutionTypeBadge = (executionType?: ExecutionType) => {
 }
 
 export const getGiroStatusBadge = (status: GiroStatus) => {
-  const statusMap: Record<GiroStatus, { label: string; className: string; icon: any }> = {
+  const statusMap: Record<GiroStatus, { label: string; className: string; icon: LucideIcon }> = {
     PENDIENTE: { label: 'Pendiente', className: 'bg-yellow-100 text-yellow-800', icon: Clock },
     ASIGNADO: { label: 'Asignado', className: 'bg-blue-100 text-blue-800', icon: ArrowRight },
     PROCESANDO: { label: 'Procesando', className: 'bg-purple-100 text-purple-800', icon: Clock },

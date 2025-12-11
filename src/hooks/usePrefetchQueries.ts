@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import type { Giro } from '@/types/api'
-import type { ExchangeRate } from '@/types/api'
+import type { ExchangeRate, BankAccount } from '@/types/api'
 
 /**
  * Hook para prefetch de queries
@@ -95,7 +95,7 @@ export function usePrefetchQueries() {
         queryKey: ['bankAccounts', 'all'],
         queryFn: async () => {
           const response = await api.get<{
-            bankAccounts: any[]
+            bankAccounts: BankAccount[]
           }>('/bank-account/all')
           return response.bankAccounts
         },
@@ -106,7 +106,7 @@ export function usePrefetchQueries() {
      * Prefetch siguiente página de giros
      * Útil cuando el usuario está viendo la página 1 y probablemente verá la página 2
      */
-    prefetchNextPage: (currentPage: number, params?: any) => {
+    prefetchNextPage: (currentPage: number, params?: Record<string, unknown>) => {
       queryClient.prefetchQuery({
         queryKey: ['giros', { ...params, page: currentPage + 1 }],
         queryFn: async () => {

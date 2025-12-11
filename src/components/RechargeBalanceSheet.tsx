@@ -66,8 +66,9 @@ export function RechargeBalanceSheet({ open, onOpenChange, account, onBalanceUpd
       } else {
         toast.success('Ajuste de saldo realizado exitosamente')
       }
-    } catch (error: any) {
-      toast.error(error.message || 'Error al modificar saldo')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Error al modificar saldo'
+      toast.error(message)
     } finally {
       setLoading(false)
     }

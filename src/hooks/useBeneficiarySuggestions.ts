@@ -11,6 +11,15 @@ export interface BeneficiaryData {
   executionType: 'TRANSFERENCIA' | 'PAGO_MOVIL' | 'RECARGA' | 'EFECTIVO' | 'ZELLE' | 'OTROS'
 }
 
+interface BeneficiarySuggestionResponse {
+  beneficiaryName: string
+  beneficiaryId: string
+  phone: string
+  bankId: string
+  accountNumber: string
+  executionType?: 'TRANSFERENCIA' | 'PAGO_MOVIL' | 'RECARGA' | 'EFECTIVO' | 'ZELLE' | 'OTROS'
+}
+
 const BENEFICIARY_SUGGESTIONS_QUERY_KEY = ['beneficiary-suggestions']
 
 export function useBeneficiarySuggestions() {
@@ -20,7 +29,7 @@ export function useBeneficiarySuggestions() {
   const { data: suggestions = [], isLoading } = useQuery({
     queryKey: BENEFICIARY_SUGGESTIONS_QUERY_KEY,
     queryFn: async () => {
-      const data = await api.get<{ suggestions: Record<string, any>[] }>('/beneficiary-suggestion/list')
+      const data = await api.get<{ suggestions: BeneficiarySuggestionResponse[] }>('/beneficiary-suggestion/list')
       return data.suggestions.map((s) => ({
         name: s.beneficiaryName,
         id: s.beneficiaryId,
