@@ -56,6 +56,8 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
 
   console.log(giro)
 
+  const isOwner = giro?.createdBy?.id === user?.id
+
   // Mutations
   const executeGiroMutation = useExecuteGiro()
   const markProcessingMutation = useMarkGiroAsProcessing()
@@ -270,6 +272,31 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
         },
         onError: (error: any) => {
           toast.error(error.message || 'Error al devolver el giro')
+        },
+      }
+    )
+  }
+
+  const handleResendGiro = () => {
+    if (!giro) return
+    if (!confirm('¿Estás seguro de que deseas reenviar este giro?')) {
+      return
+    }
+    // Update status to ASIGNADO (or PENDIENTE if we want to release it, but ASIGNADO keeps it)
+    // Assuming updateGiro accepts status override or we use a separate mutation?
+    // Using updateGiro with partial data.
+    updateGiroMutation.mutate(
+      {
+        giroId: giro.id,
+        data: { status: 'ASIGNADO' } as any,
+      },
+      {
+        onSuccess: () => {
+          toast.success('Giro reenviado exitosamente.')
+          onUpdate()
+        },
+        onError: (error: any) => {
+          toast.error(error.message || 'Error al reenviar el giro')
         },
       }
     )
@@ -795,6 +822,63 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, onUpdate }: GiroDe
                   <Button onClick={handleMarkAsProcessing} disabled={isProcessing} className="w-full">
                     Marcar como Procesando
                   </Button>
+                </div>
+              )}
+
+              {/* Owner Actions for ASIGNADO (Delete) */}
+              {giro.status === 'ASIGNADO' && isOwner && (
+                <div className="space-y-4 pt-4 border-t">
+                  <p className="text-xs text-muted-foreground text-center">
+                    El giro está asignado y en espera de ser procesado.
+                  </p>
+                  <Button
+                    variant="outline"
+                    onClick={handleDeleteGiro}
+                    className="w-full border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300"
+                    disabled={isProcessing}
+                  >
+                    Eliminar Giro
+                  </Button>
+                </div>
+              )}
+
+              {/* Actions for DEVUELTO (Delete, Edit, Resend) */}
+              {giro.status === 'DEVUELTO' && (
+                <div className="space-y-4 pt-4 border-t">
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Delete: Owner or Admin */}
+                    {(isOwner || isAdmin) && (
+                      <Button
+                        variant="outline"
+                        onClick={handleDeleteGiro}
+                        className="w-full border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300"
+                        disabled={isProcessing}
+                      >
+                        Eliminar
+                      </Button>
+                    )}
+
+                    {/* Owner specific: Edit/Resend */}
+                    {isOwner && (
+                      <>
+                        <Button
+                          variant="outline"
+                          onClick={() => setIsEditing(true)}
+                          className="w-full border-blue-600 text-blue-600 hover:bg-blue-50"
+                          disabled={isProcessing}
+                        >
+                          Corregir
+                        </Button>
+                        <Button
+                          onClick={handleResendGiro}
+                          className="w-full col-span-2 bg-slate-200 text-slate-700 hover:bg-slate-300 font-bold"
+                          disabled={isProcessing}
+                        >
+                          Reenviar Giro
+                        </Button>
+                      </>
+                    )}
+                  </div>
                 </div>
               )}
 

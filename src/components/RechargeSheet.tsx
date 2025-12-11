@@ -174,7 +174,7 @@ export function RechargeSheet({ open, onOpenChange }: RechargeSheetProps) {
     setSelectedOperator('')
     setSelectedAmount('')
     setPhone('')
-    setSenderName('')
+    setSenderName('Pepito')
   }
 
   return (

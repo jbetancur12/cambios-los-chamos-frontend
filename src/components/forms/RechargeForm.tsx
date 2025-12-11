@@ -37,7 +37,7 @@ export function RechargeForm({ onSuccess }: RechargeFormProps) {
   const [selectedOperator, setSelectedOperator] = useState('')
   const [selectedAmount, setSelectedAmount] = useState('')
   const [phone, setPhone] = useState('')
-  const [senderName, setSenderName] = useState('')
+  const [senderName, setSenderName] = useState('Pepito')
   const [operators, setOperators] = useState<RechargeOperator[]>([])
   const [amounts, setAmounts] = useState<RechargeAmount[]>([])
   const [exchangeRate, setExchangeRate] = useState<ExchangeRate | null>(null)
@@ -227,10 +227,10 @@ export function RechargeForm({ onSuccess }: RechargeFormProps) {
         <Label htmlFor="phone" className="hidden md:block">
           Teléfono
         </Label>
-        <Input id="phone" placeholder="04141234567" value={phone} onChange={(e) => setPhone(e.target.value)} required />
+        <Input id="phone" placeholder="Teléfono" value={phone} onChange={(e) => setPhone(e.target.value)} required />
       </div>
 
-      <div>
+      {/* <div>
         <Label htmlFor="senderName" className="hidden md:block">
           Contacto que Envía
         </Label>
@@ -241,7 +241,7 @@ export function RechargeForm({ onSuccess }: RechargeFormProps) {
           onChange={(e) => setSenderName(e.target.value)}
           required
         />
-      </div>
+      </div> */}
 
       <div className="bg-gray-50 dark:bg-gray-900 p-3 rounded border space-y-2">
         <div className="text-sm font-medium">Conversiones</div>
@@ -250,8 +250,8 @@ export function RechargeForm({ onSuccess }: RechargeFormProps) {
           <span className="font-semibold">{formatCurrency(Number(amountCop), 'COP')}</span>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-gray-600 dark:text-gray-400">USD:</span>
-          <span className="font-semibold">{formatCurrency(Number(amountUsd), 'USD')}</span>
+          <span className="text-gray-600 dark:text-gray-400">BCV:</span>
+          <span className="font-semibold">{formatCurrency(Number(amountUsd), 'BCV')}</span>
         </div>
       </div>
 
