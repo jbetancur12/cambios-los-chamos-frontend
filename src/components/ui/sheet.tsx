@@ -52,9 +52,22 @@ export function SheetContent({ children, className }: { children: React.ReactNod
   )
 }
 
-export function SheetHeader({ children, onClose }: { children: React.ReactNode; onClose?: () => void }) {
+export function SheetHeader({
+  children,
+  onClose,
+  className,
+}: {
+  children: React.ReactNode
+  onClose?: () => void
+  className?: string
+}) {
   return (
-    <div className="sticky top-0 bg-background border-b px-6 py-4 flex items-center justify-between z-10 rounded-t-3xl lg:rounded-xl">
+    <div
+      className={cn(
+        'sticky top-0 bg-background border-b px-6 py-4 flex items-center justify-between z-10 rounded-t-3xl lg:rounded-xl',
+        className
+      )}
+    >
       <div className="flex-1">{children}</div>
       {onClose && (
         <button onClick={onClose} className="ml-4 p-2 rounded-full hover:bg-accent transition-colors">
@@ -65,8 +78,8 @@ export function SheetHeader({ children, onClose }: { children: React.ReactNode; 
   )
 }
 
-export function SheetTitle({ children }: { children: React.ReactNode }) {
-  return <h2 className="text-xl font-semibold">{children}</h2>
+export function SheetTitle({ children, className }: { children: React.ReactNode; className?: string }) {
+  return <h2 className={cn('text-xl font-semibold', className)}>{children}</h2>
 }
 
 import { cn } from '@/lib/utils'

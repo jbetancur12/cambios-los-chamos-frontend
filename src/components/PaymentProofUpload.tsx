@@ -13,6 +13,7 @@ interface PaymentProofUploadProps {
     url: string
   }
   disabled?: boolean
+  minimalist?: boolean
 }
 
 export function PaymentProofUpload({
@@ -20,6 +21,7 @@ export function PaymentProofUpload({
   onProofUploaded,
   existingProof,
   disabled = false,
+  minimalist = false,
 }: PaymentProofUploadProps) {
   const [uploading, setUploading] = useState(false)
   const [proof, setProof] = useState<{ key: string; url: string } | null>(existingProof || null)
@@ -95,6 +97,48 @@ export function PaymentProofUpload({
     const truncatedName = nameWithoutExt.substring(0, maxLength - ext.length - 3)
 
     return `${truncatedName}...${ext}`
+  }
+
+  if (minimalist) {
+    return (
+      <div className="flex items-center gap-2">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/gif"
+          onChange={handleFileSelect}
+          disabled={uploading || disabled}
+          className="hidden"
+        />
+        {proof ? (
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={handleChangeProof}
+              disabled={uploading || disabled}
+              className="text-xs h-8 gap-1 bg-green-50 text-green-700 border-green-200"
+            >
+              <FileIcon className="h-3 w-3" />
+              {uploading ? '...' : 'Listo'}
+            </Button>
+          </div>
+        ) : (
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading || disabled}
+            className="text-xs h-8 gap-1 bg-white"
+          >
+            <Upload className="h-3 w-3" />
+            {uploading ? 'Subiendo...' : 'Subir captura'}
+          </Button>
+        )}
+      </div>
+    )
   }
 
   return (
