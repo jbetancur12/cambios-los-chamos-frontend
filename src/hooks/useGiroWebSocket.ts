@@ -86,6 +86,14 @@ export function useGiroWebSocket() {
   useEffect(() => {
     try {
       const backendUrl = getBackendUrl()
+      console.log('[WS] 🔌 Intentando conectar a:', backendUrl)
+      console.log('[WS] 🌍 Entorno:', {
+        hostname: window.location.hostname,
+        protocol: window.location.protocol,
+        origin: window.location.origin,
+        VITE_API_URL: import.meta.env.VITE_API_URL || 'no configurado',
+      })
+
       const socket = io(backendUrl, {
         transports: ['websocket', 'polling'],
         reconnection: true,
@@ -95,26 +103,34 @@ export function useGiroWebSocket() {
       })
 
       socket.on('connect', () => {
+        console.log('[WS] ✅ Conectado al WebSocket')
         // Notificar al servidor que el usuario se conectó
         const user = JSON.parse(localStorage.getItem('user') || '{}')
+        console.log('[WS] 📋 Datos de usuario en localStorage:', user)
         if (user.id) {
-          socket.emit('user:connected', {
+          const payload = {
             userId: user.id,
             role: user.role,
             minoristaId: user.minoristaId,
             transferencistaId: user.transferencistaId,
-          })
+          }
+          console.log('[WS] 📤 Enviando user:connected con payload:', payload)
+          socket.emit('user:connected', payload)
         } else {
           console.warn('[WS] ⚠️  No user data found in localStorage!')
         }
       })
 
-      socket.on('disconnect', () => {
-        console.log('[WS] ❌ Desconectado del WebSocket')
+      socket.on('disconnect', (reason) => {
+        console.log('[WS] ❌ Desconectado. Razón:', reason)
       })
 
       socket.on('connect_error', (error) => {
         console.error('[WS] ❌ Error de conexión:', error)
+        console.error('[WS] 📋 Detalles:', {
+          message: error.message,
+          description: (error as any).description,
+        })
       })
 
       // Registrar listeners para eventos de giro
