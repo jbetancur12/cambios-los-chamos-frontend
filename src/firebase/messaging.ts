@@ -29,7 +29,7 @@ async function loadMessaging() {
 async function saveTokenToBackend(userId: string, token: string): Promise<void> {
   try {
     await api.post('/notifications/save-token', { userId, token })
-    console.log('[FCM] Token guardado en la DB con éxito.')
+    console.log(`[FCM] Token guardado en la DB con éxito para usuario: ${userId}`)
   } catch (error) {
     console.error('[FCM] Error en saveTokenToBackend:', error)
   }
