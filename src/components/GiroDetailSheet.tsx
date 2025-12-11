@@ -58,7 +58,6 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
   const { data: bankAccounts = [] } = useBankAccountsList(user?.role, true)
   const { data: banks = [] } = useBanksList()
 
-  console.log(giro)
 
   const isOwner = giro?.createdBy?.id === user?.id
 
