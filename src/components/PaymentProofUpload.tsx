@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
-import { Upload, Download, FileIcon } from 'lucide-react'
+import { Upload, Download, FileIcon, CheckCircle } from 'lucide-react'
 import type { Giro } from '@/types/api'
 
 interface PaymentProofUploadProps {
@@ -103,7 +103,7 @@ export function PaymentProofUpload({
 
   if (minimalist) {
     return (
-      <div className="flex items-center gap-2">
+      <div className="w-full">
         <input
           ref={fileInputRef}
           type="file"
@@ -113,30 +113,37 @@ export function PaymentProofUpload({
           className="hidden"
         />
         {proof ? (
-          <div className="flex items-center gap-2">
+          <div className="w-full flex items-center justify-between p-3 bg-emerald-50 border border-emerald-200 rounded-lg animate-in fade-in transition-all">
+            <div className="flex items-center gap-3">
+              <div className="bg-emerald-100 p-1.5 rounded-full">
+                <CheckCircle className="h-5 w-5 text-emerald-600" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm font-bold text-emerald-800">¡Captura Subida!</span>
+                <span className="text-xs text-emerald-600">Lista para enviar</span>
+              </div>
+            </div>
             <Button
               type="button"
               size="sm"
-              variant="outline"
+              variant="ghost"
               onClick={handleChangeProof}
               disabled={uploading || disabled}
-              className="text-xs h-8 gap-1 bg-green-50 text-green-700 border-green-200"
+              className="text-emerald-700 hover:text-emerald-900 hover:bg-emerald-100 h-8 px-2 text-xs"
             >
-              <FileIcon className="h-3 w-3" />
-              {uploading ? '...' : 'Listo'}
+              Cambiar
             </Button>
           </div>
         ) : (
           <Button
             type="button"
-            size="sm"
             variant="outline"
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading || disabled}
-            className="text-xs h-8 gap-1 bg-white"
+            className="w-full h-12 gap-2 bg-white border-dashed border-2 hover:border-blue-400 hover:bg-blue-50 text-blue-600 transition-colors"
           >
-            <Upload className="h-3 w-3" />
-            {uploading ? 'Subiendo...' : 'Subir captura'}
+            <Upload className="h-4 w-4" />
+            {uploading ? 'Subiendo...' : 'Subir captura de pantalla'}
           </Button>
         )}
       </div>

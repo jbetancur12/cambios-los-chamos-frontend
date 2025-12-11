@@ -799,7 +799,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
                   </div>
 
                   {/* Upload Capture Box - Minimalist */}
-                  <div className="flex justify-end">
+                  <div className="mt-2">
                     <PaymentProofUpload
                       giroId={giro.id}
                       onProofUploaded={(url) => setProofUrl(url)}
