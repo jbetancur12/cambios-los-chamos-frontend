@@ -991,11 +991,17 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
               <div>
                 <p>Transferencia: {formatDate(giro.completedAt)}</p>
                 {/* Mostrar quién ejecutó y desde qué banco (Solo Admins/Transferencistas) */}
-                {giro.executionType === 'TRANSFERENCIA' && !isOwner && giro.executedBy && (isAdmin || isTransferencista) && (
-                  <p className="mt-0.5 text-[10px] md:text-xs">
-                    por: <span className="font-semibold">{giro.executedBy.fullName}</span>
-                    {giro.bankAccountUsed && <span> ({giro.bankAccountUsed.bank.name})</span>}
-                  </p>
+                {!isOwner && giro.executedBy && (isAdmin || isTransferencista) && (
+                  <>
+                    <p className="mt-0.5 text-[10px] md:text-xs">
+                      por: <span className="font-semibold">{giro.executedBy.fullName}</span>
+                    </p>
+                    {giro.bankAccountUsed && (
+                      <p className="text-[10px] md:text-xs">
+                        Banco: <span className="font-semibold">{giro.bankAccountUsed.bank.name}</span>
+                      </p>
+                    )}
+                  </>
                 )}
               </div>
             )}
