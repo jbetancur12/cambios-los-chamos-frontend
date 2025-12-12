@@ -782,6 +782,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
                   {/* Upload Capture Box - Minimalist */}
                   <div className="mt-2">
                     <PaymentProofUpload
+                      key={giro.id}
                       giroId={giro.id}
                       onProofUploaded={(url) => setProofUrl(url)}
                       minimalist={true}
@@ -958,6 +959,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
                   {isEditingCompletedProof && (
                     <div className="mt-2 w-full max-w-xs">
                       <PaymentProofUpload
+                        key={giro.id}
                         giroId={giro.id}
                         onProofUploaded={() => {
                           setIsEditingCompletedProof(false)
