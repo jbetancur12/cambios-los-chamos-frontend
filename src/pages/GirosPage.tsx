@@ -660,7 +660,11 @@ export function GirosPage() {
                     return (
                       <tr
                         key={giro.id}
-                        className="border-b hover:bg-muted/30 cursor-pointer transition-colors"
+                        className={`border-b cursor-pointer transition-colors ${
+                          giro.status === 'DEVUELTO'
+                            ? 'bg-red-100 dark:bg-red-950/40 hover:bg-red-200 dark:hover:bg-red-900/50'
+                            : 'hover:bg-muted/30'
+                        }`}
                         onClick={() => handleGiroClick(giro)}
                       >
                         {user?.role !== 'MINORISTA' && (
@@ -742,7 +746,11 @@ export function GirosPage() {
               return (
                 <div
                   key={giro.id}
-                  className="bg-card border rounded p-3 cursor-pointer hover:bg-muted/50 transition-colors"
+                  className={`border rounded p-3 cursor-pointer transition-colors ${
+                    giro.status === 'DEVUELTO'
+                      ? 'bg-red-50 dark:bg-red-950/20 hover:bg-red-100 dark:hover:bg-red-900/30'
+                      : 'bg-card hover:bg-muted/50'
+                  }`}
                   onClick={() => handleGiroClick(giro)}
                 >
                   <div className={`grid ${user?.role === 'MINORISTA' ? 'grid-cols-2' : 'grid-cols-2'} gap-2 text-xs`}>
