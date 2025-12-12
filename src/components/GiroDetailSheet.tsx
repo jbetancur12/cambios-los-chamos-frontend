@@ -49,6 +49,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
 
   // Invalidate cache when giroId changes to force a fresh fetch
   useEffect(() => {
+    setProofBlobUrl(null) // Reset proof image when switching giros
     if (giroId) {
       queryClient.invalidateQueries({ queryKey: ['giro', giroId] })
     }
