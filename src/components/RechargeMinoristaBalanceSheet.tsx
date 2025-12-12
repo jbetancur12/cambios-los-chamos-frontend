@@ -217,33 +217,30 @@ export function RechargeMinoristaBalanceSheet({
           <div className="flex gap-2 border-b">
             <button
               onClick={() => setActiveTab('view')}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === 'view'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'view'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+                }`}
             >
               <Eye className="h-4 w-4 inline mr-2" />
               Ver
             </button>
             <button
               onClick={() => setActiveTab('assign')}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === 'assign'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'assign'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+                }`}
             >
               <DollarSign className="h-4 w-4 inline mr-2" />
               Asignar Cupo
             </button>
             <button
               onClick={() => setActiveTab('pay')}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === 'pay'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'pay'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+                }`}
             >
               <DollarSign className="h-4 w-4 inline mr-2" />
               Pagar Deuda
@@ -547,7 +544,7 @@ export function RechargeMinoristaBalanceSheet({
                       Pagar Todo
                     </Button>
                   </div>
-                  <p className="text-xs text-muted-foreground">Deuda actual: {formatCurrency(debtAmount)}</p>
+                  <p className="text-sm">Deuda actual: {formatCurrency(debtAmount)}</p>
                 </div>
 
                 {payAmount && !isNaN(parseFloat(payAmount)) && parseFloat(payAmount) > 0 && (
