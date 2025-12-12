@@ -156,9 +156,12 @@ export function UsersPage() {
     totalDebt: filteredUsers.reduce((sum, user) => {
       const creditLimit = user.creditLimit || 0
       const availableCredit = user.availableCredit || 0
-      return sum + (creditLimit - availableCredit)
+      return sum + Math.max(0, creditLimit - availableCredit)
     }, 0),
+    totalCreditBalance: filteredUsers.reduce((sum, user) => sum + (user.creditBalance || 0), 0),
   }
+
+  const netDebt = totals.totalDebt - totals.totalCreditBalance
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-CO', {
@@ -339,7 +342,7 @@ export function UsersPage() {
             className="mt-4 rounded border text-white text-sm"
             style={{ background: 'linear-gradient(to right, #136BBC, #274565)', borderColor: '#136BBC' }}
           >
-            <div className="p-3 md:p-4 grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
+            <div className="p-3 md:p-4 grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
               <div className="text-center">
                 <p className="text-xs opacity-80 mb-1">Total Minoristas</p>
                 <p className="text-xl md:text-2xl font-bold">{totals.count}</p>
@@ -349,8 +352,16 @@ export function UsersPage() {
                 <p className="text-lg md:text-xl font-bold">{formatCurrency(totals.totalCredit)}</p>
               </div>
               <div className="text-center">
-                <p className="text-xs opacity-80 mb-1">Deuda Total</p>
+                <p className="text-xs opacity-80 mb-1">Total Deuda</p>
                 <p className="text-lg md:text-xl font-bold">{formatCurrency(totals.totalDebt)}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-xs opacity-80 mb-1">Total Saldo a Favor</p>
+                <p className="text-lg md:text-xl font-bold">{formatCurrency(totals.totalCreditBalance)}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-xs opacity-80 mb-1">Deuda Neta</p>
+                <p className="text-lg md:text-xl font-bold">{formatCurrency(netDebt)}</p>
               </div>
             </div>
           </div>
