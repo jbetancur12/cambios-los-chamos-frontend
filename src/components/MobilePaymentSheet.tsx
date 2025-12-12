@@ -32,9 +32,11 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
   const [minoristaBalance, setMinoristaBalance] = useState<number | null>(null)
   const [minoristaBalanceInFavor, setMinoristaBalanceInFavor] = useState<number | null>(null)
   const [loadingBalance, setLoadingBalance] = useState(false)
-  const { getSuggestions } = useBeneficiarySuggestions()
+  /* Removed unused getSuggestions */
+  const { getSuggestionsById } = useBeneficiarySuggestions()
 
-  const filteredSuggestions = getSuggestions(phone, 'PAGO_MOVIL')
+  // Filter by execution type 'PAGO_MOVIL' and search by ID using cedula state
+  const filteredSuggestions = getSuggestionsById(cedula).filter(s => s.executionType === 'PAGO_MOVIL')
 
   useEffect(() => {
     if (open) {
@@ -164,6 +166,10 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPhone(e.target.value)
+  }
+
+  const handleCedulaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCedula(e.target.value)
     setShowSuggestions(true)
   }
 
@@ -187,9 +193,21 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
                   placeholder="04141234567"
                   value={phone}
                   onChange={handlePhoneChange}
-                  onFocus={() => phone && setShowSuggestions(true)}
                 />
-                {/* Sugerencias inline */}
+              </div>
+            </div>
+
+            <div className="mt-3">
+              <Label htmlFor="cedula">Cédula del Beneficiario</Label>
+              <div className="relative">
+                <Input
+                  id="cedula"
+                  placeholder="V-12345678"
+                  value={cedula}
+                  onChange={handleCedulaChange}
+                  onFocus={() => cedula && setShowSuggestions(true)}
+                />
+                {/* Sugerencias inline (Moved here) */}
                 {showSuggestions && filteredSuggestions.length > 0 && (
                   <div className="absolute top-full left-0 right-0 mt-1 bg-card border rounded-md shadow-lg z-50 max-h-48 overflow-y-auto">
                     {filteredSuggestions.map((suggestion, index) => (
@@ -199,20 +217,15 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
                         onClick={() => handleSelectBeneficiary(suggestion)}
                         className="w-full text-left px-3 py-2 hover:bg-muted/50 transition-colors text-sm border-b last:border-b-0"
                       >
-                        <div className="font-medium">{suggestion.phone}</div>
+                        <div className="font-medium">{suggestion.id}</div>
                         <div className="text-xs text-muted-foreground">
-                          {suggestion.name} • {suggestion.id}
+                          {suggestion.name} • {suggestion.phone}
                         </div>
                       </button>
                     ))}
                   </div>
                 )}
               </div>
-            </div>
-
-            <div className="mt-3">
-              <Label htmlFor="cedula">Cédula del Beneficiario</Label>
-              <Input id="cedula" placeholder="V-12345678" value={cedula} onChange={(e) => setCedula(e.target.value)} />
             </div>
 
             <div className="mt-3">
