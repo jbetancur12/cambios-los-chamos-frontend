@@ -134,6 +134,11 @@ export interface Giro {
   rateApplied: ExchangeRate
   createdBy: User
   bankAccountUsed?: BankAccount
+  executedBy?: {
+    id: string
+    fullName: string
+    email: string
+  }
 }
 
 // Bank Account Transaction Types
