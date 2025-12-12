@@ -183,7 +183,7 @@ function App() {
                 <Route
                   path="/calculadora-ves-compra"
                   element={
-                    <ProtectedRoute requiredRole="SUPER_ADMIN">
+                    <ProtectedRoute requiredRole={['SUPER_ADMIN', 'ADMIN']}>
                       <ErrorBoundary>
                         <DashboardLayout>
                           <CalculadoraVesCompraPage />
