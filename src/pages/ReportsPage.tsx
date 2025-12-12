@@ -233,6 +233,11 @@ export function ReportsPage() {
               color="bg-green-100 dark:bg-green-900/20"
             />
             <StatCard
+              label="Ganancia Minoristas"
+              value={`$${(systemReportQuery.data.totalMinoristaProfit || 0).toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
+              color="bg-emerald-100 dark:bg-emerald-900/20"
+            />
+            <StatCard
               label="Giros Totales"
               value={systemReportQuery.data.totalGiros.toString()}
               color="bg-blue-100 dark:bg-blue-900/20"
@@ -241,6 +246,21 @@ export function ReportsPage() {
               label="Giros Completados"
               value={systemReportQuery.data.completedGiros.toString()}
               color="bg-purple-100 dark:bg-purple-900/20"
+            />
+            <StatCard
+              label="Monto Total (Entrada)"
+              value={`$${(systemReportQuery.data.totalAmountCOP || 0).toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
+              color="bg-indigo-100 dark:bg-indigo-900/20"
+            />
+            <StatCard
+              label="Monto Total (Salida VES)"
+              value={`Bs ${(systemReportQuery.data.totalAmountVES || 0).toLocaleString('es-VE', { maximumFractionDigits: 2 })}`}
+              color="bg-cyan-100 dark:bg-cyan-900/20"
+            />
+            <StatCard
+              label="Comisiones Bancarias"
+              value={`$${(systemReportQuery.data.totalBankFees || 0).toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
+              color="bg-red-100 dark:bg-red-900/20"
             />
             <StatCard
               label="Ganancia Promedio"

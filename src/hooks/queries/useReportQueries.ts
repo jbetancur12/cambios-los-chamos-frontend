@@ -8,6 +8,10 @@ export interface SystemProfitReport {
   totalGiros: number
   completedGiros: number
   averageProfitPerGiro: number
+  totalMinoristaProfit: number
+  totalAmountCOP: number
+  totalAmountVES: number
+  totalBankFees: number
   profitByStatus: Array<{
     status: string
     count: number
