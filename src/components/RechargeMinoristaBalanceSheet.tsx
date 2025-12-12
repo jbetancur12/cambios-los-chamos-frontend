@@ -547,7 +547,13 @@ export function RechargeMinoristaBalanceSheet({
                       Pagar Todo
                     </Button>
                   </div>
-                  <p className="text-sm">Deuda actual: {formatCurrency(debtAmount)}</p>
+                  {(localMinorista.creditBalance || 0) > 0 ? (
+                    <p className="text-sm font-semibold text-blue-600">
+                      Saldo a favor actual: {formatCurrency(localMinorista.creditBalance)}
+                    </p>
+                  ) : (
+                    <p className="text-sm font-semibold text-red-600">Deuda actual: {formatCurrency(debtAmount)}</p>
+                  )}
                 </div>
 
                 {payAmount && !isNaN(parseFloat(payAmount)) && parseFloat(payAmount) > 0 && (
