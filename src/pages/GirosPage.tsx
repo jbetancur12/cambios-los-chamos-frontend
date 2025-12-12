@@ -837,42 +837,41 @@ export function GirosPage() {
 
             {/* Additional info when viewing completed giros - only for Admin/SuperAdmin */}
             {/* Additional info */}
-            {((filterStatus === 'COMPLETADO' && (user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN')) ||
+            {/* Additional info when viewing completed or all giros - only for Admin/SuperAdmin */}
+            {(((filterStatus === 'COMPLETADO' || filterStatus === 'ALL') &&
+              (user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN')) ||
               user?.role === 'MINORISTA') && (
               <div className="border-t border-white border-opacity-30 px-3 py-2">
-                {user?.role === 'SUPER_ADMIN' ? (
-                  // SUPER_ADMIN: COP, BS, Ganancia Minoristas, Comisión Banco, Ganancias Sitio
-                  <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-                    <div className="text-left">
-                      <p className="text-xs opacity-80">Ganancia Minoristas</p>
-                      <p className="font-semibold">{formatGiroCurrency(totals.minoristaProfit, 'COP')}</p>
-                    </div>
+                {user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN' ? (
+                  // ADMIN & SUPER_ADMIN View
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    {/* Minorista Profit - Hide if filtering only system traffic (COMPLETADO) */}
+                    {filterStatus === 'ALL' && (
+                      <div className="text-left">
+                        <p className="text-xs opacity-80">Ganancia Minoristas</p>
+                        <p className="font-semibold">{formatGiroCurrency(totals.minoristaProfit, 'COP')}</p>
+                      </div>
+                    )}
+
                     <div className="text-left">
                       <p className="text-xs opacity-80">Comisión Banco</p>
                       <p className="font-semibold">{formatGiroCurrency(totals.bankCommission, 'VES')}</p>
                     </div>
+
                     <div className="text-left">
                       <p className="text-xs opacity-80">Ganancia del Sitio</p>
                       <p className="font-semibold">{formatGiroCurrency(totals.systemProfit, 'COP')}</p>
                     </div>
-                    <div className="text-left">
-                      <p className="text-xs opacity-80">Total Ganancias</p>
-                      <p className="font-semibold">
-                        {formatGiroCurrency(totals.minoristaProfit + totals.systemProfit, 'COP')}
-                      </p>
-                    </div>
-                  </div>
-                ) : user?.role === 'ADMIN' ? (
-                  // ADMIN: COP, BS, Ganancia Minoristas, Comisión Banco
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                    <div className="text-left">
-                      <p className="text-xs opacity-80">Ganancia Minoristas</p>
-                      <p className="font-semibold">{formatGiroCurrency(totals.minoristaProfit, 'COP')}</p>
-                    </div>
-                    <div className="text-left">
-                      <p className="text-xs opacity-80">Comisión Banco</p>
-                      <p className="font-semibold">{formatGiroCurrency(totals.bankCommission, 'COP')}</p>
-                    </div>
+
+                    {/* Total Profit - Show if viewing all traffic */}
+                    {filterStatus === 'ALL' && (
+                      <div className="text-left">
+                        <p className="text-xs opacity-80">Total Ganancias</p>
+                        <p className="font-semibold">
+                          {formatGiroCurrency(totals.minoristaProfit + totals.systemProfit, 'COP')}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 ) : user?.role === 'MINORISTA' && minoristaBalanceData ? (
                   // MINORISTA: Deuda Actual, Crédito Asignado
@@ -896,7 +895,7 @@ export function GirosPage() {
                     </div>
                   </div>
                 ) : (
-                  // Default fallback for Minorista if data not loaded or just showing profit if preferred
+                  // Default fallback for Minorista if data not loaded
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     <div className="text-left">
                       <p className="text-xs opacity-80">Total Ganancia</p>
