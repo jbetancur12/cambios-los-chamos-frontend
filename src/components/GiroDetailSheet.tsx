@@ -231,11 +231,18 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
     )
   }
 
+  const [showExecuteConfirmation, setShowExecuteConfirmation] = useState(false)
+
   const handleExecuteGiro = () => {
     if (!giro || !selectedBankAccountId || !giro.executionType) {
       toast.error('Por favor completa todos los campos requeridos')
       return
     }
+    setShowExecuteConfirmation(true)
+  }
+
+  const confirmExecution = () => {
+    if (!giro || !selectedBankAccountId || !giro.executionType) return
 
     executeGiroMutation.mutate(
       {
@@ -250,6 +257,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
       {
         onSuccess: () => {
           toast.success('Giro ejecutado exitosamente')
+          setShowExecuteConfirmation(false)
           onUpdate()
           // Abrir modal de impresión para transferencistas y admins (solo en desktop)
           if ((isTransferencista || isAdmin) && window.innerWidth >= 1024) {
@@ -807,24 +815,6 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
                       Enviar
                     </Button>
                   </div>
-
-                  {/* Secondary Actions Row */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <Button
-                      variant="outline"
-                      onClick={handleDeleteGiro}
-                      className="w-full border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300"
-                    >
-                      Eliminar
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => setIsEditing(true)}
-                      className="w-full border-blue-600 text-blue-600 hover:bg-blue-50"
-                    >
-                      Corregir
-                    </Button>
-                  </div>
                 </div>
               )}
 
@@ -896,8 +886,14 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
 
               {/* Show Return Form Overlay or Inline if clicked "Devolver" */}
               {showReturnForm && (
-                <div className="fixed inset-0 z-50 bg-black/20 flex items-center justify-center p-4">
-                  <div className="bg-white dark:bg-slate-900 p-6 rounded-lg shadow-xl max-w-sm w-full space-y-4">
+                <div
+                  className="fixed inset-0 z-50 bg-black/20 flex items-center justify-center p-4"
+                  onClick={() => setShowReturnForm(false)}
+                >
+                  <div
+                    className="bg-white dark:bg-slate-900 p-6 rounded-lg shadow-xl max-w-sm w-full space-y-4"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <h3 className="font-bold text-lg">Devolver Giro</h3>
                     <select
                       value={returnReason}
@@ -924,6 +920,44 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
                         disabled={!returnReason}
                       >
                         Confirmar
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Execution Confirmation Modal */}
+              {showExecuteConfirmation && (
+                <div
+                  className="fixed inset-0 z-50 bg-black/20 flex items-center justify-center p-4"
+                  onClick={() => setShowExecuteConfirmation(false)}
+                >
+                  <div
+                    className="bg-white dark:bg-slate-900 p-6 rounded-lg shadow-xl max-w-sm w-full space-y-4 animate-in fade-in zoom-in-95 duration-200"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <h3 className="font-bold text-lg">Confirmar Envío</h3>
+                    <div className="space-y-2 text-sm text-center">
+                      <p>¿Estás seguro de que deseas enviar este giro?</p>
+                      <p className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-100 dark:border-blue-800">
+                        El dinero saldrá del banco:
+                        <br />
+                        <span className="font-bold text-blue-700 dark:text-blue-300 text-base">
+                          {bankAccounts.find((acc) => acc.id === selectedBankAccountId)?.bank.name ||
+                            'Banco Seleccionado'}
+                        </span>
+                      </p>
+                    </div>
+                    <div className="flex gap-2 pt-2">
+                      <Button variant="outline" className="flex-1" onClick={() => setShowExecuteConfirmation(false)}>
+                        Cancelar
+                      </Button>
+                      <Button
+                        className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                        onClick={confirmExecution}
+                        disabled={isProcessing}
+                      >
+                        {isProcessing ? 'Enviando...' : 'Aceptar'}
                       </Button>
                     </div>
                   </div>
@@ -1014,8 +1048,14 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
 
       {/* Modal de preview del comprobante */}
       {showProofPreview && giro?.paymentProofKey && (
-        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm">
-          <div className="bg-transparent max-w-2xl w-full max-h-[90vh] flex flex-col items-center">
+        <div
+          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm"
+          onClick={() => setShowProofPreview(false)}
+        >
+          <div
+            className="bg-transparent max-w-2xl w-full max-h-[90vh] flex flex-col items-center"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="relative w-full text-center">
               <img
                 src={proofBlobUrl || fullProofUrl}
