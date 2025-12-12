@@ -22,6 +22,8 @@ export interface User {
   email: string
   role: UserRole
   isActive: boolean
+  minoristaId?: string
+  transferencistaId?: string
 }
 
 // Auth Types

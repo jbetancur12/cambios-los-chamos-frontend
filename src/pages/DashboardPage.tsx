@@ -6,6 +6,7 @@ import { useMinoristaBalance } from '@/hooks/queries/useMinoristaQueries'
 import { useRecentGiros } from '@/hooks/queries/useGiroQueries'
 import { useBankAccountsList } from '@/hooks/queries/useBankQueries'
 import { GiroDetailSheet } from '@/components/GiroDetailSheet'
+import { useMinoristaRealtime } from '@/hooks/useMinoristaRealtime'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { Giro } from '@/types/api'
@@ -19,6 +20,9 @@ export function DashboardPage() {
   const { data: giros = [] } = useRecentGiros(5)
   const { data: minoristaBalanceData } = useMinoristaBalance(user?.role)
   const { data: bankAccounts = [] } = useBankAccountsList(user?.role)
+
+  // Real-time updates
+  useMinoristaRealtime(minoristaBalanceData?.id)
 
   // Local UI state
   const [selectedGiro, setSelectedGiro] = useState<Giro | null>(null)

@@ -1,5 +1,6 @@
 import { useEffect, useCallback, useRef } from 'react'
 import { io, Socket } from 'socket.io-client'
+import { useAuth } from '@/contexts/AuthContext'
 
 export interface GiroUpdate {
   id: string
@@ -97,13 +98,15 @@ export function useGiroWebSocket() {
 
       socket.on('connect', () => {
         // Notificar al servidor que el usuario se conectó
-        const user = JSON.parse(localStorage.getItem('user') || '{}')
-        if (user.id) {
+        // Usamos el usuario del contexto si está disponible, o localStorage como fallback
+        // PERO lo crucial es re-emitir cuando el usuario cambia (ver efecto abajo)
+        const storedUser = JSON.parse(localStorage.getItem('user') || '{}')
+        if (storedUser.id) {
           const payload = {
-            userId: user.id,
-            role: user.role,
-            minoristaId: user.minoristaId,
-            transferencistaId: user.transferencistaId,
+            userId: storedUser.id,
+            role: storedUser.role,
+            minoristaId: storedUser.minoristaId, // Ahora guardado en localStorage
+            transferencistaId: storedUser.transferencistaId,
           }
           socket.emit('user:connected', payload)
         }
@@ -141,6 +144,15 @@ export function useGiroWebSocket() {
         })
       })
 
+      // Eventos de Minorista
+      socket.on('minorista:balance_updated', (payload: any) => {
+        emitEvent('minorista:balance_updated', { ...payload, timestamp: new Date().toISOString() })
+      })
+
+      socket.on('minorista:transaction_updated', (payload: any) => {
+        emitEvent('minorista:transaction_updated', { ...payload, timestamp: new Date().toISOString() })
+      })
+
       socketRef.current = socket
 
       return () => {
@@ -150,6 +162,21 @@ export function useGiroWebSocket() {
       console.error('[WS] ❌ Error crítico al inicializar socket.io:', error)
     }
   }, [])
+
+  // Efecto para actualizar la identidad del socket cuando el usuario carga/cambia
+  const { user } = useAuth()
+  useEffect(() => {
+    if (socketRef.current && user) {
+      const payload = {
+        userId: user.id,
+        role: user.role,
+        minoristaId: user.minoristaId,
+        transferencistaId: user.transferencistaId,
+      }
+      // Re-emitir identidad para unirse a las rooms correctas
+      socketRef.current.emit('user:connected', payload)
+    }
+  }, [user])
 
   // Función para emitir eventos locales
   const emitEvent = useCallback((eventType: string, event: GiroEvent) => {

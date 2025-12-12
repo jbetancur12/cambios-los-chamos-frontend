@@ -22,9 +22,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(true)
       const response = await api.get<{ user: User }>('/user/me')
       setUser(response.user)
+      localStorage.setItem('user', JSON.stringify(response.user)) // Sync localStorage for WebSocket usage
     } catch (error) {
       console.error('[AuthContext] Error fetching user:', error)
       setUser(null)
+      // Don't clear localStorage here to avoid flashing login screen if just a temporary network error?
+      // But if 401, we probably should. userMiddleware usually handles 401.
     } finally {
       setLoading(false)
     }

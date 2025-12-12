@@ -13,6 +13,7 @@ import type { DateRange } from '@/components/DateRangeFilter'
 import { useAuth } from '@/contexts/AuthContext'
 import { MinoristaSimpleTransactionTable } from '@/components/MinoristaSimpleTransactionTable'
 import { getTodayString, getStartOfDayISO, getEndOfDayISO } from '@/lib/dateUtils'
+import { useMinoristaRealtime } from '@/hooks/useMinoristaRealtime'
 
 export function MinoristaTransactionsPage() {
   const navigate = useNavigate()
@@ -40,6 +41,9 @@ export function MinoristaTransactionsPage() {
 
   // React Query hooks
   const minoristaQuery = useMinoristaBalance(user?.role)
+  // Real-time updates
+  useMinoristaRealtime(minoristaQuery.data?.id)
+
   const transactionsQuery = useMinoristaTransactions({
     minoristaId: minoristaQuery.data?.id || '',
     page,

@@ -69,10 +69,10 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <QueryMonitorInitializer />
-      <WebSocketSyncInitializer />
       <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
         <BrowserRouter>
           <AuthProvider>
+            <WebSocketSyncInitializer />
             {/* <PushInitializer /> */}
             <PushInitializer />
             <ErrorBoundary>
