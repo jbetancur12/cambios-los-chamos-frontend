@@ -156,8 +156,9 @@ export function MinoristaSimpleTransactionTable({
                     </Badge>
                   </td>
                   <td
-                    className={`py-3 text-right font-semibold whitespace-nowrap ${isGreen ? 'text-green-600' : 'text-red-600'
-                      }`}
+                    className={`py-3 text-right font-semibold whitespace-nowrap ${
+                      isGreen ? 'text-green-600' : 'text-red-600'
+                    }`}
                   >
                     {isGreen && '+'}
                     {formatCurrency(displayAmount)}
@@ -169,8 +170,9 @@ export function MinoristaSimpleTransactionTable({
                     {formatCurrency(creditLimit - transaction.previousAvailableCredit)}
                   </td>
                   <td
-                    className={`py-3 text-right font-semibold pr-6 whitespace-nowrap ${isBalanceInFavor ? 'text-green-600' : 'text-red-600'
-                      }`}
+                    className={`py-3 text-right font-semibold pr-6 whitespace-nowrap ${
+                      isBalanceInFavor ? 'text-green-600' : 'text-red-600'
+                    }`}
                   >
                     {formatCurrency(isBalanceInFavor ? balanceQueda : (transaction.accumulatedDebt as number))}
                   </td>
