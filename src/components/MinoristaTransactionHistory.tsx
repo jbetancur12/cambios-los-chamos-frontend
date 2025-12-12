@@ -33,6 +33,7 @@ export function MinoristaTransactionHistory({ transactions, creditLimit }: Minor
       case 'DISCOUNT':
         return 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800'
       case 'RECHARGE':
+      case 'REFUND':
         return 'bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800'
       case 'ADJUSTMENT':
         return 'bg-amber-50 dark:bg-amber-950 border-amber-200 dark:border-amber-800'
@@ -47,6 +48,8 @@ export function MinoristaTransactionHistory({ transactions, creditLimit }: Minor
         return <Minus className="h-4 w-4 text-red-600" />
       case 'RECHARGE':
         return <TrendingUp className="h-4 w-4 text-blue-600" />
+      case 'REFUND':
+        return <TrendingUp className="h-4 w-4 text-green-600" />
       case 'ADJUSTMENT':
         return <TrendingDown className="h-4 w-4 text-amber-600" />
       default:
@@ -60,6 +63,8 @@ export function MinoristaTransactionHistory({ transactions, creditLimit }: Minor
         return 'Consumo de Cupo (con ganancia del 5%)'
       case 'RECHARGE':
         return 'Recarga de Saldo'
+      case 'REFUND':
+        return 'Reembolso de Giro'
       case 'ADJUSTMENT':
         return 'Ajuste'
       default:
@@ -153,11 +158,10 @@ export function MinoristaTransactionHistory({ transactions, creditLimit }: Minor
                   <div className="flex items-center gap-4">
                     <div className="text-right">
                       <p
-                        className={`font-bold text-sm ${
-                          transaction.type === 'DISCOUNT' || transaction.type === 'ADJUSTMENT'
-                            ? 'text-red-600'
-                            : 'text-green-600'
-                        }`}
+                        className={`font-bold text-sm ${transaction.type === 'DISCOUNT' || transaction.type === 'ADJUSTMENT'
+                          ? 'text-red-600'
+                          : 'text-green-600'
+                          }`}
                       >
                         {transaction.type === 'DISCOUNT' || transaction.type === 'ADJUSTMENT' ? '-' : '+'}
                         {formatCurrency(Math.abs(transaction.amount))}

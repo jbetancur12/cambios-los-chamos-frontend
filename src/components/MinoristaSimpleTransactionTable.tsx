@@ -42,6 +42,8 @@ export function MinoristaSimpleTransactionTable({
         return 'Abono'
       case 'ADJUSTMENT':
         return 'Ajuste'
+      case 'REFUND':
+        return 'Reembolso'
       default:
         return type
     }
@@ -53,6 +55,7 @@ export function MinoristaSimpleTransactionTable({
         return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
       case 'ADJUSTMENT':
       case 'RECHARGE':
+      case 'REFUND':
         return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
@@ -138,12 +141,12 @@ export function MinoristaSimpleTransactionTable({
 
               // Adjusted logic:
               let displayAmount = transaction.amount
-              if (transaction.type !== 'RECHARGE' && transaction.type !== 'ADJUSTMENT') {
+              if (transaction.type !== 'RECHARGE' && transaction.type !== 'ADJUSTMENT' && transaction.type !== 'REFUND') {
                 displayAmount = -transaction.amount
               }
 
               // Recalculate isPositive based on displayAmount for color
-              const isGreen = displayAmount >= 0
+              const isGreen = displayAmount >= 0 || transaction.type === 'REFUND'
               const balanceQueda = transaction.currentBalanceInFavor || 0
               const isBalanceInFavor = balanceQueda > 0
 
@@ -156,9 +159,8 @@ export function MinoristaSimpleTransactionTable({
                     </Badge>
                   </td>
                   <td
-                    className={`py-3 text-right font-semibold whitespace-nowrap ${
-                      isGreen ? 'text-green-600' : 'text-red-600'
-                    }`}
+                    className={`py-3 text-right font-semibold whitespace-nowrap ${isGreen ? 'text-green-600' : 'text-red-600'
+                      }`}
                   >
                     {isGreen && '+'}
                     {formatCurrency(displayAmount)}
@@ -170,9 +172,8 @@ export function MinoristaSimpleTransactionTable({
                     {formatCurrency(creditLimit - transaction.previousAvailableCredit)}
                   </td>
                   <td
-                    className={`py-3 text-right font-semibold pr-6 whitespace-nowrap ${
-                      isBalanceInFavor ? 'text-green-600' : 'text-red-600'
-                    }`}
+                    className={`py-3 text-right font-semibold pr-6 whitespace-nowrap ${isBalanceInFavor ? 'text-green-600' : 'text-red-600'
+                      }`}
                   >
                     {formatCurrency(isBalanceInFavor ? balanceQueda : (transaction.accumulatedDebt as number))}
                   </td>
@@ -187,7 +188,7 @@ export function MinoristaSimpleTransactionTable({
       <div className="md:hidden space-y-3">
         {groupedTransactions.map((transaction) => {
           let displayAmount = transaction.amount
-          if (transaction.type !== 'RECHARGE' && transaction.type !== 'ADJUSTMENT') {
+          if (transaction.type !== 'RECHARGE' && transaction.type !== 'ADJUSTMENT' && transaction.type !== 'REFUND') {
             displayAmount = -transaction.amount
           }
           const isGreen = displayAmount >= 0
