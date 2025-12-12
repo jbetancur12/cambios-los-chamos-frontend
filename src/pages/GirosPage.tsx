@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Search, Calendar, ChevronDown, ArrowRight, Printer } from 'lucide-react'
+import { Search, Calendar, ChevronDown, ArrowRight, Printer, X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { GiroDetailSheet } from '@/components/GiroDetailSheet'
@@ -46,7 +46,7 @@ export function GirosPage() {
   const [detailSheetOpen, setDetailSheetOpen] = useState(false)
   const [selectedGiroId, setSelectedGiroId] = useState<string | null>(null)
   const [selectedGiroStatus, setSelectedGiroStatus] = useState<GiroStatus | undefined>(undefined)
-  const [searchQuery] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
   const [page, setPage] = useState(1)
   const [showPrintModal, setShowPrintModal] = useState(false)
   const [selectedGiroForPrint, setSelectedGiroForPrint] = useState<string | null>(null)
@@ -257,23 +257,26 @@ export function GirosPage() {
       </div> */}
 
       {/* Search Bar */}
-      {/* <div className="relative mb-6">
-        <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Buscar por nombre, beneficiario, banco, transferencista..."
-          className="pl-10 pr-10"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-        {searchQuery && (
-          <button
-            onClick={() => setSearchQuery('')}
-            className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
-          >
-            <XIcon className="h-4 w-4" />
-          </button>
-        )}
-      </div> */}
+      {/* Search Bar - Visible only to Admins, SuperAdmins, and Transferencistas */}
+      {(user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN' || user?.role === 'TRANSFERENCISTA') && (
+        <div className="relative mb-6">
+          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar por nombre, beneficiario, banco, transferencista..."
+            className="pl-10 pr-10"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Status Filters */}
       <div className="mb-4">
@@ -657,7 +660,11 @@ export function GirosPage() {
                     return (
                       <tr
                         key={giro.id}
-                        className="border-b hover:bg-muted/30 cursor-pointer transition-colors"
+                        className={`border-b cursor-pointer transition-colors ${
+                          giro.status === 'DEVUELTO'
+                            ? 'bg-red-100 dark:bg-red-950/40 hover:bg-red-200 dark:hover:bg-red-900/50'
+                            : 'hover:bg-muted/30'
+                        }`}
                         onClick={() => handleGiroClick(giro)}
                       >
                         {user?.role !== 'MINORISTA' && (
@@ -739,7 +746,11 @@ export function GirosPage() {
               return (
                 <div
                   key={giro.id}
-                  className="bg-card border rounded p-3 cursor-pointer hover:bg-muted/50 transition-colors"
+                  className={`border rounded p-3 cursor-pointer transition-colors ${
+                    giro.status === 'DEVUELTO'
+                      ? 'bg-red-50 dark:bg-red-950/20 hover:bg-red-100 dark:hover:bg-red-900/30'
+                      : 'bg-card hover:bg-muted/50'
+                  }`}
                   onClick={() => handleGiroClick(giro)}
                 >
                   <div className={`grid ${user?.role === 'MINORISTA' ? 'grid-cols-2' : 'grid-cols-2'} gap-2 text-xs`}>

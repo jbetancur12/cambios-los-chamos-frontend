@@ -23,11 +23,22 @@ interface MobilePaymentFormProps {
 
 export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   const { user } = useAuth()
-  const [cedula, setCedula] = useState('')
-  const [selectedBank, setSelectedBank] = useState('')
-  const [phone, setPhone] = useState('')
-  const [senderName, setSenderName] = useState('')
-  const [amountCop, setAmountCop] = useState('')
+  // Persistence
+  const [savedData] = useState(() => {
+    if (typeof window === 'undefined') return {}
+    try {
+      const saved = localStorage.getItem('mobile_payment_form_data')
+      return saved ? JSON.parse(saved) : {}
+    } catch {
+      return {}
+    }
+  })
+
+  const [cedula, setCedula] = useState(savedData.cedula || '')
+  const [selectedBank, setSelectedBank] = useState(savedData.selectedBank || '')
+  const [phone, setPhone] = useState(savedData.phone || '')
+  const [senderName, setSenderName] = useState(savedData.senderName || '')
+  const [amountCop, setAmountCop] = useState(savedData.amountCop || '')
   const [banks, setBanks] = useState<Bank[]>([])
   const [exchangeRate, setExchangeRate] = useState<ExchangeRate | null>(null)
   const [loading, setLoading] = useState(false)
@@ -48,6 +59,11 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   const [customSellRate, setCustomSellRate] = useState('')
   const [customUsd, setCustomUsd] = useState('')
   const [customBcv, setCustomBcv] = useState('')
+
+  useEffect(() => {
+    const data = { cedula, selectedBank, phone, senderName, amountCop }
+    localStorage.setItem('mobile_payment_form_data', JSON.stringify(data))
+  }, [cedula, selectedBank, phone, senderName, amountCop])
 
   useEffect(() => {
     loadBanks()
@@ -207,6 +223,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
     setAmountCop('')
     setShowSuggestions(false)
     setUseCustomRate(false)
+    localStorage.removeItem('mobile_payment_form_data')
   }
 
   const handleSelectBeneficiary = (beneficiary: BeneficiaryData) => {

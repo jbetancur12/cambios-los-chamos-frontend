@@ -123,9 +123,14 @@ export function RechargeMinoristaBalanceSheet({
     setLocalMinorista(minorista)
   }, [minorista])
 
-  // Cargar datos iniciales cuando se abre el modal
+  // Cargar datos iniciales y limpiar estados cuando se abre el modal o cambia el minorista
   useEffect(() => {
     if (open && minorista) {
+      // Resetear inputs y tab para asegurar estado limpio
+      setPayAmount('')
+      setCreditLimitAmount('')
+      setActiveTab('view')
+
       const loadUpdatedMinorista = async () => {
         try {
           const response = await api.get<{ minorista: Minorista }>(`/minorista/${minorista.id}`)
