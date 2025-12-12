@@ -32,14 +32,38 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
   const [loadingBalance, setLoadingBalance] = useState(false)
   const [creditLimit, setCreditLimit] = useState<number | null>(null)
 
-  // Form fields
-  const [beneficiaryName, setBeneficiaryName] = useState('')
-  const [beneficiaryId, setBeneficiaryId] = useState('')
-  const [phone, setPhone] = useState('')
-  const [bankId, setBankId] = useState('')
-  const [accountNumber, setAccountNumber] = useState('')
-  const [amountInput, setAmountInput] = useState('')
-  const [currencyInput, setCurrencyInput] = useState<Currency>('COP')
+  // Form fields with persistence
+  const [savedData] = useState(() => {
+    if (typeof window === 'undefined') return {}
+    try {
+      const saved = localStorage.getItem('transfer_form_data')
+      return saved ? JSON.parse(saved) : {}
+    } catch {
+      return {}
+    }
+  })
+
+  const [beneficiaryName, setBeneficiaryName] = useState(savedData.beneficiaryName || '')
+  const [beneficiaryId, setBeneficiaryId] = useState(savedData.beneficiaryId || '')
+  const [phone, setPhone] = useState(savedData.phone || '')
+  const [bankId, setBankId] = useState(savedData.bankId || '')
+  const [accountNumber, setAccountNumber] = useState(savedData.accountNumber || '')
+  const [amountInput, setAmountInput] = useState(savedData.amountInput || '')
+  const [currencyInput, setCurrencyInput] = useState<Currency>((savedData.currencyInput as Currency) || 'COP')
+
+  // Save state on change
+  useEffect(() => {
+    const data = {
+      beneficiaryName,
+      beneficiaryId,
+      phone,
+      bankId,
+      accountNumber,
+      amountInput,
+      currencyInput,
+    }
+    localStorage.setItem('transfer_form_data', JSON.stringify(data))
+  }, [beneficiaryName, beneficiaryId, phone, bankId, accountNumber, amountInput, currencyInput])
 
   // Suggestions
   const [nameSuggestions, setNameSuggestions] = useState<BeneficiaryData[]>([])
@@ -115,6 +139,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
     setCurrencyInput('COP')
     setUseCustomRate(false)
     setNameSuggestions([])
+    localStorage.removeItem('transfer_form_data')
   }
 
   const handleNameChange = (value: string) => {

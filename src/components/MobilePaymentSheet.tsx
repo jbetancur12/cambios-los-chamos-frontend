@@ -36,7 +36,7 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
   const { getSuggestionsById } = useBeneficiarySuggestions()
 
   // Filter by execution type 'PAGO_MOVIL' and search by ID using cedula state
-  const filteredSuggestions = getSuggestionsById(cedula).filter(s => s.executionType === 'PAGO_MOVIL')
+  const filteredSuggestions = getSuggestionsById(cedula).filter((s) => s.executionType === 'PAGO_MOVIL')
 
   useEffect(() => {
     if (open) {
@@ -188,12 +188,7 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
             <div>
               <Label htmlFor="phone">Teléfono del Beneficiario</Label>
               <div className="relative">
-                <Input
-                  id="phone"
-                  placeholder="04141234567"
-                  value={phone}
-                  onChange={handlePhoneChange}
-                />
+                <Input id="phone" placeholder="04141234567" value={phone} onChange={handlePhoneChange} />
               </div>
             </div>
 
