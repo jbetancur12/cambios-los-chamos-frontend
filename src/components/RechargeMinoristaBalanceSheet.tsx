@@ -123,9 +123,14 @@ export function RechargeMinoristaBalanceSheet({
     setLocalMinorista(minorista)
   }, [minorista])
 
-  // Cargar datos iniciales cuando se abre el modal
+  // Cargar datos iniciales y limpiar estados cuando se abre el modal o cambia el minorista
   useEffect(() => {
     if (open && minorista) {
+      // Resetear inputs y tab para asegurar estado limpio
+      setPayAmount('')
+      setCreditLimitAmount('')
+      setActiveTab('view')
+
       const loadUpdatedMinorista = async () => {
         try {
           const response = await api.get<{ minorista: Minorista }>(`/minorista/${minorista.id}`)
@@ -217,33 +222,30 @@ export function RechargeMinoristaBalanceSheet({
           <div className="flex gap-2 border-b">
             <button
               onClick={() => setActiveTab('view')}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === 'view'
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'view'
                   ? 'border-blue-500 text-blue-600'
                   : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
+                }`}
             >
               <Eye className="h-4 w-4 inline mr-2" />
               Ver
             </button>
             <button
               onClick={() => setActiveTab('assign')}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === 'assign'
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'assign'
                   ? 'border-blue-500 text-blue-600'
                   : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
+                }`}
             >
               <DollarSign className="h-4 w-4 inline mr-2" />
               Asignar Cupo
             </button>
             <button
               onClick={() => setActiveTab('pay')}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === 'pay'
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'pay'
                   ? 'border-blue-500 text-blue-600'
                   : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
+                }`}
             >
               <DollarSign className="h-4 w-4 inline mr-2" />
               Pagar Deuda
