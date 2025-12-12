@@ -150,7 +150,7 @@ export function DashboardPage() {
             </CardHeader>
             <CardContent className="p-5 pt-0 md:p-6 md:pt-0">
               <div className="text-2xl md:text-3xl font-bold">{formatCurrency(stats.volumeBs, 'VES')}</div>
-              <p className="text-xs text-muted-foreground">Este mes.</p>
+              <p className="text-xs text-muted-foreground">Este mes</p>
             </CardContent>
           </Card>
         )}
