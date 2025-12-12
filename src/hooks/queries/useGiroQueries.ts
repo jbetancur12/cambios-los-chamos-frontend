@@ -9,21 +9,22 @@ interface GirosListParams {
   dateTo?: string
   page?: number
   limit?: number
+  showAllTraffic?: boolean
 }
 
 export function useGirosList(params?: GirosListParams) {
   const queryString = params
     ? new URLSearchParams(
-        Object.entries(params).reduce(
-          (acc, [key, value]) => {
-            if (value !== undefined && value !== null && value !== '') {
-              acc[key] = String(value)
-            }
-            return acc
-          },
-          {} as Record<string, string>
-        )
-      ).toString()
+      Object.entries(params).reduce(
+        (acc, [key, value]) => {
+          if (value !== undefined && value !== null && value !== '') {
+            acc[key] = String(value)
+          }
+          return acc
+        },
+        {} as Record<string, string>
+      )
+    ).toString()
     : ''
 
   return useQuery({
