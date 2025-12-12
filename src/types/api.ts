@@ -156,7 +156,7 @@ export interface BankAccountTransaction {
 }
 
 // Minorista Transaction Types
-export type MinoristaTransactionType = 'RECHARGE' | 'DISCOUNT' | 'ADJUSTMENT'
+export type MinoristaTransactionType = 'RECHARGE' | 'DISCOUNT' | 'ADJUSTMENT' | 'REFUND'
 
 export interface MinoristaTransaction {
   id: string
