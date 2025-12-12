@@ -857,13 +857,15 @@ export function GirosPage() {
                       <p className="font-semibold">{formatGiroCurrency(totals.bankCommission, 'VES')}</p>
                     </div>
 
-                    <div className="text-left">
-                      <p className="text-xs opacity-80">Ganancia del Sitio</p>
-                      <p className="font-semibold">{formatGiroCurrency(totals.systemProfit, 'COP')}</p>
-                    </div>
+                    {user?.role === 'SUPER_ADMIN' && (
+                      <div className="text-left">
+                        <p className="text-xs opacity-80">Ganancia del Sitio</p>
+                        <p className="font-semibold">{formatGiroCurrency(totals.systemProfit, 'COP')}</p>
+                      </div>
+                    )}
 
                     {/* Total Profit - Show if viewing all traffic */}
-                    {filterStatus === 'ALL' && (
+                    {filterStatus === 'ALL' && user?.role === 'SUPER_ADMIN' && (
                       <div className="text-left">
                         <p className="text-xs opacity-80">Total Ganancias</p>
                         <p className="font-semibold">
