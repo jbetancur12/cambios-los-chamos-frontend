@@ -41,7 +41,7 @@ export default defineConfig({
         description: 'PWA para gestionar giros y transferencias',
         theme_color: '#000000',
         background_color: '#ffffff',
-        display: 'fullscreen',
+        display: 'standalone',
         start_url: '/',
         scope: '/',
 
