@@ -50,8 +50,6 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   const [customUsd, setCustomUsd] = useState('')
   const [customBcv, setCustomBcv] = useState('')
 
-
-
   useEffect(() => {
     loadBanks()
     loadExchangeRate()
@@ -127,11 +125,11 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   const effectiveRate =
     useCustomRate && (isSuperAdmin || isAdmin)
       ? {
-        buyRate: parseFloat(customBuyRate) || exchangeRate?.buyRate || 0,
-        sellRate: parseFloat(customSellRate) || exchangeRate?.sellRate || 0,
-        bcv: parseFloat(customBcv) || exchangeRate?.bcv || 0,
-        usd: parseFloat(customUsd) || exchangeRate?.usd || 0,
-      }
+          buyRate: parseFloat(customBuyRate) || exchangeRate?.buyRate || 0,
+          sellRate: parseFloat(customSellRate) || exchangeRate?.sellRate || 0,
+          bcv: parseFloat(customBcv) || exchangeRate?.bcv || 0,
+          usd: parseFloat(customUsd) || exchangeRate?.usd || 0,
+        }
       : exchangeRate
 
   const amountBs = effectiveRate && amountCop ? (Number(amountCop) / effectiveRate.sellRate).toFixed(2) : '0.00'
@@ -210,7 +208,6 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
     setAmountCop('')
     setShowSuggestions(false)
     setUseCustomRate(false)
-
   }
 
   const handleSelectBeneficiary = (beneficiary: BeneficiaryData) => {
@@ -305,7 +302,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
           </div>
         </div>
 
-        <div className="space-y-1 md:space-y-2">
+        <div className="space-y-1 md:space-y-2 hidden">
           <Label htmlFor="senderName" className="hidden md:block text-md">
             Contacto que Envía (Opcional)
           </Label>

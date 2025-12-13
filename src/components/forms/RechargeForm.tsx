@@ -231,7 +231,14 @@ export function RechargeForm({ onSuccess }: RechargeFormProps) {
         <Label htmlFor="phone" className="hidden md:block">
           Teléfono
         </Label>
-        <Input id="phone" placeholder="Teléfono" value={phone} onChange={(e) => setPhone(e.target.value)} required autoComplete="off" />
+        <Input
+          id="phone"
+          placeholder="Teléfono"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          required
+          autoComplete="off"
+        />
       </div>
 
       {/* <div>
