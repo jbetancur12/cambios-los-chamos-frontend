@@ -661,7 +661,7 @@ export function GirosPage() {
                       <tr
                         key={giro.id}
                         className={`border-b cursor-pointer transition-colors ${giro.status === 'DEVUELTO'
-                          ? 'bg-red-100 dark:bg-red-950/40 hover:bg-red-200 dark:hover:bg-red-900/50'
+                          ? 'bg-red-300 dark:bg-red-900 hover:bg-red-400 dark:hover:bg-red-800'
                           : 'hover:bg-muted/30'
                           }`}
                         onClick={() => handleGiroClick(giro)}
@@ -746,7 +746,7 @@ export function GirosPage() {
                 <div
                   key={giro.id}
                   className={`border rounded p-3 cursor-pointer transition-colors ${giro.status === 'DEVUELTO'
-                    ? 'bg-red-50 dark:bg-red-950/20 hover:bg-red-100 dark:hover:bg-red-900/30'
+                    ? 'bg-red-300 dark:bg-red-900 hover:bg-red-400 dark:hover:bg-red-800'
                     : 'bg-card hover:bg-muted/50'
                     }`}
                   onClick={() => handleGiroClick(giro)}
