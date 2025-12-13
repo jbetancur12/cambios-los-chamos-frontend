@@ -242,7 +242,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-2">
+    <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-2" autoComplete="off">
       {/* Información del Beneficiario */}
       <div className="bg-blue-50 p-3 rounded mb-2 md:mb-4 border border-blue-200">
         {/* <p className="text-sm font-semibold text-blue-900 mb-2 md:mb-3">Datos del Beneficiario</p> */}
@@ -258,6 +258,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
             onChange={(e) => setCedula(e.target.value)}
             required
             className="font-medium placeholder:text-muted-foreground md:placeholder:text-transparent"
+            autoComplete="off"
           />
         </div>
 
@@ -295,6 +296,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
               onChange={handlePhoneChange}
               onFocus={() => phone && setShowSuggestions(true)}
               className="font-medium placeholder:text-muted-foreground md:placeholder:text-transparent"
+              autoComplete="off"
             />
             {showSuggestions && filteredSuggestions.length > 0 && (
               <div className="absolute top-full left-0 right-0 mt-1 bg-card border rounded-md shadow-lg z-50 max-h-48 overflow-y-auto">

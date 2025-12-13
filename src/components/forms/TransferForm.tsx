@@ -51,6 +51,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
   const [amountInput, setAmountInput] = useState(savedData.amountInput || '')
   const [currencyInput, setCurrencyInput] = useState<Currency>((savedData.currencyInput as Currency) || 'COP')
 
+
   // Save state on change
   useEffect(() => {
     const data = {
@@ -232,11 +233,11 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
   const effectiveRate =
     useCustomRate && (isSuperAdmin || isAdmin)
       ? {
-          buyRate: parseFloat(customBuyRate) || currentRate?.buyRate || 0,
-          sellRate: parseFloat(customSellRate) || currentRate?.sellRate || 0,
-          bcv: parseFloat(customBcv) || currentRate?.bcv || 0,
-          usd: parseFloat(customUsd) || currentRate?.usd || 0,
-        }
+        buyRate: parseFloat(customBuyRate) || currentRate?.buyRate || 0,
+        sellRate: parseFloat(customSellRate) || currentRate?.sellRate || 0,
+        bcv: parseFloat(customBcv) || currentRate?.bcv || 0,
+        usd: parseFloat(customUsd) || currentRate?.usd || 0,
+      }
       : currentRate
 
   const calculateAmountBs = () => {
@@ -336,7 +337,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
   const amountBcv = effectiveRate && effectiveRate.bcv > 0 ? amountBs / effectiveRate.bcv : 0
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-2 w-full">
+    <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-2 w-full" autoComplete="off">
       {/* Beneficiary Info */}
       <div className="space-y-2">
         <BeneficiaryAutocomplete
@@ -363,6 +364,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
           placeholder="Cédula del Beneficiario"
           required
           className="text-base md:text-md h-10 md:h-12 font-medium placeholder:text-muted-foreground md:placeholder:text-transparent"
+          autoComplete="off"
         />
       </div>
 
@@ -400,6 +402,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
           placeholder="Número de Cuenta"
           required
           className="text-sm md:text-lg h-10 md:h-12 font-medium placeholder:text-muted-foreground md:placeholder:text-transparent"
+          autoComplete="off"
         />
       </div>
 

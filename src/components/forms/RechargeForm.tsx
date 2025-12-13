@@ -190,7 +190,7 @@ export function RechargeForm({ onSuccess }: RechargeFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="p-6 space-y-4">
+    <form onSubmit={handleSubmit} className="p-6 space-y-4" autoComplete="off">
       <div>
         <Label htmlFor="operator" className="hidden md:block">
           Operador
@@ -231,7 +231,7 @@ export function RechargeForm({ onSuccess }: RechargeFormProps) {
         <Label htmlFor="phone" className="hidden md:block">
           Teléfono
         </Label>
-        <Input id="phone" placeholder="Teléfono" value={phone} onChange={(e) => setPhone(e.target.value)} required />
+        <Input id="phone" placeholder="Teléfono" value={phone} onChange={(e) => setPhone(e.target.value)} required autoComplete="off" />
       </div>
 
       {/* <div>
