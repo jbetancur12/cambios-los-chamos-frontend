@@ -158,10 +158,11 @@ export function MinoristaTransactionHistory({ transactions, creditLimit }: Minor
                   <div className="flex items-center gap-4">
                     <div className="text-right">
                       <p
-                        className={`font-bold text-sm ${transaction.type === 'DISCOUNT' || transaction.type === 'ADJUSTMENT'
-                          ? 'text-red-600'
-                          : 'text-green-600'
-                          }`}
+                        className={`font-bold text-sm ${
+                          transaction.type === 'DISCOUNT' || transaction.type === 'ADJUSTMENT'
+                            ? 'text-red-600'
+                            : 'text-green-600'
+                        }`}
                       >
                         {transaction.type === 'DISCOUNT' || transaction.type === 'ADJUSTMENT' ? '-' : '+'}
                         {formatCurrency(Math.abs(transaction.amount))}

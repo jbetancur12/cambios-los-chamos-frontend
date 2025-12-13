@@ -70,8 +70,8 @@ export function MinoristaSimpleTransactionTable({
   const filteredTransactions = typeFilter === 'ALL' ? transactions : transactions.filter((t) => t.type === typeFilter)
 
   // Sort transactions by date descending to ensure correct order
-  const sortedTransactions = [...filteredTransactions].sort((a, b) =>
-    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  const sortedTransactions = [...filteredTransactions].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   )
 
   // Agrupar transacciones de abono (RECHARGE) que ocurrieron en el mismo instante (split por deuda/saldo a favor)
@@ -146,7 +146,11 @@ export function MinoristaSimpleTransactionTable({
 
               // Adjusted logic:
               let displayAmount = transaction.amount
-              if (transaction.type !== 'RECHARGE' && transaction.type !== 'ADJUSTMENT' && transaction.type !== 'REFUND') {
+              if (
+                transaction.type !== 'RECHARGE' &&
+                transaction.type !== 'ADJUSTMENT' &&
+                transaction.type !== 'REFUND'
+              ) {
                 displayAmount = -transaction.amount
               }
 
@@ -164,8 +168,9 @@ export function MinoristaSimpleTransactionTable({
                     </Badge>
                   </td>
                   <td
-                    className={`py-3 text-right font-semibold whitespace-nowrap ${isGreen ? 'text-green-600' : 'text-red-600'
-                      }`}
+                    className={`py-3 text-right font-semibold whitespace-nowrap ${
+                      isGreen ? 'text-green-600' : 'text-red-600'
+                    }`}
                   >
                     {isGreen && '+'}
                     {formatCurrency(displayAmount)}
@@ -177,8 +182,9 @@ export function MinoristaSimpleTransactionTable({
                     {formatCurrency(creditLimit - transaction.previousAvailableCredit)}
                   </td>
                   <td
-                    className={`py-3 text-right font-semibold pr-6 whitespace-nowrap ${isBalanceInFavor ? 'text-green-600' : 'text-red-600'
-                      }`}
+                    className={`py-3 text-right font-semibold pr-6 whitespace-nowrap ${
+                      isBalanceInFavor ? 'text-green-600' : 'text-red-600'
+                    }`}
                   >
                     {formatCurrency(isBalanceInFavor ? balanceQueda : (transaction.accumulatedDebt as number))}
                   </td>

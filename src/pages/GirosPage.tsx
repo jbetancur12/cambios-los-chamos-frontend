@@ -331,8 +331,9 @@ export function GirosPage() {
           >
             <p className="text-base font-semibold ">Tipo de Usuario</p>
             <ChevronDown
-              className={`h-4 w-4 text-muted-foreground transition-transform ${userFiltersExpanded ? 'rotate-180' : ''
-                }`}
+              className={`h-4 w-4 text-muted-foreground transition-transform ${
+                userFiltersExpanded ? 'rotate-180' : ''
+              }`}
             />
           </button>
 
@@ -660,10 +661,11 @@ export function GirosPage() {
                     return (
                       <tr
                         key={giro.id}
-                        className={`border-b cursor-pointer transition-colors ${giro.status === 'DEVUELTO'
+                        className={`border-b cursor-pointer transition-colors ${
+                          giro.status === 'DEVUELTO'
                             ? 'bg-red-100 dark:bg-red-950/40 hover:bg-red-200 dark:hover:bg-red-900/50'
                             : 'hover:bg-muted/30'
-                          }`}
+                        }`}
                         onClick={() => handleGiroClick(giro)}
                       >
                         {user?.role !== 'MINORISTA' && (
@@ -677,9 +679,9 @@ export function GirosPage() {
                         <td className="px-3 py-2 text-right whitespace-nowrap font-semibold w-20">
                           {giro.amountBs > 0
                             ? giro.amountBs.toLocaleString('es-VE', {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            })
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })
                             : '—'}
                         </td>
                         <td className="px-3 py-2 truncate w-32">
@@ -745,10 +747,11 @@ export function GirosPage() {
               return (
                 <div
                   key={giro.id}
-                  className={`border rounded p-3 cursor-pointer transition-colors ${giro.status === 'DEVUELTO'
+                  className={`border rounded p-3 cursor-pointer transition-colors ${
+                    giro.status === 'DEVUELTO'
                       ? 'bg-red-50 dark:bg-red-950/20 hover:bg-red-100 dark:hover:bg-red-900/30'
                       : 'bg-card hover:bg-muted/50'
-                    }`}
+                  }`}
                   onClick={() => handleGiroClick(giro)}
                 >
                   <div className={`grid ${user?.role === 'MINORISTA' ? 'grid-cols-2' : 'grid-cols-2'} gap-2 text-xs`}>
@@ -806,8 +809,9 @@ export function GirosPage() {
                 <button
                   key={pageNum}
                   onClick={() => setPage(pageNum)}
-                  className={`px-2 py-0.5 text-xs border rounded ${page === pageNum ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
-                    }`}
+                  className={`px-2 py-0.5 text-xs border rounded ${
+                    page === pageNum ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+                  }`}
                 >
                   {pageNum}
                 </button>
@@ -848,72 +852,72 @@ export function GirosPage() {
             {(((filterStatus === 'COMPLETADO' || filterStatus === 'ALL') &&
               (user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN')) ||
               user?.role === 'MINORISTA') && (
-                <div className="border-t border-white border-opacity-30 px-3 py-2">
-                  {user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN' ? (
-                    // ADMIN & SUPER_ADMIN View
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                      {/* Minorista Profit - Hide if filtering only system traffic (COMPLETADO) */}
-                      {filterStatus === 'ALL' && (
-                        <div className="text-left">
-                          <p className="text-xs opacity-80">Ganancia Minoristas</p>
-                          <p className="font-semibold">{formatGiroCurrency(totals.minoristaProfit, 'COP')}</p>
-                        </div>
-                      )}
-
+              <div className="border-t border-white border-opacity-30 px-3 py-2">
+                {user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN' ? (
+                  // ADMIN & SUPER_ADMIN View
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    {/* Minorista Profit - Hide if filtering only system traffic (COMPLETADO) */}
+                    {filterStatus === 'ALL' && (
                       <div className="text-left">
-                        <p className="text-xs opacity-80">Comisión Banco</p>
-                        <p className="font-semibold">{formatGiroCurrency(totals.bankCommission, 'VES')}</p>
-                      </div>
-
-                      {user?.role === 'SUPER_ADMIN' && (
-                        <div className="text-left">
-                          <p className="text-xs opacity-80">Ganancia del Sitio</p>
-                          <p className="font-semibold">{formatGiroCurrency(totals.systemProfit, 'COP')}</p>
-                        </div>
-                      )}
-
-                      {/* Total Profit - Show if viewing all traffic */}
-                      {filterStatus === 'ALL' && user?.role === 'SUPER_ADMIN' && (
-                        <div className="text-left">
-                          <p className="text-xs opacity-80">Total Ganancias</p>
-                          <p className="font-semibold">
-                            {formatGiroCurrency(totals.minoristaProfit + totals.systemProfit, 'COP')}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  ) : user?.role === 'MINORISTA' && minoristaBalanceData ? (
-                    // MINORISTA: Deuda Actual, Crédito Asignado
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="text-left">
-                        <p className="text-xs opacity-80">Total Ganancia</p>
+                        <p className="text-xs opacity-80">Ganancia Minoristas</p>
                         <p className="font-semibold">{formatGiroCurrency(totals.minoristaProfit, 'COP')}</p>
                       </div>
+                    )}
+
+                    <div className="text-left">
+                      <p className="text-xs opacity-80">Comisión Banco</p>
+                      <p className="font-semibold">{formatGiroCurrency(totals.bankCommission, 'VES')}</p>
+                    </div>
+
+                    {user?.role === 'SUPER_ADMIN' && (
                       <div className="text-left">
-                        <p className="text-xs opacity-80">Deuda Actual</p>
-                        <p className="font-semibold text-red-100">
-                          {formatGiroCurrency(
-                            Math.max(0, minoristaBalanceData.creditLimit - minoristaBalanceData.availableCredit),
-                            'COP'
-                          )}
+                        <p className="text-xs opacity-80">Ganancia del Sitio</p>
+                        <p className="font-semibold">{formatGiroCurrency(totals.systemProfit, 'COP')}</p>
+                      </div>
+                    )}
+
+                    {/* Total Profit - Show if viewing all traffic */}
+                    {filterStatus === 'ALL' && user?.role === 'SUPER_ADMIN' && (
+                      <div className="text-left">
+                        <p className="text-xs opacity-80">Total Ganancias</p>
+                        <p className="font-semibold">
+                          {formatGiroCurrency(totals.minoristaProfit + totals.systemProfit, 'COP')}
                         </p>
                       </div>
-                      <div className="text-left">
-                        <p className="text-xs opacity-80">Crédito Asignado</p>
-                        <p className="font-semibold">{formatGiroCurrency(minoristaBalanceData.creditLimit, 'COP')}</p>
-                      </div>
+                    )}
+                  </div>
+                ) : user?.role === 'MINORISTA' && minoristaBalanceData ? (
+                  // MINORISTA: Deuda Actual, Crédito Asignado
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="text-left">
+                      <p className="text-xs opacity-80">Total Ganancia</p>
+                      <p className="font-semibold">{formatGiroCurrency(totals.minoristaProfit, 'COP')}</p>
                     </div>
-                  ) : (
-                    // Default fallback for Minorista if data not loaded
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                      <div className="text-left">
-                        <p className="text-xs opacity-80">Total Ganancia</p>
-                        <p className="font-semibold">{formatGiroCurrency(totals.minoristaProfit, 'COP')}</p>
-                      </div>
+                    <div className="text-left">
+                      <p className="text-xs opacity-80">Deuda Actual</p>
+                      <p className="font-semibold text-red-100">
+                        {formatGiroCurrency(
+                          Math.max(0, minoristaBalanceData.creditLimit - minoristaBalanceData.availableCredit),
+                          'COP'
+                        )}
+                      </p>
                     </div>
-                  )}
-                </div>
-              )}
+                    <div className="text-left">
+                      <p className="text-xs opacity-80">Crédito Asignado</p>
+                      <p className="font-semibold">{formatGiroCurrency(minoristaBalanceData.creditLimit, 'COP')}</p>
+                    </div>
+                  </div>
+                ) : (
+                  // Default fallback for Minorista if data not loaded
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <div className="text-left">
+                      <p className="text-xs opacity-80">Total Ganancia</p>
+                      <p className="font-semibold">{formatGiroCurrency(totals.minoristaProfit, 'COP')}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </>
       )}
@@ -974,7 +978,7 @@ export function GirosPage() {
           onOpenChange={setDetailSheetOpen}
           giroId={selectedGiroId}
           initialStatus={selectedGiroStatus}
-          onUpdate={() => { }}
+          onUpdate={() => {}}
         />
       )}
 
