@@ -33,10 +33,10 @@ interface GiroDetailSheetProps {
 }
 
 const RETURN_REASON_OPTIONS = [
+  'Número de cédula incorrecto',
   'Número de cuenta incorrecto',
   'Número de teléfono incorrecto',
   'Banco incorrecto',
-  'Otro motivo',
 ]
 
 export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onUpdate }: GiroDetailSheetProps) {
