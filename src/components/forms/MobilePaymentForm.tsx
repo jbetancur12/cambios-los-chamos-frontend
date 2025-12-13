@@ -140,11 +140,11 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   const effectiveRate =
     useCustomRate && (isSuperAdmin || isAdmin)
       ? {
-          buyRate: parseFloat(customBuyRate) || exchangeRate?.buyRate || 0,
-          sellRate: parseFloat(customSellRate) || exchangeRate?.sellRate || 0,
-          bcv: parseFloat(customBcv) || exchangeRate?.bcv || 0,
-          usd: parseFloat(customUsd) || exchangeRate?.usd || 0,
-        }
+        buyRate: parseFloat(customBuyRate) || exchangeRate?.buyRate || 0,
+        sellRate: parseFloat(customSellRate) || exchangeRate?.sellRate || 0,
+        bcv: parseFloat(customBcv) || exchangeRate?.bcv || 0,
+        usd: parseFloat(customUsd) || exchangeRate?.usd || 0,
+      }
       : exchangeRate
 
   const amountBs = effectiveRate && amountCop ? (Number(amountCop) / effectiveRate.sellRate).toFixed(2) : '0.00'
@@ -152,7 +152,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!cedula?.trim() || !selectedBank || !phone?.trim() || !senderName?.trim() || !amountCop) {
+    if (!cedula?.trim() || !selectedBank || !phone?.trim() || !amountCop) {
       toast.error('Por favor completa todos los campos')
       return
     }
@@ -181,7 +181,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
         cedula,
         bankId: selectedBank,
         phone,
-        contactoEnvia: senderName,
+        contactoEnvia: senderName || '', // Send empty if not used
         amountCop: Number(amountCop),
       }
 
@@ -316,7 +316,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
           </div>
         </div>
 
-        <div className="space-y-1 md:space-y-2">
+        {/* <div className="space-y-1 md:space-y-2">
           <Label htmlFor="senderName" className="hidden md:block text-md">
             Contacto que Envía
           </Label>
@@ -326,10 +326,10 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
             placeholder="Contacto que Envía"
             value={senderName}
             onChange={(e) => setSenderName(e.target.value)}
-            required
+            // required
             className="font-medium placeholder:text-muted-foreground md:placeholder:text-transparent"
           />
-        </div>
+        </div> */}
       </div>
 
       {/* Bank and Amount Info */}
