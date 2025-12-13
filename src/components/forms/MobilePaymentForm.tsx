@@ -24,21 +24,11 @@ interface MobilePaymentFormProps {
 export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   const { user } = useAuth()
   // Persistence
-  const [savedData] = useState(() => {
-    if (typeof window === 'undefined') return {}
-    try {
-      const saved = localStorage.getItem('mobile_payment_form_data')
-      return saved ? JSON.parse(saved) : {}
-    } catch {
-      return {}
-    }
-  })
-
-  const [cedula, setCedula] = useState(savedData.cedula || '')
-  const [selectedBank, setSelectedBank] = useState(savedData.selectedBank || '')
-  const [phone, setPhone] = useState(savedData.phone || '')
-  const [senderName, setSenderName] = useState(savedData.senderName || '')
-  const [amountCop, setAmountCop] = useState(savedData.amountCop || '')
+  const [cedula, setCedula] = useState('')
+  const [selectedBank, setSelectedBank] = useState('')
+  const [phone, setPhone] = useState('')
+  const [senderName, setSenderName] = useState('')
+  const [amountCop, setAmountCop] = useState('')
   const [banks, setBanks] = useState<Bank[]>([])
   const [exchangeRate, setExchangeRate] = useState<ExchangeRate | null>(null)
   const [loading, setLoading] = useState(false)
@@ -60,10 +50,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   const [customUsd, setCustomUsd] = useState('')
   const [customBcv, setCustomBcv] = useState('')
 
-  useEffect(() => {
-    const data = { cedula, selectedBank, phone, senderName, amountCop }
-    localStorage.setItem('mobile_payment_form_data', JSON.stringify(data))
-  }, [cedula, selectedBank, phone, senderName, amountCop])
+
 
   useEffect(() => {
     loadBanks()
@@ -223,7 +210,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
     setAmountCop('')
     setShowSuggestions(false)
     setUseCustomRate(false)
-    localStorage.removeItem('mobile_payment_form_data')
+
   }
 
   const handleSelectBeneficiary = (beneficiary: BeneficiaryData) => {
@@ -318,20 +305,20 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
           </div>
         </div>
 
-        {/* <div className="space-y-1 md:space-y-2">
+        <div className="space-y-1 md:space-y-2">
           <Label htmlFor="senderName" className="hidden md:block text-md">
-            Contacto que Envía
+            Contacto que Envía (Opcional)
           </Label>
 
           <Input
             id="senderName"
-            placeholder="Contacto que Envía"
+            placeholder="Contacto que Envía (Opcional)"
             value={senderName}
             onChange={(e) => setSenderName(e.target.value)}
-            // required
             className="font-medium placeholder:text-muted-foreground md:placeholder:text-transparent"
+            autoComplete="off"
           />
-        </div> */}
+        </div>
       </div>
 
       {/* Bank and Amount Info */}
