@@ -27,7 +27,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   const [cedula, setCedula] = useState('')
   const [selectedBank, setSelectedBank] = useState('')
   const [phone, setPhone] = useState('')
-  const [senderName, setSenderName] = useState('')
+  const [senderName, setSenderName] = useState('Sistema')
   const [amountCop, setAmountCop] = useState('')
   const [banks, setBanks] = useState<Bank[]>([])
   const [exchangeRate, setExchangeRate] = useState<ExchangeRate | null>(null)
@@ -125,11 +125,11 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   const effectiveRate =
     useCustomRate && (isSuperAdmin || isAdmin)
       ? {
-          buyRate: parseFloat(customBuyRate) || exchangeRate?.buyRate || 0,
-          sellRate: parseFloat(customSellRate) || exchangeRate?.sellRate || 0,
-          bcv: parseFloat(customBcv) || exchangeRate?.bcv || 0,
-          usd: parseFloat(customUsd) || exchangeRate?.usd || 0,
-        }
+        buyRate: parseFloat(customBuyRate) || exchangeRate?.buyRate || 0,
+        sellRate: parseFloat(customSellRate) || exchangeRate?.sellRate || 0,
+        bcv: parseFloat(customBcv) || exchangeRate?.bcv || 0,
+        usd: parseFloat(customUsd) || exchangeRate?.usd || 0,
+      }
       : exchangeRate
 
   const amountBs = effectiveRate && amountCop ? (Number(amountCop) / effectiveRate.sellRate).toFixed(2) : '0.00'
