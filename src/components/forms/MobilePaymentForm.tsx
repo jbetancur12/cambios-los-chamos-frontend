@@ -36,12 +36,14 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   const [minoristaBalance, setMinoristaBalance] = useState<number | null>(null)
   const [minoristaBalanceInFavor, setMinoristaBalanceInFavor] = useState<number | null>(null)
   const [loadingBalance, setLoadingBalance] = useState(false)
-  const { getSuggestions } = useBeneficiarySuggestions()
+  const { getSuggestions, addSuggestion } = useBeneficiarySuggestions()
 
   const isMinorista = user?.role === 'MINORISTA'
   const isSuperAdmin = user?.role === 'SUPER_ADMIN'
   const isAdmin = user?.role === 'ADMIN'
+
   const filteredSuggestions = getSuggestions(phone, 'PAGO_MOVIL')
+  const filteredCedulaSuggestions = getSuggestions(cedula, 'PAGO_MOVIL')
 
   // Custom rate override
   const [useCustomRate, setUseCustomRate] = useState(false)
@@ -49,6 +51,10 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   const [customSellRate, setCustomSellRate] = useState('')
   const [customUsd, setCustomUsd] = useState('')
   const [customBcv, setCustomBcv] = useState('')
+
+  // New features state
+  const [saveBeneficiary, setSaveBeneficiary] = useState(false)
+  const [showCedulaSuggestions, setShowCedulaSuggestions] = useState(false)
 
   useEffect(() => {
     loadBanks()
@@ -186,6 +192,24 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
       }
 
       await api.post('/giro/mobile-payment/create', payload)
+
+      // Save suggestion if checked
+      if (saveBeneficiary) {
+        // Find bank object for accurate data if needed, though ID is enough
+        // We use the current form data
+        const bankObj = banks.find((b) => b.id === selectedBank)
+        if (bankObj) {
+          await addSuggestion({
+            name: senderName || phone, // Use nickname/senderName or fallback to phone
+            id: cedula,
+            phone: phone,
+            bankId: selectedBank,
+            accountNumber: '', // Not used for mobile payment but required by type
+            executionType: 'PAGO_MOVIL',
+          })
+        }
+      }
+
       toast.success('Pago móvil registrado exitosamente')
       resetForm()
       if (isMinorista) {
@@ -207,22 +231,32 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
     setSenderName('')
     setAmountCop('')
     setShowSuggestions(false)
+    setShowCedulaSuggestions(false)
     setUseCustomRate(false)
+    setSaveBeneficiary(false)
   }
 
   const handleSelectBeneficiary = (beneficiary: BeneficiaryData) => {
     setPhone(beneficiary.phone)
     setCedula(beneficiary.id)
-    setSenderName(beneficiary.phone)
+    setSenderName(beneficiary.name || beneficiary.phone)
     if (beneficiary.bankId && banks.length > 0) {
       setSelectedBank(beneficiary.bankId)
     }
     setShowSuggestions(false)
+    setShowCedulaSuggestions(false)
   }
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPhone(e.target.value)
     setShowSuggestions(true)
+    setShowCedulaSuggestions(false)
+  }
+
+  const handleCedulaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCedula(e.target.value)
+    setShowCedulaSuggestions(true)
+    setShowSuggestions(false)
   }
 
   return (
@@ -235,15 +269,35 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
           <Label htmlFor="cedula" className="hidden md:block text-md">
             Cédula del Beneficiario
           </Label>
-          <Input
-            id="cedula"
-            placeholder="Cédula del Beneficiario"
-            value={cedula}
-            onChange={(e) => setCedula(e.target.value)}
-            required
-            className="font-medium placeholder:text-muted-foreground md:placeholder:text-transparent"
-            autoComplete="off"
-          />
+          <div className="relative">
+            <Input
+              id="cedula"
+              placeholder="Cédula del Beneficiario"
+              value={cedula}
+              onChange={handleCedulaChange}
+              onFocus={() => cedula && setShowCedulaSuggestions(true)}
+              required
+              className="font-medium placeholder:text-muted-foreground md:placeholder:text-transparent"
+              autoComplete="off"
+            />
+            {showCedulaSuggestions && filteredCedulaSuggestions.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-card border rounded-md shadow-lg z-50 max-h-48 overflow-y-auto">
+                {filteredCedulaSuggestions.map((suggestion, index) => (
+                  <button
+                    key={`cedula-${suggestion.phone}-${suggestion.id}-${index}`}
+                    type="button"
+                    onClick={() => handleSelectBeneficiary(suggestion)}
+                    className="w-full text-left px-3 py-2 hover:bg-muted/50 transition-colors text-sm border-b last:border-b-0"
+                  >
+                    <div className="font-medium">{suggestion.id}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {suggestion.name} • {suggestion.phone}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="space-y-1 md:space-y-2">
@@ -300,6 +354,20 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
               </div>
             )}
           </div>
+        </div>
+
+        {/* Save Suggestion Checkbox */}
+        <div className="flex items-center gap-2 pt-2">
+          <input
+            type="checkbox"
+            id="saveBeneficiary"
+            checked={saveBeneficiary}
+            onChange={(e) => setSaveBeneficiary(e.target.checked)}
+            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+          />
+          <Label htmlFor="saveBeneficiary" className="text-sm font-medium cursor-pointer select-none">
+            Guardar como beneficiario frecuente
+          </Label>
         </div>
 
         <div className="space-y-1 md:space-y-2 hidden">
