@@ -123,6 +123,16 @@ export function RechargeMinoristaBalanceSheet({
     setLocalMinorista(minorista)
   }, [minorista])
 
+  const loadUpdatedMinorista = async () => {
+    if (!minorista?.id) return
+    try {
+      const response = await api.get<{ minorista: Minorista }>(`/minorista/${minorista.id}`)
+      setLocalMinorista(response.minorista)
+    } catch (error) {
+      console.error('Error loading updated minorista:', error)
+    }
+  }
+
   // Cargar datos iniciales y limpiar estados cuando se abre el modal o cambia el minorista
   useEffect(() => {
     if (open && minorista) {
@@ -131,14 +141,6 @@ export function RechargeMinoristaBalanceSheet({
       setCreditLimitAmount('')
       setActiveTab('view')
 
-      const loadUpdatedMinorista = async () => {
-        try {
-          const response = await api.get<{ minorista: Minorista }>(`/minorista/${minorista.id}`)
-          setLocalMinorista(response.minorista)
-        } catch (error) {
-          console.error('Error loading updated minorista:', error)
-        }
-      }
       loadUpdatedMinorista()
     }
   }, [open, minorista?.id])
@@ -166,6 +168,10 @@ export function RechargeMinoristaBalanceSheet({
         amount: numericAmount,
       })
       setPayAmount('')
+
+      // Recargar datos para ver el nuevo saldo sin cerrar el modal
+      await loadUpdatedMinorista()
+
       onBalanceUpdated()
       toast.success('Deuda pagada exitosamente')
     } catch (error) {

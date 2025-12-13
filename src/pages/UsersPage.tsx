@@ -85,9 +85,11 @@ export function UsersPage() {
   }
 
   const handleMinoristaBalanceUpdated = () => {
-    setRechargeMinoristaSheetOpen(false)
-    setSelectedMinorista(null)
-    // Invalidate users query to refetch updated balance
+    // No cerramos el modal para que el usuario pueda seguir viendo los detalles
+    // setRechargeMinoristaSheetOpen(false)
+    // setSelectedMinorista(null)
+
+    // Invalidate users query to refetch updated balance in the background list
     queryClient.invalidateQueries({ queryKey: ['users'] })
   }
 

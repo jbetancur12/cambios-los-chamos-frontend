@@ -663,14 +663,18 @@ export function GirosPage() {
                         key={giro.id}
                         className={`border-b cursor-pointer transition-colors ${
                           giro.status === 'DEVUELTO'
-                            ? 'bg-red-300 dark:bg-red-900 hover:bg-red-400 dark:hover:bg-red-800'
+                            ? 'bg-[linear-gradient(to_right,#510200,#f80000)] text-white hover:opacity-90'
                             : 'hover:bg-muted/30'
                         }`}
                         onClick={() => handleGiroClick(giro)}
                       >
                         {user?.role !== 'MINORISTA' && (
                           <td className="px-3 py-2 truncate text-sm w-28">
-                            <div className="font-medium text-foreground truncate">{userName}</div>
+                            <div
+                              className={`font-medium truncate ${giro.status === 'DEVUELTO' ? 'text-white' : 'text-foreground'}`}
+                            >
+                              {userName}
+                            </div>
                           </td>
                         )}
                         <td className="px-3 py-2 text-right whitespace-nowrap font-semibold w-24">
@@ -749,7 +753,7 @@ export function GirosPage() {
                   key={giro.id}
                   className={`border rounded p-3 cursor-pointer transition-colors ${
                     giro.status === 'DEVUELTO'
-                      ? 'bg-red-300 dark:bg-red-900 hover:bg-red-400 dark:hover:bg-red-800'
+                      ? 'bg-[linear-gradient(to_right,#510200,#f80000)] text-white hover:opacity-90'
                       : 'bg-card hover:bg-muted/50'
                   }`}
                   onClick={() => handleGiroClick(giro)}
@@ -757,23 +761,45 @@ export function GirosPage() {
                   <div className={`grid ${user?.role === 'MINORISTA' ? 'grid-cols-2' : 'grid-cols-2'} gap-2 text-xs`}>
                     {user?.role !== 'MINORISTA' && (
                       <div>
-                        <p className="text-muted-foreground font-semibold">
+                        <p
+                          className={`font-semibold ${giro.status === 'DEVUELTO' ? 'text-white/80' : 'text-muted-foreground'}`}
+                        >
                           {filterUserType === 'TRANSFERENCISTA' ? 'Trasferencista' : 'Minorista'}
                         </p>
-                        <p className="font-medium truncate">{userName}</p>
+                        <p className={`font-medium truncate ${giro.status === 'DEVUELTO' ? 'text-white' : ''}`}>
+                          {userName}
+                        </p>
                       </div>
                     )}
                     <div className={user?.role === 'MINORISTA' ? 'col-span-1' : ''}>
-                      <p className="text-muted-foreground font-semibold">COP</p>
-                      <p className="font-semibold">{copAmount > 0 ? formatGiroCurrency(copAmount, 'COP') : '—'}</p>
+                      <p
+                        className={`font-semibold ${giro.status === 'DEVUELTO' ? 'text-white/80' : 'text-muted-foreground'}`}
+                      >
+                        COP
+                      </p>
+                      <p className={`font-semibold ${giro.status === 'DEVUELTO' ? 'text-white' : ''}`}>
+                        {copAmount > 0 ? formatGiroCurrency(copAmount, 'COP') : '—'}
+                      </p>
                     </div>
                     <div>
-                      <p className="text-muted-foreground font-semibold">Bs</p>
-                      <p className="font-semibold">{giro.amountBs > 0 ? giro.amountBs.toLocaleString('es-VE') : '—'}</p>
+                      <p
+                        className={`font-semibold ${giro.status === 'DEVUELTO' ? 'text-white/80' : 'text-muted-foreground'}`}
+                      >
+                        Bs
+                      </p>
+                      <p className={`font-semibold ${giro.status === 'DEVUELTO' ? 'text-white' : ''}`}>
+                        {giro.amountBs > 0 ? giro.amountBs.toLocaleString('es-VE') : '—'}
+                      </p>
                     </div>
                     <div>
-                      <p className="text-muted-foreground font-semibold">Banco</p>
-                      <p className="truncate text-xs">{giro.bankName}</p>
+                      <p
+                        className={`font-semibold ${giro.status === 'DEVUELTO' ? 'text-white/80' : 'text-muted-foreground'}`}
+                      >
+                        Banco
+                      </p>
+                      <p className={`truncate text-xs ${giro.status === 'DEVUELTO' ? 'text-white' : ''}`}>
+                        {giro.bankName}
+                      </p>
                     </div>
                     <div>
                       <span
