@@ -110,10 +110,12 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
       setEditableBeneficiaryId(giro.beneficiaryId)
       setEditablePhone(giro.phone)
       setEditableAccountNumber(giro.accountNumber)
-      if (giro.bankCode) {
-        // Optionally try to find the bank by code, but we don't have the list here conveniently mapped.
-        // We'll skip auto-setting bank ID for now unless we do a lookup.
-        // Leaving it empty enforces user to select if they want to edit.
+      if (giro.bankCode && banks.length > 0) {
+        // Try to find the bank by code
+        const matchingBank = banks.find((b) => Number(b.code) === giro.bankCode)
+        if (matchingBank) {
+          setEditableBankId(matchingBank.id)
+        }
       }
       setEditableRate({
         buyRate: giro.rateApplied?.buyRate || 0,
@@ -125,7 +127,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
       setFee('')
       setProofUrl('')
     }
-  }, [giro?.id])
+  }, [giro?.id, banks])
 
   // Fetch proof image securely (with auth headers)
   useEffect(() => {
@@ -631,7 +633,8 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
                         className="h-8"
                       />
                     </div>
-                    <div className="grid gap-1">
+                    {/* Phone field removed by user request for correction form */}
+                    {/* <div className="grid gap-1">
                       <Label htmlFor="editPhone" className="text-xs">
                         Teléfono
                       </Label>
@@ -641,7 +644,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
                         onChange={(e) => setEditablePhone(e.target.value)}
                         className="h-8"
                       />
-                    </div>
+                    </div> */}
                     <div className="grid gap-1">
                       <Label htmlFor="editBankId" className="text-xs">
                         Banco
