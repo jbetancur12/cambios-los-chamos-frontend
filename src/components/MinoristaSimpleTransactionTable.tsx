@@ -69,12 +69,17 @@ export function MinoristaSimpleTransactionTable({
   // Filtrar por tipo si se especifica
   const filteredTransactions = typeFilter === 'ALL' ? transactions : transactions.filter((t) => t.type === typeFilter)
 
+  // Sort transactions by date descending to ensure correct order
+  const sortedTransactions = [...filteredTransactions].sort((a, b) =>
+    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  )
+
   // Agrupar transacciones de abono (RECHARGE) que ocurrieron en el mismo instante (split por deuda/saldo a favor)
   const groupedTransactions: MinoristaTransaction[] = []
 
-  for (let i = 0; i < filteredTransactions.length; i++) {
-    const current = filteredTransactions[i]
-    const next = filteredTransactions[i + 1]
+  for (let i = 0; i < sortedTransactions.length; i++) {
+    const current = sortedTransactions[i]
+    const next = sortedTransactions[i + 1]
 
     // Verificar si podemos agrupar con la siguiente (que es más antigua en la lista descendente)
     // Criterios:
