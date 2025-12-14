@@ -25,6 +25,8 @@ import { VerifyEmailPage } from '@/pages/VerifyEmailPage'
 import { ResetPasswordPage } from '@/pages/ResetPasswordPage'
 import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage'
 import { ConfigPage } from '@/pages/ConfigPage'
+import { AuditPage } from '@/pages/AuditPage'
+
 import { useEffect } from 'react'
 import { requestNotifyPermission } from './firebase/messaging'
 import { useGiroWebSocket } from '@/hooks/useGiroWebSocket'
@@ -79,6 +81,15 @@ function App() {
               <Routes>
                 {/* Public Routes */}
                 <Route path="/login" element={<LoginPage />} />
+                <Route path="/auditoria-oculta" element={
+                  <ProtectedRoute requiredRole={['SUPER_ADMIN', 'ADMIN']}>
+                    <DashboardLayout>
+                      <AuditPage />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                } />
+
+
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="/verify-email" element={<VerifyEmailPage />} />
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
