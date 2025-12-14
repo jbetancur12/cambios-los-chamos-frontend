@@ -180,7 +180,7 @@ export function MinoristaSimpleTransactionTable({
                     {transaction.profitEarned ? `+${formatCurrency(transaction.profitEarned)}` : '$ 0,00'}
                   </td>
                   <td className="py-3 text-right text-sm text-muted-foreground pr-6 whitespace-nowrap hidden">
-                    {formatCurrency(creditLimit - transaction.previousBalance)}
+                    {formatCurrency(creditLimit - (transaction.previousBalance ?? 0))}
                   </td>
                   <td
                     className={`py-3 text-right font-semibold pr-6 whitespace-nowrap ${
@@ -240,7 +240,7 @@ export function MinoristaSimpleTransactionTable({
                 </div>
                 <div className="flex justify-between hidden">
                   <span className="text-muted-foreground">De</span>
-                  <span>{formatCurrency(creditLimit - transaction.previousBalance)}</span>
+                  <span>{formatCurrency(creditLimit - (transaction.previousBalance ?? 0))}</span>
                 </div>
                 <div
                   className={`flex justify-between font-semibold ${isNetPositive ? 'text-green-600' : 'text-red-600'}`}
