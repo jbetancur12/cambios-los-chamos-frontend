@@ -150,6 +150,8 @@ export function RechargeSheet({ open, onOpenChange }: RechargeSheetProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    if (loading) return
+
     if (!selectedOperator || !selectedAmount || !phone || !senderName) {
       toast.error('Por favor completa todos los campos')
       return
