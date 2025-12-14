@@ -1024,8 +1024,8 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
             {giro.completedAt && (
               <div>
                 <p>Transferencia: {formatDate(giro.completedAt)}</p>
-                {/* Mostrar quién ejecutó y desde qué banco (Solo Admins) */}
-                {giro.executedBy && isAdmin && (
+                {/* Mostrar quién ejecutó y desde qué banco (Admins y Transferencistas) */}
+                {giro.executedBy && (isAdmin || isTransferencista) && (
                   <>
                     <p className="mt-0.5 text-[10px] md:text-xs">
                       por: <span className="font-semibold">{giro.executedBy.fullName}</span>
