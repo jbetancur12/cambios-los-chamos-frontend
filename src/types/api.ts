@@ -172,6 +172,7 @@ export interface MinoristaTransaction {
   previousAvailableCredit: number
   availableCredit: number
   currentBalance: number
+  previousBalance?: number // Added to match backend DTO
   previousBalanceInFavor?: number // Optional for backward compatibility with old transactions
   currentBalanceInFavor?: number // Optional for backward compatibility with old transactions
   creditConsumed?: number

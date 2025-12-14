@@ -100,7 +100,7 @@ export function RechargeMinoristaBalanceSheet({
     if (!localMinorista) return
     try {
       setTransactionsLoading(true)
-      let url = `/minorista/${localMinorista.id}/transactions?page=${page}&limit=10`
+      let url = `/minorista/${localMinorista.id}/transactions?page=${page}&limit=20`
 
       if (dateRange.from && dateRange.to) {
         url += `&startDate=${encodeURIComponent(dateRange.from)}&endDate=${encodeURIComponent(dateRange.to)}`
@@ -279,15 +279,13 @@ export function RechargeMinoristaBalanceSheet({
                 </div>
                 <div className="p-3 rounded-lg bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800">
                   <p className="text-xs text-muted-foreground mb-1">Crédito Disponible</p>
-                  <p className="text-lg font-semibold text-green-600">
-                    {formatCurrency(localMinorista.availableCredit)}
-                  </p>
+                  <p className="text-lg font-semibold text-green-600">{formatCurrency(totalAvailable)}</p>
                 </div>
-                {localMinorista.creditBalance > 0 && (
+                {totalAvailable > localMinorista.creditLimit && (
                   <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800">
                     <p className="text-xs text-muted-foreground mb-1">Saldo a Favor</p>
                     <p className="text-lg font-semibold text-blue-600">
-                      {formatCurrency(localMinorista.creditBalance)}
+                      {formatCurrency(totalAvailable - localMinorista.creditLimit)}
                     </p>
                   </div>
                 )}

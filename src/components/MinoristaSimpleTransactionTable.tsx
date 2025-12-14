@@ -156,8 +156,9 @@ export function MinoristaSimpleTransactionTable({
 
               // Recalculate isPositive based on displayAmount for color
               const isGreen = displayAmount >= 0 || transaction.type === 'REFUND'
-              const balanceQueda = transaction.currentBalanceInFavor || 0
-              const isBalanceInFavor = balanceQueda > 0
+              const impliedDebt = Math.max(0, creditLimit - transaction.currentBalance)
+              const netBalance = (transaction.currentBalanceInFavor || 0) - impliedDebt
+              const isNetPositive = netBalance >= 0
 
               return (
                 <tr key={transaction.id} className="border-b last:border-0 hover:bg-muted/50">
@@ -179,14 +180,14 @@ export function MinoristaSimpleTransactionTable({
                     {transaction.profitEarned ? `+${formatCurrency(transaction.profitEarned)}` : '$ 0,00'}
                   </td>
                   <td className="py-3 text-right text-sm text-muted-foreground pr-6 whitespace-nowrap hidden">
-                    {formatCurrency(creditLimit - transaction.previousAvailableCredit)}
+                    {formatCurrency(creditLimit - transaction.previousBalance)}
                   </td>
                   <td
                     className={`py-3 text-right font-semibold pr-6 whitespace-nowrap ${
-                      isBalanceInFavor ? 'text-green-600' : 'text-red-600'
+                      isNetPositive ? 'text-green-600' : 'text-red-600'
                     }`}
                   >
-                    {formatCurrency(isBalanceInFavor ? balanceQueda : (transaction.accumulatedDebt as number))}
+                    {formatCurrency(netBalance)}
                   </td>
                 </tr>
               )
@@ -204,8 +205,9 @@ export function MinoristaSimpleTransactionTable({
           }
           const isGreen = displayAmount >= 0
 
-          const balanceQueda = transaction.currentBalanceInFavor || 0
-          const isBalanceInFavor = balanceQueda > 0
+          const impliedDebt = Math.max(0, creditLimit - transaction.currentBalance)
+          const netBalance = (transaction.currentBalanceInFavor || 0) - impliedDebt
+          const isNetPositive = netBalance >= 0
 
           return (
             <Card key={transaction.id} className="p-2">
@@ -238,15 +240,13 @@ export function MinoristaSimpleTransactionTable({
                 </div>
                 <div className="flex justify-between hidden">
                   <span className="text-muted-foreground">De</span>
-                  <span>{formatCurrency(creditLimit - transaction.previousAvailableCredit)}</span>
+                  <span>{formatCurrency(creditLimit - transaction.previousBalance)}</span>
                 </div>
                 <div
-                  className={`flex justify-between font-semibold ${isBalanceInFavor ? 'text-green-600' : 'text-red-600'}`}
+                  className={`flex justify-between font-semibold ${isNetPositive ? 'text-green-600' : 'text-red-600'}`}
                 >
                   <span>Saldo</span>
-                  <span>
-                    {formatCurrency(isBalanceInFavor ? balanceQueda : (transaction.accumulatedDebt as number))}
-                  </span>
+                  <span>{formatCurrency(netBalance)}</span>
                 </div>
               </div>
             </Card>
