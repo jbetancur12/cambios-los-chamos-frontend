@@ -100,7 +100,7 @@ export function RechargeMinoristaBalanceSheet({
     if (!localMinorista) return
     try {
       setTransactionsLoading(true)
-      let url = `/minorista/${localMinorista.id}/transactions?page=${page}&limit=20`
+      let url = `/minorista/${localMinorista.id}/transactions?page=${page}&limit=50`
 
       if (dateRange.from && dateRange.to) {
         url += `&startDate=${encodeURIComponent(dateRange.from)}&endDate=${encodeURIComponent(dateRange.to)}`
@@ -228,33 +228,30 @@ export function RechargeMinoristaBalanceSheet({
           <div className="flex gap-2 border-b">
             <button
               onClick={() => setActiveTab('view')}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === 'view'
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'view'
                   ? 'border-blue-500 text-blue-600'
                   : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
+                }`}
             >
               <Eye className="h-4 w-4 inline mr-2" />
               Ver
             </button>
             <button
               onClick={() => setActiveTab('assign')}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === 'assign'
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'assign'
                   ? 'border-blue-500 text-blue-600'
                   : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
+                }`}
             >
               <DollarSign className="h-4 w-4 inline mr-2" />
               Asignar Cupo
             </button>
             <button
               onClick={() => setActiveTab('pay')}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === 'pay'
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'pay'
                   ? 'border-blue-500 text-blue-600'
                   : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
+                }`}
             >
               <DollarSign className="h-4 w-4 inline mr-2" />
               Pagar Deuda
