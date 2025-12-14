@@ -52,6 +52,30 @@ export function RechargeMinoristaBalanceSheet({
     endDate: today.toISOString().split('T')[0],
   })
   const [typeFilter, setTypeFilter] = useState<MinoristaTransactionType | 'ALL'>('ALL')
+  const [pendingGirosAmount, setPendingGirosAmount] = useState(0)
+
+  const fetchPendingGiros = async () => {
+    if (!localMinorista) return
+    try {
+      // Fetch only pending/assigned/processing giros for this minorista
+      const response = await api.get<{
+        giros: any[]
+      }>(`/giro/list?minoristaId=${localMinorista.id}&status=PENDIENTE,ASIGNADO,PROCESANDO&limit=1000`)
+
+      const giros = response.giros || []
+      // Sum amountInput (assuming it matches the deduction currency, usually COP)
+      const totalPending = giros.reduce((sum, g) => sum + (g.amountInput || 0), 0)
+      setPendingGirosAmount(totalPending)
+    } catch (error) {
+      console.error('Error fetching pending giros:', error)
+    }
+  }
+
+  useEffect(() => {
+    if (open && localMinorista) {
+      fetchPendingGiros()
+    }
+  }, [open, localMinorista?.id])
 
   const handleSingleDateChange = (date: string) => {
     setSingleDate(date)
@@ -100,7 +124,7 @@ export function RechargeMinoristaBalanceSheet({
     if (!localMinorista) return
     try {
       setTransactionsLoading(true)
-      let url = `/minorista/${localMinorista.id}/transactions?page=${page}&limit=50`
+      let url = `/minorista/${localMinorista.id}/transactions?page=${page}&limit=100`
 
       if (dateRange.from && dateRange.to) {
         url += `&startDate=${encodeURIComponent(dateRange.from)}&endDate=${encodeURIComponent(dateRange.to)}`
@@ -228,30 +252,33 @@ export function RechargeMinoristaBalanceSheet({
           <div className="flex gap-2 border-b">
             <button
               onClick={() => setActiveTab('view')}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'view'
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === 'view'
                   ? 'border-blue-500 text-blue-600'
                   : 'border-transparent text-muted-foreground hover:text-foreground'
-                }`}
+              }`}
             >
               <Eye className="h-4 w-4 inline mr-2" />
               Ver
             </button>
             <button
               onClick={() => setActiveTab('assign')}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'assign'
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === 'assign'
                   ? 'border-blue-500 text-blue-600'
                   : 'border-transparent text-muted-foreground hover:text-foreground'
-                }`}
+              }`}
             >
               <DollarSign className="h-4 w-4 inline mr-2" />
               Asignar Cupo
             </button>
             <button
               onClick={() => setActiveTab('pay')}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'pay'
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === 'pay'
                   ? 'border-blue-500 text-blue-600'
                   : 'border-transparent text-muted-foreground hover:text-foreground'
-                }`}
+              }`}
             >
               <DollarSign className="h-4 w-4 inline mr-2" />
               Pagar Deuda
@@ -276,7 +303,9 @@ export function RechargeMinoristaBalanceSheet({
                 </div>
                 <div className="p-3 rounded-lg bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800">
                   <p className="text-xs text-muted-foreground mb-1">Crédito Disponible</p>
-                  <p className="text-lg font-semibold text-green-600">{formatCurrency(totalAvailable)}</p>
+                  <p className="text-lg font-semibold text-green-600">
+                    {formatCurrency(Math.min(totalAvailable, localMinorista.creditLimit))}
+                  </p>
                 </div>
                 {totalAvailable > localMinorista.creditLimit && (
                   <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800">
@@ -297,8 +326,26 @@ export function RechargeMinoristaBalanceSheet({
               {hasDebt && (
                 <div className="flex items-start gap-2 p-3 bg-red-50 dark:bg-red-950 rounded border border-red-200 dark:border-red-800">
                   <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
-                  <p className="text-xs text-red-700 dark:text-red-300">
-                    Este minorista tiene deuda. Usa la pestaña "Pagar Deuda" para abonar fondos y reducir la deuda.
+                  <div className="space-y-1">
+                    <p className="text-xs text-red-700 dark:text-red-300">
+                      Este minorista tiene deuda. Usa la pestaña "Pagar Deuda" para abonar fondos y reducir la deuda.
+                    </p>
+                    {pendingGirosAmount > 0 && (
+                      <p className="text-xs font-semibold text-red-800 dark:text-red-200">
+                        Nota: {formatCurrency(pendingGirosAmount)} de esta deuda corresponden a giros en proceso
+                        (pendientes o asignados) que aún no aparecen en el historial.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {!hasDebt && pendingGirosAmount > 0 && (
+                <div className="flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-950 rounded border border-amber-200 dark:border-amber-800">
+                  <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                  <p className="text-xs text-amber-700 dark:text-amber-300">
+                    Hay {formatCurrency(pendingGirosAmount)} en giros en proceso retenidos del cupo disponible que aún
+                    no aparecen en el historial.
                   </p>
                 </div>
               )}
