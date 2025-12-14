@@ -249,7 +249,15 @@ export function DashboardPage() {
                   Crédito Disponible
                 </p>
                 <div className="text-2xl md:text-3xl font-bold text-blue-600">
-                  {formatCurrency(minoristaBalanceData.availableCredit, 'COP')}
+                  {formatCurrency(
+                    minoristaBalanceData
+                      ? Math.min(
+                          minoristaBalanceData.availableCredit + (minoristaBalanceData.creditBalance || 0),
+                          minoristaBalanceData.creditLimit
+                        )
+                      : 0,
+                    'COP'
+                  )}
                 </div>
                 <p className="text-xs text-muted-foreground">Para crear giros</p>
               </div>
@@ -261,25 +269,38 @@ export function DashboardPage() {
                 </p>
                 <div className="text-2xl md:text-3xl font-bold text-red-600">
                   {formatCurrency(
-                    Math.max(0, minoristaBalanceData.creditLimit - minoristaBalanceData.availableCredit),
+                    minoristaBalanceData
+                      ? Math.max(
+                          0,
+                          minoristaBalanceData.creditLimit -
+                            (minoristaBalanceData.availableCredit + (minoristaBalanceData.creditBalance || 0))
+                        )
+                      : 0,
                     'COP'
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground">Crédito utilizado</p>
               </div>
 
-              {/* Saldo a Favor - Solo mostrar si existe positivo */}
-              {minoristaBalanceData.creditBalance > 0 && (
-                <div className="space-y-2 bg-emerald-50 dark:bg-emerald-950 p-3 rounded-lg border border-emerald-200 dark:border-emerald-800">
-                  <p className="text-xs md:text-sm font-medium text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
-                    Saldo a Favor
-                  </p>
-                  <div className="text-2xl md:text-3xl font-bold text-emerald-700 dark:text-emerald-300">
-                    {formatCurrency(minoristaBalanceData.creditBalance, 'COP')}
+              {/* Saldo a Favor - Solo mostrar si existe positivo (excedente sobre el cupo) */}
+              {minoristaBalanceData &&
+                minoristaBalanceData.availableCredit + (minoristaBalanceData.creditBalance || 0) >
+                  minoristaBalanceData.creditLimit && (
+                  <div className="space-y-2 bg-emerald-50 dark:bg-emerald-950 p-3 rounded-lg border border-emerald-200 dark:border-emerald-800">
+                    <p className="text-xs md:text-sm font-medium text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+                      Saldo a Favor
+                    </p>
+                    <div className="text-2xl md:text-3xl font-bold text-emerald-700 dark:text-emerald-300">
+                      {formatCurrency(
+                        minoristaBalanceData.availableCredit +
+                          (minoristaBalanceData.creditBalance || 0) -
+                          minoristaBalanceData.creditLimit,
+                        'COP'
+                      )}
+                    </div>
+                    <p className="text-xs text-emerald-600 dark:text-emerald-400">Balance acreditado</p>
                   </div>
-                  <p className="text-xs text-emerald-600 dark:text-emerald-400">Balance acreditado</p>
-                </div>
-              )}
+                )}
             </div>
           </CardContent>
         </Card>
