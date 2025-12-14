@@ -76,7 +76,7 @@ export function ConfigPage() {
     <div className="p-4 md:p-6 max-w-6xl mx-auto">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-foreground">Configuración</h1>
-        <p className="text-sm md:text-base text-muted-foreground mt-2">Gestiona la configuración del sistema</p>
+        <p className="text-sm md:text-base text-muted-foreground mt-2">Gestiona la configuración del sistema.</p>
       </div>
 
       <div className="space-y-6">
