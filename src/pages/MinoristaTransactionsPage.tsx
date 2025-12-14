@@ -110,8 +110,10 @@ export function MinoristaTransactionsPage() {
   }
 
   // Lógica UI/UX
-  const creditUsed = Math.max(0, minorista.creditLimit - minorista.availableCredit)
-  const percentAvailable = minorista.creditLimit > 0 ? (minorista.availableCredit / minorista.creditLimit) * 100 : 0
+  const totalAvailable = minorista.availableCredit + (minorista.creditBalance || 0)
+  const creditUsed = Math.max(0, minorista.creditLimit - totalAvailable)
+  const percentAvailable =
+    minorista.creditLimit > 0 ? (Math.min(totalAvailable, minorista.creditLimit) / minorista.creditLimit) * 100 : 0
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-6 pb-20">
@@ -139,7 +141,7 @@ export function MinoristaTransactionsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="flex flex-col space-y-1">
                 <span className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Saldo
+                  Saldo Deudor
                 </span>
                 <span
                   className={`text-4xl font-extrabold ${creditUsed === 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}
@@ -148,13 +150,13 @@ export function MinoristaTransactionsPage() {
                 </span>
               </div>
 
-              {minorista.creditBalance > 0 && (
+              {totalAvailable > minorista.creditLimit && (
                 <div className="flex flex-col space-y-1 bg-emerald-50 dark:bg-emerald-950 p-4 rounded-lg border border-emerald-200 dark:border-emerald-800">
                   <span className="text-sm font-medium text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
                     Saldo a Favor
                   </span>
                   <span className="text-4xl font-extrabold text-emerald-700 dark:text-emerald-300">
-                    {formatCurrency(minorista.creditBalance)}
+                    {formatCurrency(totalAvailable - minorista.creditLimit)}
                   </span>
                 </div>
               )}
