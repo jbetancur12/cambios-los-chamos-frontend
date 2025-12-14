@@ -74,7 +74,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
   const [isEditing, setIsEditing] = useState(false)
   const [editableBeneficiaryName, setEditableBeneficiaryName] = useState('')
   const [editableBeneficiaryId, setEditableBeneficiaryId] = useState('')
-  const [editablePhone, setEditablePhone] = useState('')
+  const [editablePhone, setEditablePhone] = useState('12346')
   const [editableBankId, setEditableBankId] = useState('')
   const [editableAccountNumber, setEditableAccountNumber] = useState('')
   const [selectedBankAccountId, setSelectedBankAccountId] = useState('')
@@ -197,13 +197,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
   const handleSaveEdit = () => {
     if (!giro) return
 
-    if (
-      !editableBeneficiaryName ||
-      !editableBeneficiaryId ||
-      !editablePhone ||
-      !editableBankId ||
-      !editableAccountNumber
-    ) {
+    if (!editableBeneficiaryName || !editableBeneficiaryId || !editableBankId || !editableAccountNumber) {
       toast.error('Todos los campos del beneficiario son obligatorios.')
       return
     }

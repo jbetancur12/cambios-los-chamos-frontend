@@ -35,6 +35,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [minoristaBalance, setMinoristaBalance] = useState<number | null>(null)
   const [minoristaBalanceInFavor, setMinoristaBalanceInFavor] = useState<number | null>(null)
+  const [creditLimit, setCreditLimit] = useState<number | undefined>(undefined)
   const [loadingBalance, setLoadingBalance] = useState(false)
   const { getSuggestions, addSuggestion } = useBeneficiarySuggestions()
 
@@ -91,9 +92,10 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   const fetchMinoristaBalance = async () => {
     try {
       setLoadingBalance(true)
-      const response = await api.get<{ minorista: Minorista }>('/minorista/me')
+      const response = await api.get<{ minorista: Minorista; creditLimit?: number }>('/minorista/me')
       setMinoristaBalance(response.minorista.availableCredit)
       setMinoristaBalanceInFavor(response.minorista.creditBalance || 0)
+      setCreditLimit(response.creditLimit) // Now returned by API
     } catch (error) {
       console.error('Error loading balance:', error)
       const message = error instanceof Error ? error.message : 'Error al cargar balance'
@@ -123,9 +125,11 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
     if (minoristaBalance === null || minoristaBalanceInFavor === null) return false
 
     const amount = parseFloat(amountCop) || 0
+    const profit = getEarnedProfit() || 0
     const totalBalance = minoristaBalance + minoristaBalanceInFavor
 
-    return totalBalance < amount
+    // Check if total liquidity (including profit) is sufficient
+    return totalBalance - amount + profit < 0
   }
 
   const effectiveRate =
@@ -443,6 +447,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
         <BalanceInfo
           minoristaBalance={minoristaBalance}
           minoristaBalanceInFavor={minoristaBalanceInFavor}
+          creditLimit={creditLimit}
           amountInput={amountCop}
           getEarnedProfit={getEarnedProfit}
           getRemainingBalance={getRemainingBalance}

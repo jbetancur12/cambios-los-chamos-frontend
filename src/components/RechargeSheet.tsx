@@ -43,6 +43,7 @@ export function RechargeSheet({ open, onOpenChange }: RechargeSheetProps) {
   const [loading, setLoading] = useState(false)
   const [minoristaBalance, setMinoristaBalance] = useState<number | null>(null)
   const [minoristaBalanceInFavor, setMinoristaBalanceInFavor] = useState<number | null>(null)
+  const [creditLimit, setCreditLimit] = useState<number | null>(null)
   const [loadingBalance, setLoadingBalance] = useState(false)
 
   useEffect(() => {
@@ -108,6 +109,7 @@ export function RechargeSheet({ open, onOpenChange }: RechargeSheetProps) {
       const response = await api.get<{ minorista: Minorista }>('/minorista/me')
       setMinoristaBalance(response.minorista.availableCredit)
       setMinoristaBalanceInFavor(response.minorista.creditBalance || 0)
+      setCreditLimit(response.minorista.creditLimit)
     } catch (error) {
       console.error('Error loading balance:', error)
       const message = error instanceof Error ? error.message : 'Error al cargar balance'
@@ -250,6 +252,7 @@ export function RechargeSheet({ open, onOpenChange }: RechargeSheetProps) {
             <BalanceInfo
               minoristaBalance={minoristaBalance}
               minoristaBalanceInFavor={minoristaBalanceInFavor}
+              creditLimit={creditLimit ?? undefined}
               amountInput={amountCop}
               getEarnedProfit={getEarnedProfit}
               getRemainingBalance={getRemainingBalance}

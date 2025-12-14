@@ -477,6 +477,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
         <BalanceInfo
           minoristaBalance={minoristaBalance}
           minoristaBalanceInFavor={minoristaBalanceInFavor}
+          creditLimit={creditLimit ?? undefined}
           amountInput={amountInput}
           getEarnedProfit={getEarnedProfit}
           getRemainingBalance={getRemainingBalance}

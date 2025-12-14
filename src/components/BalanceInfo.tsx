@@ -4,6 +4,7 @@ import { useState } from 'react'
 interface BalanceInfoProps {
   minoristaBalance: number | null
   minoristaBalanceInFavor: number | null
+  creditLimit?: number
   amountInput: string
   getEarnedProfit: () => number | null
   getRemainingBalance: () => number | null
@@ -13,6 +14,7 @@ interface BalanceInfoProps {
 export function BalanceInfo({
   minoristaBalance,
   minoristaBalanceInFavor,
+  creditLimit,
   amountInput,
   getEarnedProfit,
   getRemainingBalance,
@@ -21,18 +23,32 @@ export function BalanceInfo({
   const [isBalanceOpen, setIsBalanceOpen] = useState(false)
   const [isBreakdownOpen, setIsBreakdownOpen] = useState(false)
 
-  // Calculate how much will be consumed from each balance type
+  // Net Liquidity Normalization
+  const rawAvailable = minoristaBalance ?? 0
+  const rawSurplus = minoristaBalanceInFavor ?? 0
+  const totalLiquidity = rawAvailable + rawSurplus
+  const limit = creditLimit || rawAvailable + rawSurplus // Fallback: Assume total is limit if unknown, effectively showing 0 debt/surplus split based on input
+
+  // NOTE: If we don't have creditLimit, we CANNOT determine the split correctly.
+  // However, usually input `minoristaBalance` is `availableCredit` (capped).
+  // If `creditLimit` is undefined, we use old behavior (raw inputs).
+  const useNormalization = creditLimit !== undefined
+
+  const displayAvailable = useNormalization ? Math.min(totalLiquidity, limit) : rawAvailable
+  const displaySurplus = useNormalization ? Math.max(0, totalLiquidity - limit) : rawSurplus
+
+  // Calculate Consumption
   const calculateConsumption = () => {
     const amount = parseFloat(amountInput) || 0
     if (amount === 0) return { fromBalanceInFavor: 0, fromCredit: 0 }
 
-    const balanceInFavor = minoristaBalanceInFavor ?? 0
-    const availableCredit = minoristaBalance ?? 0
+    // Logic: Pay with Surplus first (Normalized Surplus)
+    const availableSurplus = displaySurplus
+    const availableCred = displayAvailable
 
-    // Saldo a favor se consume primero
-    const fromBalanceInFavor = Math.min(amount, balanceInFavor)
+    const fromBalanceInFavor = Math.min(amount, availableSurplus)
     const remaining = amount - fromBalanceInFavor
-    const fromCredit = Math.min(remaining, availableCredit)
+    const fromCredit = Math.min(remaining, availableCred)
 
     return { fromBalanceInFavor, fromCredit }
   }
@@ -66,7 +82,7 @@ export function BalanceInfo({
                     style: 'currency',
                     currency: 'COP',
                     minimumFractionDigits: 0,
-                  }).format(minoristaBalance ?? 0)}
+                  }).format(displayAvailable)}
                 </p>
               </div>
 
@@ -78,7 +94,7 @@ export function BalanceInfo({
                     style: 'currency',
                     currency: 'COP',
                     minimumFractionDigits: 0,
-                  }).format(minoristaBalanceInFavor ?? 0)}
+                  }).format(displaySurplus)}
                 </p>
               </div>
             </div>
@@ -176,17 +192,13 @@ export function BalanceInfo({
                 {/* Breakdown of remaining balances */}
                 {(() => {
                   const amount = parseFloat(amountInput) || 0
-                  const balanceInFavor = minoristaBalanceInFavor ?? 0
-                  const availableCredit = minoristaBalance ?? 0
                   const profit = getEarnedProfit() || 0
 
-                  // Net Liquidity Logic: Combine everything into "Total Purchasing Power"
-                  const totalAvailable = availableCredit + balanceInFavor
-                  const totalAfterPurchase = totalAvailable - amount
+                  // Projected Total Liquidity
+                  const totalAfter = totalLiquidity - amount + profit
 
                   // If insufficient, we stop (the parent handles validation, but here we just show negative or 0)
-                  if (totalAfterPurchase < 0) {
-                    // Should technically be prevented by validations, but as a fallback
+                  if (totalAfter < 0 && hasInsufficientBalance()) {
                     return (
                       <div className="p-2 bg-red-50 dark:bg-red-950 rounded border border-red-200 dark:border-red-800 text-center">
                         <p className="text-sm font-semibold text-red-600">Balance insuficiente</p>
@@ -194,63 +206,11 @@ export function BalanceInfo({
                     )
                   }
 
-                  // Now redistribute back into "Credit" vs "Surplus"
-                  // Assuming we don't know the exact Credit Limit here directly from props...
-                  // Wait, looking at props, we receive `minoristaBalance` (which usually is capped at Credit Limit if we used the right hook)
-                  // BUT `BalanceInfo` doesn't receive `creditLimit` prop.
-                  // We can infer Credit Limit as: (currentAvailable + currentUsed) ??? No, we don't know currentUsed.
-                  // Actually, `minoristaBalance` passed from parent IS `availableCredit`.
-                  // If we don't have `creditLimit`, we can't perfectly separate Surplus from Credit unless we assume `minoristaBalance` was ALREADY capped?
-                  //
-                  // Let's assume the standard behavior:
-                  // The system treats `availableCredit` as money inside the credit line.
-                  // `balanceInFavor` is money ON TOP of the credit line.
-                  // So the "Virtual Credit Limit" is basically `availableCredit` (if full) + `debt` (if any).
-                  //
-                  // Actually, simpler approach:
-                  // Use `balanceInFavor` first (Surplus).
-                  // Then use `availableCredit` (Credit Line).
-                  //
-                  // Profit restores `availableCredit` first (paying back debt? NO, `availableCredit` IS the empty space).
-                  // Profit adds to `balanceInFavor`? Or restores Credit?
-                  //
-                  // Let's stick to the user's simplified request: "Total Money".
-                  // However, to keep "Credit" and "Surplus" boxes accurate:
-                  // 1. Pay with Surplus first.
-                  // 2. Pay with Credit next.
-                  // 3. Profit adds to Surplus (Net Liquidity increase).
-                  //
-                  // WAIT! If I use Credit, I am borrowing. Profit should REDUCE the debt (increase available credit).
-                  //
-                  // Let's look at how it calculates consumption currently:
-                  // it consumes BalanceInFavor first.
-                  //
-                  // Logic for "After":
-                  // remainingBalanceInFavor = (BalanceInFavor - UsedBalanceInFavor) + Profit ???
-                  // NO. Profit acts as a repayment if there is debt?
-                  //
-                  // Let's assume Profit is CASH (Surplus).
-                  // So:
-                  // NewSurplus = (OldSurplus - UsedSurplus) + Profit.
-                  // NewCredit = (OldCredit - UsedCredit).
-                  //
-                  // This seems safer without knowing Credit Limit.
+                  // Normalize Projected State
+                  const afterDateLimit = limit
 
-                  const usedFromSurplus = Math.min(amount, balanceInFavor)
-                  const usedFromCredit = Math.min(amount - usedFromSurplus, availableCredit)
-
-                  // New State before Profit
-                  let newSurplus = balanceInFavor - usedFromSurplus
-                  let newCredit = availableCredit - usedFromCredit
-
-                  // Apply Profit
-                  // Does profit fill the credit hole? Usually yes, "Liquidez Neta".
-                  // If I have used generic credit, and I earn profit, my net position improves.
-                  // Ideally: newLiquidity = newSurplus + newCredit + profit.
-                  // But how to split?
-                  // Without Credit Limit, we will assume Profit goes to Surplus (Cash).
-
-                  newSurplus += profit
+                  const creditAvailableAfter = Math.min(Math.max(0, totalAfter), afterDateLimit)
+                  const surplusAfter = Math.max(0, totalAfter - afterDateLimit)
 
                   return (
                     <div className="grid grid-cols-2 gap-2">
@@ -261,7 +221,7 @@ export function BalanceInfo({
                             style: 'currency',
                             currency: 'COP',
                             minimumFractionDigits: 0,
-                          }).format(newCredit)}
+                          }).format(creditAvailableAfter)}
                         </p>
                       </div>
                       <div className="p-2 bg-white dark:bg-slate-900 rounded border border-emerald-200 dark:border-emerald-700">
@@ -271,7 +231,7 @@ export function BalanceInfo({
                             style: 'currency',
                             currency: 'COP',
                             minimumFractionDigits: 0,
-                          }).format(newSurplus)}
+                          }).format(surplusAfter)}
                         </p>
                       </div>
                     </div>
