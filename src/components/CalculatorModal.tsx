@@ -88,6 +88,21 @@ export function CalculatorModal({ open, onOpenChange }: CalculatorModalProps) {
 
     const [activeTab, setActiveTab] = useState<'bcv' | 'manual' | 'ves'>('bcv')
 
+
+    // Reset inputs when modal closes
+    useEffect(() => {
+        if (!open) {
+            setUsdBCV('')
+            setResultBCV(null)
+            setUsdManual('')
+            setPriceVES('')
+            setResultManual(null)
+            setVesAmount('')
+            setResultVES(null)
+            setActiveTab('bcv')
+        }
+    }, [open])
+
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
             <SheetContent className="w-full sm:max-w-md overflow-y-auto">
