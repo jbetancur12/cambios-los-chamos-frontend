@@ -42,19 +42,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
   const [currencyInput, setCurrencyInput] = useState<Currency>('COP')
 
 
-  // Save state on change
-  useEffect(() => {
-    const data = {
-      beneficiaryName,
-      beneficiaryId,
-      phone,
-      bankId,
-      accountNumber,
-      amountInput,
-      currencyInput,
-    }
-    localStorage.setItem('transfer_form_data', JSON.stringify(data))
-  }, [beneficiaryName, beneficiaryId, phone, bankId, accountNumber, amountInput, currencyInput])
+
 
   // Suggestions
   const [nameSuggestions, setNameSuggestions] = useState<BeneficiaryData[]>([])
