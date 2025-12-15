@@ -34,15 +34,19 @@ export function AuditPage() {
     const [email, setEmail] = useState('')
     const [loading, setLoading] = useState(false)
     const [result, setResult] = useState<AuditResult | AuditResult[] | null>(null)
+    const [date, setDate] = useState(new Date().toISOString().split('T')[0])
 
     const handleAudit = async () => {
         setLoading(true)
         setResult(null)
         try {
             let url = '/audit-transactions'
-            if (email.trim()) {
-                url += `?email=${encodeURIComponent(email)}`
-            }
+            const params = new URLSearchParams()
+            if (email.trim()) params.append('email', email)
+            if (date) params.append('date', date)
+
+            const queryString = params.toString()
+            if (queryString) url += `?${queryString}`
 
             const response = await api.get<AuditResult | AuditResult[]>(url)
             setResult(response)
@@ -202,6 +206,26 @@ export function AuditPage() {
                                 onChange={(e) => setEmail(e.target.value)}
                                 className="pl-10"
                             />
+                        </div>
+                        <div className="w-[180px]">
+                            <div className="flex gap-2">
+                                <Input
+                                    type="date"
+                                    value={date}
+                                    onChange={(e) => setDate(e.target.value)}
+                                    className={!date ? "text-muted-foreground" : ""}
+                                />
+                                {date && (
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => setDate('')}
+                                        title="Ver Todas (Histórico Completo)"
+                                    >
+                                        <XCircle className="h-4 w-4" />
+                                    </Button>
+                                )}
+                            </div>
                         </div>
                         <Button onClick={handleAudit} disabled={loading} size="lg">
                             {loading ? 'Calculando...' : 'Ejecutar Auditoría'}
