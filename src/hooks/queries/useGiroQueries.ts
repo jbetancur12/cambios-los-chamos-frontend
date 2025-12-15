@@ -28,6 +28,17 @@ export function useGirosList(params?: GirosListParams) {
       ).toString()
     : ''
 
+  // Determinar staleTime dinámico
+  const isVolatile =
+    params?.status &&
+    (params.status.includes('ASIGNADO') || params.status.includes('PROCESANDO') || params.status.includes('PENDIENTE'))
+
+  // Si es volátil (ASIGNADO/PROCESANDO), caché corto (2s) para ver cambios rápidos
+  // Si es histórico (COMPLETADO/ALL), mantenemos HIGH_PRIORITY (30s) para performance
+  const dedupConfig = isVolatile
+    ? { staleTime: 2000, gcTime: 1000 * 60, dedupeInterval: 500 }
+    : applyDedupConfig('HIGH_PRIORITY')
+
   return useQuery({
     queryKey: ['giros', params],
     queryFn: async () => {
@@ -37,7 +48,7 @@ export function useGirosList(params?: GirosListParams) {
       }>(`/giro/list${queryString ? `?${queryString}` : ''}`)
       return response // Return full response { giros, pagination }
     },
-    ...applyDedupConfig('HIGH_PRIORITY'), // 30s - giros cambian rápido
+    ...dedupConfig,
   })
 }
 
