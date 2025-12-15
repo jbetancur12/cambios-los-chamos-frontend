@@ -33,23 +33,14 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
   const [creditLimit, setCreditLimit] = useState<number | null>(null)
 
   // Form fields with persistence
-  const [savedData] = useState(() => {
-    if (typeof window === 'undefined') return {}
-    try {
-      const saved = localStorage.getItem('transfer_form_data')
-      return saved ? JSON.parse(saved) : {}
-    } catch {
-      return {}
-    }
-  })
+  const [beneficiaryName, setBeneficiaryName] = useState('')
+  const [beneficiaryId, setBeneficiaryId] = useState('')
+  const [phone, setPhone] = useState('')
+  const [bankId, setBankId] = useState('')
+  const [accountNumber, setAccountNumber] = useState('')
+  const [amountInput, setAmountInput] = useState('')
+  const [currencyInput, setCurrencyInput] = useState<Currency>('COP')
 
-  const [beneficiaryName, setBeneficiaryName] = useState(savedData.beneficiaryName || '')
-  const [beneficiaryId, setBeneficiaryId] = useState(savedData.beneficiaryId || '')
-  const [phone, setPhone] = useState(savedData.phone || '')
-  const [bankId, setBankId] = useState(savedData.bankId || '')
-  const [accountNumber, setAccountNumber] = useState(savedData.accountNumber || '')
-  const [amountInput, setAmountInput] = useState(savedData.amountInput || '')
-  const [currencyInput, setCurrencyInput] = useState<Currency>((savedData.currencyInput as Currency) || 'COP')
 
   // Save state on change
   useEffect(() => {
@@ -139,7 +130,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
     setCurrencyInput('COP')
     setUseCustomRate(false)
     setNameSuggestions([])
-    localStorage.removeItem('transfer_form_data')
+
   }
 
   const handleNameChange = (value: string) => {
@@ -232,11 +223,11 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
   const effectiveRate =
     useCustomRate && (isSuperAdmin || isAdmin)
       ? {
-          buyRate: parseFloat(customBuyRate) || currentRate?.buyRate || 0,
-          sellRate: parseFloat(customSellRate) || currentRate?.sellRate || 0,
-          bcv: parseFloat(customBcv) || currentRate?.bcv || 0,
-          usd: parseFloat(customUsd) || currentRate?.usd || 0,
-        }
+        buyRate: parseFloat(customBuyRate) || currentRate?.buyRate || 0,
+        sellRate: parseFloat(customSellRate) || currentRate?.sellRate || 0,
+        bcv: parseFloat(customBcv) || currentRate?.bcv || 0,
+        usd: parseFloat(customUsd) || currentRate?.usd || 0,
+      }
       : currentRate
 
   const calculateAmountBs = () => {
