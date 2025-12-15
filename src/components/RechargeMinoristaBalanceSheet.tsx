@@ -253,30 +253,33 @@ export function RechargeMinoristaBalanceSheet({
           <div className="flex gap-2 border-b">
             <button
               onClick={() => setActiveTab('view')}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'view'
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === 'view'
                   ? 'border-blue-500 text-blue-600'
                   : 'border-transparent text-muted-foreground hover:text-foreground'
-                }`}
+              }`}
             >
               <Eye className="h-4 w-4 inline mr-2" />
               Ver
             </button>
             <button
               onClick={() => setActiveTab('assign')}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'assign'
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === 'assign'
                   ? 'border-blue-500 text-blue-600'
                   : 'border-transparent text-muted-foreground hover:text-foreground'
-                }`}
+              }`}
             >
               <DollarSign className="h-4 w-4 inline mr-2" />
               Asignar Cupo
             </button>
             <button
               onClick={() => setActiveTab('pay')}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'pay'
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === 'pay'
                   ? 'border-blue-500 text-blue-600'
                   : 'border-transparent text-muted-foreground hover:text-foreground'
-                }`}
+              }`}
             >
               <DollarSign className="h-4 w-4 inline mr-2" />
               Pagar Deuda
@@ -314,10 +317,13 @@ export function RechargeMinoristaBalanceSheet({
                   </div>
                 )}
                 {debtAmount > 0 && (
-                  <div className={`p-4 rounded-lg border space-y-2 ${surplusAmount > 0
-                    ? 'bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800'
-                    : 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800'
-                    }`}>
+                  <div
+                    className={`p-4 rounded-lg border space-y-2 ${
+                      surplusAmount > 0
+                        ? 'bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800'
+                        : 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800'
+                    }`}
+                  >
                     <p className="text-xs text-muted-foreground mb-1">Deuda Actual</p>
                     <p className="text-lg font-semibold text-red-600">{formatCurrency(debtAmount)}</p>
                   </div>
@@ -515,14 +521,16 @@ export function RechargeMinoristaBalanceSheet({
           {activeTab === 'assign' && (
             <div className="space-y-4">
               <div
-                className={`p-4 rounded-lg border space-y-2 ${surplusAmount > 0
-                  ? 'bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800'
-                  : 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800'
-                  }`}
+                className={`p-4 rounded-lg border space-y-2 ${
+                  surplusAmount > 0
+                    ? 'bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800'
+                    : 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800'
+                }`}
               >
                 <p
-                  className={`text-sm font-medium ${surplusAmount > 0 ? 'text-blue-900 dark:text-blue-100' : 'text-red-900 dark:text-red-100'
-                    }`}
+                  className={`text-sm font-medium ${
+                    surplusAmount > 0 ? 'text-blue-900 dark:text-blue-100' : 'text-red-900 dark:text-red-100'
+                  }`}
                 >
                   {surplusAmount > 0 ? 'Pagar Saldo a Favor' : 'Pagar Deuda y Liberar Cupo'}
                 </p>
@@ -575,14 +583,16 @@ export function RechargeMinoristaBalanceSheet({
           {activeTab === 'pay' && (
             <div className="space-y-4">
               <div
-                className={`p-4 rounded-lg border space-y-2 ${surplusAmount > 0
-                  ? 'bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800'
-                  : 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800'
-                  }`}
+                className={`p-4 rounded-lg border space-y-2 ${
+                  surplusAmount > 0
+                    ? 'bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800'
+                    : 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800'
+                }`}
               >
                 <p
-                  className={`text-sm font-medium ${surplusAmount > 0 ? 'text-blue-900 dark:text-blue-100' : 'text-red-900 dark:text-red-100'
-                    }`}
+                  className={`text-sm font-medium ${
+                    surplusAmount > 0 ? 'text-blue-900 dark:text-blue-100' : 'text-red-900 dark:text-red-100'
+                  }`}
                 >
                   {surplusAmount > 0 ? 'Pagar Saldo a Favor' : 'Pagar Deuda y Liberar Cupo'}
                 </p>
@@ -617,7 +627,9 @@ export function RechargeMinoristaBalanceSheet({
                     />
                     <Button
                       type="button"
-                      onClick={() => setPayAmount(surplusAmount > 0 ? (-surplusAmount).toString() : debtAmount.toString())}
+                      onClick={() =>
+                        setPayAmount(surplusAmount > 0 ? (-surplusAmount).toString() : debtAmount.toString())
+                      }
                       variant="outline"
                       className="flex-shrink-0"
                       disabled={loading || (debtAmount <= 0 && surplusAmount <= 0)}
