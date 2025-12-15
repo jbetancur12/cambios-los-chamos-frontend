@@ -239,6 +239,7 @@ export function RechargeMinoristaBalanceSheet({
   // El saldo a favor también es dinero disponible del minorista
   const totalAvailable = localMinorista.availableCredit + (localMinorista.creditBalance || 0)
   const debtAmount = Math.max(0, localMinorista.creditLimit - totalAvailable)
+  const surplusAmount = Math.max(0, totalAvailable - localMinorista.creditLimit)
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -252,33 +253,30 @@ export function RechargeMinoristaBalanceSheet({
           <div className="flex gap-2 border-b">
             <button
               onClick={() => setActiveTab('view')}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === 'view'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'view'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+                }`}
             >
               <Eye className="h-4 w-4 inline mr-2" />
               Ver
             </button>
             <button
               onClick={() => setActiveTab('assign')}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === 'assign'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'assign'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+                }`}
             >
               <DollarSign className="h-4 w-4 inline mr-2" />
               Asignar Cupo
             </button>
             <button
               onClick={() => setActiveTab('pay')}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === 'pay'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'pay'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+                }`}
             >
               <DollarSign className="h-4 w-4 inline mr-2" />
               Pagar Deuda
@@ -316,7 +314,10 @@ export function RechargeMinoristaBalanceSheet({
                   </div>
                 )}
                 {debtAmount > 0 && (
-                  <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800">
+                  <div className={`p-4 rounded-lg border space-y-2 ${surplusAmount > 0
+                    ? 'bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800'
+                    : 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800'
+                    }`}>
                     <p className="text-xs text-muted-foreground mb-1">Deuda Actual</p>
                     <p className="text-lg font-semibold text-red-600">{formatCurrency(debtAmount)}</p>
                   </div>
@@ -513,12 +514,22 @@ export function RechargeMinoristaBalanceSheet({
           {/* Asignar Cupo */}
           {activeTab === 'assign' && (
             <div className="space-y-4">
-              <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 space-y-2">
-                <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                  Asignar o Modificar Cupo de Crédito
+              <div
+                className={`p-4 rounded-lg border space-y-2 ${surplusAmount > 0
+                  ? 'bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800'
+                  : 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800'
+                  }`}
+              >
+                <p
+                  className={`text-sm font-medium ${surplusAmount > 0 ? 'text-blue-900 dark:text-blue-100' : 'text-red-900 dark:text-red-100'
+                    }`}
+                >
+                  {surplusAmount > 0 ? 'Pagar Saldo a Favor' : 'Pagar Deuda y Liberar Cupo'}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  El cupo se puede modificar en cualquier momento después de su asignación inicial.
+                  {surplusAmount > 0
+                    ? 'Paga el saldo a favor al minorista (ingresa valor negativo) para reducir el excedente.'
+                    : 'Paga la deuda acumulada para liberar cupo disponible.'}
                 </p>
               </div>
 
@@ -564,15 +575,24 @@ export function RechargeMinoristaBalanceSheet({
           {activeTab === 'pay' && (
             <div className="space-y-4">
               <div className="p-4 rounded-lg bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 space-y-2">
-                <p className="text-sm font-medium text-red-900 dark:text-red-100">Pagar Deuda y Liberar Cupo</p>
+                <p
+                  className={`text-sm font-medium ${surplusAmount > 0 ? 'text-blue-900 dark:text-blue-100' : 'text-red-900 dark:text-red-100'
+                    }`}
+                >
+                  {surplusAmount > 0 ? 'Pagar Saldo a Favor' : 'Pagar Deuda y Liberar Cupo'}
+                </p>
                 <p className="text-xs text-muted-foreground">
-                  Paga la deuda acumulada para liberar cupo disponible. Las ganancias acumuladas se reiniciarán.
+                  {surplusAmount > 0
+                    ? 'Paga el saldo a favor al minorista (ingresa valor negativo) para reducir el excedente.'
+                    : 'Paga la deuda acumulada para liberar cupo disponible.'}
                 </p>
               </div>
 
               <form onSubmit={handlePayDebt} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="pay-amount">Monto a Pagar (COP)</Label>
+                  <Label htmlFor="pay-amount">
+                    {surplusAmount > 0 ? 'Monto a Pagar (Negativo para descontar)' : 'Monto a Pagar (COP)'}
+                  </Label>
                   <div className="flex gap-2">
                     <NumericFormat
                       id="pay-amount"
@@ -592,44 +612,35 @@ export function RechargeMinoristaBalanceSheet({
                     />
                     <Button
                       type="button"
-                      onClick={() => setPayAmount(debtAmount.toString())}
+                      onClick={() => setPayAmount(surplusAmount > 0 ? (-surplusAmount).toString() : debtAmount.toString())}
                       variant="outline"
                       className="flex-shrink-0"
-                      disabled={loading || debtAmount <= 0}
+                      disabled={loading || (debtAmount <= 0 && surplusAmount <= 0)}
                     >
-                      Pagar Todo
+                      {surplusAmount > 0 ? 'Pagar Saldo' : 'Pagar Todo'}
                     </Button>
                   </div>
-                  {(localMinorista.creditBalance || 0) > 0 ? (
+                  {surplusAmount > 0 ? (
                     <p className="text-sm font-semibold text-blue-600">
-                      Saldo a favor actual: {formatCurrency(localMinorista.creditBalance)}
+                      Saldo a favor actual: {formatCurrency(surplusAmount)}
                     </p>
                   ) : (
                     <p className="text-sm font-semibold text-red-600">Deuda actual: {formatCurrency(debtAmount)}</p>
                   )}
                 </div>
 
-                {payAmount && !isNaN(parseFloat(payAmount)) && parseFloat(payAmount) > 0 && (
+                {payAmount && !isNaN(parseFloat(payAmount)) && parseFloat(payAmount) !== 0 && (
                   <div className="space-y-3">
                     <div className="rounded-lg bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 p-4">
                       <p className="text-sm text-green-900 dark:text-green-100 font-medium mb-2">
-                        Deuda después del pago:
+                        {surplusAmount > 0 ? 'Saldo a favor después del pago:' : 'Deuda después del pago:'}
                       </p>
                       <p className="text-2xl font-bold text-green-600">
-                        {formatCurrency(Math.max(0, debtAmount - parseFloat(payAmount)))}
+                        {surplusAmount > 0
+                          ? formatCurrency(Math.max(0, surplusAmount + parseFloat(payAmount)))
+                          : formatCurrency(Math.max(0, debtAmount - parseFloat(payAmount)))}
                       </p>
                     </div>
-                    {parseFloat(payAmount) > debtAmount && !isNaN(debtAmount) && (
-                      <div className="rounded-lg bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 p-4">
-                        <p className="text-sm text-blue-900 dark:text-blue-100 font-medium mb-2">
-                          Saldo a Favor Después:
-                        </p>
-                        <p className="text-2xl font-bold text-blue-600">
-                          {formatCurrency(parseFloat(payAmount) - debtAmount + localMinorista.creditBalance)}
-                        </p>
-                        <p className="text-xs text-blue-700 dark:text-blue-300 mt-2">Exceso de pago + saldo anterior</p>
-                      </div>
-                    )}
                   </div>
                 )}
 
