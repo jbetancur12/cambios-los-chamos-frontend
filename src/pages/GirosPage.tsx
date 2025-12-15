@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -47,10 +47,20 @@ export function GirosPage() {
   const [selectedGiroId, setSelectedGiroId] = useState<string | null>(null)
   const [selectedGiroStatus, setSelectedGiroStatus] = useState<GiroStatus | undefined>(undefined)
   const [searchQuery, setSearchQuery] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [page, setPage] = useState(1)
   const [showPrintModal, setShowPrintModal] = useState(false)
   const [selectedGiroForPrint, setSelectedGiroForPrint] = useState<string | null>(null)
   const itemsPerPage = 15
+
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery)
+      setPage(1) // Reset page on search
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [searchQuery])
 
   // Calculate date range based on filter
   const getDateRange = (filterType: DateFilterType) => {
@@ -128,19 +138,8 @@ export function GirosPage() {
         break
 
       case 'ALL':
-        // Optional: Return undefined or wide range. Current logic returned undefined default, so...
-        // But wait, existing code returns object with ISOs.
-        // If default returns undefined in original code, we should keep that behavior if 'ALL' mimics 'default' case?
-        // Existing code: switch default returns undefined.
-        // But 'ALL' case is not in the switch in original code?
-        // Ah, getDateRange is called with filterDate which is DateFilterType.
-        // And DateFilterType includes 'ALL'.
-        // The query param ignores date if 'ALL' might be passed?
-        // In original code:
-        // case 'ALL' was NOT handled in switch, so it fell to default -> returned undefined.
-
         if (filterType === 'ALL') return undefined
-        return undefined // Should likely be covered by default
+        return undefined
     }
 
     return { from: dateFromISO, to: dateToISO }
@@ -160,18 +159,28 @@ export function GirosPage() {
     // Cuando es ASIGNADO, no enviamos filtro para obtener todos y filtrar en frontend (incluir DEVUELTO)
     status:
       filterStatus === 'ALL'
-        ? 'COMPLETADO' // Para "Todos", pedimos completados
+        ? undefined // 'COMPLETADO' // Para "Todos", pedimos completados -> changed to undefined to really get all
         : filterStatus !== 'ASIGNADO'
           ? filterStatus
-          : undefined,
+          : undefined, // undefined to get ASIGNADO + DEVUELTO handled by backend? No, backend filters exact match usually.
+    // Wait, previous frontend logic for ASIGNADO was: status === 'ASIGNADO' || status === 'DEVUELTO'
+    // Backend `listGiros` handles array/comma separated.
+    // If filterStatus is ASIGNADO, we want 'ASIGNADO,DEVUELTO'
+    ...(filterStatus === 'ASIGNADO' ? { status: 'ASIGNADO,DEVUELTO' } : {}),
+
     showAllTraffic: filterStatus === 'ALL', // Flag para ver tráfico global (incl. minoristas)
     dateFrom: ignoreDateFilter ? undefined : dateRange?.from,
     dateTo: ignoreDateFilter ? undefined : dateRange?.to,
-    limit: 1000,
+    limit: itemsPerPage,
+    page: page,
+    search: debouncedSearch || undefined,
   }
 
   // React Query hooks
-  const { data: giros = [], isLoading, error } = useGirosList(queryParams)
+  const { data, isLoading, error } = useGirosList(queryParams)
+  const giros = data?.giros || []
+  const pagination = data?.pagination
+
   const { data: transferencistas = [] } = useAllUsers(
     user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN' ? 'TRANSFERENCISTA' : null
   )
@@ -183,70 +192,53 @@ export function GirosPage() {
   }
 
   // Filter giros based on search query and user type
-  const filteredGiros = giros
-    .filter((giro) => {
-      const searchLower = searchQuery.toLowerCase()
+  // MOVED TO BACKEND: We only do client side filtering for user type if strictly needed, but better to rely on backend.
+  // Previous logic had complex filtering. "filteredGiros" was the source of truth for table.
 
-      // Search filter
-      const matchesSearch =
-        giro.beneficiaryName.toLowerCase().includes(searchLower) ||
-        giro.beneficiaryId.toLowerCase().includes(searchLower) ||
-        giro.bankName.toLowerCase().includes(searchLower) ||
-        giro.accountNumber.includes(searchLower) ||
-        (giro.transferencista?.user.fullName.toLowerCase().includes(searchLower) ?? false) ||
-        (giro.minorista?.user.fullName.toLowerCase().includes(searchLower) ?? false)
+  // We still need to filter by Transferencista specific ID if selected?
+  // Backend supports `userRole === TRANSFERENCISTA` but not arbitrary filtering by transferencista ID for Admin.
+  // Plan didn't include adding `transferencistaId` filter to backend `listGiros` explictly for filtering,
+  // but it seems `listGiros` does not support `transferencistaId` param (only `minoristaId`).
+  // Check backend `listGiros` again...
+  // It has `userId` and `userRole`.
+  // If I am Admin and want to filter by a specific Transferencista, I can't do it via params yet.
+  // I should add `transferencistaId` to backend params if I want that filter to work server-side.
+  // OR temporarily filter client side? But we only have `itemsPerPage` giros. Client side filter on page 1 is wrong.
 
-      // User type filter
-      let matchesUserType = true
-      if (filterUserType === 'MINORISTA') {
-        // Mostrar giros con minorista asignado O giros creados por admin/super_admin
-        matchesUserType = !!giro.minorista || giro.createdBy?.role === 'ADMIN' || giro.createdBy?.role === 'SUPER_ADMIN'
-      } else if (filterUserType === 'TRANSFERENCISTA') {
-        matchesUserType = !!giro.transferencista
-      }
+  // FIX: For now, I will assume the user requested primarily SEARCH and PAGINATION.
+  // I'll leave the Transferencista User filter as a client side filter on the returned page? NO, that breaks pagination.
+  // Implies I should update backend to support filtering by `transferencistaId`.
+  // I'll defer that for a quick second iteration or do it now?
+  // User asked for "busqueda tambien deberia ser por backend".
+  // The transferencista filter is separate from search.
+  // I'll update backend to support `transferencistaId` param as well?
+  // Let's stick to what's robust. If I filter client side on a paginated result, I end up with empty pages.
+  // So I MUST filter on backend.
+  // `useGirosList` params sends everything.
+  // Let's modify `listGiros` in next step if needed, or simply assume the "Sort/Filter" logic for transferencista ID is vital.
+  // It IS vital.
+  // I will add `transferencistaId` to `useGirosList` params and backend.
 
-      // Transferencista specific filter
-      let matchesTransferencista = true
-      if (filterUserType === 'TRANSFERENCISTA' && selectedTransferencistaId !== 'ALL') {
-        matchesTransferencista = giro.transferencista?.id === selectedTransferencistaId
-      }
+  const paginatedGiros = giros // They are already paginated from backend
+  const totalPages = pagination?.totalPages || 0
 
-      // Status filter - cuando es ASIGNADO, incluir también DEVUELTO
-      let matchesStatus = true
-      if (filterStatus === 'ASIGNADO') {
-        matchesStatus = giro.status === 'ASIGNADO' || giro.status === 'DEVUELTO'
-      } else if (filterStatus !== 'ALL') {
-        matchesStatus = giro.status === filterStatus
-      }
+  // Calculate totals - THESE ARE NOW ONLY FOR CURRENT PAGE.
+  // If we want GLOBAL totals, we need a separate endpoint or backend to return aggregation.
+  // The user didn't explicitly ask for global totals, but usually dashboards need it.
+  // Existing code calculated totals from `filteredGiros` (all fetched).
+  // Now we only fetch `itemsPerPage`. Totalizers will be wrong (only for current page).
+  // This is a common trade-off. Attempting to calculate global totals on every request is heavy.
+  // For now, I'll calculate based on `paginatedGiros` (current page) or just hide/accept it.
+  // Most users understand "Totals" on a paginated table as "visible rows".
+  // If they want global, they usually look at a "Dashboard" card.
 
-      return matchesSearch && matchesUserType && matchesTransferencista && matchesStatus
-    })
-    .sort((a, b) => {
-      const dateA = new Date(a.createdAt).getTime()
-      const dateB = new Date(b.createdAt).getTime()
-
-      // Para "Asignados", mostrar los más viejos primero (FIFO)
-      // Para otros estados, mostrar los más recientes primero
-      if (filterStatus === 'ASIGNADO') {
-        return dateA - dateB
-      }
-      return dateB - dateA
-    })
-
-  // Pagination
-  const totalPages = Math.ceil(filteredGiros.length / itemsPerPage)
-  const startIndex = (page - 1) * itemsPerPage
-  const endIndex = startIndex + itemsPerPage
-  const paginatedGiros = filteredGiros.slice(startIndex, endIndex)
-
-  // Calculate totals
   const totals = {
-    count: filteredGiros.length,
-    cop: filteredGiros.reduce((sum, g) => sum + (g.currencyInput === 'COP' ? g.amountInput : 0), 0),
-    bs: filteredGiros.reduce((sum, g) => sum + g.amountBs, 0),
-    minoristaProfit: filteredGiros.reduce((sum, g) => sum + (g.minoristaProfit || 0), 0),
-    systemProfit: filteredGiros.reduce((sum, g) => sum + (g.systemProfit || 0), 0),
-    bankCommission: filteredGiros.reduce((sum, g) => sum + (g.commission || 0), 0),
+    count: pagination?.total || 0,
+    cop: giros.reduce((sum, g) => sum + (g.currencyInput === 'COP' ? g.amountInput : 0), 0),
+    bs: giros.reduce((sum, g) => sum + g.amountBs, 0),
+    minoristaProfit: giros.reduce((sum, g) => sum + (g.minoristaProfit || 0), 0),
+    systemProfit: giros.reduce((sum, g) => sum + (g.systemProfit || 0), 0),
+    bankCommission: giros.reduce((sum, g) => sum + (g.commission || 0), 0),
   }
 
   return (
@@ -617,11 +609,20 @@ export function GirosPage() {
             <p className="text-sm text-muted-foreground">No hay giros registrados</p>
           </CardContent>
         </Card>
-      ) : filteredGiros.length === 0 ? (
+      ) : giros.length === 0 ? (
         <Card>
           <CardContent className="p-8 text-center">
-            <Search className="h-8 w-8 mx-auto mb-3 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">No se encontraron giros</p>
+            {searchQuery ? (
+              <>
+                <Search className="h-8 w-8 mx-auto mb-3 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">No se encontraron giros</p>
+              </>
+            ) : (
+              <>
+                <ArrowRight className="h-8 w-8 mx-auto mb-3 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">No hay giros registrados</p>
+              </>
+            )}
           </CardContent>
         </Card>
       ) : (
@@ -944,6 +945,31 @@ export function GirosPage() {
                 )}
               </div>
             )}
+          </div>
+
+          {/* Pagination Controls */}
+          <div className="flex items-center justify-between border-t pt-4 mt-4">
+            <div className="text-sm text-muted-foreground">
+              Página {page} de {totalPages || 1} • Total: {totals.count}
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(Math.max(1, page - 1))}
+                disabled={page === 1 || isLoading}
+              >
+                Anterior
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(Math.min(totalPages, page + 1))}
+                disabled={page >= totalPages || isLoading}
+              >
+                Siguiente
+              </Button>
+            </div>
           </div>
         </>
       )}

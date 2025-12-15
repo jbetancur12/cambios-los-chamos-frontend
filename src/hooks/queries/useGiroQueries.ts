@@ -10,6 +10,7 @@ interface GirosListParams {
   page?: number
   limit?: number
   showAllTraffic?: boolean
+  search?: string
 }
 
 export function useGirosList(params?: GirosListParams) {
@@ -34,7 +35,7 @@ export function useGirosList(params?: GirosListParams) {
         giros: Giro[]
         pagination: { total: number; page: number; limit: number; totalPages: number }
       }>(`/giro/list${queryString ? `?${queryString}` : ''}`)
-      return response.giros
+      return response // Return full response { giros, pagination }
     },
     ...applyDedupConfig('HIGH_PRIORITY'), // 30s - giros cambian rápido
   })

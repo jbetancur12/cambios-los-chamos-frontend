@@ -81,14 +81,16 @@ function App() {
               <Routes>
                 {/* Public Routes */}
                 <Route path="/login" element={<LoginPage />} />
-                <Route path="/auditoria-oculta" element={
-                  <ProtectedRoute requiredRole={['SUPER_ADMIN', 'ADMIN']}>
-                    <DashboardLayout>
-                      <AuditPage />
-                    </DashboardLayout>
-                  </ProtectedRoute>
-                } />
-
+                <Route
+                  path="/auditoria-oculta"
+                  element={
+                    <ProtectedRoute requiredRole={['SUPER_ADMIN', 'ADMIN']}>
+                      <DashboardLayout>
+                        <AuditPage />
+                      </DashboardLayout>
+                    </ProtectedRoute>
+                  }
+                />
 
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="/verify-email" element={<VerifyEmailPage />} />
