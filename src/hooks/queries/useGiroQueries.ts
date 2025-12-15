@@ -16,16 +16,16 @@ interface GirosListParams {
 export function useGirosList(params?: GirosListParams) {
   const queryString = params
     ? new URLSearchParams(
-        Object.entries(params).reduce(
-          (acc, [key, value]) => {
-            if (value !== undefined && value !== null && value !== '') {
-              acc[key] = String(value)
-            }
-            return acc
-          },
-          {} as Record<string, string>
-        )
-      ).toString()
+      Object.entries(params).reduce(
+        (acc, [key, value]) => {
+          if (value !== undefined && value !== null && value !== '') {
+            acc[key] = String(value)
+          }
+          return acc
+        },
+        {} as Record<string, string>
+      )
+    ).toString()
     : ''
 
   // Determinar staleTime dinámico
@@ -45,6 +45,14 @@ export function useGirosList(params?: GirosListParams) {
       const response = await api.get<{
         giros: Giro[]
         pagination: { total: number; page: number; limit: number; totalPages: number }
+        totals: {
+          count: number
+          cop: number
+          bs: number
+          minoristaProfit: number
+          systemProfit: number
+          bankCommission: number
+        }
       }>(`/giro/list${queryString ? `?${queryString}` : ''}`)
       return response // Return full response { giros, pagination }
     },
