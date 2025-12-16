@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -56,6 +56,8 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   // New features state
   const [showCedulaSuggestions, setShowCedulaSuggestions] = useState(false)
 
+  const formRef = useRef<HTMLFormElement>(null)
+
   useEffect(() => {
     loadBanks()
     loadExchangeRate()
@@ -63,6 +65,20 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
       fetchMinoristaBalance()
     }
   }, [isMinorista])
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (formRef.current && !formRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false)
+        setShowCedulaSuggestions(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
 
   const loadBanks = async () => {
     try {
@@ -246,19 +262,21 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   }
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPhone(e.target.value)
-    setShowSuggestions(true)
+    const value = e.target.value
+    setPhone(value)
+    setShowSuggestions(!!value)
     setShowCedulaSuggestions(false)
   }
 
   const handleCedulaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCedula(e.target.value)
-    setShowCedulaSuggestions(true)
+    const value = e.target.value
+    setCedula(value)
+    setShowCedulaSuggestions(!!value)
     setShowSuggestions(false)
   }
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-2" autoComplete="off">
+    <form ref={formRef} onSubmit={handleSubmit} className="p-4 md:p-6 space-y-2" autoComplete="off">
       {/* Información del Beneficiario */}
       <div className="bg-blue-50 p-3 rounded mb-2 md:mb-4 border border-blue-200">
         {/* <p className="text-sm font-semibold text-blue-900 mb-2 md:mb-3">Datos del Beneficiario</p> */}
@@ -288,9 +306,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
                     className="w-full text-left px-3 py-2 hover:bg-muted/50 transition-colors text-sm border-b last:border-b-0"
                   >
                     <div className="font-medium">{suggestion.id}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {suggestion.name} • {suggestion.phone}
-                    </div>
+                    <div className="text-xs text-muted-foreground">{suggestion.phone}</div>
                   </button>
                 ))}
               </div>
