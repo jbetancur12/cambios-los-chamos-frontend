@@ -11,6 +11,7 @@ import { AlertCircle, Eye, DollarSign, Calendar, ChevronDown } from 'lucide-reac
 import { MinoristaSimpleTransactionTable } from './MinoristaSimpleTransactionTable'
 import { type DateRange } from './DateRangeFilter'
 import { NumericFormat } from 'react-number-format'
+import { OpeningBalanceCard } from '@/components/OpeningBalanceCard'
 
 interface RechargeMinoristaBalanceSheetProps {
   open: boolean
@@ -34,6 +35,8 @@ export function RechargeMinoristaBalanceSheet({
   const [localMinorista, setLocalMinorista] = useState<Minorista | null>(minorista)
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
+  const [startBalance, setStartBalance] = useState<number | undefined>(undefined)
+  const [startBalanceInFavor, setStartBalanceInFavor] = useState<number | undefined>(undefined)
 
   // Standardized Date Filter State
   const dateInputRef = useRef<HTMLInputElement>(null)
@@ -133,9 +136,13 @@ export function RechargeMinoristaBalanceSheet({
       const response = await api.get<{
         transactions: MinoristaTransaction[]
         pagination: { total: number; page: number; limit: number; totalPages: number }
+        startBalance?: number
+        startBalanceInFavor?: number
       }>(url)
       setTransactions(response.transactions || [])
       setTotalPages(response.pagination.totalPages)
+      setStartBalance(response.startBalance)
+      setStartBalanceInFavor(response.startBalanceInFavor)
     } catch (error) {
       console.error('Error loading transactions:', error)
     } finally {
@@ -486,6 +493,16 @@ export function RechargeMinoristaBalanceSheet({
                   </div>
                 ) : (
                   <>
+                    {startBalance !== undefined && localMinorista && (
+                      <OpeningBalanceCard
+                        startBalance={startBalance}
+                        startBalanceInFavor={startBalanceInFavor}
+                        creditLimit={localMinorista.creditLimit}
+                        startDate={dateRange.startDate || today.toISOString().split('T')[0]}
+                        endDate={dateRange.endDate || today.toISOString().split('T')[0]}
+                        formatCurrency={formatCurrency}
+                      />
+                    )}
                     <MinoristaSimpleTransactionTable
                       transactions={transactions}
                       typeFilter={typeFilter}

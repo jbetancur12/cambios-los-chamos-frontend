@@ -14,6 +14,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { MinoristaSimpleTransactionTable } from '@/components/MinoristaSimpleTransactionTable'
 import { getTodayString, getStartOfDayISO, getEndOfDayISO } from '@/lib/dateUtils'
 import { useMinoristaRealtime } from '@/hooks/useMinoristaRealtime'
+import { OpeningBalanceCard } from '@/components/OpeningBalanceCard'
 
 export function MinoristaTransactionsPage() {
   const navigate = useNavigate()
@@ -57,6 +58,8 @@ export function MinoristaTransactionsPage() {
   const transactions = transactionsResponse?.transactions || []
   const totalPages = transactionsResponse?.pagination.totalPages || 1
   const isLoading = transactionsQuery.isLoading
+
+  console.log('Transactions Response:', transactionsResponse)
 
   // Handle Update Logic
   const handleSingleDateChange = (date: string) => {
@@ -312,6 +315,16 @@ export function MinoristaTransactionsPage() {
             </div>
           </CardHeader>
           <CardContent>
+            {transactionsResponse?.startBalance !== undefined && (
+              <OpeningBalanceCard
+                startBalance={transactionsResponse.startBalance}
+                startBalanceInFavor={transactionsResponse.startBalanceInFavor}
+                creditLimit={minorista.creditLimit}
+                startDate={dateRange.startDate || todayStr}
+                endDate={dateRange.endDate || todayStr}
+                formatCurrency={formatCurrency}
+              />
+            )}
             {isLoading ? (
               <div className="text-center py-8 text-muted-foreground">Cargando transacciones...</div>
             ) : (
