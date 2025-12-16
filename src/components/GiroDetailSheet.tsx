@@ -202,16 +202,23 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
       return
     }
 
+    const updatePayload: any = {
+      beneficiaryName: editableBeneficiaryName,
+      beneficiaryId: editableBeneficiaryId,
+      phone: editablePhone,
+      bankId: editableBankId,
+      accountNumber: editableAccountNumber,
+    }
+
+    // If fixing a returned giro, also set status to ASIGNADO to resend immediately
+    if (giro.status === 'DEVUELTO') {
+      updatePayload.status = 'ASIGNADO'
+    }
+
     updateGiroMutation.mutate(
       {
         giroId: giro.id,
-        data: {
-          beneficiaryName: editableBeneficiaryName,
-          beneficiaryId: editableBeneficiaryId,
-          phone: editablePhone,
-          bankId: editableBankId,
-          accountNumber: editableAccountNumber,
-        },
+        data: updatePayload,
       },
       {
         onSuccess: () => {
@@ -673,7 +680,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
                   </div>
                   <div className="flex gap-2">
                     <Button size="sm" onClick={handleSaveEdit} disabled={isProcessing}>
-                      Guardar
+                      {giro.status === 'DEVUELTO' ? 'Reenviar' : 'Guardar'}
                     </Button>
                     <Button size="sm" variant="outline" onClick={() => setIsEditing(false)}>
                       Cancelar
@@ -868,13 +875,15 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
                         >
                           Corregir
                         </Button>
-                        <Button
-                          onClick={handleResendGiro}
-                          className="w-full col-span-2 bg-slate-200 text-slate-700 hover:bg-slate-300 font-bold"
-                          disabled={isProcessing}
-                        >
-                          Reenviar Giro
-                        </Button>
+                        {!isEditing && (
+                          <Button
+                            onClick={handleResendGiro}
+                            className="w-full col-span-2 bg-slate-200 text-slate-700 hover:bg-slate-300 font-bold"
+                            disabled={isProcessing}
+                          >
+                            Reenviar Giro
+                          </Button>
+                        )}
                       </>
                     )}
                   </div>
