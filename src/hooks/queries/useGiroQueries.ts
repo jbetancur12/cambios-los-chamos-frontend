@@ -16,16 +16,16 @@ interface GirosListParams {
 export function useGirosList(params?: GirosListParams) {
   const queryString = params
     ? new URLSearchParams(
-        Object.entries(params).reduce(
-          (acc, [key, value]) => {
-            if (value !== undefined && value !== null && value !== '') {
-              acc[key] = String(value)
-            }
-            return acc
-          },
-          {} as Record<string, string>
-        )
-      ).toString()
+      Object.entries(params).reduce(
+        (acc, [key, value]) => {
+          if (value !== undefined && value !== null && value !== '') {
+            acc[key] = String(value)
+          }
+          return acc
+        },
+        {} as Record<string, string>
+      )
+    ).toString()
     : ''
 
   // Determinar staleTime dinámico
@@ -40,7 +40,7 @@ export function useGirosList(params?: GirosListParams) {
     : applyDedupConfig('HIGH_PRIORITY')
 
   return useQuery({
-    queryKey: ['giros', params],
+    queryKey: ['giros', 'list', params], // Updated query key to distinct from 'totals'
     queryFn: async () => {
       const response = await api.get<{
         giros: Giro[]
@@ -54,9 +54,43 @@ export function useGirosList(params?: GirosListParams) {
           bankCommission: number
         }
       }>(`/giro/list${queryString ? `?${queryString}` : ''}`)
-      return response // Return full response { giros, pagination }
+      return response
     },
     ...dedupConfig,
+  })
+}
+
+export function useGirosTotals(params?: GirosListParams) {
+  const queryString = params
+    ? new URLSearchParams(
+      Object.entries(params).reduce(
+        (acc, [key, value]) => {
+          if (value !== undefined && value !== null && value !== '') {
+            acc[key] = String(value)
+          }
+          return acc
+        },
+        {} as Record<string, string>
+      )
+    ).toString()
+    : ''
+
+  return useQuery({
+    queryKey: ['giros', 'totals', params],
+    queryFn: async () => {
+      const response = await api.get<{
+        count: number
+        cop: number
+        bs: number
+        minoristaProfit: number
+        systemProfit: number
+        bankCommission: number
+      }>(`/giro/totals${queryString ? `?${queryString}` : ''}`)
+      return response
+    },
+    // Keep totals slightly less volatile than the list, but still responsive
+    staleTime: 5000,
+    gcTime: 1000 * 60 * 5,
   })
 }
 

@@ -553,7 +553,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">Cuenta:</span>
                   <div className="flex items-center gap-2">
-                    <span className="font-medium font-mono text-xs md:text-sm">{giro.accountNumber}</span>
+                    <span className="font-medium">{giro.accountNumber}</span>
                     <button
                       onClick={() => copyToClipboard(giro.accountNumber, 'Cuenta')}
                       className="text-muted-foreground hover:text-foreground transition-colors"
