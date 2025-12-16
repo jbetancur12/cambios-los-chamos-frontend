@@ -72,7 +72,13 @@ export function useBeneficiarySuggestions() {
       query: string,
       executionType?: 'TRANSFERENCIA' | 'PAGO_MOVIL' | 'RECARGA' | 'EFECTIVO' | 'ZELLE' | 'OTROS'
     ): BeneficiaryData[] => {
-      const searchLower = query.toLowerCase()
+      const normalize = (str: string) =>
+        str
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+
+      const searchNormalized = normalize(query)
 
       return suggestions.filter((b) => {
         // Filter by execution type if provided
@@ -87,9 +93,9 @@ export function useBeneficiarySuggestions() {
 
         // Search by name, ID, or phone
         return (
-          b.name.toLowerCase().includes(searchLower) ||
-          b.id.toLowerCase().includes(searchLower) ||
-          b.phone.includes(searchLower)
+          normalize(b.name).includes(searchNormalized) ||
+          normalize(b.id).includes(searchNormalized) ||
+          b.phone.includes(searchNormalized)
         )
       })
     },
@@ -100,8 +106,13 @@ export function useBeneficiarySuggestions() {
   const getSuggestionsByName = useCallback(
     (name: string) => {
       if (!name.trim()) return []
-      const searchLower = name.toLowerCase()
-      return suggestions.filter((b) => b.name.toLowerCase().includes(searchLower))
+      const normalize = (str: string) =>
+        str
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+      const searchNormalized = normalize(name)
+      return suggestions.filter((b) => normalize(b.name).includes(searchNormalized))
     },
     [suggestions]
   )
@@ -119,8 +130,13 @@ export function useBeneficiarySuggestions() {
   const getSuggestionsById = useCallback(
     (id: string) => {
       if (!id.trim()) return []
-      const searchLower = id.toLowerCase()
-      return suggestions.filter((b) => b.id.toLowerCase().includes(searchLower))
+      const normalize = (str: string) =>
+        str
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+      const searchNormalized = normalize(id)
+      return suggestions.filter((b) => normalize(b.id).includes(searchNormalized))
     },
     [suggestions]
   )

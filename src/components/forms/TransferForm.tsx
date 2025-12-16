@@ -20,7 +20,7 @@ interface TransferFormProps {
 
 export function TransferForm({ onSuccess }: TransferFormProps) {
   const { user } = useAuth()
-  const { getSuggestionsByName, addSuggestion } = useBeneficiarySuggestions()
+  const { getSuggestions, addSuggestion } = useBeneficiarySuggestions()
   const createGiroMutation = useCreateGiro()
 
   const [loading, setLoading] = useState(false)
@@ -120,7 +120,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
   const handleNameChange = (value: string) => {
     setBeneficiaryName(value)
     if (value.trim()) {
-      const suggestions = getSuggestionsByName(value)
+      const suggestions = getSuggestions(value)
       setNameSuggestions(suggestions)
     } else {
       setNameSuggestions([])

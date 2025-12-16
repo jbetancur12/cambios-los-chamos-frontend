@@ -43,8 +43,8 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   const isSuperAdmin = user?.role === 'SUPER_ADMIN'
   const isAdmin = user?.role === 'ADMIN'
 
-  const filteredSuggestions = getSuggestions(phone, 'PAGO_MOVIL')
-  const filteredCedulaSuggestions = getSuggestions(cedula, 'PAGO_MOVIL')
+  const filteredSuggestions = getSuggestions(phone)
+  const filteredCedulaSuggestions = getSuggestions(cedula)
 
   // Custom rate override
   const [useCustomRate, setUseCustomRate] = useState(false)
@@ -54,7 +54,6 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   const [customBcv, setCustomBcv] = useState('')
 
   // New features state
-  const [saveBeneficiary, setSaveBeneficiary] = useState(false)
   const [showCedulaSuggestions, setShowCedulaSuggestions] = useState(false)
 
   useEffect(() => {
@@ -197,21 +196,17 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
 
       await api.post('/giro/mobile-payment/create', payload)
 
-      // Save suggestion if checked
-      if (saveBeneficiary) {
-        // Find bank object for accurate data if needed, though ID is enough
-        // We use the current form data
-        const bankObj = banks.find((b) => b.id === selectedBank)
-        if (bankObj) {
-          await addSuggestion({
-            name: senderName || phone, // Use nickname/senderName or fallback to phone
-            id: cedula,
-            phone: phone,
-            bankId: selectedBank,
-            accountNumber: '', // Not used for mobile payment but required by type
-            executionType: 'PAGO_MOVIL',
-          })
-        }
+      // Always save/update suggestion
+      const bankObj = banks.find((b) => b.id === selectedBank)
+      if (bankObj) {
+        await addSuggestion({
+          name: senderName || phone, // Use nickname/senderName or fallback to phone
+          id: cedula,
+          phone: phone,
+          bankId: selectedBank,
+          accountNumber: '', // Not used for mobile payment but required by type
+          executionType: 'PAGO_MOVIL',
+        })
       }
 
       toast.success('Pago móvil registrado exitosamente')
@@ -237,7 +232,6 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
     setShowSuggestions(false)
     setShowCedulaSuggestions(false)
     setUseCustomRate(false)
-    setSaveBeneficiary(false)
   }
 
   const handleSelectBeneficiary = (beneficiary: BeneficiaryData) => {
@@ -358,20 +352,6 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
               </div>
             )}
           </div>
-        </div>
-
-        {/* Save Suggestion Checkbox */}
-        <div className="flex items-center gap-2 pt-2">
-          <input
-            type="checkbox"
-            id="saveBeneficiary"
-            checked={saveBeneficiary}
-            onChange={(e) => setSaveBeneficiary(e.target.checked)}
-            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-          />
-          <Label htmlFor="saveBeneficiary" className="text-sm font-medium cursor-pointer select-none">
-            Guardar como beneficiario frecuente
-          </Label>
         </div>
 
         <div className="space-y-1 md:space-y-2 hidden">
