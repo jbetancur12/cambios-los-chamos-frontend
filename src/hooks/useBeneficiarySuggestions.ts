@@ -157,6 +157,19 @@ export function useBeneficiarySuggestions() {
     isLoading,
     addSuggestion,
     getSuggestions,
+    searchSuggestions: useCallback(async (query: string, executionType?: string) => {
+      const response = await api.get<{ suggestions: BeneficiarySuggestionResponse[] }>('/beneficiary-suggestion/search', {
+        params: { q: query, executionType }
+      })
+      return response.suggestions.map((s) => ({
+        name: s.beneficiaryName,
+        id: s.beneficiaryId,
+        phone: s.phone,
+        bankId: s.bankId,
+        accountNumber: s.accountNumber,
+        executionType: s.executionType || 'TRANSFERENCIA',
+      }))
+    }, []),
     getSuggestionsByName,
     getSuggestionsByPhone,
     getSuggestionsById,

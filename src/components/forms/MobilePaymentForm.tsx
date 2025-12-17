@@ -37,13 +37,33 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   const [minoristaBalanceInFavor, setMinoristaBalanceInFavor] = useState<number | null>(null)
   const [creditLimit, setCreditLimit] = useState<number | undefined>(undefined)
   const [loadingBalance, setLoadingBalance] = useState(false)
-  const { getSuggestions, addSuggestion } = useBeneficiarySuggestions()
+  const { addSuggestion, searchSuggestions } = useBeneficiarySuggestions()
 
   const isMinorista = user?.role === 'MINORISTA'
   const isSuperAdmin = user?.role === 'SUPER_ADMIN'
   const isAdmin = user?.role === 'ADMIN'
 
-  const filteredCedulaSuggestions = getSuggestions(cedula)
+  // Server-side search state
+  const [cedulaSuggestions, setCedulaSuggestions] = useState<BeneficiaryData[]>([])
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(async () => {
+      if (cedula && cedula.length >= 3) {
+        try {
+          // Use server-side search instead of local filtering
+          const results = await searchSuggestions(cedula)
+          setCedulaSuggestions(results)
+        } catch (error) {
+          console.error('Error searching suggestions:', error)
+          setCedulaSuggestions([])
+        }
+      } else {
+        setCedulaSuggestions([])
+      }
+    }, 300)
+
+    return () => clearTimeout(delayDebounceFn)
+  }, [cedula, searchSuggestions])
 
   // Custom rate override
   const [useCustomRate, setUseCustomRate] = useState(false)
@@ -290,9 +310,9 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
               className="font-medium placeholder:text-muted-foreground md:placeholder:text-transparent"
               autoComplete="off"
             />
-            {showCedulaSuggestions && filteredCedulaSuggestions.length > 0 && (
+            {showCedulaSuggestions && cedulaSuggestions.length > 0 && (
               <div className="absolute top-full left-0 right-0 mt-1 bg-card border rounded-md shadow-lg z-50 max-h-48 overflow-y-auto">
-                {filteredCedulaSuggestions.map((suggestion, index) => (
+                {cedulaSuggestions.map((suggestion, index) => (
                   <button
                     key={`cedula-${suggestion.phone}-${suggestion.id}-${index}`}
                     type="button"
