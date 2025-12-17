@@ -256,11 +256,11 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
   const effectiveRate =
     useCustomRate && (isSuperAdmin || isAdmin)
       ? {
-        buyRate: parseFloat(customBuyRate) || currentRate?.buyRate || 0,
-        sellRate: parseFloat(customSellRate) || currentRate?.sellRate || 0,
-        bcv: parseFloat(customBcv) || currentRate?.bcv || 0,
-        usd: parseFloat(customUsd) || currentRate?.usd || 0,
-      }
+          buyRate: parseFloat(customBuyRate) || currentRate?.buyRate || 0,
+          sellRate: parseFloat(customSellRate) || currentRate?.sellRate || 0,
+          bcv: parseFloat(customBcv) || currentRate?.bcv || 0,
+          usd: parseFloat(customUsd) || currentRate?.usd || 0,
+        }
       : currentRate
 
   const calculateAmountBs = () => {
