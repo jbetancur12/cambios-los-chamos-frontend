@@ -20,7 +20,7 @@ interface TransferFormProps {
 
 export function TransferForm({ onSuccess }: TransferFormProps) {
   const { user } = useAuth()
-  const { getSuggestions, addSuggestion } = useBeneficiarySuggestions()
+  const { getSuggestions, addSuggestion, searchSuggestions } = useBeneficiarySuggestions()
   const createGiroMutation = useCreateGiro()
 
   const [loading, setLoading] = useState(false)
@@ -43,6 +43,27 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
 
   // Suggestions
   const [nameSuggestions, setNameSuggestions] = useState<BeneficiaryData[]>([])
+  // Server-side search state for Cedula
+  const [cedulaSuggestions, setCedulaSuggestions] = useState<BeneficiaryData[]>([])
+  const [showCedulaSuggestions, setShowCedulaSuggestions] = useState(false)
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(async () => {
+      if (beneficiaryId && beneficiaryId.length >= 3) {
+        try {
+          const results = await searchSuggestions(beneficiaryId, 'TRANSFERENCIA')
+          setCedulaSuggestions(results)
+        } catch (error) {
+          console.error(error)
+          setCedulaSuggestions([])
+        }
+      } else {
+        setCedulaSuggestions([])
+      }
+    }, 300)
+
+    return () => clearTimeout(delayDebounceFn)
+  }, [beneficiaryId, searchSuggestions])
 
   // Custom rate override (solo SUPER_ADMIN)
   const [useCustomRate, setUseCustomRate] = useState(false)
@@ -108,6 +129,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
   const resetForm = () => {
     setBeneficiaryName('')
     setBeneficiaryId('')
+    setShowCedulaSuggestions(false)
     setPhone('')
     setBankId('')
     setAccountNumber('')
@@ -130,9 +152,23 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
   const handleSelectBeneficiaryFromName = (suggestion: BeneficiaryData) => {
     setBeneficiaryName(suggestion.name)
     setBeneficiaryId(suggestion.id)
+    setBeneficiaryId(suggestion.id)
     setBankId(suggestion.bankId)
     setAccountNumber(suggestion.accountNumber)
     setNameSuggestions([])
+  }
+
+  const handleSelectBeneficiaryFromCedula = (suggestion: BeneficiaryData) => {
+    setBeneficiaryName(suggestion.name)
+    setBeneficiaryId(suggestion.id)
+    setBankId(suggestion.bankId)
+    setAccountNumber(suggestion.accountNumber)
+    setShowCedulaSuggestions(false)
+  }
+
+  const handleCedulaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setBeneficiaryId(e.target.value)
+    setShowCedulaSuggestions(true)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -207,11 +243,11 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
   const effectiveRate =
     useCustomRate && (isSuperAdmin || isAdmin)
       ? {
-          buyRate: parseFloat(customBuyRate) || currentRate?.buyRate || 0,
-          sellRate: parseFloat(customSellRate) || currentRate?.sellRate || 0,
-          bcv: parseFloat(customBcv) || currentRate?.bcv || 0,
-          usd: parseFloat(customUsd) || currentRate?.usd || 0,
-        }
+        buyRate: parseFloat(customBuyRate) || currentRate?.buyRate || 0,
+        sellRate: parseFloat(customSellRate) || currentRate?.sellRate || 0,
+        bcv: parseFloat(customBcv) || currentRate?.bcv || 0,
+        usd: parseFloat(customUsd) || currentRate?.usd || 0,
+      }
       : currentRate
 
   const calculateAmountBs = () => {
@@ -331,15 +367,33 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
         <Label htmlFor="beneficiaryId" className="hidden md:block text-md md:text-md">
           Cédula del Beneficiario
         </Label>
-        <Input
-          id="beneficiaryId"
-          value={beneficiaryId}
-          onChange={(e) => setBeneficiaryId(e.target.value)}
-          placeholder="Cédula del Beneficiario"
-          required
-          className="text-base md:text-md h-10 md:h-12 font-medium placeholder:text-muted-foreground md:placeholder:text-transparent"
-          autoComplete="off"
-        />
+        <div className="relative">
+          <Input
+            id="beneficiaryId"
+            value={beneficiaryId}
+            onChange={handleCedulaChange}
+            onFocus={() => beneficiaryId && setShowCedulaSuggestions(true)}
+            placeholder="Cédula del Beneficiario"
+            required
+            className="text-base md:text-md h-10 md:h-12 font-medium placeholder:text-muted-foreground md:placeholder:text-transparent"
+            autoComplete="off"
+          />
+          {showCedulaSuggestions && cedulaSuggestions.length > 0 && (
+            <div className="absolute top-full left-0 right-0 mt-1 bg-card border rounded-md shadow-lg z-50 max-h-48 overflow-y-auto">
+              {cedulaSuggestions.map((suggestion, index) => (
+                <button
+                  key={`cedula-${suggestion.id}-${index}`}
+                  type="button"
+                  onClick={() => handleSelectBeneficiaryFromCedula(suggestion)}
+                  className="w-full text-left px-3 py-2 hover:bg-muted/50 transition-colors text-sm border-b last:border-b-0"
+                >
+                  <div className="font-medium">{suggestion.id}</div>
+                  <div className="text-xs text-muted-foreground">{suggestion.name}</div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Bank Info */}
