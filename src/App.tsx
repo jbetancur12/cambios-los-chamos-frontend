@@ -66,6 +66,8 @@ function PushInitializer() {
 }
 
 import { ThemeProvider } from '@/components/ThemeProvider'
+import { PostHogIdentifier } from '@/components/PostHogIdentifier'
+
 
 function App() {
   return (
@@ -74,6 +76,7 @@ function App() {
       <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
         <BrowserRouter>
           <AuthProvider>
+            <PostHogIdentifier />
             <WebSocketSyncInitializer />
             {/* <PushInitializer /> */}
             <PushInitializer />
