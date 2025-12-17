@@ -32,7 +32,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   const [banks, setBanks] = useState<Bank[]>([])
   const [exchangeRate, setExchangeRate] = useState<ExchangeRate | null>(null)
   const [loading, setLoading] = useState(false)
-  const [showSuggestions, setShowSuggestions] = useState(false)
+
   const [minoristaBalance, setMinoristaBalance] = useState<number | null>(null)
   const [minoristaBalanceInFavor, setMinoristaBalanceInFavor] = useState<number | null>(null)
   const [creditLimit, setCreditLimit] = useState<number | undefined>(undefined)
@@ -43,7 +43,6 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   const isSuperAdmin = user?.role === 'SUPER_ADMIN'
   const isAdmin = user?.role === 'ADMIN'
 
-  const filteredSuggestions = getSuggestions(phone)
   const filteredCedulaSuggestions = getSuggestions(cedula)
 
   // Custom rate override
@@ -69,7 +68,6 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (formRef.current && !formRef.current.contains(event.target as Node)) {
-        setShowSuggestions(false)
         setShowCedulaSuggestions(false)
       }
     }
@@ -150,11 +148,11 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   const effectiveRate =
     useCustomRate && (isSuperAdmin || isAdmin)
       ? {
-          buyRate: parseFloat(customBuyRate) || exchangeRate?.buyRate || 0,
-          sellRate: parseFloat(customSellRate) || exchangeRate?.sellRate || 0,
-          bcv: parseFloat(customBcv) || exchangeRate?.bcv || 0,
-          usd: parseFloat(customUsd) || exchangeRate?.usd || 0,
-        }
+        buyRate: parseFloat(customBuyRate) || exchangeRate?.buyRate || 0,
+        sellRate: parseFloat(customSellRate) || exchangeRate?.sellRate || 0,
+        bcv: parseFloat(customBcv) || exchangeRate?.bcv || 0,
+        usd: parseFloat(customUsd) || exchangeRate?.usd || 0,
+      }
       : exchangeRate
 
   const amountBs = effectiveRate && amountCop ? (Number(amountCop) / effectiveRate.sellRate).toFixed(2) : '0.00'
@@ -245,7 +243,6 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
     setPhone('')
     setSenderName('')
     setAmountCop('')
-    setShowSuggestions(false)
     setShowCedulaSuggestions(false)
     setUseCustomRate(false)
   }
@@ -257,14 +254,12 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
     if (beneficiary.bankId && banks.length > 0) {
       setSelectedBank(beneficiary.bankId)
     }
-    setShowSuggestions(false)
     setShowCedulaSuggestions(false)
   }
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     setPhone(value)
-    setShowSuggestions(!!value)
     setShowCedulaSuggestions(false)
   }
 
@@ -272,7 +267,6 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
     const value = e.target.value
     setCedula(value)
     setShowCedulaSuggestions(!!value)
-    setShowSuggestions(false)
   }
 
   return (
@@ -346,27 +340,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
               placeholder="Teléfono del Beneficiario"
               value={phone}
               onChange={handlePhoneChange}
-              onFocus={() => phone && setShowSuggestions(true)}
-              className="font-medium placeholder:text-muted-foreground md:placeholder:text-transparent"
-              autoComplete="off"
             />
-            {showSuggestions && filteredSuggestions.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-card border rounded-md shadow-lg z-50 max-h-48 overflow-y-auto">
-                {filteredSuggestions.map((suggestion, index) => (
-                  <button
-                    key={`${suggestion.phone}-${suggestion.id}-${index}`}
-                    type="button"
-                    onClick={() => handleSelectBeneficiary(suggestion)}
-                    className="w-full text-left px-3 py-2 hover:bg-muted/50 transition-colors text-sm border-b last:border-b-0"
-                  >
-                    <div className="font-medium">{suggestion.phone}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {suggestion.name} • {suggestion.id}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
         </div>
 
@@ -413,151 +387,159 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
       </div>
 
       {/* Exchange Rate Info - Moved here for visibility */}
-      {effectiveRate && (
-        <div className="p-1 bg-green-50 dark:bg-green-950 rounded-lg">
-          <div className="grid grid-cols-2 gap-4 text-center">
-            <div>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Bolivares</p>
-              <p className="text-base md:text-lg font-bold text-green-700 dark:text-green-400">
-                {new Intl.NumberFormat('es-VE', {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                }).format(Number(amountBs))}
-              </p>
-            </div>
-            <div>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">BCV</p>
-              <p className="text-base md:text-lg font-bold text-blue-700 dark:text-blue-400">
-                {new Intl.NumberFormat('en-US', {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                }).format(Number(amountBs) / effectiveRate.bcv)}
-              </p>
+      {
+        effectiveRate && (
+          <div className="p-1 bg-green-50 dark:bg-green-950 rounded-lg">
+            <div className="grid grid-cols-2 gap-4 text-center">
+              <div>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Bolivares</p>
+                <p className="text-base md:text-lg font-bold text-green-700 dark:text-green-400">
+                  {new Intl.NumberFormat('es-VE', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  }).format(Number(amountBs))}
+                </p>
+              </div>
+              <div>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">BCV</p>
+                <p className="text-base md:text-lg font-bold text-blue-700 dark:text-blue-400">
+                  {new Intl.NumberFormat('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  }).format(Number(amountBs) / effectiveRate.bcv)}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       {/* Balance Info */}
-      {!loadingBalance && minoristaBalance !== null && (
-        <BalanceInfo
-          minoristaBalance={minoristaBalance}
-          minoristaBalanceInFavor={minoristaBalanceInFavor}
-          creditLimit={creditLimit}
-          amountInput={amountCop}
-          getEarnedProfit={getEarnedProfit}
-          getRemainingBalance={getRemainingBalance}
-          hasInsufficientBalance={hasInsufficientBalance}
-        />
-      )}
+      {
+        !loadingBalance && minoristaBalance !== null && (
+          <BalanceInfo
+            minoristaBalance={minoristaBalance}
+            minoristaBalanceInFavor={minoristaBalanceInFavor}
+            creditLimit={creditLimit}
+            amountInput={amountCop}
+            getEarnedProfit={getEarnedProfit}
+            getRemainingBalance={getRemainingBalance}
+            hasInsufficientBalance={hasInsufficientBalance}
+          />
+        )
+      }
 
       {/* Submit */}
-      {effectiveRate ? (
-        <div className="bg-gray-100 rounded-lg p-1 mb-5">
-          {isMinorista || isAdmin ? (
-            <div className="grid grid-cols-1 gap-3 text-xs md:text-sm">
-              <div>
-                <span className="text-gray-600 text-sm">Tasa: </span>
-                <span className="font-bold text-blue-700 text-sm">{effectiveRate.sellRate.toFixed(2)}</span>
+      {
+        effectiveRate ? (
+          <div className="bg-gray-100 rounded-lg p-1 mb-5">
+            {isMinorista || isAdmin ? (
+              <div className="grid grid-cols-1 gap-3 text-xs md:text-sm">
+                <div>
+                  <span className="text-gray-600 text-sm">Tasa: </span>
+                  <span className="font-bold text-blue-700 text-sm">{effectiveRate.sellRate.toFixed(2)}</span>
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-2 text-xs md:text-sm">
-              <div>
-                <span className="text-gray-600">Compra: </span>
-                <span className="font-bold text-blue-700">{effectiveRate.buyRate.toFixed(2)}</span>
+            ) : (
+              <div className="grid grid-cols-2 gap-2 text-xs md:text-sm">
+                <div>
+                  <span className="text-gray-600">Compra: </span>
+                  <span className="font-bold text-blue-700">{effectiveRate.buyRate.toFixed(2)}</span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Venta: </span>
+                  <span className="font-bold text-blue-700">{effectiveRate.sellRate.toFixed(2)}</span>
+                </div>
+                <div>
+                  <span className="text-gray-600">USD: </span>
+                  <span className="font-bold text-blue-700">{effectiveRate.usd.toFixed(2)}</span>
+                </div>
+                <div>
+                  <span className="text-gray-600">BCV: </span>
+                  <span className="font-bold text-blue-700">{effectiveRate.bcv.toFixed(2)}</span>
+                </div>
               </div>
-              <div>
-                <span className="text-gray-600">Venta: </span>
-                <span className="font-bold text-blue-700">{effectiveRate.sellRate.toFixed(2)}</span>
-              </div>
-              <div>
-                <span className="text-gray-600">USD: </span>
-                <span className="font-bold text-blue-700">{effectiveRate.usd.toFixed(2)}</span>
-              </div>
-              <div>
-                <span className="text-gray-600">BCV: </span>
-                <span className="font-bold text-blue-700">{effectiveRate.bcv.toFixed(2)}</span>
-              </div>
-            </div>
-          )}
-        </div>
-      ) : null}
+            )}
+          </div>
+        ) : null
+      }
 
       {/* Custom Rate Override (SUPER_ADMIN or ADMIN) */}
-      {(isSuperAdmin || isAdmin) && (
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="useCustomRate"
-              checked={useCustomRate}
-              onChange={(e) => setUseCustomRate(e.target.checked)}
-              className="h-5 w-5 rounded border-gray-300"
-            />
-            <Label htmlFor="useCustomRate" className="cursor-pointer text-sm md:text-base">
-              Usar tasa personalizada
-            </Label>
-          </div>
-
-          {useCustomRate && (
-            <div className="grid grid-cols-2 gap-3 p-2 bg-yellow-50 dark:bg-yellow-950 rounded-lg">
-              <div className="space-y-1">
-                <Label htmlFor="customBuyRate" className="text-xs md:text-sm">
-                  Compra
-                </Label>
-                <Input
-                  id="customBuyRate"
-                  type="number"
-                  step="0.01"
-                  value={customBuyRate}
-                  onChange={(e) => setCustomBuyRate(e.target.value)}
-                  className="text-sm md:text-base h-8 md:h-10"
-                />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="customSellRate" className="text-xs md:text-sm">
-                  Venta
-                </Label>
-                <Input
-                  id="customSellRate"
-                  type="number"
-                  step="0.01"
-                  value={customSellRate}
-                  onChange={(e) => setCustomSellRate(e.target.value)}
-                  className="text-sm md:text-base h-8 md:h-10"
-                />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="customUsd" className="text-xs md:text-sm">
-                  USD
-                </Label>
-                <Input
-                  id="customUsd"
-                  type="number"
-                  step="0.01"
-                  value={customUsd}
-                  onChange={(e) => setCustomUsd(e.target.value)}
-                  className="text-sm md:text-base h-8 md:h-10"
-                />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="customBcv" className="text-xs md:text-sm">
-                  BCV
-                </Label>
-                <Input
-                  id="customBcv"
-                  type="number"
-                  step="0.01"
-                  value={customBcv}
-                  onChange={(e) => setCustomBcv(e.target.value)}
-                  className="text-sm md:text-base h-8 md:h-10"
-                />
-              </div>
+      {
+        (isSuperAdmin || isAdmin) && (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="useCustomRate"
+                checked={useCustomRate}
+                onChange={(e) => setUseCustomRate(e.target.checked)}
+                className="h-5 w-5 rounded border-gray-300"
+              />
+              <Label htmlFor="useCustomRate" className="cursor-pointer text-sm md:text-base">
+                Usar tasa personalizada
+              </Label>
             </div>
-          )}
-        </div>
-      )}
+
+            {useCustomRate && (
+              <div className="grid grid-cols-2 gap-3 p-2 bg-yellow-50 dark:bg-yellow-950 rounded-lg">
+                <div className="space-y-1">
+                  <Label htmlFor="customBuyRate" className="text-xs md:text-sm">
+                    Compra
+                  </Label>
+                  <Input
+                    id="customBuyRate"
+                    type="number"
+                    step="0.01"
+                    value={customBuyRate}
+                    onChange={(e) => setCustomBuyRate(e.target.value)}
+                    className="text-sm md:text-base h-8 md:h-10"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="customSellRate" className="text-xs md:text-sm">
+                    Venta
+                  </Label>
+                  <Input
+                    id="customSellRate"
+                    type="number"
+                    step="0.01"
+                    value={customSellRate}
+                    onChange={(e) => setCustomSellRate(e.target.value)}
+                    className="text-sm md:text-base h-8 md:h-10"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="customUsd" className="text-xs md:text-sm">
+                    USD
+                  </Label>
+                  <Input
+                    id="customUsd"
+                    type="number"
+                    step="0.01"
+                    value={customUsd}
+                    onChange={(e) => setCustomUsd(e.target.value)}
+                    className="text-sm md:text-base h-8 md:h-10"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="customBcv" className="text-xs md:text-sm">
+                    BCV
+                  </Label>
+                  <Input
+                    id="customBcv"
+                    type="number"
+                    step="0.01"
+                    value={customBcv}
+                    onChange={(e) => setCustomBcv(e.target.value)}
+                    className="text-sm md:text-base h-8 md:h-10"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        )
+      }
 
       {/* Submit */}
       <div className="flex gap-3 pt-4">
@@ -576,6 +558,6 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
           )}
         </Button>
       </div>
-    </form>
+    </form >
   )
 }
