@@ -20,7 +20,7 @@ interface TransferFormProps {
 
 export function TransferForm({ onSuccess }: TransferFormProps) {
   const { user } = useAuth()
-  const { getSuggestions, addSuggestion, searchSuggestions } = useBeneficiarySuggestions()
+  const { addSuggestion, searchSuggestions } = useBeneficiarySuggestions()
   const createGiroMutation = useCreateGiro()
 
   const [loading, setLoading] = useState(false)
@@ -84,6 +84,24 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
     }
   }, [isMinorista])
 
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(async () => {
+      if (beneficiaryName && beneficiaryName.length >= 3) {
+        try {
+          const results = await searchSuggestions(beneficiaryName, 'TRANSFERENCIA')
+          setNameSuggestions(results)
+        } catch (error) {
+          console.error(error)
+          setNameSuggestions([])
+        }
+      } else {
+        setNameSuggestions([])
+      }
+    }, 300)
+
+    return () => clearTimeout(delayDebounceFn)
+  }, [beneficiaryName, searchSuggestions])
+
   const fetchBanks = async () => {
     try {
       const response = await api.get<{ banks: Bank[] }>('/bank/all')
@@ -141,12 +159,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
 
   const handleNameChange = (value: string) => {
     setBeneficiaryName(value)
-    if (value.trim()) {
-      const suggestions = getSuggestions(value)
-      setNameSuggestions(suggestions)
-    } else {
-      setNameSuggestions([])
-    }
+    // Local filtering removed in favor of debounced useEffect server search
   }
 
   const handleSelectBeneficiaryFromName = (suggestion: BeneficiaryData) => {
