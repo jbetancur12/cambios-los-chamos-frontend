@@ -91,11 +91,10 @@ export function useBeneficiarySuggestions() {
           return true
         }
 
-        // Search by name, ID, or phone
+        // Search by name, ID (cedula) - PHONE SEARCH DISABLED by user request
         return (
           normalize(b.name).includes(searchNormalized) ||
-          normalize(b.id).includes(searchNormalized) ||
-          b.phone.includes(searchNormalized)
+          normalize(b.id).includes(searchNormalized)
         )
       })
     },
