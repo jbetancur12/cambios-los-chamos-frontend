@@ -26,6 +26,7 @@ import { ResetPasswordPage } from '@/pages/ResetPasswordPage'
 import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage'
 import { ConfigPage } from '@/pages/ConfigPage'
 import { AuditPage } from '@/pages/AuditPage'
+import { LogsPage } from '@/pages/LogsPage'
 
 import { useEffect } from 'react'
 import { requestNotifyPermission } from './firebase/messaging'
@@ -67,7 +68,6 @@ function PushInitializer() {
 
 import { ThemeProvider } from '@/components/ThemeProvider'
 import { PostHogIdentifier } from '@/components/PostHogIdentifier'
-
 
 function App() {
   return (
@@ -272,6 +272,19 @@ function App() {
                       <ErrorBoundary>
                         <DashboardLayout>
                           <ConfigPage />
+                        </DashboardLayout>
+                      </ErrorBoundary>
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route
+                  path="/logs"
+                  element={
+                    <ProtectedRoute requiredRole={['SUPER_ADMIN', 'ADMIN']}>
+                      <ErrorBoundary>
+                        <DashboardLayout>
+                          <LogsPage />
                         </DashboardLayout>
                       </ErrorBoundary>
                     </ProtectedRoute>

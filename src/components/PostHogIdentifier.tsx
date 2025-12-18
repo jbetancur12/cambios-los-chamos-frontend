@@ -3,20 +3,20 @@ import { usePostHog } from 'posthog-js/react'
 import { useAuth } from '@/contexts/AuthContext'
 
 export function PostHogIdentifier() {
-    const { user } = useAuth()
-    const posthog = usePostHog()
+  const { user } = useAuth()
+  const posthog = usePostHog()
 
-    useEffect(() => {
-        if (posthog && user) {
-            posthog.identify(user.id, {
-                email: user.email,
-                role: user.role,
-                fullName: user.fullName,
-            })
-        } else if (posthog && !user) {
-            posthog.reset()
-        }
-    }, [user, posthog])
+  useEffect(() => {
+    if (posthog && user) {
+      posthog.identify(user.id, {
+        email: user.email,
+        role: user.role,
+        fullName: user.fullName,
+      })
+    } else if (posthog && !user) {
+      posthog.reset()
+    }
+  }, [user, posthog])
 
-    return null
+  return null
 }
