@@ -7,8 +7,8 @@ export function PostHogIdentifier() {
   const posthog = usePostHog()
 
   useEffect(() => {
-    // Only identify SUPER_ADMIN users in PostHog
-    if (posthog && user && user.role === 'SUPER_ADMIN') {
+    // Only identify SUPER_ADMIN or ADMIN users in PostHog
+    if (posthog && user && (user.role === 'SUPER_ADMIN' || user.role === 'ADMIN')) {
       posthog.identify(user.id, {
         email: user.email,
         role: user.role,
