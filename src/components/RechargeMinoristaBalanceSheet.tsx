@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
 import type { Minorista, MinoristaTransaction, MinoristaTransactionType } from '@/types/api'
-import { AlertCircle, Eye, DollarSign, Calendar, ChevronDown } from 'lucide-react'
+import { AlertCircle, Eye, DollarSign, Calendar, ChevronDown, Download } from 'lucide-react'
 import { MinoristaSimpleTransactionTable } from './MinoristaSimpleTransactionTable'
 import { type DateRange } from './DateRangeFilter'
 import { NumericFormat } from 'react-number-format'
@@ -37,6 +37,7 @@ export function RechargeMinoristaBalanceSheet({
   const [totalPages, setTotalPages] = useState(1)
   const [startBalance, setStartBalance] = useState<number | undefined>(undefined)
   const [startBalanceInFavor, setStartBalanceInFavor] = useState<number | undefined>(undefined)
+  const [downloading, setDownloading] = useState(false)
 
   // Standardized Date Filter State
   const dateInputRef = useRef<HTMLInputElement>(null)
@@ -150,6 +151,42 @@ export function RechargeMinoristaBalanceSheet({
     }
   }
 
+  const handleDownloadExcel = async () => {
+    if (!localMinorista) return
+    try {
+      setDownloading(true)
+      let url = `/minorista/${localMinorista.id}/transactions/export`
+      const params = new URLSearchParams()
+
+      // Use the calculated ISO strings (from/to) which cover the full time range (00:00 to 23:59)
+      // This matches the logic used in fetchTransactions
+      if (dateRange.from) params.append('startDate', dateRange.from)
+      if (dateRange.to) params.append('endDate', dateRange.to)
+
+      const queryString = params.toString()
+      if (queryString) url += `?${queryString}`
+
+      const { blob, filename } = await api.downloadFile(url)
+
+      // Create and click download link
+      const downloadUrl = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = downloadUrl
+      link.download = filename
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(downloadUrl)
+
+      toast.success('Descarga iniciada')
+    } catch (error) {
+      console.error('Error downloading excel:', error)
+      toast.error('Error al descargar el archivo')
+    } finally {
+      setDownloading(false)
+    }
+  }
+
   useEffect(() => {
     setLocalMinorista(minorista)
   }, [minorista])
@@ -260,33 +297,30 @@ export function RechargeMinoristaBalanceSheet({
           <div className="flex gap-2 border-b">
             <button
               onClick={() => setActiveTab('view')}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === 'view'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'view'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+                }`}
             >
               <Eye className="h-4 w-4 inline mr-2" />
               Ver
             </button>
             <button
               onClick={() => setActiveTab('assign')}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === 'assign'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'assign'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+                }`}
             >
               <DollarSign className="h-4 w-4 inline mr-2" />
               Asignar Cupo
             </button>
             <button
               onClick={() => setActiveTab('pay')}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === 'pay'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'pay'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+                }`}
             >
               <DollarSign className="h-4 w-4 inline mr-2" />
               Pagar Deuda
@@ -325,11 +359,10 @@ export function RechargeMinoristaBalanceSheet({
                 )}
                 {debtAmount > 0 && (
                   <div
-                    className={`p-4 rounded-lg border space-y-2 ${
-                      surplusAmount > 0
-                        ? 'bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800'
-                        : 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800'
-                    }`}
+                    className={`p-4 rounded-lg border space-y-2 ${surplusAmount > 0
+                      ? 'bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800'
+                      : 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800'
+                      }`}
                   >
                     <p className="text-xs text-muted-foreground mb-1">Deuda Actual</p>
                     <p className="text-lg font-semibold text-red-600">{formatCurrency(debtAmount)}</p>
@@ -368,6 +401,15 @@ export function RechargeMinoristaBalanceSheet({
               <div className="mt-6 pt-6 border-t space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="font-semibold">Historial Detallado de Transacciones</h3>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleDownloadExcel}
+                    disabled={downloading}
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    {downloading ? 'Descargando...' : 'Descargar Excel'}
+                  </Button>
                 </div>
 
                 {/* Filter Tabs */}
@@ -538,16 +580,14 @@ export function RechargeMinoristaBalanceSheet({
           {activeTab === 'assign' && (
             <div className="space-y-4">
               <div
-                className={`p-4 rounded-lg border space-y-2 ${
-                  surplusAmount > 0
-                    ? 'bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800'
-                    : 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800'
-                }`}
+                className={`p-4 rounded-lg border space-y-2 ${surplusAmount > 0
+                  ? 'bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800'
+                  : 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800'
+                  }`}
               >
                 <p
-                  className={`text-sm font-medium ${
-                    surplusAmount > 0 ? 'text-blue-900 dark:text-blue-100' : 'text-red-900 dark:text-red-100'
-                  }`}
+                  className={`text-sm font-medium ${surplusAmount > 0 ? 'text-blue-900 dark:text-blue-100' : 'text-red-900 dark:text-red-100'
+                    }`}
                 >
                   {surplusAmount > 0 ? 'Pagar Saldo a Favor' : 'Pagar Deuda y Liberar Cupo'}
                 </p>
@@ -600,16 +640,14 @@ export function RechargeMinoristaBalanceSheet({
           {activeTab === 'pay' && (
             <div className="space-y-4">
               <div
-                className={`p-4 rounded-lg border space-y-2 ${
-                  surplusAmount > 0
-                    ? 'bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800'
-                    : 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800'
-                }`}
+                className={`p-4 rounded-lg border space-y-2 ${surplusAmount > 0
+                  ? 'bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800'
+                  : 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800'
+                  }`}
               >
                 <p
-                  className={`text-sm font-medium ${
-                    surplusAmount > 0 ? 'text-blue-900 dark:text-blue-100' : 'text-red-900 dark:text-red-100'
-                  }`}
+                  className={`text-sm font-medium ${surplusAmount > 0 ? 'text-blue-900 dark:text-blue-100' : 'text-red-900 dark:text-red-100'
+                    }`}
                 >
                   {surplusAmount > 0 ? 'Pagar Saldo a Favor' : 'Pagar Deuda y Liberar Cupo'}
                 </p>
