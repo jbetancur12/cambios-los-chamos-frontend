@@ -158,10 +158,10 @@ export function RechargeMinoristaBalanceSheet({
       let url = `/minorista/${localMinorista.id}/transactions/export`
       const params = new URLSearchParams()
 
-      // Use the calculated ISO strings (from/to) which cover the full time range (00:00 to 23:59)
-      // This matches the logic used in fetchTransactions
-      if (dateRange.from) params.append('startDate', dateRange.from)
-      if (dateRange.to) params.append('endDate', dateRange.to)
+      // Export FULL history (ignoring current date view) as per user request for "todos sus giros"
+      // If we want filtered export later, we can add a toggle.
+      // if (dateRange.from) params.append('startDate', dateRange.from)
+      // if (dateRange.to) params.append('endDate', dateRange.to)
 
       const queryString = params.toString()
       if (queryString) url += `?${queryString}`
