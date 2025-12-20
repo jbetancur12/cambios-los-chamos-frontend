@@ -1,7 +1,8 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import type { User, LoginRequest, LoginResponse } from '@/types/api'
-import { api } from '@/lib/api'
+
+import { api, ApiError } from '@/lib/api'
 
 interface AuthContextType {
   user: User | null
@@ -14,7 +15,10 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<User | null>(() => {
+    const storedUser = localStorage.getItem('user')
+    return storedUser ? JSON.parse(storedUser) : null
+  })
   const [loading, setLoading] = useState(true)
 
   const fetchUser = async () => {
@@ -25,9 +29,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem('user', JSON.stringify(response.user)) // Sync localStorage for WebSocket usage
     } catch (error) {
       console.error('[AuthContext] Error fetching user:', error)
-      setUser(null)
-      // Don't clear localStorage here to avoid flashing login screen if just a temporary network error?
-      // But if 401, we probably should. userMiddleware usually handles 401.
+
+      // Only clear session if explicitly unauthorized (expired or invalid token)
+      // This protects against network errors (offline/flakey connection) clearing the session
+      if (error instanceof ApiError && (error.code === 'UNAUTHORIZED' || error.code === 'INVALID_TOKEN')) {
+        setUser(null)
+        localStorage.removeItem('authToken')
+        localStorage.removeItem('user')
+      }
+      // If it's a network error or other server error, we keep the local user state
+      // This allows the app to stay "logged in" while offline or during server hiccups
     } finally {
       setLoading(false)
     }
