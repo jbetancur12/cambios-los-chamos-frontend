@@ -370,7 +370,7 @@ export function BankAccountsPage() {
                                 <span className="font-medium">{account.bank.name}</span>
                               </div>
                             </td>
-                            <td className="py-4 text-sm">{account.accountHolder}</td>
+                            <td className="py-4 text-sm font-medium">{account.accountHolder}</td>
                             <td
                               className={cn(
                                 'py-4 text-right font-semibold',

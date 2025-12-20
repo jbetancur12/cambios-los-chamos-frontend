@@ -11,6 +11,7 @@ interface GirosListParams {
   limit?: number
   showAllTraffic?: boolean
   search?: string
+  transferencistaId?: string
 }
 
 export function useGirosList(params?: GirosListParams) {
