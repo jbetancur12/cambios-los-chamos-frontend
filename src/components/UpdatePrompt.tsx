@@ -14,11 +14,16 @@ export function UpdatePrompt() {
     onRegisteredSW(swUrl, registration) {
       console.log('Service Worker registrado:', swUrl)
 
-      // Check for updates every 60 seconds
+      // Check for updates every hour
       if (registration) {
-        setInterval(() => {
-          registration.update()
-        }, 60 * 1000)
+        setInterval(
+          () => {
+            registration.update().catch((err) => {
+              console.error('Error checking for SW updates:', err)
+            })
+          },
+          60 * 60 * 1000
+        )
       }
     },
     onRegisterError(error) {
