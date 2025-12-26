@@ -96,7 +96,7 @@ export function useSiaRateImage() {
 
       // Sell Rate
       ctx.textAlign = 'right'
-      const rateText = rate.sellRate % 1 === 0 ? rate.sellRate.toFixed(0) : rate.sellRate.toFixed(1)
+      const rateText = parseFloat(rate.sellRate.toFixed(3)).toString()
       ctx.fillText('TASA ' + rateText, offsetX + cardWidth - 30, offsetY + 35)
 
       // ---- TABLE HEADER (TEXT ONLY) ----
