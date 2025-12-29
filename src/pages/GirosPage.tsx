@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -7,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { GiroDetailSheet } from '@/components/GiroDetailSheet'
 import { PrintTicketModal } from '@/components/PrintTicketModal'
+import { ReassignGiroModal } from '@/components/ReassignGiroModal'
 import { useGirosList, useGirosTotals } from '@/hooks/queries/useGiroQueries'
 import { useMinoristaBalance } from '@/hooks/queries/useMinoristaQueries'
 import { useAllUsers } from '@/hooks/queries/useUserQueries'
@@ -26,6 +28,7 @@ type DateFilterType =
 
 export function GirosPage() {
   const { user } = useAuth()
+  const queryClient = useQueryClient()
 
   // Filter states
   const [filterStatus, setFilterStatus] = useState<GiroStatus | 'ALL'>('ASIGNADO')
@@ -51,6 +54,10 @@ export function GirosPage() {
   const [page, setPage] = useState(1)
   const [showPrintModal, setShowPrintModal] = useState(false)
   const [selectedGiroForPrint, setSelectedGiroForPrint] = useState<string | null>(null)
+
+  const [reassignModalOpen, setReassignModalOpen] = useState(false)
+  const [selectedGiroForReassign, setSelectedGiroForReassign] = useState<Giro | null>(null)
+
   const itemsPerPage = 15
 
   // Debounce search
@@ -330,9 +337,8 @@ export function GirosPage() {
           >
             <p className="text-base font-semibold ">Tipo de Usuario</p>
             <ChevronDown
-              className={`h-4 w-4 text-muted-foreground transition-transform ${
-                userFiltersExpanded ? 'rotate-180' : ''
-              }`}
+              className={`h-4 w-4 text-muted-foreground transition-transform ${userFiltersExpanded ? 'rotate-180' : ''
+                }`}
             />
           </button>
 
@@ -669,11 +675,10 @@ export function GirosPage() {
                     return (
                       <tr
                         key={giro.id}
-                        className={`border-b cursor-pointer transition-colors ${
-                          giro.status === 'DEVUELTO'
-                            ? 'bg-[linear-gradient(to_right,#510200,#f80000)] text-white hover:opacity-90'
-                            : 'hover:bg-muted/30'
-                        }`}
+                        className={`border-b cursor-pointer transition-colors ${giro.status === 'DEVUELTO'
+                          ? 'bg-[linear-gradient(to_right,#510200,#f80000)] text-white hover:opacity-90'
+                          : 'hover:bg-muted/30'
+                          }`}
                         onClick={() => handleGiroClick(giro)}
                       >
                         {user?.role !== 'MINORISTA' && (
@@ -691,9 +696,9 @@ export function GirosPage() {
                         <td className="px-3 py-2 text-right whitespace-nowrap font-semibold w-20">
                           {giro.amountBs > 0
                             ? giro.amountBs.toLocaleString('es-VE', {
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2,
-                              })
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })
                             : '—'}
                         </td>
                         <td className="px-3 py-2 truncate w-32">
@@ -734,6 +739,36 @@ export function GirosPage() {
                                 <Printer className="h-4 w-4 text-blue-600" />
                               </button>
                             )}
+                            {(user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN' || user?.role === 'TRANSFERENCISTA') &&
+                              (giro.status === 'ASIGNADO' || giro.status === 'PROCESANDO') && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setSelectedGiroForReassign(giro)
+                                    setReassignModalOpen(true)
+                                  }}
+                                  className="p-1 hover:bg-orange-100 dark:hover:bg-orange-900 rounded transition-colors ml-1"
+                                  title="Reasignar Giro"
+                                >
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="16"
+                                    height="16"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    className="text-orange-600"
+                                  >
+                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                                    <circle cx="9" cy="7" r="4" />
+                                    <line x1="19" y1="8" x2="19" y2="14" />
+                                    <line x1="22" y1="11" x2="16" y2="11" />
+                                  </svg>
+                                </button>
+                              )}
                           </div>
                         </td>
                       </tr>
@@ -759,11 +794,10 @@ export function GirosPage() {
               return (
                 <div
                   key={giro.id}
-                  className={`border rounded p-3 cursor-pointer transition-colors ${
-                    giro.status === 'DEVUELTO'
-                      ? 'bg-[linear-gradient(to_right,#510200,#f80000)] text-white hover:opacity-90'
-                      : 'bg-card hover:bg-muted/50'
-                  }`}
+                  className={`border rounded p-3 cursor-pointer transition-colors ${giro.status === 'DEVUELTO'
+                    ? 'bg-[linear-gradient(to_right,#510200,#f80000)] text-white hover:opacity-90'
+                    : 'bg-card hover:bg-muted/50'
+                    }`}
                   onClick={() => handleGiroClick(giro)}
                 >
                   <div className={`grid ${user?.role === 'MINORISTA' ? 'grid-cols-2' : 'grid-cols-2'} gap-2 text-xs`}>
@@ -855,72 +889,72 @@ export function GirosPage() {
             {(((filterStatus === 'COMPLETADO' || filterStatus === 'ALL') &&
               (user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN')) ||
               user?.role === 'MINORISTA') && (
-              <div className="border-t border-white border-opacity-30 px-3 py-2">
-                {user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN' ? (
-                  // ADMIN & SUPER_ADMIN View
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                    {/* Minorista Profit - Hide if filtering only system traffic (COMPLETADO) */}
-                    {filterStatus === 'ALL' && (
+                <div className="border-t border-white border-opacity-30 px-3 py-2">
+                  {user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN' ? (
+                    // ADMIN & SUPER_ADMIN View
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                      {/* Minorista Profit - Hide if filtering only system traffic (COMPLETADO) */}
+                      {filterStatus === 'ALL' && (
+                        <div className="text-left">
+                          <p className="text-xs opacity-80">Ganancia Minoristas</p>
+                          <p className="font-semibold">{formatGiroCurrency(totals.minoristaProfit, 'COP')}</p>
+                        </div>
+                      )}
+
                       <div className="text-left">
-                        <p className="text-xs opacity-80">Ganancia Minoristas</p>
+                        <p className="text-xs opacity-80">Comisión Banco</p>
+                        <p className="font-semibold">{formatGiroCurrency(totals.bankCommission, 'VES')}</p>
+                      </div>
+
+                      {user?.role === 'SUPER_ADMIN' && (
+                        <div className="text-left">
+                          <p className="text-xs opacity-80">Ganancia del Sitio</p>
+                          <p className="font-semibold">{formatGiroCurrency(totals.systemProfit, 'COP')}</p>
+                        </div>
+                      )}
+
+                      {/* Total Profit - Show if viewing all traffic */}
+                      {filterStatus === 'ALL' && user?.role === 'SUPER_ADMIN' && (
+                        <div className="text-left">
+                          <p className="text-xs opacity-80">Total Ganancias</p>
+                          <p className="font-semibold">
+                            {formatGiroCurrency(totals.minoristaProfit + totals.systemProfit, 'COP')}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ) : user?.role === 'MINORISTA' && minoristaBalanceData ? (
+                    // MINORISTA: Deuda Actual, Crédito Asignado
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="text-left">
+                        <p className="text-xs opacity-80">Total Ganancia</p>
                         <p className="font-semibold">{formatGiroCurrency(totals.minoristaProfit, 'COP')}</p>
                       </div>
-                    )}
-
-                    <div className="text-left">
-                      <p className="text-xs opacity-80">Comisión Banco</p>
-                      <p className="font-semibold">{formatGiroCurrency(totals.bankCommission, 'VES')}</p>
-                    </div>
-
-                    {user?.role === 'SUPER_ADMIN' && (
                       <div className="text-left">
-                        <p className="text-xs opacity-80">Ganancia del Sitio</p>
-                        <p className="font-semibold">{formatGiroCurrency(totals.systemProfit, 'COP')}</p>
-                      </div>
-                    )}
-
-                    {/* Total Profit - Show if viewing all traffic */}
-                    {filterStatus === 'ALL' && user?.role === 'SUPER_ADMIN' && (
-                      <div className="text-left">
-                        <p className="text-xs opacity-80">Total Ganancias</p>
-                        <p className="font-semibold">
-                          {formatGiroCurrency(totals.minoristaProfit + totals.systemProfit, 'COP')}
+                        <p className="text-xs opacity-80">Deuda Actual</p>
+                        <p className="font-semibold text-red-100">
+                          {formatGiroCurrency(
+                            Math.max(0, minoristaBalanceData.creditLimit - minoristaBalanceData.availableCredit),
+                            'COP'
+                          )}
                         </p>
                       </div>
-                    )}
-                  </div>
-                ) : user?.role === 'MINORISTA' && minoristaBalanceData ? (
-                  // MINORISTA: Deuda Actual, Crédito Asignado
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="text-left">
-                      <p className="text-xs opacity-80">Total Ganancia</p>
-                      <p className="font-semibold">{formatGiroCurrency(totals.minoristaProfit, 'COP')}</p>
+                      <div className="text-left">
+                        <p className="text-xs opacity-80">Crédito Asignado</p>
+                        <p className="font-semibold">{formatGiroCurrency(minoristaBalanceData.creditLimit, 'COP')}</p>
+                      </div>
                     </div>
-                    <div className="text-left">
-                      <p className="text-xs opacity-80">Deuda Actual</p>
-                      <p className="font-semibold text-red-100">
-                        {formatGiroCurrency(
-                          Math.max(0, minoristaBalanceData.creditLimit - minoristaBalanceData.availableCredit),
-                          'COP'
-                        )}
-                      </p>
+                  ) : (
+                    // Default fallback for Minorista if data not loaded
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      <div className="text-left">
+                        <p className="text-xs opacity-80">Total Ganancia</p>
+                        <p className="font-semibold">{formatGiroCurrency(totals.minoristaProfit, 'COP')}</p>
+                      </div>
                     </div>
-                    <div className="text-left">
-                      <p className="text-xs opacity-80">Crédito Asignado</p>
-                      <p className="font-semibold">{formatGiroCurrency(minoristaBalanceData.creditLimit, 'COP')}</p>
-                    </div>
-                  </div>
-                ) : (
-                  // Default fallback for Minorista if data not loaded
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    <div className="text-left">
-                      <p className="text-xs opacity-80">Total Ganancia</p>
-                      <p className="font-semibold">{formatGiroCurrency(totals.minoristaProfit, 'COP')}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
+                  )}
+                </div>
+              )}
           </div>
 
           {/* Pagination Controls */}
@@ -1006,7 +1040,7 @@ export function GirosPage() {
           onOpenChange={setDetailSheetOpen}
           giroId={selectedGiroId}
           initialStatus={selectedGiroStatus}
-          onUpdate={() => {}}
+          onUpdate={() => { }}
         />
       )}
 
@@ -1020,6 +1054,16 @@ export function GirosPage() {
           }}
         />
       )}
+
+      <ReassignGiroModal
+        giro={selectedGiroForReassign}
+        open={reassignModalOpen}
+        onOpenChange={setReassignModalOpen}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ['giros', 'list'] })
+          queryClient.invalidateQueries({ queryKey: ['giros', 'totals'] })
+        }}
+      />
     </div>
   )
 }

@@ -58,6 +58,14 @@ export function setupWebSocketSync(queryClient: QueryClient) {
         queryClient.invalidateQueries({ queryKey: ['bankAccounts'], exact: false })
       })
 
+      // Escuchar giro reasignado
+      const unsubAssigned = subscribe('giro:assigned', (event) => {
+        queryClient.invalidateQueries({ queryKey: ['giro', event.giro.id] })
+        queryClient.invalidateQueries({ queryKey: ['giros'], exact: false })
+        queryClient.invalidateQueries({ queryKey: ['totals'], exact: false })
+        queryClient.invalidateQueries({ queryKey: ['dashboard'], exact: false })
+      })
+
       // Escuchar giro eliminado
       const unsubDeleted = subscribe('giro:deleted', (event) => {
         queryClient.invalidateQueries({ queryKey: ['giro', event.giro.id] })
@@ -76,6 +84,7 @@ export function setupWebSocketSync(queryClient: QueryClient) {
         unsubProcessing()
         unsubExecuted()
         unsubReturned()
+        unsubAssigned()
         unsubDeleted()
       }
     },

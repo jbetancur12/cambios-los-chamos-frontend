@@ -112,9 +112,9 @@ export function useGiroWebSocket() {
         }
       })
 
-      socket.on('disconnect', () => {})
+      socket.on('disconnect', () => { })
 
-      socket.on('connect_error', () => {})
+      socket.on('connect_error', () => { })
 
       // Registrar listeners para eventos de giro
       socket.on('giro:created', (event: GiroEvent) => {
@@ -142,6 +142,10 @@ export function useGiroWebSocket() {
           giro: { id: data.giroId } as GiroUpdate,
           timestamp: data.timestamp,
         })
+      })
+
+      socket.on('giro:assigned', (event: GiroEvent) => {
+        emitEvent('giro:assigned', event)
       })
 
       // Eventos de Minorista
