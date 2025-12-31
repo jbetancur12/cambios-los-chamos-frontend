@@ -272,14 +272,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         {/* Mobile Header */}
 
         {/* Page Content */}
-        <main className="flex-1 pb-[calc(6rem+env(safe-area-inset-bottom))] md:pb-6">
-          {!user?.isActive && user?.role === 'MINORISTA' && (
-            <div className="bg-red-500 text-white px-4 py-3 text-center text-sm font-medium">
-              Tu cuenta está inactiva. Por favor contacta al administrador.
-            </div>
-          )}
-          {children}
-        </main>
+        <main className="flex-1 pb-[calc(6rem+env(safe-area-inset-bottom))] md:pb-6">{children}</main>
 
         {/* Mobile Bottom Navigation - 5 icons */}
         <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden border-t text-white bg-[linear-gradient(to_right,#136BBC,#274565)] border-white/10 dark:bg-none dark:bg-background dark:border-border pb-[calc(env(safe-area-inset-bottom)+15px)]">

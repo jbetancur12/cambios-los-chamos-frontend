@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { ChevronDown, AlertTriangle } from 'lucide-react'
-import { useAuth } from '@/contexts/AuthContext'
+import { ChevronDown } from 'lucide-react'
 // import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { TransferForm } from '@/components/forms/TransferForm'
@@ -39,8 +38,6 @@ export function SendGiroPage() {
   // const navigate = useNavigate()
   const [selectedType, setSelectedType] = useState<GiroType>('TRANSFERENCIA')
   const [dropdownOpen, setDropdownOpen] = useState(false)
-  const { user } = useAuth()
-  const isInactive = !user?.isActive && user?.role === 'MINORISTA'
 
   const handleSuccess = () => {
     // No navegar - permitir crear múltiples giros seguidos
@@ -73,8 +70,9 @@ export function SendGiroPage() {
                     setSelectedType(type.value)
                     setDropdownOpen(false)
                   }}
-                  className={`flex w-full flex-col gap-1 border-b border-border px-4 py-3 text-left transition-colors last:border-0 ${selectedType === type.value ? 'bg-accent/50' : 'hover:bg-accent'
-                    }`}
+                  className={`flex w-full flex-col gap-1 border-b border-border px-4 py-3 text-left transition-colors last:border-0 ${
+                    selectedType === type.value ? 'bg-accent/50' : 'hover:bg-accent'
+                  }`}
                 >
                   <span
                     className={`font-medium text-base md:text-lg ${selectedType === type.value ? 'text-primary' : 'text-foreground'}`}
@@ -91,25 +89,9 @@ export function SendGiroPage() {
 
       {/* Forms - Rendered inline based on selection */}
       <Card className="border border-gray-200">
-        {isInactive ? (
-          <div className="p-8 text-center bg-muted/20">
-            <div className="flex justify-center mb-4">
-              <div className="p-4 bg-red-100 dark:bg-red-900/20 rounded-full">
-                <AlertTriangle className="h-8 w-8 text-red-600 dark:text-red-400" />
-              </div>
-            </div>
-            <h3 className="text-lg font-semibold text-foreground mb-2">Cuenta Inactiva</h3>
-            <p className="text-muted-foreground max-w-md mx-auto">
-              Tu cuenta se encuentra inactiva. Para realizar giros, por favor contacta al administrador del sistema.
-            </p>
-          </div>
-        ) : (
-          <>
-            {selectedType === 'TRANSFERENCIA' && <TransferForm onSuccess={handleSuccess} />}
-            {selectedType === 'PAGO_MOVIL' && <MobilePaymentForm onSuccess={handleSuccess} />}
-            {selectedType === 'RECARGA' && <RechargeForm onSuccess={handleSuccess} />}
-          </>
-        )}
+        {selectedType === 'TRANSFERENCIA' && <TransferForm onSuccess={handleSuccess} />}
+        {selectedType === 'PAGO_MOVIL' && <MobilePaymentForm onSuccess={handleSuccess} />}
+        {selectedType === 'RECARGA' && <RechargeForm onSuccess={handleSuccess} />}
       </Card>
 
       {/* Back Button */}
