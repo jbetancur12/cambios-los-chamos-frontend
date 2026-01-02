@@ -66,7 +66,8 @@ export function OperatorAmountsManager() {
   const loadOperatorAmounts = async (operatorId: string) => {
     try {
       const data = await api.get<OperatorAmount[]>(`/operator-amounts/${operatorId}/all`)
-      setOperatorAmounts(data)
+      const sortedData = [...data].sort((a, b) => a.amount.amountBs - b.amount.amountBs)
+      setOperatorAmounts(sortedData)
     } catch (error) {
       console.error('Error loading operator amounts:', error)
       toast.error('Error al cargar relaciones de operador-monto')
@@ -240,11 +241,10 @@ export function OperatorAmountsManager() {
                   {operatorAmounts.map((oa) => (
                     <div
                       key={oa.id}
-                      className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all ${
-                        oa.isActive
+                      className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all ${oa.isActive
                           ? 'border-gray-200 bg-white hover:border-green-300 hover:shadow-md'
                           : 'border-gray-200 bg-gray-50 opacity-60'
-                      }`}
+                        }`}
                     >
                       {editingAmountId === oa.id ? (
                         <div className="flex-1 space-y-3">

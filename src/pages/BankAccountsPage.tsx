@@ -53,20 +53,20 @@ export function BankAccountsPage() {
     searchTerm.trim() === ''
       ? accounts
       : accounts.filter(
-          (account) =>
-            account.bank.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            account.accountHolder.toLowerCase().includes(searchTerm.toLowerCase())
-        )
+        (account) =>
+          account.bank.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          account.accountHolder.toLowerCase().includes(searchTerm.toLowerCase())
+      )
 
   // Client-side filtering for trasferencistas
   const filteredTrasferencistas =
     searchTransferencistasTerm.trim() === ''
       ? trasferencistas
       : trasferencistas.filter(
-          (t) =>
-            t.fullName.toLowerCase().includes(searchTransferencistasTerm.toLowerCase()) ||
-            t.email.toLowerCase().includes(searchTransferencistasTerm.toLowerCase())
-        )
+        (t) =>
+          t.fullName.toLowerCase().includes(searchTransferencistasTerm.toLowerCase()) ||
+          t.email.toLowerCase().includes(searchTransferencistasTerm.toLowerCase())
+      )
 
   // Handle errors
   if (accountsQuery.error) {
@@ -370,7 +370,7 @@ export function BankAccountsPage() {
                                 <span className="font-medium">{account.bank.name}</span>
                               </div>
                             </td>
-                            <td className="py-4 text-sm font-medium">{account.accountHolder}</td>
+                            <td className="py-4 text-base font-medium">{account.accountHolder}</td>
                             <td
                               className={cn(
                                 'py-4 text-right font-semibold',

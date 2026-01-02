@@ -80,6 +80,7 @@ export function RechargeForm({ onSuccess }: RechargeFormProps) {
     try {
       const data = await api.get<OperatorAmount[]>(`/operator-amounts/${operatorId}`)
       const amounts = data.map((oa) => oa.amount)
+      amounts.sort((a, b) => a.amountBs - b.amountBs)
       setAmounts(amounts)
       if (amounts.length > 0) {
         setSelectedAmount(amounts[0].id)
