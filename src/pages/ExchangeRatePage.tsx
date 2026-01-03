@@ -35,6 +35,17 @@ export function ExchangeRatePage() {
   const canCreateRate = user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN'
   const { generatePreviewImage } = useSiaRateImage()
 
+  // Pre-fill form from current rate if available
+  const handleOpenCreateSheet = () => {
+    if (currentRate) {
+      setBuyRate(currentRate.buyRate.toString())
+      setSellRate(currentRate.sellRate.toString())
+      setUsd(currentRate.usd.toString())
+      setBcv(currentRate.bcv.toString())
+    }
+    setCreateSheetOpen(true)
+  }
+
   const resetForm = () => {
     setBuyRate('')
     setSellRate('')
@@ -72,6 +83,7 @@ export function ExchangeRatePage() {
           toast.success(data.message || 'Tasa de cambio creada exitosamente')
           resetForm()
           setCreateSheetOpen(false)
+          setEditSheetOpen(false)
         },
         onError: (error) => {
           const message = error instanceof Error ? error.message : 'Error al crear tasa de cambio'
@@ -89,14 +101,15 @@ export function ExchangeRatePage() {
     }).format(date)
   }
 
-  // Edit state
+  // Edit state (Modified to behave as "Create New based on Old")
   const [editSheetOpen, setEditSheetOpen] = useState(false)
-  const [editRateId, setEditRateId] = useState('')
+  // const [editRateId, setEditRateId] = useState('') // Unused now
 
+  // We keep the old update mutation unused or remove it, but for safety in case I missed a usage, I'll leave hook but not use it here
   const updateExchangeRateMutation = useUpdateExchangeRate()
 
   const handleEdit = (rate: { id: string; buyRate: number; sellRate: number; usd: number; bcv: number }) => {
-    setEditRateId(rate.id)
+    // setEditRateId(rate.id)
     setBuyRate(rate.buyRate.toString())
     setSellRate(rate.sellRate.toString())
     setUsd(rate.usd.toString())
@@ -104,47 +117,8 @@ export function ExchangeRatePage() {
     setEditSheetOpen(true)
   }
 
-  const handleUpdate = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    const buyRateNum = parseFloat(buyRate)
-    const sellRateNum = parseFloat(sellRate)
-    const usdNum = parseFloat(usd)
-    const bcvNum = parseFloat(bcv)
-
-    if (isNaN(buyRateNum) || isNaN(sellRateNum) || isNaN(usdNum) || isNaN(bcvNum)) {
-      toast.error('Todos los campos deben ser números válidos')
-      return
-    }
-
-    if (buyRateNum <= 0 || sellRateNum <= 0 || usdNum <= 0 || bcvNum <= 0) {
-      toast.error('Todos los valores deben ser mayores a 0')
-      return
-    }
-
-    updateExchangeRateMutation.mutate(
-      {
-        rateId: editRateId,
-        data: {
-          buyRate: buyRateNum,
-          sellRate: sellRateNum,
-          usd: usdNum,
-          bcv: bcvNum,
-        },
-      },
-      {
-        onSuccess: (data) => {
-          toast.success(data.message || 'Tasa de cambio actualizada exitosamente')
-          resetForm()
-          setEditSheetOpen(false)
-        },
-        onError: (error) => {
-          const message = error instanceof Error ? error.message : 'Error al actualizar tasa de cambio'
-          toast.error(message)
-        },
-      }
-    )
-  }
+  // Re-use handleSubmit to CREATE NEW instead of updating
+  const handleUpdate = handleSubmit
 
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
@@ -231,7 +205,7 @@ export function ExchangeRatePage() {
       {/* Create Button */}
       {canCreateRate && (
         <div className="mb-6">
-          <Button onClick={() => setCreateSheetOpen(true)} className="bg-[linear-gradient(to_right,#136BBC,#274565)]">
+          <Button onClick={handleOpenCreateSheet} className="bg-[linear-gradient(to_right,#136BBC,#274565)]">
             <Plus className="h-4 w-4 mr-2" />
             Crear Nueva Tasa
           </Button>
