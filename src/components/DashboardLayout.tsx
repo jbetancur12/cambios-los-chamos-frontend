@@ -273,11 +273,6 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
 
         {/* Page Content */}
         <main className="flex-1 pb-[calc(6rem+env(safe-area-inset-bottom))] md:pb-6">
-          {!user?.isActive && user?.role === 'MINORISTA' && (
-            <div className="bg-red-500 text-white px-4 py-3 text-center text-sm font-medium">
-              Tu cuenta está inactiva. Por favor contacta al administrador.
-            </div>
-          )}
           {children}
         </main>
 
