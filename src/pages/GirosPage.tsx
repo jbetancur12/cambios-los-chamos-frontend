@@ -233,7 +233,7 @@ export function GirosPage() {
   const paginatedGiros = giros // They are already paginated from backend
   const totalPages = pagination?.totalPages || 0
 
-  console.log(paginatedGiros)
+
 
   // Calculate totals - THESE ARE NOW ONLY FOR CURRENT PAGE.
   // If we want GLOBAL totals, we need a separate endpoint or backend to return aggregation.
