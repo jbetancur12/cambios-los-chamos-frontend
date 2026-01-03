@@ -7,6 +7,7 @@ import { api } from '@/lib/api'
 import { toast } from 'sonner'
 import { useAuth } from '@/contexts/AuthContext'
 import { useBeneficiarySuggestions, type BeneficiaryData } from '@/hooks/useBeneficiarySuggestions'
+import { useCreateMobilePayment } from '@/hooks/mutations/useGiroMutations'
 import type { ExchangeRate, Minorista } from '@/types/api'
 import { BalanceInfo } from '@/components/BalanceInfo'
 import { NumericFormat } from 'react-number-format'
@@ -23,6 +24,7 @@ interface MobilePaymentFormProps {
 
 export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   const { user } = useAuth()
+  const createMobilePaymentMutation = useCreateMobilePayment()
   // Persistence
   const [cedula, setCedula] = useState('')
   const [selectedBank, setSelectedBank] = useState('')
@@ -168,11 +170,11 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   const effectiveRate =
     useCustomRate && (isSuperAdmin || isAdmin)
       ? {
-          buyRate: parseFloat(customBuyRate) || exchangeRate?.buyRate || 0,
-          sellRate: parseFloat(customSellRate) || exchangeRate?.sellRate || 0,
-          bcv: parseFloat(customBcv) || exchangeRate?.bcv || 0,
-          usd: parseFloat(customUsd) || exchangeRate?.usd || 0,
-        }
+        buyRate: parseFloat(customBuyRate) || exchangeRate?.buyRate || 0,
+        sellRate: parseFloat(customSellRate) || exchangeRate?.sellRate || 0,
+        bcv: parseFloat(customBcv) || exchangeRate?.bcv || 0,
+        usd: parseFloat(customUsd) || exchangeRate?.usd || 0,
+      }
       : exchangeRate
 
   const amountBs = effectiveRate && amountCop ? (Number(amountCop) / effectiveRate.sellRate).toFixed(2) : '0.00'
@@ -228,7 +230,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
         payload.customRate = { buyRate, sellRate, usd, bcv }
       }
 
-      await api.post('/giro/mobile-payment/create', payload)
+      await createMobilePaymentMutation.mutateAsync(payload)
 
       // Always save/update suggestion
       const bankObj = banks.find((b) => b.id === selectedBank)

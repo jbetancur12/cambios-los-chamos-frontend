@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
 import { useAuth } from '@/contexts/AuthContext'
+import { useCreateRecharge } from '@/hooks/mutations/useGiroMutations'
 import type { ExchangeRate, Minorista } from '@/types/api'
 import { BalanceInfo } from '@/components/BalanceInfo'
 import { formatCurrency } from '@/lib/formatCurrency'
@@ -35,6 +36,7 @@ interface RechargeFormProps {
 
 export function RechargeForm({ onSuccess }: RechargeFormProps) {
   const { user } = useAuth()
+  const createRechargeMutation = useCreateRecharge()
   const [selectedOperator, setSelectedOperator] = useState('')
   const [selectedAmount, setSelectedAmount] = useState('')
   const [phone, setPhone] = useState('')
@@ -162,7 +164,7 @@ export function RechargeForm({ onSuccess }: RechargeFormProps) {
 
     setLoading(true)
     try {
-      await api.post('/giro/recharge/create', {
+      await createRechargeMutation.mutateAsync({
         operatorId: selectedOperator,
         amountBsId: selectedAmount,
         phone,

@@ -157,6 +157,7 @@ export function useUpdateGiro() {
   })
 }
 
+// ... existing code ...
 export function useUpdateGiroRate() {
   const queryClient = useQueryClient()
 
@@ -168,6 +169,59 @@ export function useUpdateGiroRate() {
     onSuccess: (giro) => {
       queryClient.invalidateQueries({ queryKey: ['giro', giro.id], refetchType: 'active' })
       queryClient.invalidateQueries({ queryKey: ['giros'], exact: false, refetchType: 'active' })
+    },
+  })
+}
+
+interface CreateMobilePaymentInput {
+  cedula: string
+  bankId: string
+  phone: string
+  contactoEnvia: string
+  amountCop: number
+  customRate?: {
+    buyRate: number
+    sellRate: number
+    usd: number
+    bcv: number
+  }
+}
+
+export function useCreateMobilePayment() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (data: CreateMobilePaymentInput) => {
+      // Note: The backend endpoint is /giro/mobile-payment/create.
+      // We assume the caller constructs the payload correctly.
+      await api.post('/giro/mobile-payment/create', data)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['giros'], exact: false, refetchType: 'all' })
+      queryClient.invalidateQueries({ queryKey: ['dashboard'], exact: false, refetchType: 'all' })
+      queryClient.invalidateQueries({ queryKey: ['minorista'], exact: false, refetchType: 'all' })
+    },
+  })
+}
+
+interface CreateRechargeInput {
+  operatorId: string
+  amountBsId: string
+  phone: string
+  contactoEnvia: string
+}
+
+export function useCreateRecharge() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (data: CreateRechargeInput) => {
+      await api.post('/giro/recharge/create', data)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['giros'], exact: false, refetchType: 'all' })
+      queryClient.invalidateQueries({ queryKey: ['dashboard'], exact: false, refetchType: 'all' })
+      queryClient.invalidateQueries({ queryKey: ['minorista'], exact: false, refetchType: 'all' })
     },
   })
 }
