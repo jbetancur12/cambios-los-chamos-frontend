@@ -23,6 +23,7 @@ import { XCircle, Copy, Share2, Download, CreditCard } from 'lucide-react'
 import { GiroDetailSkeleton } from './skeletons/GiroDetailSkeleton'
 import type { GiroStatus } from '@/types/api'
 import { formatGiroCurrency } from '@/lib/giroUtils'
+import { useBeneficiarySuggestions } from '@/hooks/useBeneficiarySuggestions'
 
 interface GiroDetailSheetProps {
   open: boolean
@@ -69,6 +70,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
   const deleteGiroMutation = useDeleteGiro()
   const updateGiroMutation = useUpdateGiro()
   const updateGiroRateMutation = useUpdateGiroRate()
+  const { addSuggestion } = useBeneficiarySuggestions()
 
   // Local state for UI
   const [isEditing, setIsEditing] = useState(false)
@@ -221,8 +223,23 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
         data: updatePayload,
       },
       {
-        onSuccess: () => {
+        onSuccess: async () => {
           toast.success('Giro actualizado exitosamente.')
+
+          // Update suggestion with new data
+          if (updatePayload.beneficiaryName && updatePayload.beneficiaryId) {
+            // We need to pass all required fields. Some might come from the edit, others from existing giro if not edited (though current edit form edits all main fields)
+            // For safety, we use the values we are saving (editable* state)
+            await addSuggestion({
+              name: editableBeneficiaryName,
+              id: editableBeneficiaryId,
+              phone: editablePhone, // Even if not edited in this form, it's state
+              bankId: editableBankId,
+              accountNumber: editableAccountNumber,
+              executionType: giro.executionType || 'TRANSFERENCIA'
+            })
+          }
+
           setIsEditing(false)
           onUpdate()
         },

@@ -18,9 +18,54 @@ interface TransferFormProps {
   onSuccess: () => void
 }
 
+import { DeleteConfirmationModal } from '@/components/ui/DeleteConfirmationModal'
+
+// ... existing imports
+
 export function TransferForm({ onSuccess }: TransferFormProps) {
   const { user } = useAuth()
-  const { addSuggestion, searchSuggestions } = useBeneficiarySuggestions()
+  const { addSuggestion, searchSuggestions, deleteSuggestion } = useBeneficiarySuggestions()
+
+  // Modal state
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [suggestionToDelete, setSuggestionToDelete] = useState<string | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  const confirmDelete = (suggestionId: string) => {
+    setSuggestionToDelete(suggestionId)
+    setDeleteModalOpen(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!suggestionToDelete) return
+
+    setIsDeleting(true)
+    try {
+      const success = await deleteSuggestion(suggestionToDelete)
+      if (success) {
+        // Manually update local state to remove the suggestion immediately
+        if (showCedulaSuggestions) {
+          setCedulaSuggestions(prev => prev.filter(s => s.suggestionId !== suggestionToDelete))
+        }
+        // Name suggestions are handled by autocomplete, but we can't easily access its internal state
+        // However, if we are filtering from a parent state (if we were), we would update it here.
+        // For name search, since we use 'searchSuggestions' on change, we might need to trigger a re-search or just wait for react-query invalidation
+        // But for better UX, we can try to update 'nameSuggestions' if we have it locally? 
+        // looking at code, 'nameSuggestions' is state.
+        setNameSuggestions(prev => prev.filter(s => s.suggestionId !== suggestionToDelete))
+
+        toast.success('Beneficiario eliminado')
+      } else {
+        toast.error('No se pudo eliminar el beneficiario')
+      }
+    } catch (error) {
+      toast.error('Error al eliminar')
+    } finally {
+      setIsDeleting(false)
+      setDeleteModalOpen(false)
+      setSuggestionToDelete(null)
+    }
+  }
   const createGiroMutation = useCreateGiro()
 
   const [loading, setLoading] = useState(false)
@@ -256,11 +301,11 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
   const effectiveRate =
     useCustomRate && (isSuperAdmin || isAdmin)
       ? {
-          buyRate: parseFloat(customBuyRate) || currentRate?.buyRate || 0,
-          sellRate: parseFloat(customSellRate) || currentRate?.sellRate || 0,
-          bcv: parseFloat(customBcv) || currentRate?.bcv || 0,
-          usd: parseFloat(customUsd) || currentRate?.usd || 0,
-        }
+        buyRate: parseFloat(customBuyRate) || currentRate?.buyRate || 0,
+        sellRate: parseFloat(customSellRate) || currentRate?.sellRate || 0,
+        bcv: parseFloat(customBcv) || currentRate?.bcv || 0,
+        usd: parseFloat(customUsd) || currentRate?.usd || 0,
+      }
       : currentRate
 
   const calculateAmountBs = () => {
@@ -373,6 +418,9 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
           displayField="name"
           required
           className="text-lg md:text-lg h-10 md:h-12 font-medium placeholder:text-muted-foreground md:placeholder:text-transparent"
+          onDeleteSuggestion={(id) => {
+            confirmDelete(id)
+          }}
         />
       </div>
 
@@ -394,15 +442,48 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
           {showCedulaSuggestions && cedulaSuggestions.length > 0 && (
             <div className="absolute top-full left-0 right-0 mt-1 bg-card border rounded-md shadow-lg z-50 max-h-48 overflow-y-auto">
               {cedulaSuggestions.map((suggestion, index) => (
-                <button
+                <div
                   key={`cedula-${suggestion.id}-${index}`}
-                  type="button"
-                  onClick={() => handleSelectBeneficiaryFromCedula(suggestion)}
-                  className="w-full text-left px-3 py-2 hover:bg-muted/50 transition-colors text-sm border-b last:border-b-0"
+                  className="flex items-center w-full border-b last:border-b-0"
                 >
-                  <div className="font-medium">{suggestion.id}</div>
-                  <div className="text-xs text-muted-foreground">{suggestion.name}</div>
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSelectBeneficiaryFromCedula(suggestion)}
+                    className="flex-1 text-left px-3 py-2 hover:bg-muted/50 transition-colors text-sm"
+                  >
+                    <div className="font-medium">{suggestion.id}</div>
+                    <div className="text-xs text-muted-foreground">{suggestion.name}</div>
+                  </button>
+                  {suggestion.suggestionId && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        confirmDelete(suggestion.suggestionId!)
+                      }}
+                      className="px-3 py-2 text-destructive hover:bg-destructive/10 transition-colors"
+                      title="Eliminar beneficiario guardado"
+                    >
+                      <span className="sr-only">Delete</span>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="h-4 w-4"
+                      >
+                        <path d="M3 6h18" />
+                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
               ))}
             </div>
           )}
@@ -671,6 +752,14 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
           )}
         </Button>
       </div>
+      <DeleteConfirmationModal
+        open={deleteModalOpen}
+        onOpenChange={setDeleteModalOpen}
+        onConfirm={handleDeleteConfirm}
+        loading={isDeleting}
+        title="Eliminar beneficiario"
+        description="¿Estás seguro de que quieres eliminar este beneficiario guardado? Esta acción no se puede deshacer."
+      />
     </form>
   )
 }

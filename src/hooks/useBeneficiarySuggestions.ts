@@ -9,9 +9,11 @@ export interface BeneficiaryData {
   bankId: string
   accountNumber: string
   executionType: 'TRANSFERENCIA' | 'PAGO_MOVIL' | 'RECARGA' | 'EFECTIVO' | 'ZELLE' | 'OTROS'
+  suggestionId?: string
 }
 
 interface BeneficiarySuggestionResponse {
+  id: string
   beneficiaryName: string
   beneficiaryId: string
   phone: string
@@ -37,6 +39,7 @@ export function useBeneficiarySuggestions() {
         bankId: s.bankId,
         accountNumber: s.accountNumber,
         executionType: s.executionType || 'TRANSFERENCIA',
+        suggestionId: s.id,
       }))
     },
     staleTime: 1000 * 60 * 5, // 5 minutes
@@ -61,6 +64,24 @@ export function useBeneficiarySuggestions() {
         })
       } catch (error) {
         console.error('Error saving beneficiary:', error)
+      }
+    },
+    [queryClient]
+  )
+
+  // Add delete suggestion function
+  const deleteSuggestion = useCallback(
+    async (suggestionId: string) => {
+      try {
+        await api.delete(`/beneficiary-suggestion/${suggestionId}`)
+        // Invalidate queries to refresh the list
+        await queryClient.invalidateQueries({
+          queryKey: BENEFICIARY_SUGGESTIONS_QUERY_KEY,
+        })
+        return true
+      } catch (error) {
+        console.error('Error deleting beneficiary suggestion:', error)
+        return false
       }
     },
     [queryClient]
@@ -153,6 +174,7 @@ export function useBeneficiarySuggestions() {
     suggestions,
     isLoading,
     addSuggestion,
+    deleteSuggestion,
     getSuggestions,
     searchSuggestions: useCallback(async (query: string, executionType?: string) => {
       const response = await api.get<{ suggestions: BeneficiarySuggestionResponse[] }>(
@@ -168,6 +190,7 @@ export function useBeneficiarySuggestions() {
         bankId: s.bankId,
         accountNumber: s.accountNumber,
         executionType: s.executionType || 'TRANSFERENCIA',
+        suggestionId: s.id,
       }))
     }, []),
     getSuggestionsByName,

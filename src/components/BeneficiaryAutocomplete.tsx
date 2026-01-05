@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
-import { X as XIcon } from 'lucide-react'
+import { X as XIcon, Trash2 } from 'lucide-react'
 import type { BeneficiaryData } from '@/hooks/useBeneficiarySuggestions'
 
 interface BeneficiaryAutocompleteProps {
@@ -13,6 +13,7 @@ interface BeneficiaryAutocompleteProps {
   required?: boolean
   displayField?: 'name' | 'id' | 'phone'
   className?: string
+  onDeleteSuggestion?: (suggestionId: string) => void
 }
 
 export function BeneficiaryAutocomplete({
@@ -25,6 +26,7 @@ export function BeneficiaryAutocomplete({
   required = false,
   displayField = 'name',
   className,
+  onDeleteSuggestion,
 }: BeneficiaryAutocompleteProps) {
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -101,15 +103,33 @@ export function BeneficiaryAutocomplete({
       {isOpen && suggestions.length > 0 && (
         <div className="absolute top-full left-0 right-0 mt-1 bg-card border rounded-md shadow-lg z-50 max-h-64 overflow-y-auto">
           {suggestions.map((suggestion, index) => (
-            <button
+            <div
               key={`${suggestion.name}-${suggestion.id}-${suggestion.phone}-${index}`}
-              type="button"
-              onClick={() => handleSuggestionClick(suggestion)}
-              className="w-full text-left px-3 py-2 hover:bg-muted/50 transition-colors text-sm border-b last:border-b-0"
+              className="flex items-center w-full border-b last:border-b-0"
             >
-              <div className="font-medium">{displayValue(suggestion)}</div>
-              <div className="text-xs text-muted-foreground">{suggestionLabel(suggestion)}</div>
-            </button>
+              <button
+                type="button"
+                onClick={() => handleSuggestionClick(suggestion)}
+                className="flex-1 text-left px-3 py-2 hover:bg-muted/50 transition-colors text-sm"
+              >
+                <div className="font-medium">{displayValue(suggestion)}</div>
+                <div className="text-xs text-muted-foreground">{suggestionLabel(suggestion)}</div>
+              </button>
+              {onDeleteSuggestion && suggestion.suggestionId && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onDeleteSuggestion(suggestion.suggestionId!)
+                  }}
+                  className="px-3 py-2 text-destructive hover:bg-destructive/10 transition-colors"
+                  title="Eliminar beneficiario guardado"
+                >
+                  <span className="sr-only">Delete</span>
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              )}
+            </div>
           ))}
         </div>
       )}
