@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { CalculatorModal } from '@/components/CalculatorModal'
+import { VesCalculatorModal } from '@/components/VesCalculatorModal'
 import {
   Home,
   FileText,
@@ -80,6 +81,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
   const navigate = useNavigate()
   const [sideMenuOpen, setSideMenuOpen] = useState(false)
   const [calculatorModalOpen, setCalculatorModalOpen] = useState(false)
+  const [vesCalculatorModalOpen, setVesCalculatorModalOpen] = useState(false)
 
   const handleLogout = async () => {
     try {
@@ -127,6 +129,19 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
                   {item.label === 'Calculadora' ? (
                     <button
                       onClick={() => setCalculatorModalOpen(true)}
+                      className={cn(
+                        'w-full flex items-center gap-3 px-3 py-2 text-base font-medium rounded-md transition-all duration-200',
+                        isActive
+                          ? 'text-white bg-white/15 dark:bg-muted dark:text-foreground'
+                          : 'text-blue-100 hover:text-white hover:bg-white/5 dark:text-muted-foreground dark:hover:text-foreground dark:hover:bg-muted/50'
+                      )}
+                    >
+                      <Icon className="w-6 h-6" />
+                      <span>{item.label}</span>
+                    </button>
+                  ) : item.label === 'Calc. Compra VES' ? (
+                    <button
+                      onClick={() => setVesCalculatorModalOpen(true)}
                       className={cn(
                         'w-full flex items-center gap-3 px-3 py-2 text-base font-medium rounded-md transition-all duration-200',
                         isActive
@@ -212,6 +227,22 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
                     <button
                       onClick={() => {
                         setCalculatorModalOpen(true)
+                        setSideMenuOpen(false)
+                      }}
+                      className={cn(
+                        'w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-all duration-200',
+                        isActive
+                          ? 'text-white bg-white/15 dark:bg-muted dark:text-foreground'
+                          : 'text-blue-100 hover:text-white hover:bg-white/5 dark:text-muted-foreground dark:hover:text-foreground dark:hover:bg-muted/50'
+                      )}
+                    >
+                      <Icon className="w-5 h-5" />
+                      <span>{item.label}</span>
+                    </button>
+                  ) : item.label === 'Calc. Compra VES' ? (
+                    <button
+                      onClick={() => {
+                        setVesCalculatorModalOpen(true)
                         setSideMenuOpen(false)
                       }}
                       className={cn(
@@ -352,6 +383,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         </nav>
       </div>
       <CalculatorModal open={calculatorModalOpen} onOpenChange={setCalculatorModalOpen} />
+      <VesCalculatorModal open={vesCalculatorModalOpen} onOpenChange={setVesCalculatorModalOpen} />
     </div>
   )
 }
