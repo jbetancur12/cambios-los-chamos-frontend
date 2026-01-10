@@ -17,7 +17,7 @@ export function ExchangeRatePage() {
 
   // React Query hooks
   const { data: currentRate } = useCurrentExchangeRate()
-  const { data: rates = [], isLoading, error } = useExchangeRateHistory(20)
+  const { data: rates = [], isLoading, error } = useExchangeRateHistory(5)
   const createExchangeRateMutation = useCreateExchangeRate()
 
   // UI state
