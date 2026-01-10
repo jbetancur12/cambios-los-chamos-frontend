@@ -83,7 +83,7 @@ export function useSiaRateImage() {
 
       // Date
       ctx.fillStyle = '#ffffff'
-      ctx.font = 'bold 28px Arial'
+      ctx.font = 'bold 32px Arial'
       ctx.textAlign = 'left'
 
       const dateStr = new Date().toLocaleDateString('es-ES', {
