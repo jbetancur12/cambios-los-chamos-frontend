@@ -860,6 +860,44 @@ export function GirosPage() {
                       </span>
                     </div>
                   </div>
+
+                  {/* Mobile Actions */}
+                  <div className="mt-3 pt-3 border-t flex justify-end gap-3">
+                    {(user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN' || user?.role === 'TRANSFERENCISTA') &&
+                      (giro.status === 'ASIGNADO' || giro.status === 'PROCESANDO') && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setSelectedGiroForReassign(giro)
+                            setReassignModalOpen(true)
+                          }}
+                          className="h-8 px-2 text-orange-600 hover:text-orange-700 hover:bg-orange-50 dark:text-orange-400 dark:hover:bg-orange-900/30"
+                          title="Reasignar Giro"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="mr-1.5"
+                          >
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                            <line x1="19" y1="8" x2="19" y2="14" />
+                            <line x1="22" y1="11" x2="16" y2="11" />
+                          </svg>
+                          <span className="text-xs font-medium">Reasignar</span>
+                        </Button>
+                      )}
+                  </div>
+
                 </div>
               )
             })}
@@ -984,78 +1022,85 @@ export function GirosPage() {
             </div>
           </div>
         </>
-      )}
+      )
+      }
 
       {/* Custom Date Range Modal */}
-      {customDateModalOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              setCustomDateModalOpen(false)
-            }
-          }}
-        >
-          <Card className="w-full max-w-sm">
-            <div className="p-6 space-y-4">
-              <h2 className="text-lg font-semibold">Rango de Fechas Personalizado</h2>
-              <div className="space-y-2">
-                <label className="text-xs font-semibold">Desde</label>
-                <Input
-                  type="date"
-                  value={customDateRange.from}
-                  onChange={(e) => setCustomDateRange({ ...customDateRange, from: e.target.value })}
-                />
+      {
+        customDateModalOpen && (
+          <div
+            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setCustomDateModalOpen(false)
+              }
+            }}
+          >
+            <Card className="w-full max-w-sm">
+              <div className="p-6 space-y-4">
+                <h2 className="text-lg font-semibold">Rango de Fechas Personalizado</h2>
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold">Desde</label>
+                  <Input
+                    type="date"
+                    value={customDateRange.from}
+                    onChange={(e) => setCustomDateRange({ ...customDateRange, from: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold">Hasta</label>
+                  <Input
+                    type="date"
+                    value={customDateRange.to}
+                    onChange={(e) => setCustomDateRange({ ...customDateRange, to: e.target.value })}
+                  />
+                </div>
+                <div className="flex gap-2 pt-4">
+                  <Button
+                    onClick={() => {
+                      setFilterDate('CUSTOM')
+                      setCustomDateModalOpen(false)
+                    }}
+                    className="flex-1"
+                    size="sm"
+                  >
+                    Aplicar
+                  </Button>
+                  <Button onClick={() => setCustomDateModalOpen(false)} variant="outline" className="flex-1" size="sm">
+                    Cancelar
+                  </Button>
+                </div>
               </div>
-              <div className="space-y-2">
-                <label className="text-xs font-semibold">Hasta</label>
-                <Input
-                  type="date"
-                  value={customDateRange.to}
-                  onChange={(e) => setCustomDateRange({ ...customDateRange, to: e.target.value })}
-                />
-              </div>
-              <div className="flex gap-2 pt-4">
-                <Button
-                  onClick={() => {
-                    setFilterDate('CUSTOM')
-                    setCustomDateModalOpen(false)
-                  }}
-                  className="flex-1"
-                  size="sm"
-                >
-                  Aplicar
-                </Button>
-                <Button onClick={() => setCustomDateModalOpen(false)} variant="outline" className="flex-1" size="sm">
-                  Cancelar
-                </Button>
-              </div>
-            </div>
-          </Card>
-        </div>
-      )}
+            </Card>
+          </div>
+        )
+      }
 
       {/* Giro Detail Sheet */}
-      {selectedGiroId && (
-        <GiroDetailSheet
-          open={detailSheetOpen}
-          onOpenChange={setDetailSheetOpen}
-          giroId={selectedGiroId}
-          initialStatus={selectedGiroStatus}
-          onUpdate={() => { }}
-        />
-      )}
+      {
+        selectedGiroId && (
+          <GiroDetailSheet
+            open={detailSheetOpen}
+            onOpenChange={setDetailSheetOpen}
+            giroId={selectedGiroId}
+            initialStatus={selectedGiroStatus}
+            onUpdate={() => { }}
+          />
+        )
+      }
 
       {/* Print Modal */}
-      {selectedGiroForPrint && (
-        <PrintTicketModal
-          giroId={selectedGiroForPrint}
-          open={showPrintModal}
-          onOpenChange={(open) => {
-            setShowPrintModal(open)
-          }}
-        />
-      )}
+      {
+        selectedGiroForPrint && (
+          <PrintTicketModal
+            giroId={selectedGiroForPrint}
+            open={showPrintModal}
+            onOpenChange={(open) => {
+              setShowPrintModal(open)
+            }}
+          />
+        )
+      }
 
       <ReassignGiroModal
         giro={selectedGiroForReassign}
@@ -1066,6 +1111,6 @@ export function GirosPage() {
           queryClient.invalidateQueries({ queryKey: ['giros', 'totals'] })
         }}
       />
-    </div>
+    </div >
   )
 }
