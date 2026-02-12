@@ -85,7 +85,12 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
   const [showReturnForm, setShowReturnForm] = useState(false)
   const [returnReason, setReturnReason] = useState('')
   const [isEditingRate, setIsEditingRate] = useState(false)
-  const [editableRate, setEditableRate] = useState({
+  const [editableRate, setEditableRate] = useState<{
+    buyRate: number | string
+    sellRate: number | string
+    usd: number | string
+    bcv: number | string
+  }>({
     buyRate: 0,
     sellRate: 0,
     usd: 0,
@@ -370,10 +375,10 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
       {
         giroId: giro.id,
         data: {
-          buyRate: editableRate.buyRate,
-          sellRate: editableRate.sellRate,
-          usd: editableRate.usd,
-          bcv: editableRate.bcv,
+          buyRate: Number(editableRate.buyRate),
+          sellRate: Number(editableRate.sellRate),
+          usd: Number(editableRate.usd),
+          bcv: Number(editableRate.bcv),
         },
       },
       {
@@ -462,8 +467,6 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
       if (navigator.canShare({ files: [file] })) {
         await navigator.share({
           files: [file],
-          title: 'Comprobante de Pago',
-          text: 'Compartir comprobante de pago',
         })
         toast.success('Compartido exitosamente')
       } else {
@@ -547,10 +550,12 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
               {/* Minimalist Key-Value Pairs */}
               <div className="space-y-4 text-sm">
                 {/* Cliente / Beneficiario Name */}
-                <div className="flex justify-between items-start">
-                  <span className="text-muted-foreground">Cliente:</span>
-                  <span className="font-medium text-right">{giro.beneficiaryName}</span>
-                </div>
+                {giro.executionType !== 'PAGO_MOVIL' && (
+                  <div className="flex justify-between items-start">
+                    <span className="text-muted-foreground">Cliente:</span>
+                    <span className="font-medium text-right">{giro.beneficiaryName}</span>
+                  </div>
+                )}
 
                 {/* Cédula */}
                 <div className="flex justify-between items-center">
@@ -587,7 +592,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
                 </div>
 
                 {/* CELULAR - SOLO PAGO MOVIL */}
-                {giro.executionType === 'PAGO_MOVIL' && (
+                {/* {giro.executionType === 'PAGO_MOVIL' && (
                   <div className="flex justify-between items-center">
                     <span className="text-muted-foreground">Celular:</span>
                     <div className="flex items-center gap-2">
@@ -600,7 +605,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
                       </button>
                     </div>
                   </div>
-                )}
+                )} */}
 
                 {/* Monto USD/COP */}
                 <div className="flex justify-between items-center pt-2">
@@ -627,19 +632,22 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
               {/* Editing Form */}
               {isEditing && (
                 <div className="space-y-4 border p-4 rounded-lg bg-muted/20">
+
                   <h3 className="font-semibold text-sm">Editar Datos</h3>
                   <div className="space-y-3">
-                    <div className="grid gap-1">
-                      <Label htmlFor="editName" className="text-xs">
-                        Nombre
-                      </Label>
-                      <Input
-                        id="editName"
-                        value={editableBeneficiaryName}
-                        onChange={(e) => setEditableBeneficiaryName(e.target.value)}
-                        className="h-8"
-                      />
-                    </div>
+                    {giro.executionType !== 'PAGO_MOVIL' && (
+                      <div className="grid gap-1">
+                        <Label htmlFor="editName" className="text-xs">
+                          Nombre
+                        </Label>
+                        <Input
+                          id="editName"
+                          value={editableBeneficiaryName}
+                          onChange={(e) => setEditableBeneficiaryName(e.target.value)}
+                          className="h-8"
+                        />
+                      </div>
+                    )}
                     <div className="grid gap-1">
                       <Label htmlFor="editId" className="text-xs">
                         Cédula
@@ -731,9 +739,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
                             step="0.01"
                             className="h-7"
                             value={editableRate.buyRate}
-                            onChange={(e) =>
-                              setEditableRate({ ...editableRate, buyRate: parseFloat(e.target.value) || 0 })
-                            }
+                            onChange={(e) => setEditableRate({ ...editableRate, buyRate: e.target.value })}
                           />
                         </div>
                         <div>
@@ -743,9 +749,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
                             step="0.01"
                             className="h-7"
                             value={editableRate.sellRate}
-                            onChange={(e) =>
-                              setEditableRate({ ...editableRate, sellRate: parseFloat(e.target.value) || 0 })
-                            }
+                            onChange={(e) => setEditableRate({ ...editableRate, sellRate: e.target.value })}
                           />
                         </div>
                       </div>
