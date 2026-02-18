@@ -10,6 +10,7 @@ import {
   useMinoristaProfitReport,
   useBankTransactionReport,
   useMinoristaTransactionReport,
+  useInventoryProfitReport,
 } from '@/hooks/queries/useReportQueries'
 import {
   LineChart,
@@ -29,7 +30,7 @@ import {
 import { ChevronDown, ChevronUp, Calendar } from 'lucide-react'
 import { getTodayString, getStartOfDayISO, getEndOfDayISO } from '@/lib/dateUtils'
 
-type TabType = 'system' | 'minoristas' | 'bank' | 'minoristaTransactions'
+type TabType = 'system' | 'minoristas' | 'bank' | 'minoristaTransactions' | 'inventory'
 
 const CHART_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899']
 
@@ -55,6 +56,7 @@ export function ReportsPage() {
   const minoristaReportQuery = useMinoristaProfitReport(dateFrom || null, dateTo || null)
   const bankReportQuery = useBankTransactionReport(dateFrom || null, dateTo || null)
   const minoristaTransactionReportQuery = useMinoristaTransactionReport(dateFrom || null, dateTo || null)
+  const inventoryReportQuery = useInventoryProfitReport(dateFrom || null, dateTo || null)
 
   // Determine which query to use based on active tab
   const getActiveQueryState = () => {
@@ -67,6 +69,8 @@ export function ReportsPage() {
         return { isLoading: bankReportQuery.isLoading, error: bankReportQuery.error }
       case 'minoristaTransactions':
         return { isLoading: minoristaTransactionReportQuery.isLoading, error: minoristaTransactionReportQuery.error }
+      case 'inventory':
+        return { isLoading: inventoryReportQuery.isLoading, error: inventoryReportQuery.error }
       default:
         return { isLoading: false, error: null }
     }
@@ -186,41 +190,47 @@ export function ReportsPage() {
         <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
           <button
             onClick={() => handleTabChange('system')}
-            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${
-              activeTab === 'system' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
-            }`}
+            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${activeTab === 'system' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
+              }`}
             style={activeTab === 'system' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             Ganancias del Sistema
           </button>
           <button
             onClick={() => handleTabChange('minoristas')}
-            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${
-              activeTab === 'minoristas' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
-            }`}
+            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${activeTab === 'minoristas' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
+              }`}
             style={activeTab === 'minoristas' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             Top Minoristas
           </button>
           <button
             onClick={() => handleTabChange('bank')}
-            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${
-              activeTab === 'bank' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
-            }`}
+            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${activeTab === 'bank' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
+              }`}
             style={activeTab === 'bank' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             Transacciones Bancarias
           </button>
           <button
             onClick={() => handleTabChange('minoristaTransactions')}
-            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${
-              activeTab === 'minoristaTransactions' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
-            }`}
+            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${activeTab === 'minoristaTransactions' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
+              }`}
             style={
               activeTab === 'minoristaTransactions' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}
             }
           >
             Transacciones Minoristas
+          </button>
+          <button
+            onClick={() => handleTabChange('inventory')}
+            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${activeTab === 'inventory' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
+              }`}
+            style={
+              activeTab === 'inventory' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}
+            }
+          >
+            Inventario
           </button>
         </div>
 
@@ -596,10 +606,42 @@ export function ReportsPage() {
           </>
         )}
 
+        {/* Inventory Profit Report */}
+        {activeTab === 'inventory' && inventoryReportQuery.data && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+            <StatCard
+              label="Ventas Totales"
+              value={`$${inventoryReportQuery.data.totalSales.toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
+              color="bg-blue-100 dark:bg-blue-900/20"
+            />
+            <StatCard
+              label="Costo Total"
+              value={`$${inventoryReportQuery.data.totalCost.toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
+              color="bg-orange-100 dark:bg-orange-900/20"
+            />
+            <StatCard
+              label="Ganancia Neta"
+              value={`$${inventoryReportQuery.data.totalProfit.toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
+              color="bg-green-100 dark:bg-green-900/20"
+            />
+            <StatCard
+              label="Items Vendidos"
+              value={inventoryReportQuery.data.totalItemsSold.toString()}
+              color="bg-purple-100 dark:bg-purple-900/20"
+            />
+            <StatCard
+              label="Transacciones"
+              value={inventoryReportQuery.data.transactionCount.toString()}
+              color="bg-indigo-100 dark:bg-indigo-900/20"
+            />
+          </div>
+        )}
+
         {!systemReportQuery.data &&
           !minoristaReportQuery.data &&
           !bankReportQuery.data &&
           !minoristaTransactionReportQuery.data &&
+          !inventoryReportQuery.data &&
           !isLoading && (
             <Card>
               <CardContent className="text-center py-8">

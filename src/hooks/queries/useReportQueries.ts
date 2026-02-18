@@ -204,3 +204,27 @@ export function useMinoristaGiroTrendReport(dateFrom: string | null, dateTo: str
     enabled: !!dateFrom && !!dateTo && enabled,
   })
 }
+
+// Inventory Profit Report Types
+export interface InventoryProfitReport {
+  totalSales: number
+  totalCost: number
+  totalProfit: number
+  totalItemsSold: number
+  transactionCount: number
+}
+
+// Query hook for inventory profit report
+export function useInventoryProfitReport(dateFrom: string | null, dateTo: string | null, enabled: boolean = true) {
+  return useQuery({
+    queryKey: ['reports', 'inventory-profit', { dateFrom, dateTo }],
+    queryFn: async () => {
+      const response = await api.get<InventoryProfitReport>(
+        `/reports/inventory-profit?dateFrom=${dateFrom}&dateTo=${dateTo}`
+      )
+      return response
+    },
+    ...applyDedupConfig('NORMAL'),
+    enabled: !!dateFrom && !!dateTo && enabled,
+  })
+}

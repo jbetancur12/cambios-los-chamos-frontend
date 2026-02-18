@@ -27,6 +27,7 @@ import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage'
 import { ConfigPage } from '@/pages/ConfigPage'
 import { AuditPage } from '@/pages/AuditPage'
 import { LogsPage } from '@/pages/LogsPage'
+import InventoryPage from '@/pages/InventoryPage'
 
 import { useEffect } from 'react'
 import { requestNotifyPermission } from './firebase/messaging'
@@ -285,6 +286,20 @@ function App() {
                       <ErrorBoundary>
                         <DashboardLayout>
                           <LogsPage />
+                        </DashboardLayout>
+                      </ErrorBoundary>
+                    </ProtectedRoute>
+                  }
+                />
+
+                {/* Inventory */}
+                <Route
+                  path="/inventory"
+                  element={
+                    <ProtectedRoute requiredRole={['SUPER_ADMIN', 'ADMIN']}>
+                      <ErrorBoundary>
+                        <DashboardLayout>
+                          <InventoryPage />
                         </DashboardLayout>
                       </ErrorBoundary>
                     </ProtectedRoute>
