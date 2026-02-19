@@ -73,6 +73,9 @@ export const inventoryApi = {
     createSale: async (data: { productId: string; quantity: number; sellingPrice?: number }) => {
         return await api.post('/inventory/transactions/sale', data);
     },
+    createBulkSale: async (data: { items: { productId: string; quantity: number; sellingPrice?: number }[] }) => {
+        return await api.post('/inventory/transactions/bulk-sale', data);
+    },
     createAdjustment: async (data: { productId: string; quantity: number; reason?: string }) => {
         return await api.post('/inventory/transactions/adjustment', data);
     }

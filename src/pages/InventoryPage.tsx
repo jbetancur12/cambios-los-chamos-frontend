@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { DeleteConfirmationModal } from '@/components/ui/DeleteConfirmationModal';
 import { useAuth } from '@/contexts/AuthContext';
+import { POSSheet } from './POSSheet';
 
 export default function InventoryPage() {
     const queryClient = useQueryClient();
@@ -34,6 +35,9 @@ export default function InventoryPage() {
     // Delete State
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+
+    // POS State
+    const [posOpen, setPosOpen] = useState(false);
 
     const filteredProducts = products?.filter(p =>
         p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -78,6 +82,9 @@ export default function InventoryPage() {
                         </Button>
                         <Button onClick={openCreate} className="bg-[linear-gradient(to_right,#136BBC,#274565)]">
                             <Plus className="mr-2 h-4 w-4" /> Nuevo Producto
+                        </Button>
+                        <Button onClick={() => setPosOpen(true)} className="bg-green-600 hover:bg-green-700 text-white shadow-sm">
+                            <ShoppingCart className="mr-2 h-4 w-4" /> Nueva Venta (POS)
                         </Button>
                     </div>
                 )}
@@ -257,6 +264,8 @@ export default function InventoryPage() {
                 title="¿Eliminar producto?"
                 description={`¿Estás seguro de que deseas eliminar "${productToDelete?.name}"? Esta acción no se puede deshacer.`}
             />
+
+            <POSSheet open={posOpen} onOpenChange={setPosOpen} />
         </div>
     );
 }
