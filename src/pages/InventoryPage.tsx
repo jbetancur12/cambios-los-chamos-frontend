@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetBody } from '@/components/ui/sheet';
 import { Label } from '@/components/ui/label';
-import { Plus, Edit, ShoppingCart, TrendingUp, Search, Trash2 } from 'lucide-react';
+import { Plus, Edit, ShoppingCart, TrendingUp, Search, Trash2, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatCurrency } from '@/lib/formatCurrency';
 import { Badge } from '@/components/ui/badge';
@@ -485,10 +485,19 @@ function SaleSheet({ open, onOpenChange, product }: { open: boolean, onOpenChang
 }
 
 function SalesReportSheet({ open, onOpenChange }: { open: boolean, onOpenChange: (open: boolean) => void }) {
-    const [startDate, setStartDate] = useState<string>(new Date().toISOString().split('T')[0]);
-    const [endDate, setEndDate] = useState<string>(new Date().toISOString().split('T')[0]);
-    const [showScrollTop, setShowScrollTop] = useState(false);
+    const _now = new Date();
+    const today = `${_now.getFullYear()}-${String(_now.getMonth() + 1).padStart(2, '0')}-${String(_now.getDate()).padStart(2, '0')}`;
+    const [filterType, setFilterType] = React.useState<'SINGLE' | 'CUSTOM'>('SINGLE');
+    const [singleDate, setSingleDate] = React.useState<string>(today);
+    const [customRange, setCustomRange] = React.useState({ from: today, to: today });
+    const [customModalOpen, setCustomModalOpen] = React.useState(false);
+    const dateInputRef = React.useRef<HTMLInputElement>(null);
+    const [showScrollTop, setShowScrollTop] = React.useState(false);
     const scrollRef = React.useRef<HTMLDivElement>(null);
+
+    // Derive actual query dates
+    const startDate = filterType === 'CUSTOM' ? customRange.from : singleDate;
+    const endDate = filterType === 'CUSTOM' ? customRange.to : singleDate;
 
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
         setShowScrollTop(e.currentTarget.scrollTop > 200);
@@ -498,16 +507,17 @@ function SalesReportSheet({ open, onOpenChange }: { open: boolean, onOpenChange:
         scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    const { data: transactions, isLoading, refetch } = useQuery({
+    const { data: transactions, isLoading } = useQuery({
         queryKey: ['transactions', 'report', startDate, endDate],
         queryFn: () => {
-            const start = new Date(startDate);
-            start.setHours(0, 0, 0, 0);
-            const end = new Date(endDate);
-            end.setHours(23, 59, 59, 999);
+            // Parse date strings as LOCAL midnight (not UTC midnight like new Date("YYYY-MM-DD") would do)
+            const [sy, sm, sd] = startDate.split('-').map(Number);
+            const start = new Date(sy, sm - 1, sd, 0, 0, 0, 0);
+            const [ey, em, ed] = endDate.split('-').map(Number);
+            const end = new Date(ey, em - 1, ed, 23, 59, 59, 999);
             return inventoryApi.getTransactions({ startDate: start, endDate: end });
         },
-        enabled: open, // Fetch when open
+        enabled: open,
     });
 
     // Calculate Totals
@@ -517,149 +527,183 @@ function SalesReportSheet({ open, onOpenChange }: { open: boolean, onOpenChange:
     const totalItems = sales.reduce((sum, t) => sum + t.quantity, 0);
 
     return (
-        <Sheet open={open} onOpenChange={onOpenChange}>
-            <SheetContent className="w-full sm:max-w-xl flex flex-col p-0">
-                <SheetHeader onClose={() => onOpenChange(false)} className="px-6 pt-6 pb-4 border-b">
-                    <SheetTitle>Reporte de Ventas</SheetTitle>
-                </SheetHeader>
+        <>
+            <Sheet open={open} onOpenChange={onOpenChange}>
+                <SheetContent className="w-full sm:max-w-xl flex flex-col p-0">
+                    <SheetHeader onClose={() => onOpenChange(false)} className="px-6 pt-6 pb-4 border-b">
+                        <SheetTitle>Reporte de Ventas</SheetTitle>
+                    </SheetHeader>
+                    <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-y-auto relative">
+                        {showScrollTop && (
+                            <button
+                                onClick={scrollToTop}
+                                className="fixed bottom-6 right-6 z-50 flex items-center gap-1.5 bg-primary text-primary-foreground text-xs font-medium px-3 py-2 rounded-full shadow-lg hover:opacity-90 transition-all animate-in fade-in slide-in-from-bottom-2"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 15l-6-6-6 6" /></svg>
+                                Ir arriba
+                            </button>
+                        )}
+                        <SheetBody>
+                            <div className="space-y-6 py-4">
+                                {/* Date filter */}
+                                <div className="flex gap-2 flex-wrap">
+                                    <Button
+                                        variant={filterType === 'SINGLE' ? 'default' : 'outline'}
+                                        size="sm"
+                                        className={`relative overflow-hidden ${filterType === 'SINGLE' ? 'text-white' : ''}`}
+                                        style={filterType === 'SINGLE' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+                                        onClick={() => dateInputRef.current?.showPicker()}
+                                    >
+                                        <Calendar className="mr-2 h-3 w-3" />
+                                        {singleDate === today ? 'Ver día (Hoy)' : `Ver día: ${singleDate}`}
+                                    </Button>
+                                    <input
+                                        ref={dateInputRef}
+                                        type="date"
+                                        value={singleDate}
+                                        onChange={(e) => { if (e.target.value) { setSingleDate(e.target.value); setFilterType('SINGLE'); } }}
+                                        className="absolute opacity-0 pointer-events-none w-0 h-0"
+                                        tabIndex={-1}
+                                    />
+                                    <Button
+                                        variant={filterType === 'CUSTOM' ? 'default' : 'outline'}
+                                        size="sm"
+                                        onClick={() => setCustomModalOpen(true)}
+                                        className={filterType === 'CUSTOM' ? 'text-white' : ''}
+                                        style={filterType === 'CUSTOM' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+                                    >
+                                        <Calendar className="h-3 w-3 mr-1" />
+                                        {filterType === 'CUSTOM' ? `${customRange.from} → ${customRange.to}` : 'Personalizado'}
+                                    </Button>
+                                </div>
+
+                                {/* Summary Cards */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="bg-green-50 border border-green-100 p-4 rounded-lg">
+                                        <span className="text-xs text-green-600 font-medium uppercase tracking-wider">Total Ventas</span>
+                                        <div className="text-2xl font-bold text-green-700">{formatCurrency(totalRevenue)}</div>
+                                    </div>
+                                    <div className="bg-blue-50 border border-blue-100 p-4 rounded-lg">
+                                        <span className="text-xs text-blue-600 font-medium uppercase tracking-wider">Ganancia (Real)</span>
+                                        <div className="text-2xl font-bold text-blue-700">{formatCurrency(totalProfit)}</div>
+                                    </div>
+                                    <div className="bg-gray-50 border p-4 rounded-lg col-span-2 flex justify-between items-center">
+                                        <span className="text-sm text-gray-600">Items Vendidos:</span>
+                                        <span className="font-bold text-lg">{totalItems}</span>
+                                    </div>
+                                </div>
+
+                                {/* Top Products */}
+                                {sales.length > 0 && (() => {
+                                    const byProduct = sales.reduce((acc, t) => {
+                                        const key = t.product?.name || 'Producto Eliminado';
+                                        if (!acc[key]) acc[key] = { name: key, units: 0, revenue: 0, profit: 0 };
+                                        acc[key].units += t.quantity;
+                                        acc[key].revenue += Number(t.totalPrice);
+                                        acc[key].profit += Number(t.profit || 0);
+                                        return acc;
+                                    }, {} as Record<string, { name: string; units: number; revenue: number; profit: number }>);
+                                    const top = Object.values(byProduct).sort((a, b) => b.units - a.units).slice(0, 5);
+                                    const maxUnits = top[0]?.units || 1;
+                                    return (
+                                        <div className="space-y-3">
+                                            <h3 className="font-medium border-b pb-2 flex items-center gap-2"><span>🏆</span> Top Productos</h3>
+                                            {top.map((p, i) => (
+                                                <div key={p.name} className="space-y-1">
+                                                    <div className="flex justify-between items-center text-sm">
+                                                        <div className="flex items-center gap-2 min-w-0">
+                                                            <span className={`text-xs font-bold w-5 text-center shrink-0 ${i === 0 ? 'text-yellow-500' : i === 1 ? 'text-gray-400' : i === 2 ? 'text-amber-600' : 'text-muted-foreground'}`}>
+                                                                {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`}
+                                                            </span>
+                                                            <span className="font-medium truncate">{p.name}</span>
+                                                        </div>
+                                                        <div className="text-right shrink-0 ml-2">
+                                                            <span className="font-semibold text-xs">{p.units} unds</span>
+                                                            <span className="text-muted-foreground text-xs"> · {formatCurrency(p.revenue)}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="flex-1 bg-muted rounded-full h-1.5 overflow-hidden">
+                                                            <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${(p.units / maxUnits) * 100}%` }} />
+                                                        </div>
+                                                        <span className="text-xs text-green-600 shrink-0">+{formatCurrency(p.profit)}</span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    );
+                                })()}
+
+                                {/* Transactions List */}
+                                <div className="space-y-4">
+                                    <h3 className="font-medium border-b pb-2">Detalle de Transacciones</h3>
+                                    {isLoading ? (
+                                        <div className="text-center py-8 text-muted-foreground">Cargando reporte...</div>
+                                    ) : sales.length === 0 ? (
+                                        <div className="text-center py-8 text-muted-foreground bg-muted/10 rounded-lg">
+                                            No hay ventas registradas en este periodo.
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-3">
+                                            {sales.map((sale) => (
+                                                <div key={sale.id} className="flex justify-between items-start text-sm p-3 hover:bg-muted/50 rounded-md border border-transparent hover:border-border transition-colors">
+                                                    <div>
+                                                        <div className="font-medium">{sale.product?.name || 'Producto Eliminado'}</div>
+                                                        <div className="text-xs text-muted-foreground">
+                                                            {new Date(sale.createdAt).toLocaleDateString()} {new Date(sale.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                            {' • '}{sale.createdBy?.fullName}
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <div className="text-sm font-semibold">{sale.quantity} unds x {formatCurrency(Number(sale.pricePerUnit))}</div>
+                                                        <div className="font-medium text-xs text-muted-foreground">Total: {formatCurrency(Number(sale.totalPrice))}</div>
+                                                        <div className="text-xs text-green-600">+{formatCurrency(Number(sale.profit || 0))} ganancia</div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </SheetBody>
+                    </div>
+                </SheetContent>
+            </Sheet>
+
+            {/* Custom Date Range Modal */}
+            {customModalOpen && (
                 <div
-                    ref={scrollRef}
-                    onScroll={handleScroll}
-                    className="flex-1 overflow-y-auto relative"
+                    className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center p-4"
+                    onClick={(e) => { if (e.target === e.currentTarget) setCustomModalOpen(false); }}
                 >
-                    {/* Floating scroll-to-top button */}
-                    {showScrollTop && (
-                        <button
-                            onClick={scrollToTop}
-                            className="fixed bottom-6 right-6 z-50 flex items-center gap-1.5 bg-primary text-primary-foreground text-xs font-medium px-3 py-2 rounded-full shadow-lg hover:opacity-90 transition-all animate-in fade-in slide-in-from-bottom-2"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 15l-6-6-6 6" /></svg>
-                            Ir arriba
-                        </button>
-                    )}
-                    <SheetBody>
-                        <div className="space-y-6 py-4">
-                            {/* Filters */}
-                            <div className="flex gap-4 items-end bg-muted/30 p-4 rounded-lg border">
-                                <div className="space-y-2 flex-1">
-                                    <Label>Desde</Label>
-                                    <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-                                </div>
-                                <div className="space-y-2 flex-1">
-                                    <Label>Hasta</Label>
-                                    <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-                                </div>
-                                <Button variant="outline" size="icon" onClick={() => refetch()} title="Refrescar">
-                                    <Search className="h-4 w-4" />
+                    <Card className="w-full max-w-sm">
+                        <div className="p-6 space-y-4">
+                            <h2 className="text-lg font-semibold">Rango de Fechas Personalizado</h2>
+                            <div className="space-y-2">
+                                <Label>Desde</Label>
+                                <Input type="date" value={customRange.from} onChange={(e) => setCustomRange((r) => ({ ...r, from: e.target.value }))} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Hasta</Label>
+                                <Input type="date" value={customRange.to} onChange={(e) => setCustomRange((r) => ({ ...r, to: e.target.value }))} />
+                            </div>
+                            <div className="flex gap-2 pt-2">
+                                <Button
+                                    onClick={() => { setFilterType('CUSTOM'); setCustomModalOpen(false); }}
+                                    className="flex-1"
+                                    size="sm"
+                                    style={{ background: 'linear-gradient(to right, #136BBC, #274565)' }}
+                                >
+                                    Aplicar
+                                </Button>
+                                <Button onClick={() => setCustomModalOpen(false)} variant="outline" className="flex-1" size="sm">
+                                    Cancelar
                                 </Button>
                             </div>
-
-                            {/* Summary Cards */}
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="bg-green-50 border border-green-100 p-4 rounded-lg">
-                                    <span className="text-xs text-green-600 font-medium uppercase tracking-wider">Total Ventas</span>
-                                    <div className="text-2xl font-bold text-green-700">{formatCurrency(totalRevenue)}</div>
-                                </div>
-                                <div className="bg-blue-50 border border-blue-100 p-4 rounded-lg">
-                                    <span className="text-xs text-blue-600 font-medium uppercase tracking-wider">Ganancia (Real)</span>
-                                    <div className="text-2xl font-bold text-blue-700">{formatCurrency(totalProfit)}</div>
-                                </div>
-                                <div className="bg-gray-50 border p-4 rounded-lg col-span-2 flex justify-between items-center">
-                                    <span className="text-sm text-gray-600">Items Vendidos:</span>
-                                    <span className="font-bold text-lg">{totalItems}</span>
-                                </div>
-                            </div>
-
-                            {/* Top Products */}
-                            {sales.length > 0 && (() => {
-                                const byProduct = sales.reduce((acc, t) => {
-                                    const key = t.product?.name || 'Producto Eliminado';
-                                    if (!acc[key]) acc[key] = { name: key, units: 0, revenue: 0, profit: 0 };
-                                    acc[key].units += t.quantity;
-                                    acc[key].revenue += Number(t.totalPrice);
-                                    acc[key].profit += Number(t.profit || 0);
-                                    return acc;
-                                }, {} as Record<string, { name: string; units: number; revenue: number; profit: number }>);
-
-                                const top = Object.values(byProduct)
-                                    .sort((a, b) => b.units - a.units)
-                                    .slice(0, 5);
-                                const maxUnits = top[0]?.units || 1;
-
-                                return (
-                                    <div className="space-y-3">
-                                        <h3 className="font-medium border-b pb-2 flex items-center gap-2">
-                                            <span>🏆</span> Top Productos
-                                        </h3>
-                                        {top.map((p, i) => (
-                                            <div key={p.name} className="space-y-1">
-                                                <div className="flex justify-between items-center text-sm">
-                                                    <div className="flex items-center gap-2 min-w-0">
-                                                        <span className={`text-xs font-bold w-5 text-center shrink-0 ${i === 0 ? 'text-yellow-500' : i === 1 ? 'text-gray-400' : i === 2 ? 'text-amber-600' : 'text-muted-foreground'}`}>
-                                                            {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`}
-                                                        </span>
-                                                        <span className="font-medium truncate">{p.name}</span>
-                                                    </div>
-                                                    <div className="text-right shrink-0 ml-2">
-                                                        <span className="font-semibold text-xs">{p.units} unds</span>
-                                                        <span className="text-muted-foreground text-xs"> · {formatCurrency(p.revenue)}</span>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    <div className="flex-1 bg-muted rounded-full h-1.5 overflow-hidden">
-                                                        <div
-                                                            className="h-full bg-primary rounded-full transition-all"
-                                                            style={{ width: `${(p.units / maxUnits) * 100}%` }}
-                                                        />
-                                                    </div>
-                                                    <span className="text-xs text-green-600 shrink-0">+{formatCurrency(p.profit)}</span>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                );
-                            })()}
-
-                            {/* Transactions List */}
-                            <div className="space-y-4">
-                                <h3 className="font-medium border-b pb-2">Detalle de Transacciones</h3>
-                                {isLoading ? (
-                                    <div className="text-center py-8 text-muted-foreground">Cargando reporte...</div>
-                                ) : sales.length === 0 ? (
-                                    <div className="text-center py-8 text-muted-foreground bg-muted/10 rounded-lg">
-                                        No hay ventas registradas en este periodo.
-                                    </div>
-                                ) : (
-                                    <div className="space-y-3">
-                                        {sales.map((sale) => (
-                                            <div key={sale.id} className="flex justify-between items-start text-sm p-3 hover:bg-muted/50 rounded-md border border-transparent hover:border-border transition-colors">
-                                                <div>
-                                                    <div className="font-medium">{sale.product?.name || 'Producto Eliminado'}</div>
-                                                    <div className="text-xs text-muted-foreground">
-                                                        {new Date(sale.createdAt).toLocaleDateString()} {new Date(sale.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                        {' • '}{sale.createdBy?.fullName}
-                                                    </div>
-                                                </div>
-                                                <div className="text-right">
-                                                    <div className="text-sm font-semibold">
-                                                        {sale.quantity} unds x {formatCurrency(Number(sale.pricePerUnit))}
-                                                    </div>
-                                                    <div className="font-medium text-xs text-muted-foreground">
-                                                        Total: {formatCurrency(Number(sale.totalPrice))}
-                                                    </div>
-                                                    <div className="text-xs text-green-600">
-                                                        +{formatCurrency(Number(sale.profit || 0))} ganancia
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
                         </div>
-                    </SheetBody>
+                    </Card>
                 </div>
-            </SheetContent>
-        </Sheet>
+            )}
+        </>
     );
 }
