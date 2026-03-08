@@ -27,7 +27,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts'
-import { ChevronDown, ChevronUp, Calendar } from 'lucide-react'
+import { ChevronDown, Calendar } from 'lucide-react'
 import { getTodayString, getStartOfDayISO, getEndOfDayISO } from '@/lib/dateUtils'
 
 type TabType = 'system' | 'minoristas' | 'bank' | 'minoristaTransactions' | 'inventory'
@@ -37,26 +37,29 @@ const CHART_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#e
 export function ReportsPage() {
   const [activeTab, setActiveTab] = useState<TabType>('system')
 
-  // Standardized Date Filter State
+  // Date Filter State
   const dateInputRef = useRef<HTMLInputElement>(null)
   const [filterType, setFilterType] = useState<'SINGLE' | 'CUSTOM'>('SINGLE')
   const [singleDate, setSingleDate] = useState(getTodayString())
+  const [customDateRange, setCustomDateRange] = useState({ from: getTodayString(), to: getTodayString() })
+  const [customDateModalOpen, setCustomDateModalOpen] = useState(false)
+  const [dateFiltersExpanded, setDateFiltersExpanded] = useState(false)
 
-  const todayStr = getTodayString()
-  const startOfDay = getStartOfDayISO(todayStr)
-  const endOfDay = getEndOfDayISO(todayStr)
-
-  const [dateFrom, setDateFrom] = useState<string>(startOfDay)
-  const [dateTo, setDateTo] = useState<string>(endOfDay)
-  const [filterOpen, setFilterOpen] = useState(false)
+  // Derive dateFrom / dateTo from the active filter
+  const dateFrom = filterType === 'CUSTOM'
+    ? getStartOfDayISO(customDateRange.from)
+    : getStartOfDayISO(singleDate)
+  const dateTo = filterType === 'CUSTOM'
+    ? getEndOfDayISO(customDateRange.to)
+    : getEndOfDayISO(singleDate)
 
   // React Query hooks for each report type
-  const systemReportQuery = useSystemProfitReport(dateFrom || null, dateTo || null)
-  const systemTrendReportQuery = useSystemProfitTrendReport(dateFrom || null, dateTo || null)
-  const minoristaReportQuery = useMinoristaProfitReport(dateFrom || null, dateTo || null)
-  const bankReportQuery = useBankTransactionReport(dateFrom || null, dateTo || null)
-  const minoristaTransactionReportQuery = useMinoristaTransactionReport(dateFrom || null, dateTo || null)
-  const inventoryReportQuery = useInventoryProfitReport(dateFrom || null, dateTo || null)
+  const systemReportQuery = useSystemProfitReport(dateFrom, dateTo)
+  const systemTrendReportQuery = useSystemProfitTrendReport(dateFrom, dateTo)
+  const minoristaReportQuery = useMinoristaProfitReport(dateFrom, dateTo)
+  const bankReportQuery = useBankTransactionReport(dateFrom, dateTo)
+  const minoristaTransactionReportQuery = useMinoristaTransactionReport(dateFrom, dateTo)
+  const inventoryReportQuery = useInventoryProfitReport(dateFrom, dateTo)
 
   // Determine which query to use based on active tab
   const getActiveQueryState = () => {
@@ -78,14 +81,6 @@ export function ReportsPage() {
 
   const { isLoading } = getActiveQueryState()
 
-  const handleSingleDateChange = (date: string) => {
-    setSingleDate(date)
-    setFilterType('SINGLE')
-
-    setDateFrom(getStartOfDayISO(date))
-    setDateTo(getEndOfDayISO(date))
-  }
-
   const handleTabChange = (tab: TabType) => {
     setActiveTab(tab)
   }
@@ -96,95 +91,107 @@ export function ReportsPage() {
         <h1 className="text-3xl font-bold mb-8 text-foreground">Reportes</h1>
 
         {/* Date Range Filters */}
-        <Card className="mb-6">
-          <CardHeader
-            className="cursor-pointer hover:bg-accent/50 transition-colors"
-            onClick={() => setFilterOpen(!filterOpen)}
+        <div className="mb-6 border rounded-lg bg-card">
+          <button
+            onClick={() => setDateFiltersExpanded(!dateFiltersExpanded)}
+            className="w-full flex items-center justify-between p-3 hover:bg-muted/50 transition-colors"
           >
-            <div className="flex items-center justify-between">
-              <CardTitle>Filtrar por Rango de Fechas</CardTitle>
-              {filterOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+            <p className="text-base font-semibold">Fecha</p>
+            <ChevronDown
+              className={`h-4 w-4 text-muted-foreground transition-transform ${dateFiltersExpanded ? 'rotate-180' : ''}`}
+            />
+          </button>
+
+          {dateFiltersExpanded && (
+            <div className="border-t p-3">
+              <div className="flex gap-2 flex-wrap">
+                {/* Single day picker */}
+                <Button
+                  variant={filterType === 'SINGLE' ? 'default' : 'outline'}
+                  size="sm"
+                  className={`relative overflow-hidden ${filterType === 'SINGLE' ? 'text-white' : ''}`}
+                  style={filterType === 'SINGLE' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+                  onClick={() => dateInputRef.current?.showPicker()}
+                >
+                  <Calendar className="mr-2 h-3 w-3" />
+                  {singleDate === getTodayString() ? 'Ver día (Hoy)' : `Ver día: ${singleDate}`}
+                </Button>
+
+                <input
+                  ref={dateInputRef}
+                  type="date"
+                  value={singleDate}
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      setSingleDate(e.target.value)
+                      setFilterType('SINGLE')
+                    }
+                  }}
+                  className="absolute opacity-0 pointer-events-none w-0 h-0"
+                  tabIndex={-1}
+                  title="Seleccionar día"
+                />
+
+                {/* Custom date range */}
+                <Button
+                  variant={filterType === 'CUSTOM' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setCustomDateModalOpen(true)}
+                  className={filterType === 'CUSTOM' ? 'text-white' : ''}
+                  style={filterType === 'CUSTOM' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+                >
+                  <Calendar className="h-3 w-3 mr-1" />
+                  {filterType === 'CUSTOM'
+                    ? `${customDateRange.from} → ${customDateRange.to}`
+                    : 'Personalizado'}
+                </Button>
+              </div>
             </div>
-          </CardHeader>
-          {filterOpen && (
-            <CardContent className="space-y-4">
-              <div className="flex flex-col gap-4">
-                <div className="flex gap-2 overflow-x-auto pb-2 flex-wrap">
-                  <Button
-                    variant={filterType === 'SINGLE' ? 'default' : 'outline'}
-                    size="sm"
-                    className={`relative overflow-hidden ${filterType === 'SINGLE' ? 'text-white' : ''}`}
-                    style={filterType === 'SINGLE' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
-                    onClick={() => dateInputRef.current?.showPicker()}
-                  >
-                    <Calendar className="mr-2 h-3 w-3" />
-                    <Calendar className="mr-2 h-3 w-3" />
-                    {singleDate === getTodayString() ? 'Ver día (Hoy)' : `Ver día: ${singleDate}`}
-                  </Button>
+          )}
+        </div>
 
-                  <input
-                    ref={dateInputRef}
+        {/* Custom Date Range Modal */}
+        {customDateModalOpen && (
+          <div
+            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+            onClick={(e) => { if (e.target === e.currentTarget) setCustomDateModalOpen(false) }}
+          >
+            <Card className="w-full max-w-sm">
+              <div className="p-6 space-y-4">
+                <h2 className="text-lg font-semibold">Rango de Fechas Personalizado</h2>
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold">Desde</label>
+                  <Input
                     type="date"
-                    value={singleDate}
-                    onChange={(e) => {
-                      if (e.target.value) handleSingleDateChange(e.target.value)
-                    }}
-                    className="absolute opacity-0 pointer-events-none w-0 h-0"
-                    tabIndex={-1}
+                    value={customDateRange.from}
+                    onChange={(e) => setCustomDateRange((r) => ({ ...r, from: e.target.value }))}
                   />
-
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold">Hasta</label>
+                  <Input
+                    type="date"
+                    value={customDateRange.to}
+                    onChange={(e) => setCustomDateRange((r) => ({ ...r, to: e.target.value }))}
+                  />
+                </div>
+                <div className="flex gap-2 pt-2">
                   <Button
-                    variant={filterType === 'CUSTOM' ? 'default' : 'outline'}
+                    onClick={() => { setFilterType('CUSTOM'); setCustomDateModalOpen(false) }}
+                    className="flex-1"
                     size="sm"
-                    onClick={() => setFilterType('CUSTOM')}
-                    className={filterType === 'CUSTOM' ? 'text-white' : ''}
-                    style={filterType === 'CUSTOM' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
+                    style={{ background: 'linear-gradient(to right, #136BBC, #274565)' }}
                   >
-                    <Calendar className="h-3 w-3 mr-1" />
-                    Personalizado
+                    Aplicar
+                  </Button>
+                  <Button onClick={() => setCustomDateModalOpen(false)} variant="outline" className="flex-1" size="sm">
+                    Cancelar
                   </Button>
                 </div>
-
-                {filterType === 'CUSTOM' && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end animate-in fade-in slide-in-from-top-2 duration-200">
-                    <div>
-                      <label className="block text-sm font-medium mb-2 text-foreground">Desde</label>
-                      <Input
-                        type="date"
-                        value={dateFrom.split('T')[0]}
-                        onChange={(e) => {
-                          const val = e.target.value
-                          if (val) {
-                            setDateFrom(getStartOfDayISO(val))
-                          } else {
-                            setDateFrom('')
-                          }
-                        }}
-                        className="w-full"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-2 text-foreground">Hasta</label>
-                      <Input
-                        type="date"
-                        value={dateTo.split('T')[0]}
-                        onChange={(e) => {
-                          const val = e.target.value
-                          if (val) {
-                            setDateTo(getEndOfDayISO(val))
-                          } else {
-                            setDateTo('')
-                          }
-                        }}
-                        className="w-full"
-                      />
-                    </div>
-                  </div>
-                )}
               </div>
-            </CardContent>
-          )}
-        </Card>
+            </Card>
+          </div>
+        )}
 
         {/* Tabs */}
         <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
