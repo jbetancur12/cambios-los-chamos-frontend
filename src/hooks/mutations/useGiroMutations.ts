@@ -225,3 +225,48 @@ export function useCreateRecharge() {
     },
   })
 }
+
+interface FacturarGiroInput {
+  giroId: string
+  customerIdentification?: string
+}
+
+export function useFacturarGiro() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ giroId, customerIdentification }: FacturarGiroInput) => {
+      const response = await api.post<{ giro: Giro; message: string }>(`/giro/${giroId}/facturar`, {
+        customerIdentification
+      })
+      return response.giro
+    },
+    onSuccess: (giro) => {
+      queryClient.invalidateQueries({ queryKey: ['giro', giro.id], refetchType: 'active' })
+      queryClient.invalidateQueries({ queryKey: ['giros'], exact: false, refetchType: 'active' })
+      queryClient.invalidateQueries({ queryKey: ['dashboard'], exact: false, refetchType: 'active' })
+    },
+  })
+}
+
+interface DownloadFacturaInput {
+  giroId: string
+}
+
+export function useDownloadFacturaPdf() {
+  return useMutation({
+    mutationFn: async ({ giroId }: DownloadFacturaInput) => {
+      const response = await api.get<{ pdfBase64: string }>(`/giro/${giroId}/factura-pdf`)
+      return response.pdfBase64
+    }
+  })
+}
+
+export function useDownloadFacturaXml() {
+  return useMutation({
+    mutationFn: async ({ giroId }: DownloadFacturaInput) => {
+      const response = await api.get<{ xmlBase64: string }>(`/giro/${giroId}/factura-xml`)
+      return response.xmlBase64
+    }
+  })
+}

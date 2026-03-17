@@ -19,7 +19,7 @@ import {
 import { useQueryClient } from '@tanstack/react-query'
 import { PaymentProofUpload } from './PaymentProofUpload'
 import { PrintTicketModal } from './PrintTicketModal'
-import { XCircle, Copy, Share2, Download, CreditCard } from 'lucide-react'
+import { Copy, CreditCard, Share2, XCircle, Download } from 'lucide-react'
 import { GiroDetailSkeleton } from './skeletons/GiroDetailSkeleton'
 import type { GiroStatus } from '@/types/api'
 import { formatGiroCurrency } from '@/lib/giroUtils'
@@ -504,6 +504,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
       toast.error(`Error al descargar: ${message}`)
     }
   }
+
 
   const isProcessing =
     executeGiroMutation.isPending ||

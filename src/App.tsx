@@ -12,6 +12,8 @@ import { LoginPage } from '@/pages/LoginPage'
 import { DashboardPage } from '@/pages/DashboardPage'
 import { UsersPage } from '@/pages/UsersPage'
 import { GirosPage } from '@/pages/GirosPage'
+import { CustomerRegistrationPage } from '@/pages/CustomerRegistrationPage'
+import { CustomerManagementPage } from '@/pages/CustomerManagementPage'
 import { SendGiroPage } from '@/pages/SendGiroPage'
 import { CalculadoraPage } from '@/pages/CalculadoraPage'
 import { CalculadoraVesCompraPage } from '@/pages/CalculadoraVesCompraPage'
@@ -96,9 +98,21 @@ function App() {
                   }
                 />
 
+                <Route
+                  path="/clientes-facturacion"
+                  element={
+                    <ProtectedRoute requiredRole={['SUPER_ADMIN']}>
+                      <DashboardLayout>
+                        <CustomerManagementPage />
+                      </DashboardLayout>
+                    </ProtectedRoute>
+                  }
+                />
+
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="/verify-email" element={<VerifyEmailPage />} />
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
+                <Route path="/registro-facturacion" element={<CustomerRegistrationPage />} />
 
                 {/* Protected Routes */}
                 <Route

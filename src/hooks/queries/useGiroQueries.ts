@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { api } from '@/lib/api'
+import { api, API_BASE_URL } from '@/lib/api'
 import { applyDedupConfig } from '@/lib/deduplication'
 import type { Giro, MinoristaTransaction } from '@/types/api'
 
@@ -132,5 +132,81 @@ export function useMinoristaTransaction(giroId: string | null) {
     },
     enabled: !!giroId,
     staleTime: 1000 * 60 * 5, // 5 minutos
+  })
+}
+
+// Interfaz para la respuesta del cliente de facturación
+export interface CustomerInvoiceDataResponse {
+  id: string
+  identification: string
+  dv?: string
+  names: string
+  email: string
+  phone: string
+  address: string
+  municipality_id: number
+  municipality_name?: string
+  tribute_id: number
+}
+
+export function useCustomerInvoiceData(identification: string) {
+  return useQuery({
+    queryKey: ['customerInvoiceData', identification],
+    queryFn: async () => {
+      if (!identification || identification.trim() === '') return null
+      
+      try {
+        // api.get<T> calls handleResponse which returns body.data as T directly
+        const customer = await api.get<CustomerInvoiceDataResponse>(`/invoice-clientes/${identification}`)
+        return customer ?? null
+      } catch (error) {
+        // Ignoramos el 404 porque significa que el cliente simplemente no está registrado
+        return null
+      }
+    },
+    enabled: !!identification && identification.length >= 5, // Require matching length
+    staleTime: 1000 * 60 * 5, // 5 minutos
+    retry: false // No re-intentar si falla el fetch inicial (normalmente 404)
+  })
+}
+
+export function useAllCustomerInvoiceData() {
+  return useQuery({
+    queryKey: ['allCustomerInvoiceData'],
+    queryFn: async () => {
+      // api.get<T> calls handleResponse which extracts body.data as T directly
+      const customers = await api.get<CustomerInvoiceDataResponse[]>('/invoice-clientes/all')
+      return customers ?? []
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutos
+  })
+}
+
+export interface FactusMunicipality {
+  id: number
+  code: string
+  name: string
+  department: string
+}
+
+export function useFactusMunicipalities(name: string) {
+  return useQuery({
+    queryKey: ['factusMunicipalities', name],
+    queryFn: async () => {
+      let url = `${API_BASE_URL}/invoice-clientes/municipios`
+      if (name.trim()) {
+        url += `?name=${encodeURIComponent(name.trim())}`
+      }
+      // Public endpoint: use plain fetch (no auth headers needed)
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      })
+      if (!response.ok) throw new Error('Error al obtener municipios')
+      const json = await response.json() as { success: boolean; data: FactusMunicipality[] }
+      return json.data ?? []
+    },
+    enabled: name.trim().length >= 3,
+    staleTime: 1000 * 60 * 5, // 5 min
   })
 }

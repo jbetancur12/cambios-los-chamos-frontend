@@ -141,6 +141,10 @@ export interface Giro {
     fullName: string
     email: string
   }
+  isFacturado?: boolean
+  facturaId?: string
+  facturaStatus?: number
+  facturaFecha?: string
 }
 
 // Bank Account Transaction Types

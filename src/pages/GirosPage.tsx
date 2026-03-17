@@ -8,13 +8,17 @@ import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { GiroDetailSheet } from '@/components/GiroDetailSheet'
 import { PrintTicketModal } from '@/components/PrintTicketModal'
+import { PrintFacturaModal } from '@/components/PrintFacturaModal'
 import { ReassignGiroModal } from '@/components/ReassignGiroModal'
 import { useGirosList, useGirosTotals } from '@/hooks/queries/useGiroQueries'
 import { useMinoristaBalance } from '@/hooks/queries/useMinoristaQueries'
 import { useAllUsers } from '@/hooks/queries/useUserQueries'
+import { toast } from 'sonner'
+import { useFacturarGiro, useDownloadFacturaPdf, useDownloadFacturaXml } from '@/hooks/mutations/useGiroMutations'
 import type { Giro, GiroStatus } from '@/types/api'
 import { getTodayString, getStartOfDayISO, getEndOfDayISO } from '@/lib/dateUtils'
 import { getExecutionTypeBadge, getGiroStatusBadge, formatGiroCurrency } from '@/lib/giroUtils'
+import { FacturarGiroDialog } from '@/components/FacturarGiroDialog'
 
 type DateFilterType =
   | 'SINGLE_DATE'
@@ -55,8 +59,61 @@ export function GirosPage() {
   const [showPrintModal, setShowPrintModal] = useState(false)
   const [selectedGiroForPrint, setSelectedGiroForPrint] = useState<string | null>(null)
 
+  const [showPrintFacturaModal, setShowPrintFacturaModal] = useState(false)
+  const [selectedGiroForFacturaPrint, setSelectedGiroForFacturaPrint] = useState<string | null>(null)
+
   const [reassignModalOpen, setReassignModalOpen] = useState(false)
   const [selectedGiroForReassign, setSelectedGiroForReassign] = useState<Giro | null>(null)
+
+  // Facturación Electronica states
+  const [showFacturaDialog, setShowFacturaDialog] = useState(false)
+  const [giroToFacturar, setGiroToFacturar] = useState<Giro | null>(null)
+
+  const facturarGiroMutation = useFacturarGiro()
+  const downloadPdfMutation = useDownloadFacturaPdf()
+  const downloadXmlMutation = useDownloadFacturaXml()
+
+  const handleFacturar = (giro: Giro, cedula: string) => {
+    if (!giro) return
+    facturarGiroMutation.mutate(
+      { giroId: giro.id, customerIdentification: cedula.trim() ? cedula.trim() : undefined },
+      {
+        onSuccess: () => {
+          toast.success('Factura POS generada exitosamente')
+          setShowFacturaDialog(false)
+          setGiroToFacturar(null)
+        },
+        onError: (error: any) => {
+          const errorMessage = error.response?.data?.error || error.message || 'Error al generar factura'
+          toast.error('Error del proveedor DIAN Factus', { description: errorMessage })
+        }
+      }
+    )
+  }
+
+  const handleDownloadPdf = async (giroFacturado: Giro) => {
+    downloadPdfMutation.mutate({ giroId: giroFacturado.id }, {
+      onSuccess: (base64) => {
+        const url = `data:application/pdf;base64,${base64}`
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `factura_${giroFacturado.id}.pdf`
+        a.click()
+      }
+    })
+  }
+
+  const handleDownloadXml = async (giroFacturado: Giro) => {
+    downloadXmlMutation.mutate({ giroId: giroFacturado.id }, {
+      onSuccess: (base64) => {
+        const url = `data:application/xml;base64,${base64}`
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `factura_${giroFacturado.id}.xml`
+        a.click()
+      }
+    })
+  }
 
   const itemsPerPage = 15
 
@@ -771,6 +828,62 @@ export function GirosPage() {
                                   </svg>
                                 </button>
                               )}
+                              
+                            {/* Actions for Electronic Invoicing Factus */}
+                            {(user?.role === 'SUPER_ADMIN') && giro.status === 'COMPLETADO' && (
+                              <div className="flex gap-1 items-center ml-1">
+                                {!giro.isFacturado ? (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      setGiroToFacturar(giro)
+                                      setShowFacturaDialog(true)
+                                    }}
+                                    className="p-1 hover:bg-green-100 dark:hover:bg-green-900 rounded transition-colors"
+                                    title="Emitir Factura POS"
+                                    disabled={facturarGiroMutation.isPending && giroToFacturar?.id === giro.id}
+                                  >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-600"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                                  </button>
+                                ) : (
+                                  <>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        setSelectedGiroForFacturaPrint(giro.id)
+                                        setShowPrintFacturaModal(true)
+                                      }}
+                                      className="p-1 hover:bg-green-100 dark:hover:bg-green-900 rounded transition-colors"
+                                      title="Tirilla POS"
+                                    >
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-600"><path d="M6 14h12V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v8zm8-10v2M10 4v2"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v6a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-6z"/></svg>
+                                    </button>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        handleDownloadPdf(giro)
+                                      }}
+                                      className="p-1 hover:bg-red-100 dark:hover:bg-red-900 rounded transition-colors"
+                                      title="Descargar PDF Factura"
+                                      disabled={downloadPdfMutation.isPending}
+                                    >
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-500"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15h6"/><path d="M12 18v-6"/></svg>
+                                    </button>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        handleDownloadXml(giro)
+                                      }}
+                                      className="p-1 hover:bg-orange-100 dark:hover:bg-orange-900 rounded transition-colors"
+                                      title="Descargar XML Factura"
+                                      disabled={downloadXmlMutation.isPending}
+                                    >
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-500"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                                    </button>
+                                  </>
+                                )}
+                              </div>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -896,6 +1009,67 @@ export function GirosPage() {
                           <span className="text-xs font-medium">Reasignar</span>
                         </Button>
                       )}
+                      
+                    {/* FACTURAR MOBILE ACTIONS  */}
+                    {(user?.role === 'SUPER_ADMIN') && giro.status === 'COMPLETADO' && (
+                      <div className="flex gap-2 items-center w-full justify-end">
+                        {!giro.isFacturado ? (
+                          <Button
+                            variant="default"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setGiroToFacturar(giro)
+                              setShowFacturaDialog(true)
+                            }}
+                            className="bg-green-600 hover:bg-green-700 text-white h-8 px-3 ml-auto"
+                            disabled={facturarGiroMutation.isPending && giroToFacturar?.id === giro.id}
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                            Facturar
+                          </Button>
+                        ) : (
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setSelectedGiroForFacturaPrint(giro.id)
+                                setShowPrintFacturaModal(true)
+                              }}
+                              className="h-8 px-2 border-green-200 text-green-700 hover:bg-green-50"
+                            >
+                              Tirilla POS
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleDownloadPdf(giro)
+                              }}
+                              className="h-8 px-2 border-red-200 text-red-600 hover:bg-red-50"
+                              disabled={downloadPdfMutation.isPending}
+                            >
+                              PDF
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleDownloadXml(giro)
+                              }}
+                              className="h-8 px-2 border-orange-200 text-orange-600 hover:bg-orange-50"
+                              disabled={downloadXmlMutation.isPending}
+                            >
+                              XML
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                 </div>
@@ -1101,6 +1275,30 @@ export function GirosPage() {
           />
         )
       }
+
+      {/* Print Factura POS Modal */}
+      {
+        selectedGiroForFacturaPrint && (
+          <PrintFacturaModal
+            giroId={selectedGiroForFacturaPrint}
+            open={showPrintFacturaModal}
+            onOpenChange={(open) => {
+              setShowPrintFacturaModal(open)
+            }}
+          />
+        )
+      }
+
+      {/* Facturar Modal using dedicated component */}
+      {showFacturaDialog && giroToFacturar && (
+        <FacturarGiroDialog
+          giro={giroToFacturar}
+          isOpen={showFacturaDialog}
+          onClose={() => setShowFacturaDialog(false)}
+          onFacturar={handleFacturar}
+          isPending={facturarGiroMutation.isPending}
+        />
+      )}
 
       <ReassignGiroModal
         giro={selectedGiroForReassign}

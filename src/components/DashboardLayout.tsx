@@ -60,6 +60,12 @@ const sideMenuItems: NavItem[] = [
     roles: ['SUPER_ADMIN', 'ADMIN', 'MINORISTA'],
   },
   {
+    icon: Users,
+    label: 'Clientes Facturación',
+    href: '/clientes-facturacion',
+    roles: ['SUPER_ADMIN'],
+  },
+  {
     icon: Calculator,
     label: 'Calc. Compra VES',
     href: '/calculadora-ves-compra',
