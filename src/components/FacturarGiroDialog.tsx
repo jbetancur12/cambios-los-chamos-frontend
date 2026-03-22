@@ -10,7 +10,7 @@ interface FacturarGiroDialogProps {
   giro: Giro
   isOpen: boolean
   onClose: () => void
-  onFacturar: (giro: Giro, cedula: string) => void
+  onFacturar: (giro: Giro, cedula: string, billingType: 'STANDARD' | 'MANDATO', mandanteIdentification?: string) => void
   isPending: boolean
 }
 
@@ -23,6 +23,8 @@ export function FacturarGiroDialog({
 }: FacturarGiroDialogProps) {
   const [cedula, setCedula] = useState('')
   const [debouncedCedula, setDebouncedCedula] = useState('')
+  const [billingType, setBillingType] = useState<'STANDARD' | 'MANDATO'>('STANDARD')
+  const [mandanteIdentification, setMandanteIdentification] = useState(giro.beneficiaryId || '')
 
   // Debounce the cedula input so we don't spam the API while typing
   useEffect(() => {
@@ -42,6 +44,8 @@ export function FacturarGiroDialog({
     if (isOpen) {
       setCedula('')
       setDebouncedCedula('')
+      setBillingType('STANDARD')
+      setMandanteIdentification(giro.beneficiaryId || '')
     }
   }, [isOpen, giro.id])
 
@@ -79,6 +83,18 @@ export function FacturarGiroDialog({
 
         <div className="space-y-3 relative">
           <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+            Tipo de Facturación
+          </label>
+          <select
+            value={billingType}
+            onChange={(e) => setBillingType(e.target.value as 'STANDARD' | 'MANDATO')}
+            className="flex h-10 w-full items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-800 dark:bg-slate-950 dark:ring-offset-slate-950 dark:placeholder:text-slate-400 dark:focus:ring-slate-300"
+          >
+            <option value="STANDARD">Facturación Estándar (Ingreso Propio)</option>
+            <option value="MANDATO">Ingresos a Terceros (Mandato)</option>
+          </select>
+
+          <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 mt-4 block">
             Cédula o NIT del Cliente (Opcional)
           </label>
           <div className="relative">
@@ -135,6 +151,22 @@ export function FacturarGiroDialog({
               </AlertDescription>
             </Alert>
           )}
+
+          {billingType === 'MANDATO' && (
+            <div className="mt-4 animate-in fade-in slide-in-from-top-2">
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-2">
+                Cédula del Mandante (Tercero)
+              </label>
+              <Input
+                placeholder="Identificación del tercero..."
+                value={mandanteIdentification}
+                onChange={(e) => setMandanteIdentification(e.target.value)}
+              />
+              <p className="text-xs text-slate-500 mt-1">
+                Por defecto, se sugiere la cédula del beneficiario del giro.
+              </p>
+            </div>
+          )}
         </div>
 
         <div className="flex gap-3 pt-2">
@@ -148,8 +180,8 @@ export function FacturarGiroDialog({
           </Button>
           <Button
             className="flex-1"
-            onClick={() => onFacturar(giro, debouncedCedula)}
-            disabled={isPending}
+            onClick={() => onFacturar(giro, debouncedCedula, billingType, billingType === 'MANDATO' ? mandanteIdentification : undefined)}
+            disabled={isPending || (billingType === 'MANDATO' && !mandanteIdentification.trim())}
           >
             {isPending ? 'Generando...' : 'Confirmar Factura'}
           </Button>

@@ -229,15 +229,19 @@ export function useCreateRecharge() {
 interface FacturarGiroInput {
   giroId: string
   customerIdentification?: string
+  billingType: 'STANDARD' | 'MANDATO'
+  mandanteIdentification?: string
 }
 
 export function useFacturarGiro() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ giroId, customerIdentification }: FacturarGiroInput) => {
+    mutationFn: async ({ giroId, customerIdentification, billingType, mandanteIdentification }: FacturarGiroInput) => {
       const response = await api.post<{ giro: Giro; message: string }>(`/giro/${giroId}/facturar`, {
-        customerIdentification
+        customerIdentification,
+        billingType,
+        mandanteIdentification
       })
       return response.giro
     },

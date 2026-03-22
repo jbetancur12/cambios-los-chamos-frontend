@@ -73,10 +73,10 @@ export function GirosPage() {
   const downloadPdfMutation = useDownloadFacturaPdf()
   const downloadXmlMutation = useDownloadFacturaXml()
 
-  const handleFacturar = (giro: Giro, cedula: string) => {
+  const handleFacturar = (giro: Giro, cedula: string, billingType: 'STANDARD' | 'MANDATO', mandanteIdentification?: string) => {
     if (!giro) return
     facturarGiroMutation.mutate(
-      { giroId: giro.id, customerIdentification: cedula.trim() ? cedula.trim() : undefined },
+      { giroId: giro.id, customerIdentification: cedula.trim() ? cedula.trim() : undefined, billingType, mandanteIdentification },
       {
         onSuccess: () => {
           toast.success('Factura POS generada exitosamente')
