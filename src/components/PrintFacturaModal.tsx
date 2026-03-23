@@ -67,7 +67,7 @@ export function PrintFacturaModal({ giroId, open, onOpenChange }: PrintFacturaMo
 
   useEffect(() => {
     if (open) {
-      if (!ticketData) {
+      if (!ticketData || ticketData.giroId !== giroId) {
         fetchTicketData()
       }
       const config = getPrinterConfig()
