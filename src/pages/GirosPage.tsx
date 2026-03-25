@@ -830,7 +830,7 @@ export function GirosPage() {
                               )}
                               
                             {/* Actions for Electronic Invoicing Factus */}
-                            {(user?.role === 'SUPER_ADMIN') && giro.status === 'COMPLETADO' && (
+                            {(user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN') && giro.status === 'COMPLETADO' && (
                               <div className="flex gap-1 items-center ml-1">
                                 {!giro.isFacturado ? (
                                   <button
@@ -1011,7 +1011,7 @@ export function GirosPage() {
                       )}
                       
                     {/* FACTURAR MOBILE ACTIONS  */}
-                    {(user?.role === 'SUPER_ADMIN') && giro.status === 'COMPLETADO' && (
+                    {(user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN') && giro.status === 'COMPLETADO' && (
                       <div className="flex gap-2 items-center w-full justify-end">
                         {!giro.isFacturado ? (
                           <Button
