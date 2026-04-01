@@ -23,7 +23,7 @@ export function FacturarGiroDialog({
 }: FacturarGiroDialogProps) {
   const [cedula, setCedula] = useState('')
   const [debouncedCedula, setDebouncedCedula] = useState('')
-  const [billingType, setBillingType] = useState<'STANDARD' | 'MANDATO'>('STANDARD')
+  const [billingType, setBillingType] = useState<'STANDARD' | 'MANDATO'>('MANDATO')
   const [mandanteIdentification, setMandanteIdentification] = useState(giro.beneficiaryId || '')
 
   // Debounce the cedula input so we don't spam the API while typing
@@ -44,7 +44,7 @@ export function FacturarGiroDialog({
     if (isOpen) {
       setCedula('')
       setDebouncedCedula('')
-      setBillingType('STANDARD')
+      setBillingType('MANDATO')
       setMandanteIdentification(giro.beneficiaryId || '')
     }
   }, [isOpen, giro.id])
