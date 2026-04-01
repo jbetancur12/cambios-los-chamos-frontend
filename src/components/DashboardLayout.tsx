@@ -63,7 +63,7 @@ const sideMenuItems: NavItem[] = [
     icon: Users,
     label: 'Clientes Facturación',
     href: '/clientes-facturacion',
-    roles: ['SUPER_ADMIN'],
+    roles: ['SUPER_ADMIN', 'ADMIN'],
   },
   {
     icon: Calculator,

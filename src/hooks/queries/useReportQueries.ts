@@ -228,3 +228,39 @@ export function useInventoryProfitReport(dateFrom: string | null, dateTo: string
     enabled: !!dateFrom && !!dateTo && enabled,
   })
 }
+
+// ----------------- Facturación Report Types -----------------
+export interface FacturacionReportItem {
+  id: string
+  facturaId: string
+  facturaFecha: string
+  facturaType: string
+  customerIdentification: string
+  mandanteIdentification: string
+  plataMia: number
+  montoTercero: number
+  totalFactura: number
+}
+
+export interface FacturacionReport {
+  totalPlataMia: number
+  totalIngresoTerceros: number
+  totalFacturadoGeneral: number
+  totalGirosFacturados: number
+  items: FacturacionReportItem[]
+}
+
+// Query hook for Facturación report
+export function useFacturacionReport(dateFrom: string | null, dateTo: string | null, enabled: boolean = true) {
+  return useQuery({
+    queryKey: ['reports', 'facturacion', { dateFrom, dateTo }],
+    queryFn: async () => {
+      const response = await api.get<FacturacionReport>(
+        `/reports/facturacion?dateFrom=${dateFrom}&dateTo=${dateTo}`
+      )
+      return response
+    },
+    ...applyDedupConfig('NORMAL'),
+    enabled: !!dateFrom && !!dateTo && enabled,
+  })
+}

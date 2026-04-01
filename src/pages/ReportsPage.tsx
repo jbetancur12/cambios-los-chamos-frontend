@@ -11,6 +11,7 @@ import {
   useBankTransactionReport,
   useMinoristaTransactionReport,
   useInventoryProfitReport,
+  useFacturacionReport,
 } from '@/hooks/queries/useReportQueries'
 import {
   LineChart,
@@ -27,10 +28,10 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts'
-import { ChevronDown, ChevronUp, Calendar } from 'lucide-react'
+import { ChevronDown, ChevronUp, Calendar, Download } from 'lucide-react'
 import { getTodayString, getStartOfDayISO, getEndOfDayISO } from '@/lib/dateUtils'
 
-type TabType = 'system' | 'minoristas' | 'bank' | 'minoristaTransactions' | 'inventory'
+type TabType = 'system' | 'minoristas' | 'bank' | 'minoristaTransactions' | 'inventory' | 'facturacion'
 
 const CHART_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899']
 
@@ -57,6 +58,41 @@ export function ReportsPage() {
   const bankReportQuery = useBankTransactionReport(dateFrom || null, dateTo || null)
   const minoristaTransactionReportQuery = useMinoristaTransactionReport(dateFrom || null, dateTo || null)
   const inventoryReportQuery = useInventoryProfitReport(dateFrom || null, dateTo || null)
+  const facturacionReportQuery = useFacturacionReport(dateFrom || null, dateTo || null)
+
+  const downloadFacturacionCSV = () => {
+    if (!facturacionReportQuery.data?.items || facturacionReportQuery.data.items.length === 0) return
+
+    // Create CSV header
+    const headers = ['Factura ID', 'Fecha', 'Tipo', 'Cliente', 'Tercero (Mandante)', 'Mi Plata', 'Tercero']
+    const csvRows = [headers.join(',')]
+
+    // Format rows
+    facturacionReportQuery.data.items.forEach((item) => {
+      const row = [
+        `"${item.facturaId}"`,
+        `"${new Date(item.facturaFecha).toLocaleString()}"`,
+        `"${item.facturaType}"`,
+        `"${item.customerIdentification || 'N/A'}"`,
+        `"${item.mandanteIdentification || 'N/A'}"`,
+        item.plataMia,
+        item.montoTercero
+      ]
+      csvRows.push(row.join(','))
+    })
+
+    // Create Blob and download
+    const csvContent = csvRows.join('\n')
+    const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvContent], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    const url = URL.createObjectURL(blob)
+    link.setAttribute('href', url)
+    link.setAttribute('download', `Reporte_Facturacion_${dateFrom?.slice(0, 10)}_al_${dateTo?.slice(0, 10)}.csv`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+  }
 
   // Determine which query to use based on active tab
   const getActiveQueryState = () => {
@@ -71,6 +107,8 @@ export function ReportsPage() {
         return { isLoading: minoristaTransactionReportQuery.isLoading, error: minoristaTransactionReportQuery.error }
       case 'inventory':
         return { isLoading: inventoryReportQuery.isLoading, error: inventoryReportQuery.error }
+      case 'facturacion':
+        return { isLoading: facturacionReportQuery.isLoading, error: facturacionReportQuery.error }
       default:
         return { isLoading: false, error: null }
     }
@@ -231,6 +269,16 @@ export function ReportsPage() {
             }
           >
             Inventario
+          </button>
+          <button
+            onClick={() => handleTabChange('facturacion')}
+            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${activeTab === 'facturacion' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
+              }`}
+            style={
+              activeTab === 'facturacion' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}
+            }
+          >
+            Facturación
           </button>
         </div>
 
@@ -637,11 +685,98 @@ export function ReportsPage() {
           </div>
         )}
 
+        {/* Facturacion Report */}
+        {activeTab === 'facturacion' && facturacionReportQuery.data && (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              <StatCard
+                label="Mi Plata (Ingresos Propios)"
+                value={`$${facturacionReportQuery.data.totalPlataMia.toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
+                color="bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300"
+              />
+              <StatCard
+                label="Ingreso a Terceros (Mandatos)"
+                value={`$${facturacionReportQuery.data.totalIngresoTerceros.toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
+                color="bg-purple-100 dark:bg-purple-900/20 text-purple-800 dark:text-purple-300"
+              />
+              <StatCard
+                label="Total General Facturado"
+                value={`$${facturacionReportQuery.data.totalFacturadoGeneral.toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
+                color="bg-blue-100 dark:bg-blue-900/20"
+              />
+              <StatCard
+                label="Total de Facturas"
+                value={facturacionReportQuery.data.totalGirosFacturados.toString()}
+                color="bg-orange-100 dark:bg-orange-900/20"
+              />
+            </div>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Historial de Facturas Emitidas</CardTitle>
+                <Button variant="outline" size="sm" onClick={downloadFacturacionCSV} disabled={facturacionReportQuery.data.items.length === 0}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Descargar Excel/CSV
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left py-2 px-4 font-semibold text-foreground">Factura</th>
+                        <th className="text-left py-2 px-4 font-semibold text-foreground">Fecha</th>
+                        <th className="text-left py-2 px-4 font-semibold text-foreground">Tipo</th>
+                        <th className="text-left py-2 px-4 font-semibold text-foreground">Cliente</th>
+                        <th className="text-left py-2 px-4 font-semibold text-foreground">Tercero (Mandante)</th>
+                        <th className="text-right py-2 px-4 font-semibold text-foreground">Mi Plata</th>
+                        <th className="text-right py-2 px-4 font-semibold text-foreground">Tercero</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {facturacionReportQuery.data.items.length === 0 ? (
+                        <tr>
+                          <td colSpan={7} className="text-center py-4 text-muted-foreground">
+                            No se emitieron facturas en este periodo
+                          </td>
+                        </tr>
+                      ) : (
+                        facturacionReportQuery.data.items.map((f) => (
+                          <tr key={f.id} className="border-b hover:bg-muted/50">
+                            <td className="py-3 px-4 text-foreground font-medium">{f.facturaId}</td>
+                            <td className="py-3 px-4 text-xs text-muted-foreground">
+                              {new Date(f.facturaFecha).toLocaleString()}
+                            </td>
+                            <td className="py-3 px-4">
+                              <Badge variant={f.facturaType === 'MANDATO' ? 'secondary' : 'default'}>
+                                {f.facturaType}
+                              </Badge>
+                            </td>
+                            <td className="py-3 px-4 text-foreground">{f.customerIdentification}</td>
+                            <td className="py-3 px-4 text-muted-foreground">{f.mandanteIdentification}</td>
+                            <td className="text-right py-3 px-4 font-bold text-green-600 dark:text-green-400">
+                              ${f.plataMia.toLocaleString('es-CO', { maximumFractionDigits: 2 })}
+                            </td>
+                            <td className="text-right py-3 px-4 text-muted-foreground">
+                              ${f.montoTercero.toLocaleString('es-CO', { maximumFractionDigits: 2 })}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        )}
+
         {!systemReportQuery.data &&
           !minoristaReportQuery.data &&
           !bankReportQuery.data &&
           !minoristaTransactionReportQuery.data &&
           !inventoryReportQuery.data &&
+          !facturacionReportQuery.data &&
           !isLoading && (
             <Card>
               <CardContent className="text-center py-8">

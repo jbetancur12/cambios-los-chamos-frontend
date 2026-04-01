@@ -101,7 +101,7 @@ function App() {
                 <Route
                   path="/clientes-facturacion"
                   element={
-                    <ProtectedRoute requiredRole={['SUPER_ADMIN']}>
+                    <ProtectedRoute requiredRole={['SUPER_ADMIN', 'ADMIN']}>
                       <DashboardLayout>
                         <CustomerManagementPage />
                       </DashboardLayout>
