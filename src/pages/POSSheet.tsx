@@ -1,12 +1,12 @@
 
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { inventoryApi, type Product } from '../services/inventoryApi';
+import { inventoryApi, type Product, PaymentMethod } from '../services/inventoryApi';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Label } from '@/components/ui/label';
-import { Plus, Search, Trash2, ShoppingCart, Minus } from 'lucide-react';
+import { Plus, Search, Trash2, ShoppingCart, Minus, Banknote, Landmark, CreditCard } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatCurrency } from '@/lib/formatCurrency';
 import { Badge } from '@/components/ui/badge';
@@ -26,6 +26,7 @@ export function POSSheet({ open, onOpenChange }: { open: boolean, onOpenChange: 
 
     const [cart, setCart] = useState<CartItem[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PaymentMethod.CASH);
     const searchInputRef = useRef<HTMLInputElement>(null);
 
     // Reset cart when closing
@@ -33,6 +34,7 @@ export function POSSheet({ open, onOpenChange }: { open: boolean, onOpenChange: 
         if (!open) {
             setCart([]);
             setSearchTerm('');
+            setPaymentMethod(PaymentMethod.CASH);
         }
     }, [open]);
 
@@ -47,6 +49,10 @@ export function POSSheet({ open, onOpenChange }: { open: boolean, onOpenChange: 
     }, [searchTerm, products, cart]);
 
     const addToCart = (product: Product) => {
+        // Allow adding to cart even if stock is 0, backend will handle validation if logic requires, 
+        // but UI requirement was to disable it. Keeping logic consistent with previous steps.
+        // Wait, previous step said "Allow out-of-stock products in POS search (disabled)".
+        // So I should keep the disable logic in the UI render, but here duplicate check is fine.
         if (product.stock <= 0) return;
         setCart(prev => [...prev, { product, quantity: 1, price: Number(product.sellingPrice) }]);
         setSearchTerm('');
@@ -81,7 +87,7 @@ export function POSSheet({ open, onOpenChange }: { open: boolean, onOpenChange: 
     const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
     const mutation = useMutation({
-        mutationFn: (items: any[]) => inventoryApi.createBulkSale({ items }),
+        mutationFn: (data: { items: any[], paymentMethod: PaymentMethod }) => inventoryApi.createBulkSale(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['products'] });
             toast.success("Venta registrada exitosamente");
@@ -99,7 +105,7 @@ export function POSSheet({ open, onOpenChange }: { open: boolean, onOpenChange: 
             sellingPrice: item.price
         }));
 
-        mutation.mutate(items);
+        mutation.mutate({ items, paymentMethod });
     };
 
     return (
@@ -139,8 +145,8 @@ export function POSSheet({ open, onOpenChange }: { open: boolean, onOpenChange: 
                                             onClick={() => addToCart(product)}
                                             disabled={!hasStock}
                                             className={`w-full text-left px-4 py-3 flex justify-between items-center transition-colors border-b last:border-0 ${hasStock
-                                                    ? 'hover:bg-muted/50 cursor-pointer'
-                                                    : 'opacity-50 cursor-not-allowed bg-muted/20'
+                                                ? 'hover:bg-muted/50 cursor-pointer'
+                                                : 'opacity-50 cursor-not-allowed bg-muted/20'
                                                 }`}
                                         >
                                             <div>
@@ -232,7 +238,45 @@ export function POSSheet({ open, onOpenChange }: { open: boolean, onOpenChange: 
 
                 {/* Footer / Checkout */}
                 <div className="p-4 border-t bg-muted/20 space-y-4">
-                    <div className="flex justify-between items-end">
+                    <div className="space-y-2">
+                        <Label>Método de Pago</Label>
+                        <div className="grid grid-cols-2 gap-2">
+                            <Button
+                                variant={paymentMethod === PaymentMethod.CASH ? "default" : "outline"}
+                                className={paymentMethod === PaymentMethod.CASH ? "bg-green-600 hover:bg-green-700 text-white" : ""}
+                                onClick={() => setPaymentMethod(PaymentMethod.CASH)}
+                                size="sm"
+                            >
+                                <Banknote className="mr-2 h-4 w-4" /> Efectivo
+                            </Button>
+                            <Button
+                                variant={paymentMethod === PaymentMethod.TRANSFER ? "default" : "outline"}
+                                className={paymentMethod === PaymentMethod.TRANSFER ? "bg-blue-600 hover:bg-blue-700 text-white" : ""}
+                                onClick={() => setPaymentMethod(PaymentMethod.TRANSFER)}
+                                size="sm"
+                            >
+                                <Landmark className="mr-2 h-4 w-4" /> Transferencia
+                            </Button>
+                            <Button
+                                variant={paymentMethod === PaymentMethod.CARD ? "default" : "outline"}
+                                className={paymentMethod === PaymentMethod.CARD ? "bg-purple-600 hover:bg-purple-700 text-white" : ""}
+                                onClick={() => setPaymentMethod(PaymentMethod.CARD)}
+                                size="sm"
+                            >
+                                <CreditCard className="mr-2 h-4 w-4" /> Tarjeta
+                            </Button>
+                            <Button
+                                variant={paymentMethod === PaymentMethod.CREDIT ? "default" : "outline"}
+                                className={paymentMethod === PaymentMethod.CREDIT ? "bg-orange-600 hover:bg-orange-700 text-white" : ""}
+                                onClick={() => setPaymentMethod(PaymentMethod.CREDIT)}
+                                size="sm"
+                            >
+                                <div className="mr-2 h-4 w-4 font-bold border rounded-full flex items-center justify-center text-[10px] w-4 h-4 border-current">F</div> Fiado
+                            </Button>
+                        </div>
+                    </div>
+
+                    <div className="flex justify-between items-end pt-2">
                         <span className="text-sm text-muted-foreground">Total a Pagar</span>
                         <span className="text-3xl font-bold text-primary">{formatCurrency(total)}</span>
                     </div>

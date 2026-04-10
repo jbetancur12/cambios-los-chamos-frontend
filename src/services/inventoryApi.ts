@@ -19,7 +19,15 @@ export const ProductTransactionType = {
     ADJUSTMENT: 'ADJUSTMENT'
 } as const;
 
+export const PaymentMethod = {
+    CASH: 'CASH',
+    TRANSFER: 'TRANSFER',
+    CARD: 'CARD',
+    CREDIT: 'CREDIT'
+} as const;
+
 export type ProductTransactionType = typeof ProductTransactionType[keyof typeof ProductTransactionType];
+export type PaymentMethod = typeof PaymentMethod[keyof typeof PaymentMethod];
 
 export interface ProductTransaction {
     id: string;
@@ -70,10 +78,10 @@ export const inventoryApi = {
     createPurchase: async (data: { productId: string; quantity: number; costPrice: number }) => {
         return await api.post('/inventory/transactions/purchase', data);
     },
-    createSale: async (data: { productId: string; quantity: number; sellingPrice?: number }) => {
+    createSale: async (data: { productId: string; quantity: number; sellingPrice?: number; paymentMethod?: PaymentMethod }) => {
         return await api.post('/inventory/transactions/sale', data);
     },
-    createBulkSale: async (data: { items: { productId: string; quantity: number; sellingPrice?: number }[] }) => {
+    createBulkSale: async (data: { items: { productId: string; quantity: number; sellingPrice?: number }[]; paymentMethod?: PaymentMethod }) => {
         return await api.post('/inventory/transactions/bulk-sale', data);
     },
     createAdjustment: async (data: { productId: string; quantity: number; reason?: string }) => {
