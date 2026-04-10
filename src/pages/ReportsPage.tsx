@@ -28,7 +28,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts'
-import { ChevronDown, ChevronUp, Calendar, Download } from 'lucide-react'
+import { ChevronDown, Calendar, Download } from 'lucide-react'
 import { getTodayString, getStartOfDayISO, getEndOfDayISO } from '@/lib/dateUtils'
 
 type TabType = 'system' | 'minoristas' | 'bank' | 'minoristaTransactions' | 'inventory' | 'facturacion'
