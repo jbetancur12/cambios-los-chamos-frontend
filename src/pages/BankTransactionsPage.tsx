@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { getTodayString, getStartOfDayISO, getEndOfDayISO } from '@/lib/dateUtils'
 import { ArrowLeft, DollarSign, ChevronDown, Calendar } from 'lucide-react'
@@ -61,10 +61,12 @@ export function BankTransactionsPage() {
   const isLoading = transactionsQuery.isLoading
 
   // Handle errors
-  if (bankAccountQuery.error) {
-    toast.error('Error al cargar cuenta bancaria')
-    navigate('/')
-  }
+  useEffect(() => {
+    if (bankAccountQuery.error) {
+      toast.error('Error al cargar cuenta bancaria')
+      navigate('/')
+    }
+  }, [bankAccountQuery.error, navigate])
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-VE', {
