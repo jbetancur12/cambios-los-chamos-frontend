@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetBody } from '@/components/ui/sheet';
 import { Label } from '@/components/ui/label';
-import { Plus, Edit, ShoppingCart, TrendingUp, Search, Trash2, Calendar } from 'lucide-react';
+import { Plus, Edit, ShoppingCart, TrendingUp, Search, Archive, Calendar, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatCurrency } from '@/lib/formatCurrency';
 import { Badge } from '@/components/ui/badge';
@@ -17,7 +17,11 @@ import { POSSheet } from './POSSheet';
 
 export default function InventoryPage() {
     const queryClient = useQueryClient();
-    const { data: products, isLoading } = useQuery({ queryKey: ['products'], queryFn: inventoryApi.getAllProducts });
+    const [showArchived, setShowArchived] = useState(false);
+    const { data: products, isLoading } = useQuery({ 
+        queryKey: ['products', showArchived], 
+        queryFn: () => inventoryApi.getAllProducts({ includeInactive: showArchived }) 
+    });
     const [searchTerm, setSearchTerm] = useState('');
 
 
@@ -32,9 +36,9 @@ export default function InventoryPage() {
     const [saleOpen, setSaleOpen] = useState(false);
     const [transactionProduct, setTransactionProduct] = useState<Product | null>(null);
 
-    // Delete State
-    const [deleteOpen, setDeleteOpen] = useState(false);
-    const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+    // Archive State
+    const [archiveOpen, setArchiveOpen] = useState(false);
+    const [productToArchive, setProductToArchive] = useState<Product | null>(null);
 
     // POS State
     const [posOpen, setPosOpen] = useState(false);
@@ -51,20 +55,30 @@ export default function InventoryPage() {
     const openPurchase = (product: Product) => { setTransactionProduct(product); setPurchaseOpen(true); };
     const openSale = (product: Product) => { setTransactionProduct(product); setSaleOpen(true); };
 
-    const openDelete = (product: Product) => {
-        setProductToDelete(product);
-        setDeleteOpen(true);
+    const openArchive = (product: Product) => {
+        setProductToArchive(product);
+        setArchiveOpen(true);
     };
 
-    const confirmDelete = async () => {
-        if (!productToDelete) return;
+    const confirmArchive = async () => {
+        if (!productToArchive) return;
         try {
-            await inventoryApi.deleteProduct(productToDelete.id);
-            toast.success('Producto eliminado');
+            await inventoryApi.deleteProduct(productToArchive.id);
+            toast.success('Producto archivado correctamente');
             queryClient.invalidateQueries({ queryKey: ['products'] });
-            setDeleteOpen(false);
+            setArchiveOpen(false);
         } catch (error) {
-            toast.error('Error al eliminar producto');
+            toast.error('Error al archivar producto');
+        }
+    };
+
+    const handleRestore = async (product: Product) => {
+        try {
+            await inventoryApi.reactivateProduct(product.id);
+            toast.success('Producto restaurado correctamente');
+            queryClient.invalidateQueries({ queryKey: ['products'] });
+        } catch (error) {
+            toast.error('Error al restaurar producto');
         }
     };
 
@@ -90,15 +104,30 @@ export default function InventoryPage() {
                 )}
             </div>
 
-            <div className="flex items-center space-x-2 bg-background border rounded-md px-3 py-2 max-w-sm">
-                <Search className="h-4 w-4 text-muted-foreground" />
-                <input
-                    type="text"
-                    placeholder="Buscar por nombre o SKU..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="flex-1 bg-transparent border-none text-sm focus:outline-none"
-                />
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div className="flex items-center space-x-2 bg-background border rounded-md px-3 py-2 w-full max-w-sm">
+                    <Search className="h-4 w-4 text-muted-foreground" />
+                    <input
+                        type="text"
+                        placeholder="Buscar por nombre o SKU..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="flex-1 bg-transparent border-none text-sm focus:outline-none"
+                    />
+                </div>
+                
+                {isSuperAdmin && (
+                    <div className="flex items-center space-x-2">
+                        <input 
+                            type="checkbox" 
+                            id="showArchived" 
+                            checked={showArchived}
+                            onChange={(e) => setShowArchived(e.target.checked)}
+                            className="rounded border-gray-300 text-[linear-gradient(to_right,#136BBC,#274565)] focus:ring-[linear-gradient(to_right,#136BBC,#274565)]"
+                        />
+                        <Label htmlFor="showArchived" className="text-sm cursor-pointer">Ver Archivados</Label>
+                    </div>
+                )}
             </div>
 
             {/* Desktop Table */}
@@ -122,15 +151,21 @@ export default function InventoryPage() {
                                         {product.sku && <div className="text-xs text-muted-foreground font-mono">{product.sku}</div>}
                                     </td>
                                     <td className="px-4 py-3 text-center">
-                                        <Badge variant="outline" className={
-                                            product.stock === 0
-                                                ? 'bg-red-50 text-red-600 border-red-200'
-                                                : product.stock <= product.minStock
-                                                    ? 'bg-yellow-50 text-yellow-700 border-yellow-200'
-                                                    : 'bg-green-50 text-green-600 border-green-200'
-                                        }>
-                                            {product.stock} unids
-                                        </Badge>
+                                        {!product.isActive ? (
+                                            <Badge variant="outline" className="bg-gray-100 text-gray-500 border-gray-200">
+                                                Archivado
+                                            </Badge>
+                                        ) : (
+                                            <Badge variant="outline" className={
+                                                product.stock === 0
+                                                    ? 'bg-red-50 text-red-600 border-red-200'
+                                                    : product.stock <= product.minStock
+                                                        ? 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                                                        : 'bg-green-50 text-green-600 border-green-200'
+                                            }>
+                                                {product.stock} unids
+                                            </Badge>
+                                        )}
                                     </td>
                                     {isSuperAdmin && (
                                         <td className="px-4 py-3 text-right tabular-nums">
@@ -141,25 +176,36 @@ export default function InventoryPage() {
                                         {formatCurrency(Number(product.sellingPrice))}
                                     </td>
                                     <td className="px-4 py-3 text-right space-x-2">
-                                        {isSuperAdmin && (
-                                            <Button variant="outline" size="sm" className="h-8" onClick={() => openPurchase(product)}>
-                                                <TrendingUp className="h-3.5 w-3.5 mr-1 text-blue-600" />
-                                                <span className="sr-only lg:not-sr-only">Comprar</span>
-                                            </Button>
-                                        )}
-                                        <Button variant="outline" size="sm" className="h-8" onClick={() => openSale(product)}>
-                                            <ShoppingCart className="h-3.5 w-3.5 mr-1 text-green-600" />
-                                            <span className="sr-only lg:not-sr-only">Vender</span>
-                                        </Button>
-                                        {isSuperAdmin && (
+                                        {product.isActive ? (
                                             <>
-                                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(product)}>
-                                                    <Edit className="h-3.5 w-3.5" />
+                                                {isSuperAdmin && (
+                                                    <Button variant="outline" size="sm" className="h-8" onClick={() => openPurchase(product)}>
+                                                        <TrendingUp className="h-3.5 w-3.5 mr-1 text-blue-600" />
+                                                        <span className="sr-only lg:not-sr-only">Comprar</span>
+                                                    </Button>
+                                                )}
+                                                <Button variant="outline" size="sm" className="h-8" onClick={() => openSale(product)}>
+                                                    <ShoppingCart className="h-3.5 w-3.5 mr-1 text-green-600" />
+                                                    <span className="sr-only lg:not-sr-only">Vender</span>
                                                 </Button>
-                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50" onClick={() => openDelete(product)}>
-                                                    <Trash2 className="h-3.5 w-3.5" />
-                                                </Button>
+                                                {isSuperAdmin && (
+                                                    <>
+                                                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(product)}>
+                                                            <Edit className="h-3.5 w-3.5" />
+                                                        </Button>
+                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-amber-500 hover:text-amber-700 hover:bg-amber-50" onClick={() => openArchive(product)} title="Archivar">
+                                                            <Archive className="h-3.5 w-3.5" />
+                                                        </Button>
+                                                    </>
+                                                )}
                                             </>
+                                        ) : (
+                                            isSuperAdmin && (
+                                                <Button variant="outline" size="sm" className="h-8 text-[linear-gradient(to_right,#136BBC,#274565)]" onClick={() => handleRestore(product)}>
+                                                    <RotateCcw className="h-3.5 w-3.5 mr-1" />
+                                                    Restaurar
+                                                </Button>
+                                            )
                                         )}
                                     </td>
                                 </tr>
@@ -185,13 +231,20 @@ export default function InventoryPage() {
                                 <h3 className="font-semibold">{product.name}</h3>
                                 {product.sku && <p className="text-xs text-muted-foreground">{product.sku}</p>}
                             </div>
-                            {isSuperAdmin && (
+                            {isSuperAdmin && product.isActive && (
                                 <div className="flex gap-1 -mt-1 -mr-2">
                                     <Button variant="ghost" size="icon" onClick={() => openEdit(product)}>
                                         <Edit className="h-4 w-4" />
                                     </Button>
-                                    <Button variant="ghost" size="icon" className="text-red-500" onClick={() => openDelete(product)}>
-                                        <Trash2 className="h-4 w-4" />
+                                    <Button variant="ghost" size="icon" className="text-amber-500" onClick={() => openArchive(product)} title="Archivar">
+                                        <Archive className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            )}
+                            {isSuperAdmin && !product.isActive && (
+                                <div className="flex gap-1 -mt-1 -mr-2">
+                                    <Button variant="ghost" size="icon" className="text-blue-600" onClick={() => handleRestore(product)} title="Restaurar">
+                                        <RotateCcw className="h-4 w-4" />
                                     </Button>
                                 </div>
                             )}
@@ -200,15 +253,21 @@ export default function InventoryPage() {
                         <div className="grid grid-cols-2 gap-2 text-sm">
                             <div className="space-y-1">
                                 <span className="text-muted-foreground text-xs block">Stock</span>
-                                <Badge variant="secondary" className={
-                                    product.stock === 0
-                                        ? 'text-red-600'
-                                        : product.stock <= product.minStock
-                                            ? 'text-yellow-700'
-                                            : 'text-green-600'
-                                }>
-                                    {product.stock} unids
-                                </Badge>
+                                {!product.isActive ? (
+                                    <Badge variant="outline" className="bg-gray-100 text-gray-500 border-gray-200">
+                                        Archivado
+                                    </Badge>
+                                ) : (
+                                    <Badge variant="secondary" className={
+                                        product.stock === 0
+                                            ? 'text-red-600'
+                                            : product.stock <= product.minStock
+                                                ? 'text-yellow-700'
+                                                : 'text-green-600'
+                                    }>
+                                        {product.stock} unids
+                                    </Badge>
+                                )}
                             </div>
                             <div className="space-y-1 text-right">
                                 <span className="text-muted-foreground text-xs block">Venta</span>
@@ -216,16 +275,18 @@ export default function InventoryPage() {
                             </div>
                         </div>
 
-                        <div className="flex gap-2 pt-2">
-                            {isSuperAdmin && (
-                                <Button variant="outline" size="sm" className="flex-1" onClick={() => openPurchase(product)}>
-                                    <TrendingUp className="h-4 w-4 mr-2 text-blue-600" /> Stock
+                        {product.isActive && (
+                            <div className="flex gap-2 pt-2">
+                                {isSuperAdmin && (
+                                    <Button variant="outline" size="sm" className="flex-1" onClick={() => openPurchase(product)}>
+                                        <TrendingUp className="h-4 w-4 mr-2 text-blue-600" /> Stock
+                                    </Button>
+                                )}
+                                <Button variant="outline" size="sm" className="flex-1" onClick={() => openSale(product)}>
+                                    <ShoppingCart className="h-4 w-4 mr-2 text-green-600" /> Vender
                                 </Button>
-                            )}
-                            <Button variant="outline" size="sm" className="flex-1" onClick={() => openSale(product)}>
-                                <ShoppingCart className="h-4 w-4 mr-2 text-green-600" /> Vender
-                            </Button>
-                        </div>
+                            </div>
+                        )}
                     </Card>
                 ))}
             </div>
@@ -258,11 +319,11 @@ export default function InventoryPage() {
             )}
 
             <DeleteConfirmationModal
-                open={deleteOpen}
-                onOpenChange={setDeleteOpen}
-                onConfirm={confirmDelete}
-                title="¿Eliminar producto?"
-                description={`¿Estás seguro de que deseas eliminar "${productToDelete?.name}"? Esta acción no se puede deshacer.`}
+                open={archiveOpen}
+                onOpenChange={setArchiveOpen}
+                onConfirm={confirmArchive}
+                title="¿Archivar producto?"
+                description={`¿Estás seguro de que deseas archivar "${productToArchive?.name}"? El producto dejará de aparecer en el inventario pero su historial de transacciones se conservará.`}
             />
 
             <POSSheet open={posOpen} onOpenChange={setPosOpen} />
@@ -271,6 +332,70 @@ export default function InventoryPage() {
 }
 
 // --- Sub-components (Sheets) ---
+
+/** Formats a raw numeric string into locale display (e.g. 1200 -> "1.200") */
+function formatNumberDisplay(value: string): string {
+    const num = parseFloat(value.replace(/\./g, '').replace(',', '.'));
+    if (isNaN(num)) return '';
+    return new Intl.NumberFormat('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(num);
+}
+
+/** Strips locale formatting back to a plain number (e.g. "1.200,50" -> 1200.50) */
+function parseFormattedNumber(formatted: string): number {
+    const cleaned = formatted.replace(/\./g, '').replace(',', '.');
+    return parseFloat(cleaned) || 0;
+}
+
+function CurrencyInput({ label, name, defaultValue, required = true }: { label: string; name: string; defaultValue?: string | number; required?: boolean }) {
+    const [display, setDisplay] = React.useState(() => {
+        if (defaultValue !== undefined && defaultValue !== null && defaultValue !== '') {
+            return formatNumberDisplay(String(defaultValue));
+        }
+        return '';
+    });
+
+    React.useEffect(() => {
+        if (defaultValue !== undefined && defaultValue !== null && defaultValue !== '') {
+            setDisplay(formatNumberDisplay(String(defaultValue)));
+        } else {
+            setDisplay('');
+        }
+    }, [defaultValue]);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        // Allow only digits, dots (thousand sep) and comma (decimal sep)
+        const raw = e.target.value.replace(/[^0-9.,]/g, '');
+        setDisplay(raw);
+    };
+
+    const handleBlur = () => {
+        if (display) {
+            setDisplay(formatNumberDisplay(display));
+        }
+    };
+
+    const numericValue = parseFormattedNumber(display);
+
+    return (
+        <div className="space-y-2">
+            <Label>{label}</Label>
+            <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
+                <Input
+                    type="text"
+                    inputMode="decimal"
+                    value={display}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    required={required}
+                    placeholder="0"
+                    className="pl-7"
+                />
+            </div>
+            <input type="hidden" name={name} value={numericValue} />
+        </div>
+    );
+}
 
 function ProductFormSheet({ open, onOpenChange, product }: { open: boolean, onOpenChange: (open: boolean) => void, product: Product | null }) {
     const queryClient = useQueryClient();
@@ -318,14 +443,8 @@ function ProductFormSheet({ open, onOpenChange, product }: { open: boolean, onOp
                             <Input name="sku" defaultValue={product?.sku} placeholder="Ej: MED-001" />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label>Costo Compra</Label>
-                                <Input name="costPrice" type="number" step="0.01" defaultValue={product?.costPrice} required placeholder="0.00" />
-                            </div>
-                            <div className="space-y-2">
-                                <Label>Precio Venta</Label>
-                                <Input name="sellingPrice" type="number" step="0.01" defaultValue={product?.sellingPrice} required placeholder="0.00" />
-                            </div>
+                            <CurrencyInput label="Costo Compra" name="costPrice" defaultValue={product?.costPrice} />
+                            <CurrencyInput label="Precio Venta" name="sellingPrice" defaultValue={product?.sellingPrice} />
                         </div>
                         <div className="space-y-2">
                             <Label>Stock Mínimo</Label>
@@ -381,8 +500,7 @@ function PurchaseSheet({ open, onOpenChange, product }: { open: boolean, onOpenC
                             <Input name="quantity" type="number" min="1" required placeholder="0" autoFocus />
                         </div>
                         <div className="space-y-2">
-                            <Label>Costo Unitario (Nuevo)</Label>
-                            <Input name="costPrice" type="number" step="0.01" defaultValue={product.costPrice} required />
+                            <CurrencyInput label="Costo Unitario (Nuevo)" name="costPrice" defaultValue={product.costPrice} />
                             <p className="text-xs text-muted-foreground">Este valor actualizará el costo promedio del producto.</p>
                         </div>
                         <Button type="submit" className="w-full" disabled={mutation.isPending}>
@@ -458,13 +576,20 @@ function SaleSheet({ open, onOpenChange, product }: { open: boolean, onOpenChang
                         </div>
                         <div className="space-y-2">
                             <Label>Precio de Venta (Unitario)</Label>
-                            <Input
-                                type="number"
-                                step="0.01"
-                                value={price}
-                                onChange={(e) => setPrice(Number(e.target.value))}
-                                required
-                            />
+                            <div className="relative">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
+                                <Input
+                                    type="text"
+                                    inputMode="decimal"
+                                    value={formatNumberDisplay(String(price))}
+                                    onChange={(e) => {
+                                        const raw = e.target.value.replace(/[^0-9.,]/g, '');
+                                        setPrice(parseFormattedNumber(raw));
+                                    }}
+                                    required
+                                    className="pl-7"
+                                />
+                            </div>
                         </div>
 
                         <div className="py-4 space-y-2 border-t border-b">

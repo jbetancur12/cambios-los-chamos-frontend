@@ -20,7 +20,7 @@ interface CartItem {
 
 export function POSSheet({ open, onOpenChange }: { open: boolean, onOpenChange: (open: boolean) => void }) {
     const queryClient = useQueryClient();
-    const { data: products } = useQuery({ queryKey: ['products'], queryFn: inventoryApi.getAllProducts });
+    const { data: products } = useQuery({ queryKey: ['products'], queryFn: () => inventoryApi.getAllProducts() });
     const { user } = useAuth();
     const isSuperAdmin = user?.role === 'SUPER_ADMIN';
 
@@ -42,7 +42,7 @@ export function POSSheet({ open, onOpenChange }: { open: boolean, onOpenChange: 
     const searchResults = useMemo(() => {
         if (!searchTerm || !products) return [];
         const lower = searchTerm.toLowerCase();
-        return products.filter(p =>
+        return products.filter((p: Product) =>
             (p.name.toLowerCase().includes(lower) || p.sku?.toLowerCase().includes(lower)) &&
             !cart.some(item => item.product.id === p.id) // Exclude already added
         ).slice(0, 5);
@@ -137,7 +137,7 @@ export function POSSheet({ open, onOpenChange }: { open: boolean, onOpenChange: 
                         {/* Search Results Dropdown */}
                         {searchResults.length > 0 && (
                             <div className="absolute top-full left-4 right-4 z-50 bg-popover text-popover-foreground rounded-md border shadow-md mt-1 overflow-hidden">
-                                {searchResults.map(product => {
+                                {searchResults.map((product: Product) => {
                                     const hasStock = product.stock > 0;
                                     return (
                                         <button

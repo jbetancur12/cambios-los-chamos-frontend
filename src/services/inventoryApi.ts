@@ -50,11 +50,15 @@ import { api } from '@/lib/api';
 
 export const inventoryApi = {
     // Products
-    getAllProducts: async () => {
-        return await api.get<Product[]>('/inventory/products');
+    getAllProducts: async (params?: { includeInactive?: boolean }) => {
+        const queryParams = params?.includeInactive ? { params: { includeInactive: 'true' } } : undefined;
+        return await api.get<Product[]>('/inventory/products', queryParams);
     },
     getProduct: async (id: string) => {
         return await api.get<Product>(`/inventory/products/${id}`);
+    },
+    reactivateProduct: async (id: string) => {
+        return await api.put<Product>(`/inventory/products/${id}`, { isActive: true });
     },
     createProduct: async (data: Partial<Product>) => {
         return await api.post<Product>('/inventory/products', data);
