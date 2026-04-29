@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetBody } from '@/components/ui/sheet';
 import { Label } from '@/components/ui/label';
-import { Plus, Edit, ShoppingCart, TrendingUp, Search, Archive, Calendar, RotateCcw } from 'lucide-react';
+import { Plus, Edit, ShoppingCart, TrendingUp, Search, Archive, Calendar, RotateCcw, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatCurrency } from '@/lib/formatCurrency';
 import { Badge } from '@/components/ui/badge';
@@ -789,6 +789,55 @@ function SalesReportSheet({ open, onOpenChange }: { open: boolean, onOpenChange:
     const totalProfit = sales.reduce((sum, t) => sum + Number(t.profit || 0), 0);
     const totalItems = sales.reduce((sum, t) => sum + t.quantity, 0);
 
+    const exportToExcel = () => {
+        if (!sales.length) {
+            toast.error("No hay ventas para exportar en las fechas seleccionadas.");
+            return;
+        }
+
+        // CSV Header
+        let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+        csvContent += "Fecha,Hora,Producto,Cantidad,Costo Unitario,Precio de Venta,Total Venta,Ganancia Neta,Metodo Pago,Vendedor\n";
+
+        sales.forEach(sale => {
+            const dateObj = new Date(sale.createdAt);
+            const date = dateObj.toLocaleDateString('es-CO');
+            const time = dateObj.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+            
+            // Format numbers to avoid excel scientific notation or comma issues
+            // Use replacing . with , for Spanish Excel or vice-versa depending on standard, 
+            // but standard CSV usually expects standard numbers if quoted correctly.
+            const cost = sale.product?.costPrice || 0;
+            const price = sale.pricePerUnit;
+            const total = sale.totalPrice;
+            const profit = sale.profit || 0;
+
+            const row = [
+                `"${date}"`,
+                `"${time}"`,
+                `"${sale.product?.name?.replace(/"/g, '""')}"`,
+                sale.quantity,
+                cost,
+                price,
+                total,
+                profit,
+                `"${sale.paymentMethod || 'CASH'}"`,
+                `"${sale.createdBy?.fullName}"`
+            ].join(",");
+
+            csvContent += row + "\n";
+        });
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `Reporte_Ventas_${startDate}_al_${endDate}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.success("Reporte descargado correctamente");
+    };
+
     return (
         <>
             <Sheet open={open} onOpenChange={onOpenChange}>
@@ -838,6 +887,11 @@ function SalesReportSheet({ open, onOpenChange }: { open: boolean, onOpenChange:
                                         <Calendar className="h-3 w-3 mr-1" />
                                         {filterType === 'CUSTOM' ? `${customRange.from} → ${customRange.to}` : 'Personalizado'}
                                     </Button>
+                                    {isSuperAdmin && (
+                                        <Button variant="outline" size="sm" onClick={exportToExcel} disabled={!sales.length} className="ml-auto border-green-200 text-green-700 hover:bg-green-50">
+                                            <Download className="mr-2 h-4 w-4" /> Exportar a Excel
+                                        </Button>
+                                    )}
                                 </div>
 
                                 {/* Summary Cards */}
