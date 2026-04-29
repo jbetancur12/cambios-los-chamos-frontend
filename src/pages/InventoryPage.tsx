@@ -27,6 +27,8 @@ export default function InventoryPage() {
 
     const { user } = useAuth();
     const isSuperAdmin = user?.role === 'SUPER_ADMIN';
+    const isAdmin = user?.role === 'ADMIN';
+    const isPrivileged = isSuperAdmin || isAdmin;
 
     // Sheet States
     const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -42,6 +44,14 @@ export default function InventoryPage() {
 
     // POS State
     const [posOpen, setPosOpen] = useState(false);
+
+    // Pending Purchases State
+    const [isPendingPurchasesOpen, setIsPendingPurchasesOpen] = useState(false);
+    const { data: pendingPurchases } = useQuery({
+        queryKey: ['pendingPurchases'],
+        queryFn: () => inventoryApi.getPendingPurchases(),
+        enabled: isSuperAdmin // Only fetch if SuperAdmin
+    });
 
     const filteredProducts = products?.filter(p =>
         p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -89,14 +99,21 @@ export default function InventoryPage() {
                     <h1 className="text-2xl font-bold tracking-tight">Inventario</h1>
                     <p className="text-sm text-muted-foreground">Gestiona tus productos, compras y ventas.</p>
                 </div>
-                {isSuperAdmin && (
+                {isPrivileged && (
                     <div className="flex gap-2">
                         <Button variant="outline" onClick={() => setIsReportOpen(true)}>
                             <TrendingUp className="mr-2 h-4 w-4" /> Reporte
                         </Button>
-                        <Button onClick={openCreate} className="bg-[linear-gradient(to_right,#136BBC,#274565)]">
-                            <Plus className="mr-2 h-4 w-4" /> Nuevo Producto
-                        </Button>
+                        {isSuperAdmin && pendingPurchases && pendingPurchases.length > 0 && (
+                            <Button variant="outline" className="border-amber-500 text-amber-600 hover:bg-amber-50" onClick={() => setIsPendingPurchasesOpen(true)}>
+                                Revisar Entradas ({pendingPurchases.length})
+                            </Button>
+                        )}
+                        {isSuperAdmin && (
+                            <Button onClick={openCreate} className="bg-[linear-gradient(to_right,#136BBC,#274565)]">
+                                <Plus className="mr-2 h-4 w-4" /> Nuevo Producto
+                            </Button>
+                        )}
                         <Button onClick={() => setPosOpen(true)} className="bg-green-600 hover:bg-green-700 text-white shadow-sm">
                             <ShoppingCart className="mr-2 h-4 w-4" /> Nueva Venta (POS)
                         </Button>
@@ -178,7 +195,7 @@ export default function InventoryPage() {
                                     <td className="px-4 py-3 text-right space-x-2">
                                         {product.isActive ? (
                                             <>
-                                                {isSuperAdmin && (
+                                                {isPrivileged && (
                                                     <Button variant="outline" size="sm" className="h-8" onClick={() => openPurchase(product)}>
                                                         <TrendingUp className="h-3.5 w-3.5 mr-1 text-blue-600" />
                                                         <span className="sr-only lg:not-sr-only">Comprar</span>
@@ -277,7 +294,7 @@ export default function InventoryPage() {
 
                         {product.isActive && (
                             <div className="flex gap-2 pt-2">
-                                {isSuperAdmin && (
+                                {isPrivileged && (
                                     <Button variant="outline" size="sm" className="flex-1" onClick={() => openPurchase(product)}>
                                         <TrendingUp className="h-4 w-4 mr-2 text-blue-600" /> Stock
                                     </Button>
@@ -301,6 +318,11 @@ export default function InventoryPage() {
             <SalesReportSheet
                 open={isReportOpen}
                 onOpenChange={setIsReportOpen}
+            />
+
+            <PendingPurchasesSheet 
+                open={isPendingPurchasesOpen} 
+                onOpenChange={setIsPendingPurchasesOpen} 
             />
 
             {transactionProduct && (
@@ -416,13 +438,18 @@ function ProductFormSheet({ open, onOpenChange, product }: { open: boolean, onOp
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         const formData = new FormData(e.target as HTMLFormElement);
-        const data = {
+        const data: any = {
             name: formData.get('name'),
             sku: formData.get('sku'),
             costPrice: Number(formData.get('costPrice')),
             sellingPrice: Number(formData.get('sellingPrice')),
             minStock: Number(formData.get('minStock')),
         };
+        
+        if (!isEdit) {
+            data.stock = Number(formData.get('stock') || 0);
+        }
+        
         mutation.mutate(data);
     };
 
@@ -446,12 +473,21 @@ function ProductFormSheet({ open, onOpenChange, product }: { open: boolean, onOp
                             <CurrencyInput label="Costo Compra" name="costPrice" defaultValue={product?.costPrice} />
                             <CurrencyInput label="Precio Venta" name="sellingPrice" defaultValue={product?.sellingPrice} />
                         </div>
-                        <div className="space-y-2">
-                            <Label>Stock Mínimo</Label>
-                            <Input name="minStock" type="number" min="0" defaultValue={product?.minStock ?? 5} required placeholder="5" />
-                            <p className="text-xs text-muted-foreground">El badge se pondrá amarillo cuando el stock llegue a este nivel.</p>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label>Stock Mínimo</Label>
+                                <Input name="minStock" type="number" min="0" defaultValue={product?.minStock ?? 5} required placeholder="5" />
+                            </div>
+                            {!isEdit && (
+                                <div className="space-y-2">
+                                    <Label>Stock Inicial</Label>
+                                    <Input name="stock" type="number" min="0" defaultValue={0} required placeholder="0" />
+                                </div>
+                            )}
                         </div>
-                        <Button type="submit" className="w-full bg-[linear-gradient(to_right,#136BBC,#274565)]" disabled={mutation.isPending}>
+                        <p className="text-xs text-muted-foreground mt-1">El stock mínimo pondrá el badge en amarillo cuando llegue a ese nivel.</p>
+                        
+                        <Button type="submit" className="w-full bg-[linear-gradient(to_right,#136BBC,#274565)] mt-4" disabled={mutation.isPending}>
                             {mutation.isPending ? 'Guardando...' : 'Guardar Producto'}
                         </Button>
                     </form>
@@ -462,25 +498,32 @@ function ProductFormSheet({ open, onOpenChange, product }: { open: boolean, onOp
 }
 
 function PurchaseSheet({ open, onOpenChange, product }: { open: boolean, onOpenChange: (open: boolean) => void, product: Product }) {
+    const { user } = useAuth();
+    const isSuperAdmin = user?.role === 'SUPER_ADMIN';
     const queryClient = useQueryClient();
 
     const mutation = useMutation({
         mutationFn: (data: any) => inventoryApi.createPurchase({ productId: product.id, ...data }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['products'] });
-            toast.success("Compra registrada", { description: "El stock ha sido actualizado." });
+            toast.success("Entrada registrada", { description: "El stock ha sido actualizado." });
             onOpenChange(false);
         },
-        onError: (error: any) => toast.error("Error al registrar compra", { description: error.message })
+        onError: (error: any) => toast.error("Error al registrar entrada", { description: error.message })
     });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         const formData = new FormData(e.target as HTMLFormElement);
-        mutation.mutate({
-            quantity: Number(formData.get('quantity')),
-            costPrice: Number(formData.get('costPrice'))
-        });
+        
+        const costPriceVal = formData.get('costPrice');
+        const data: any = { quantity: Number(formData.get('quantity')) };
+        
+        if (costPriceVal !== null) {
+            data.costPrice = Number(costPriceVal);
+        }
+
+        mutation.mutate(data);
     };
 
     return (
@@ -499,10 +542,17 @@ function PurchaseSheet({ open, onOpenChange, product }: { open: boolean, onOpenC
                             <Label>Cantidad a ingresar</Label>
                             <Input name="quantity" type="number" min="1" required placeholder="0" autoFocus />
                         </div>
-                        <div className="space-y-2">
-                            <CurrencyInput label="Costo Unitario (Nuevo)" name="costPrice" defaultValue={product.costPrice} />
-                            <p className="text-xs text-muted-foreground">Este valor actualizará el costo promedio del producto.</p>
-                        </div>
+                        {isSuperAdmin && (
+                            <div className="space-y-2">
+                                <CurrencyInput label="Costo Unitario (Nuevo)" name="costPrice" defaultValue={product.costPrice} />
+                                <p className="text-xs text-muted-foreground">Este valor actualizará el costo promedio del producto.</p>
+                            </div>
+                        )}
+                        {!isSuperAdmin && (
+                            <p className="text-xs text-muted-foreground bg-muted/30 p-2 rounded">
+                                Esta entrada quedará pendiente de validación de costos por parte del Administrador.
+                            </p>
+                        )}
                         <Button type="submit" className="w-full" disabled={mutation.isPending}>
                             {mutation.isPending ? 'Procesando...' : 'Registrar Entrada'}
                         </Button>
@@ -618,7 +668,86 @@ function SaleSheet({ open, onOpenChange, product }: { open: boolean, onOpenChang
     );
 }
 
+function PendingPurchasesSheet({ open, onOpenChange }: { open: boolean, onOpenChange: (open: boolean) => void }) {
+    const queryClient = useQueryClient();
+    
+    const { data: pendingPurchases, isLoading } = useQuery({
+        queryKey: ['pendingPurchases'],
+        queryFn: () => inventoryApi.getPendingPurchases(),
+        enabled: open
+    });
+
+    const resolveMutation = useMutation({
+        mutationFn: ({ id, costPrice }: { id: string, costPrice: number }) => inventoryApi.resolvePendingPurchase(id, costPrice),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['pendingPurchases'] });
+            queryClient.invalidateQueries({ queryKey: ['products'] });
+            toast.success("Costo actualizado y entrada aprobada");
+        },
+        onError: (error: any) => toast.error("Error al aprobar entrada", { description: error.message })
+    });
+
+    const handleResolve = (e: React.FormEvent, id: string) => {
+        e.preventDefault();
+        const formData = new FormData(e.target as HTMLFormElement);
+        const costPrice = Number(formData.get('costPrice'));
+        resolveMutation.mutate({ id, costPrice });
+    };
+
+    return (
+        <Sheet open={open} onOpenChange={onOpenChange}>
+            <SheetContent className="w-full sm:max-w-xl flex flex-col p-0">
+                <SheetHeader onClose={() => onOpenChange(false)} className="px-6 pt-6 pb-4 border-b">
+                    <SheetTitle>Compras Pendientes de Revisión</SheetTitle>
+                </SheetHeader>
+                <SheetBody className="overflow-y-auto p-6">
+                    {isLoading ? (
+                        <div className="text-center py-8 text-muted-foreground">Cargando...</div>
+                    ) : !pendingPurchases || pendingPurchases.length === 0 ? (
+                        <div className="text-center py-8 text-muted-foreground bg-muted/10 rounded-lg">
+                            No hay entradas pendientes.
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            <p className="text-sm text-muted-foreground mb-4">
+                                Ingresa el costo real (según factura) para cada entrada registrada por los administradores.
+                            </p>
+                            {pendingPurchases.map(purchase => (
+                                <div key={purchase.id} className="p-4 border rounded-lg bg-card space-y-3">
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <h4 className="font-semibold">{purchase.product?.name}</h4>
+                                            <div className="text-xs text-muted-foreground mt-1">
+                                                {new Date(purchase.createdAt).toLocaleDateString()} {new Date(purchase.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                {' • Ingresado por: '}{purchase.createdBy?.fullName}
+                                            </div>
+                                        </div>
+                                        <Badge variant="outline" className="bg-amber-50 text-amber-600 border-amber-200">
+                                            +{purchase.quantity} unds
+                                        </Badge>
+                                    </div>
+                                    <form onSubmit={(e) => handleResolve(e, purchase.id)} className="flex items-end gap-2 pt-2 border-t">
+                                        <div className="flex-1">
+                                            <CurrencyInput label="Costo Factura (Ud)" name="costPrice" defaultValue={purchase.product?.costPrice || 0} />
+                                        </div>
+                                        <Button type="submit" className="bg-green-600 hover:bg-green-700 h-9" disabled={resolveMutation.isPending}>
+                                            Aprobar
+                                        </Button>
+                                    </form>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </SheetBody>
+            </SheetContent>
+        </Sheet>
+    );
+}
+
 function SalesReportSheet({ open, onOpenChange }: { open: boolean, onOpenChange: (open: boolean) => void }) {
+    const { user } = useAuth();
+    const isSuperAdmin = user?.role === 'SUPER_ADMIN';
+
     const _now = new Date();
     const today = `${_now.getFullYear()}-${String(_now.getMonth() + 1).padStart(2, '0')}-${String(_now.getDate()).padStart(2, '0')}`;
     const [filterType, setFilterType] = React.useState<'SINGLE' | 'CUSTOM'>('SINGLE');
@@ -712,16 +841,18 @@ function SalesReportSheet({ open, onOpenChange }: { open: boolean, onOpenChange:
                                 </div>
 
                                 {/* Summary Cards */}
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className={`grid ${isSuperAdmin ? 'grid-cols-2' : 'grid-cols-1'} gap-4`}>
                                     <div className="bg-green-50 border border-green-100 p-4 rounded-lg">
                                         <span className="text-xs text-green-600 font-medium uppercase tracking-wider">Total Ventas</span>
                                         <div className="text-2xl font-bold text-green-700">{formatCurrency(totalRevenue)}</div>
                                     </div>
-                                    <div className="bg-blue-50 border border-blue-100 p-4 rounded-lg">
-                                        <span className="text-xs text-blue-600 font-medium uppercase tracking-wider">Ganancia (Real)</span>
-                                        <div className="text-2xl font-bold text-blue-700">{formatCurrency(totalProfit)}</div>
-                                    </div>
-                                    <div className="bg-gray-50 border p-4 rounded-lg col-span-2 flex justify-between items-center">
+                                    {isSuperAdmin && (
+                                        <div className="bg-blue-50 border border-blue-100 p-4 rounded-lg">
+                                            <span className="text-xs text-blue-600 font-medium uppercase tracking-wider">Ganancia (Real)</span>
+                                            <div className="text-2xl font-bold text-blue-700">{formatCurrency(totalProfit)}</div>
+                                        </div>
+                                    )}
+                                    <div className={`bg-gray-50 border p-4 rounded-lg ${isSuperAdmin ? 'col-span-2' : 'col-span-1'} flex justify-between items-center`}>
                                         <span className="text-sm text-gray-600">Items Vendidos:</span>
                                         <span className="font-bold text-lg">{totalItems}</span>
                                     </div>
@@ -760,7 +891,9 @@ function SalesReportSheet({ open, onOpenChange }: { open: boolean, onOpenChange:
                                                         <div className="flex-1 bg-muted rounded-full h-1.5 overflow-hidden">
                                                             <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${(p.units / maxUnits) * 100}%` }} />
                                                         </div>
-                                                        <span className="text-xs text-green-600 shrink-0">+{formatCurrency(p.profit)}</span>
+                                                        <span className="text-xs text-green-600 shrink-0">
+                                                            {isSuperAdmin && `+${formatCurrency(p.profit)}`}
+                                                        </span>
                                                     </div>
                                                 </div>
                                             ))}
@@ -791,7 +924,9 @@ function SalesReportSheet({ open, onOpenChange }: { open: boolean, onOpenChange:
                                                     <div className="text-right">
                                                         <div className="text-sm font-semibold">{sale.quantity} unds x {formatCurrency(Number(sale.pricePerUnit))}</div>
                                                         <div className="font-medium text-xs text-muted-foreground">Total: {formatCurrency(Number(sale.totalPrice))}</div>
-                                                        <div className="text-xs text-green-600">+{formatCurrency(Number(sale.profit || 0))} ganancia</div>
+                                                        {isSuperAdmin && (
+                                                            <div className="text-xs text-green-600">+{formatCurrency(Number(sale.profit || 0))} ganancia</div>
+                                                        )}
                                                     </div>
                                                 </div>
                                             ))}

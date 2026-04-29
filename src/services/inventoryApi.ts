@@ -29,21 +29,28 @@ export const PaymentMethod = {
 export type ProductTransactionType = typeof ProductTransactionType[keyof typeof ProductTransactionType];
 export type PaymentMethod = typeof PaymentMethod[keyof typeof PaymentMethod];
 
+export const TransactionStatus = {
+    PENDING: 'PENDING',
+    COMPLETED: 'COMPLETED',
+} as const;
+export type TransactionStatus = typeof TransactionStatus[keyof typeof TransactionStatus];
+
 export interface ProductTransaction {
     id: string;
-    productId: string;
-    product?: Product;
-    type: ProductTransactionType;
+    product: Product;
+    type: 'PURCHASE' | 'SALE' | 'ADJUSTMENT';
+    status: TransactionStatus;
+    paymentMethod?: PaymentMethod;
     quantity: number;
-    pricePerUnit: string;
-    totalPrice: string;
-    profit?: string;
+    pricePerUnit: number;
+    totalPrice: number;
+    profit?: number;
+    createdAt: string;
     createdBy: {
         id: string;
         fullName: string;
         email: string;
     };
-    createdAt: string;
 }
 
 import { api } from '@/lib/api';
@@ -60,7 +67,7 @@ export const inventoryApi = {
     reactivateProduct: async (id: string) => {
         return await api.put<Product>(`/inventory/products/${id}`, { isActive: true });
     },
-    createProduct: async (data: Partial<Product>) => {
+    createProduct: async (data: Partial<Product> & { stock?: number }) => {
         return await api.post<Product>('/inventory/products', data);
     },
     updateProduct: async (id: string, data: Partial<Product>) => {
@@ -79,8 +86,14 @@ export const inventoryApi = {
 
         return await api.get<ProductTransaction[]>('/inventory/transactions', { params: queryParams });
     },
-    createPurchase: async (data: { productId: string; quantity: number; costPrice: number }) => {
+    createPurchase: async (data: { productId: string; quantity: number; costPrice?: number }) => {
         return await api.post('/inventory/transactions/purchase', data);
+    },
+    getPendingPurchases: async () => {
+        return await api.get<ProductTransaction[]>('/inventory/transactions/purchase/pending');
+    },
+    resolvePendingPurchase: async (id: string, costPrice: number) => {
+        return await api.put(`/inventory/transactions/purchase/${id}/resolve`, { costPrice });
     },
     createSale: async (data: { productId: string; quantity: number; sellingPrice?: number; paymentMethod?: PaymentMethod }) => {
         return await api.post('/inventory/transactions/sale', data);

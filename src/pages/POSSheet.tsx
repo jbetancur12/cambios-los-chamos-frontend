@@ -66,11 +66,32 @@ export function POSSheet({ open, onOpenChange }: { open: boolean, onOpenChange: 
     const updateQuantity = (productId: string, delta: number) => {
         setCart(prev => prev.map(item => {
             if (item.product.id === productId) {
-                const newQty = item.quantity + delta;
+                // If it was temporarily 0 (empty), treat as 0 + delta
+                const currentQty = item.quantity || 0;
+                const newQty = currentQty + delta;
                 if (newQty < 1) return item;
                 if (newQty > item.product.stock) {
                     toast.error(`Stock insuficiente. Máximo: ${item.product.stock}`);
                     return item;
+                }
+                return { ...item, quantity: newQty };
+            }
+            return item;
+        }));
+    };
+
+    const setExactQuantity = (productId: string, value: string) => {
+        setCart(prev => prev.map(item => {
+            if (item.product.id === productId) {
+                if (value === '') {
+                    return { ...item, quantity: 0 }; // 0 represents empty string
+                }
+                const newQty = parseInt(value, 10);
+                if (isNaN(newQty) || newQty < 0) return item;
+                
+                if (newQty > item.product.stock) {
+                    toast.error(`Stock insuficiente. Máximo: ${item.product.stock}`);
+                    return { ...item, quantity: item.product.stock };
                 }
                 return { ...item, quantity: newQty };
             }
@@ -97,9 +118,14 @@ export function POSSheet({ open, onOpenChange }: { open: boolean, onOpenChange: 
     });
 
     const handleCheckout = () => {
-        if (cart.length === 0) return;
+        // Filter out any items that have 0 quantity (e.g. left empty)
+        const validCart = cart.filter(item => item.quantity > 0);
+        if (validCart.length === 0) {
+            toast.error("El carrito está vacío o las cantidades son inválidas.");
+            return;
+        }
 
-        const items = cart.map(item => ({
+        const items = validCart.map(item => ({
             productId: item.product.id,
             quantity: item.quantity,
             sellingPrice: item.price
@@ -183,17 +209,22 @@ export function POSSheet({ open, onOpenChange }: { open: boolean, onOpenChange: 
                                         <div className="flex-1 min-w-0">
                                             <h4 className="font-medium truncate">{item.product.name}</h4>
                                             <div className="flex items-center gap-2 mt-2">
-                                                <div className="flex items-center border rounded-md h-8">
+                                                <div className="flex items-center border rounded-md h-8 overflow-hidden focus-within:ring-1 focus-within:ring-ring">
                                                     <button
                                                         onClick={() => updateQuantity(item.product.id, -1)}
-                                                        className="px-2 hover:bg-muted h-full flex items-center"
+                                                        className="px-2 hover:bg-muted h-full flex items-center transition-colors"
                                                     >
                                                         <Minus className="h-3 w-3" />
                                                     </button>
-                                                    <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
+                                                    <input 
+                                                        type="number"
+                                                        value={item.quantity === 0 ? '' : item.quantity}
+                                                        onChange={(e) => setExactQuantity(item.product.id, e.target.value)}
+                                                        className="w-10 text-center text-sm font-medium border-0 focus:ring-0 p-0 h-full bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                                    />
                                                     <button
                                                         onClick={() => updateQuantity(item.product.id, 1)}
-                                                        className="px-2 hover:bg-muted h-full flex items-center"
+                                                        className="px-2 hover:bg-muted h-full flex items-center transition-colors"
                                                     >
                                                         <Plus className="h-3 w-3" />
                                                     </button>
