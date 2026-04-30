@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetBody } from '@/components/ui/sheet';
 import { Label } from '@/components/ui/label';
-import { Plus, Edit, ShoppingCart, TrendingUp, Search, Archive, Calendar, RotateCcw, Download } from 'lucide-react';
+import { Plus, Edit, ShoppingCart, TrendingUp, Search, Archive, Calendar, RotateCcw, Download, SlidersHorizontal } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatCurrency } from '@/lib/formatCurrency';
 import { Badge } from '@/components/ui/badge';
@@ -36,6 +36,7 @@ export default function InventoryPage() {
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [purchaseOpen, setPurchaseOpen] = useState(false);
     const [saleOpen, setSaleOpen] = useState(false);
+    const [adjustmentOpen, setAdjustmentOpen] = useState(false);
     const [transactionProduct, setTransactionProduct] = useState<Product | null>(null);
 
     // Archive State
@@ -64,6 +65,7 @@ export default function InventoryPage() {
     const openEdit = (product: Product) => { setSelectedProduct(product); setIsCreateOpen(true); };
     const openPurchase = (product: Product) => { setTransactionProduct(product); setPurchaseOpen(true); };
     const openSale = (product: Product) => { setTransactionProduct(product); setSaleOpen(true); };
+    const openAdjustment = (product: Product) => { setTransactionProduct(product); setAdjustmentOpen(true); };
 
     const openArchive = (product: Product) => {
         setProductToArchive(product);
@@ -210,6 +212,9 @@ export default function InventoryPage() {
                                                         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(product)}>
                                                             <Edit className="h-3.5 w-3.5" />
                                                         </Button>
+                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-500 hover:text-blue-700 hover:bg-blue-50" onClick={() => openAdjustment(product)} title="Ajuste de Inventario">
+                                                            <SlidersHorizontal className="h-3.5 w-3.5" />
+                                                        </Button>
                                                         <Button variant="ghost" size="icon" className="h-8 w-8 text-amber-500 hover:text-amber-700 hover:bg-amber-50" onClick={() => openArchive(product)} title="Archivar">
                                                             <Archive className="h-3.5 w-3.5" />
                                                         </Button>
@@ -252,6 +257,9 @@ export default function InventoryPage() {
                                 <div className="flex gap-1 -mt-1 -mr-2">
                                     <Button variant="ghost" size="icon" onClick={() => openEdit(product)}>
                                         <Edit className="h-4 w-4" />
+                                    </Button>
+                                    <Button variant="ghost" size="icon" className="text-blue-500" onClick={() => openAdjustment(product)} title="Ajuste de Inventario">
+                                        <SlidersHorizontal className="h-4 w-4" />
                                     </Button>
                                     <Button variant="ghost" size="icon" className="text-amber-500" onClick={() => openArchive(product)} title="Archivar">
                                         <Archive className="h-4 w-4" />
@@ -335,6 +343,11 @@ export default function InventoryPage() {
                     <SaleSheet
                         open={saleOpen}
                         onOpenChange={setSaleOpen}
+                        product={transactionProduct}
+                    />
+                    <AdjustmentSheet
+                        open={adjustmentOpen}
+                        onOpenChange={setAdjustmentOpen}
                         product={transactionProduct}
                     />
                 </>
@@ -665,6 +678,94 @@ function SaleSheet({ open, onOpenChange, product }: { open: boolean, onOpenChang
                 </SheetBody>
             </SheetContent>
         </Sheet >
+    );
+}
+
+function AdjustmentSheet({ open, onOpenChange, product }: { open: boolean, onOpenChange: (open: boolean) => void, product: Product }) {
+    const queryClient = useQueryClient();
+    const [type, setType] = useState<'add' | 'remove'>('add');
+    const [qty, setQty] = useState(1);
+    
+    const mutation = useMutation({
+        mutationFn: (data: any) => inventoryApi.createAdjustment({ productId: product.id, ...data }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['products'] });
+            toast.success("Ajuste de inventario registrado");
+            onOpenChange(false);
+        },
+        onError: (error: any) => toast.error("Error al registrar ajuste", { description: error.message })
+    });
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        const formData = new FormData(e.target as HTMLFormElement);
+        const reason = formData.get('reason') as string;
+        
+        let finalQty = qty;
+        if (type === 'remove') {
+            finalQty = -qty;
+        }
+
+        mutation.mutate({
+            quantity: finalQty,
+            reason
+        });
+    };
+
+    return (
+        <Sheet open={open} onOpenChange={onOpenChange}>
+            <SheetContent>
+                <SheetHeader onClose={() => onOpenChange(false)}>
+                    <SheetTitle>Ajuste de Inventario</SheetTitle>
+                </SheetHeader>
+                <SheetBody>
+                    <div className="mb-6 p-4 bg-muted/30 rounded-lg border">
+                        <h4 className="font-semibold text-sm mb-1">{product.name}</h4>
+                        <p className="text-xs text-muted-foreground">Stock Actual: {product.stock}</p>
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div className="space-y-2">
+                            <Label>Tipo de Ajuste</Label>
+                            <select 
+                                value={type} 
+                                onChange={(e) => setType(e.target.value as 'add' | 'remove')}
+                                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                <option value="add">Agregar Stock (+)</option>
+                                <option value="remove">Quitar Stock (-)</option>
+                            </select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Cantidad</Label>
+                            <Input
+                                type="number"
+                                min="1"
+                                max={type === 'remove' ? product.stock : undefined}
+                                value={qty}
+                                onChange={(e) => setQty(Number(e.target.value))}
+                                required
+                                autoFocus
+                                className={type === 'remove' && qty > product.stock ? "border-red-500 focus-visible:ring-red-500" : ""}
+                            />
+                            {type === 'remove' && qty > product.stock && (
+                                <p className="text-sm text-red-500 font-medium">
+                                    No hay suficiente stock. Disponible: {product.stock}
+                                </p>
+                            )}
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Motivo / Observación</Label>
+                            <Input name="reason" placeholder="Ej: Pérdida, Mermas, Conteo inicial..." required={type === 'remove'} />
+                        </div>
+
+                        <Button type="submit" className="w-full bg-[linear-gradient(to_right,#136BBC,#274565)]" disabled={mutation.isPending || (type === 'remove' && qty > product.stock)}>
+                            {mutation.isPending ? 'Procesando...' : 'Confirmar Ajuste'}
+                        </Button>
+                    </form>
+                </SheetBody>
+            </SheetContent>
+        </Sheet>
     );
 }
 
