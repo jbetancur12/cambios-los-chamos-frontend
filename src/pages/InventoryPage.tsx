@@ -207,13 +207,15 @@ export default function InventoryPage() {
                                                     <ShoppingCart className="h-3.5 w-3.5 mr-1 text-green-600" />
                                                     <span className="sr-only lg:not-sr-only">Vender</span>
                                                 </Button>
+                                                {isPrivileged && (
+                                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-500 hover:text-blue-700 hover:bg-blue-50" onClick={() => openAdjustment(product)} title="Ajuste de Inventario">
+                                                        <SlidersHorizontal className="h-3.5 w-3.5" />
+                                                    </Button>
+                                                )}
                                                 {isSuperAdmin && (
                                                     <>
                                                         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(product)}>
                                                             <Edit className="h-3.5 w-3.5" />
-                                                        </Button>
-                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-500 hover:text-blue-700 hover:bg-blue-50" onClick={() => openAdjustment(product)} title="Ajuste de Inventario">
-                                                            <SlidersHorizontal className="h-3.5 w-3.5" />
                                                         </Button>
                                                         <Button variant="ghost" size="icon" className="h-8 w-8 text-amber-500 hover:text-amber-700 hover:bg-amber-50" onClick={() => openArchive(product)} title="Archivar">
                                                             <Archive className="h-3.5 w-3.5" />
@@ -253,17 +255,21 @@ export default function InventoryPage() {
                                 <h3 className="font-semibold">{product.name}</h3>
                                 {product.sku && <p className="text-xs text-muted-foreground">{product.sku}</p>}
                             </div>
-                            {isSuperAdmin && product.isActive && (
+                            {isPrivileged && product.isActive && (
                                 <div className="flex gap-1 -mt-1 -mr-2">
-                                    <Button variant="ghost" size="icon" onClick={() => openEdit(product)}>
-                                        <Edit className="h-4 w-4" />
-                                    </Button>
+                                    {isSuperAdmin && (
+                                        <Button variant="ghost" size="icon" onClick={() => openEdit(product)}>
+                                            <Edit className="h-4 w-4" />
+                                        </Button>
+                                    )}
                                     <Button variant="ghost" size="icon" className="text-blue-500" onClick={() => openAdjustment(product)} title="Ajuste de Inventario">
                                         <SlidersHorizontal className="h-4 w-4" />
                                     </Button>
-                                    <Button variant="ghost" size="icon" className="text-amber-500" onClick={() => openArchive(product)} title="Archivar">
-                                        <Archive className="h-4 w-4" />
-                                    </Button>
+                                    {isSuperAdmin && (
+                                        <Button variant="ghost" size="icon" className="text-amber-500" onClick={() => openArchive(product)} title="Archivar">
+                                            <Archive className="h-4 w-4" />
+                                        </Button>
+                                    )}
                                 </div>
                             )}
                             {isSuperAdmin && !product.isActive && (
