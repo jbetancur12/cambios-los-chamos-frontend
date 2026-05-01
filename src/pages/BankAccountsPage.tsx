@@ -111,6 +111,12 @@ export function BankAccountsPage() {
         isAvailable: newValue,
       })
       queryClient.invalidateQueries({ queryKey: ['users'] })
+
+      // Remove giros-related queries from cache so they are fetched fresh
+      // when the user navigates to the Giros page
+      queryClient.removeQueries({ queryKey: ['giros'] })
+      queryClient.removeQueries({ queryKey: ['totals'] })
+      queryClient.removeQueries({ queryKey: ['dashboard'] })
       toast.success(response.message || (newValue ? 'Trasferencista disponible' : 'Trasferencista no disponible'))
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Error al cambiar disponibilidad'

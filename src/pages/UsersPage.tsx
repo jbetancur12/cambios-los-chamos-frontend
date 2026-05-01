@@ -121,6 +121,13 @@ export function UsersPage() {
 
       // Invalidate users query to refetch updated availability
       queryClient.invalidateQueries({ queryKey: ['users'] })
+      
+      // Remove giros-related queries from cache so they are fetched fresh
+      // when the user navigates to the Giros page (invalidate only refetches
+      // if the component is currently mounted)
+      queryClient.removeQueries({ queryKey: ['giros'] })
+      queryClient.removeQueries({ queryKey: ['totals'] })
+      queryClient.removeQueries({ queryKey: ['dashboard'] })
 
       // Mostrar mensaje de éxito
       toast.success(response.message || (newValue ? 'Transferencista disponible' : 'Transferencista no disponible'))
