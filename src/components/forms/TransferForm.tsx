@@ -81,6 +81,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
   const [beneficiaryName, setBeneficiaryName] = useState('')
   const [beneficiaryId, setBeneficiaryId] = useState('')
   const [phone, setPhone] = useState('')
+  const [senderPhone, setSenderPhone] = useState('')
   const [bankId, setBankId] = useState('')
   const [accountNumber, setAccountNumber] = useState('')
   const [amountInput, setAmountInput] = useState('')
@@ -194,6 +195,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
     setBeneficiaryId('')
     setShowCedulaSuggestions(false)
     setPhone('')
+    setSenderPhone('')
     setBankId('')
     setAccountNumber('')
     setAmountInput('')
@@ -213,6 +215,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
     setBeneficiaryId(suggestion.id)
     setBankId(suggestion.bankId)
     setAccountNumber(suggestion.accountNumber)
+    if (suggestion.senderPhone) setSenderPhone(suggestion.senderPhone)
     setNameSuggestions([])
   }
 
@@ -221,6 +224,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
     setBeneficiaryId(suggestion.id)
     setBankId(suggestion.bankId)
     setAccountNumber(suggestion.accountNumber)
+    if (suggestion.senderPhone) setSenderPhone(suggestion.senderPhone)
     setShowCedulaSuggestions(false)
   }
 
@@ -250,6 +254,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
         beneficiaryName,
         beneficiaryId,
         phone,
+        senderPhone: senderPhone || undefined, // Solo enviar si tiene valor
         bankId,
         accountNumber,
         amountInput: amount,
@@ -278,6 +283,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
         name: beneficiaryName,
         id: beneficiaryId,
         phone,
+        senderPhone: senderPhone || undefined,
         bankId,
         accountNumber,
         executionType: 'TRANSFERENCIA',
@@ -525,6 +531,22 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
           required
           className="text-sm md:text-lg h-10 md:h-12 font-medium placeholder:text-muted-foreground md:placeholder:text-transparent"
           autoComplete="off"
+        />
+      </div>
+
+      {/* Teléfono del remitente - opcional para notificaciones WhatsApp */}
+      <div className="space-y-2">
+        <Label htmlFor="senderPhone" className="hidden md:block text-md md:text-md">
+          Teléfono WhatsApp (opcional)
+        </Label>
+        <Input
+          id="senderPhone"
+          value={senderPhone}
+          onChange={(e) => setSenderPhone(e.target.value)}
+          placeholder="Tu WhatsApp (ej: 3001234567)"
+          className="text-sm md:text-lg h-10 md:h-12 font-medium placeholder:text-muted-foreground md:placeholder:text-transparent"
+          autoComplete="off"
+          inputMode="tel"
         />
       </div>
 

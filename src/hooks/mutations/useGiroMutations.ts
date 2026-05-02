@@ -6,6 +6,7 @@ export interface CreateGiroInput {
   beneficiaryName: string
   beneficiaryId: string
   phone: string
+  senderPhone?: string // Teléfono del remitente para notificaciones WhatsApp (opcional)
   bankId: string
   accountNumber: string
   amountInput: number
@@ -177,6 +178,7 @@ interface CreateMobilePaymentInput {
   cedula: string
   bankId: string
   phone: string
+  senderPhone?: string
   contactoEnvia: string
   amountCop: number
   customRate?: {
@@ -208,6 +210,7 @@ interface CreateRechargeInput {
   operatorId: string
   amountBsId: string
   phone: string
+  senderPhone?: string
   contactoEnvia: string
 }
 

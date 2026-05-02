@@ -30,6 +30,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   const [cedula, setCedula] = useState('')
   const [selectedBank, setSelectedBank] = useState('')
   const [phone, setPhone] = useState('')
+  const [senderPhone, setSenderPhone] = useState('')
   const [senderName, setSenderName] = useState('Sistema')
   const [amountCop, setAmountCop] = useState('')
   const [banks, setBanks] = useState<Bank[]>([])
@@ -232,6 +233,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
         cedula: string
         bankId: string
         phone: string
+        senderPhone?: string
         contactoEnvia: string
         amountCop: number
         customRate?: {
@@ -244,6 +246,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
         cedula,
         bankId: selectedBank,
         phone,
+        senderPhone: senderPhone || undefined,
         contactoEnvia: senderName || '', // Send empty if not used
         amountCop: Number(amountCop),
       }
@@ -272,6 +275,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
           name: senderName || phone, // Use nickname/senderName or fallback to phone
           id: cedula,
           phone: phone,
+          senderPhone: senderPhone || undefined,
           bankId: selectedBank,
           accountNumber: '', // Not used for mobile payment but required by type
           executionType: 'PAGO_MOVIL',
@@ -296,6 +300,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
     setCedula('')
     setSelectedBank('')
     setPhone('')
+    setSenderPhone('')
     setSenderName('')
     setAmountCop('')
     setShowCedulaSuggestions(false)
@@ -304,6 +309,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
 
   const handleSelectBeneficiary = (beneficiary: BeneficiaryData) => {
     setPhone(beneficiary.phone)
+    if (beneficiary.senderPhone) setSenderPhone(beneficiary.senderPhone)
     setCedula(beneficiary.id)
     setSenderName(beneficiary.name || beneficiary.phone)
     if (beneficiary.bankId && banks.length > 0) {
@@ -424,6 +430,21 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
           </Label>
           <div className="relative py-1 md:py-3">
             <Input id="phone" placeholder="Teléfono del Beneficiario" value={phone} onChange={handlePhoneChange} />
+          </div>
+        </div>
+
+        <div>
+          <Label htmlFor="senderPhone" className="hidden md:block text-md">
+            Teléfono WhatsApp (opcional)
+          </Label>
+          <div className="relative py-1 md:py-3">
+            <Input
+              id="senderPhone"
+              placeholder="Tu WhatsApp (ej: 3001234567)"
+              value={senderPhone}
+              onChange={(e) => setSenderPhone(e.target.value)}
+              inputMode="tel"
+            />
           </div>
         </div>
 

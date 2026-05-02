@@ -6,6 +6,7 @@ export interface BeneficiaryData {
   name: string
   id: string
   phone: string
+  senderPhone?: string // Teléfono del remitente
   bankId: string
   accountNumber: string
   executionType: 'TRANSFERENCIA' | 'PAGO_MOVIL' | 'RECARGA' | 'EFECTIVO' | 'ZELLE' | 'OTROS'
@@ -17,6 +18,7 @@ interface BeneficiarySuggestionResponse {
   beneficiaryName: string
   beneficiaryId: string
   phone: string
+  senderPhone?: string
   bankId: string
   accountNumber: string
   executionType?: 'TRANSFERENCIA' | 'PAGO_MOVIL' | 'RECARGA' | 'EFECTIVO' | 'ZELLE' | 'OTROS'
@@ -36,6 +38,7 @@ export function useBeneficiarySuggestions() {
         name: s.beneficiaryName,
         id: s.beneficiaryId,
         phone: s.phone,
+        senderPhone: s.senderPhone,
         bankId: s.bankId,
         accountNumber: s.accountNumber,
         executionType: s.executionType || 'TRANSFERENCIA',
@@ -53,6 +56,7 @@ export function useBeneficiarySuggestions() {
           beneficiaryName: beneficiary.name,
           beneficiaryId: beneficiary.id,
           phone: beneficiary.phone,
+          senderPhone: beneficiary.senderPhone,
           bankId: beneficiary.bankId,
           accountNumber: beneficiary.accountNumber,
           executionType: beneficiary.executionType,
@@ -187,6 +191,7 @@ export function useBeneficiarySuggestions() {
         name: s.beneficiaryName,
         id: s.beneficiaryId,
         phone: s.phone,
+        senderPhone: s.senderPhone,
         bankId: s.bankId,
         accountNumber: s.accountNumber,
         executionType: s.executionType || 'TRANSFERENCIA',

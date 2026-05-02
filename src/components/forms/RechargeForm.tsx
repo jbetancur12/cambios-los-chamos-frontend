@@ -40,6 +40,7 @@ export function RechargeForm({ onSuccess }: RechargeFormProps) {
   const [selectedOperator, setSelectedOperator] = useState('')
   const [selectedAmount, setSelectedAmount] = useState('')
   const [phone, setPhone] = useState('')
+  const [senderPhone, setSenderPhone] = useState('')
   const [senderName, setSenderName] = useState('Pepito')
   const [operators, setOperators] = useState<RechargeOperator[]>([])
   const [amounts, setAmounts] = useState<RechargeAmount[]>([])
@@ -168,6 +169,7 @@ export function RechargeForm({ onSuccess }: RechargeFormProps) {
         operatorId: selectedOperator,
         amountBsId: selectedAmount,
         phone,
+        senderPhone: senderPhone || undefined,
         contactoEnvia: senderName,
       })
       toast.success('Recarga registrada exitosamente')
@@ -189,6 +191,7 @@ export function RechargeForm({ onSuccess }: RechargeFormProps) {
     setSelectedOperator('')
     setSelectedAmount('')
     setPhone('')
+    setSenderPhone('')
     setSenderName('')
   }
 
@@ -241,6 +244,19 @@ export function RechargeForm({ onSuccess }: RechargeFormProps) {
           onChange={(e) => setPhone(e.target.value)}
           required
           autoComplete="off"
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="senderPhone" className="hidden md:block">
+          Teléfono WhatsApp (opcional)
+        </Label>
+        <Input
+          id="senderPhone"
+          placeholder="Tu WhatsApp (ej: 3001234567)"
+          value={senderPhone}
+          onChange={(e) => setSenderPhone(e.target.value)}
+          inputMode="tel"
         />
       </div>
 
