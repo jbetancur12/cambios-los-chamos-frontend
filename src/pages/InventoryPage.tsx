@@ -102,7 +102,7 @@ export default function InventoryPage() {
                     <p className="text-sm text-muted-foreground">Gestiona tus productos, compras y ventas.</p>
                 </div>
                 {isPrivileged && (
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                         <Button variant="outline" onClick={() => setIsReportOpen(true)}>
                             <TrendingUp className="mr-2 h-4 w-4" /> Reporte
                         </Button>
@@ -593,6 +593,7 @@ function SaleSheet({ open, onOpenChange, product }: { open: boolean, onOpenChang
         mutationFn: (data: any) => inventoryApi.createSale({ productId: product.id, ...data }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['products'] });
+            queryClient.invalidateQueries({ queryKey: ['transactions'] });
             toast.success("Venta registrada exitosamente");
             onOpenChange(false);
         },
@@ -1053,13 +1054,27 @@ function SalesReportSheet({ open, onOpenChange }: { open: boolean, onOpenChange:
                                         </div>
                                     ) : (
                                         <div className="space-y-3">
-                                            {sales.map((sale) => (
+                                            {sales.map((sale) => {
+                                                const pmLabels: Record<string, string> = { CASH: 'Efectivo', TRANSFER: 'Transferencia', CARD: 'Tarjeta', CREDIT: 'Fiado' };
+                                                return (
                                                 <div key={sale.id} className="flex justify-between items-start text-sm p-3 hover:bg-muted/50 rounded-md border border-transparent hover:border-border transition-colors">
                                                     <div>
                                                         <div className="font-medium">{sale.product?.name || 'Producto Eliminado'}</div>
                                                         <div className="text-xs text-muted-foreground">
                                                             {new Date(sale.createdAt).toLocaleDateString()} {new Date(sale.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                             {' • '}{sale.createdBy?.fullName}
+                                                        </div>
+                                                        <div className="flex gap-2 mt-1">
+                                                            {sale.paymentMethod && (
+                                                                <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${sale.paymentMethod === 'CREDIT' ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-600'}`}>
+                                                                    {pmLabels[sale.paymentMethod] || sale.paymentMethod}
+                                                                </span>
+                                                            )}
+                                                            {sale.clientName && (
+                                                                <span className="text-[10px] text-muted-foreground">
+                                                                    Cliente: {sale.clientName}
+                                                                </span>
+                                                            )}
                                                         </div>
                                                     </div>
                                                     <div className="text-right">
@@ -1070,7 +1085,8 @@ function SalesReportSheet({ open, onOpenChange }: { open: boolean, onOpenChange:
                                                         )}
                                                     </div>
                                                 </div>
-                                            ))}
+                                                );
+                                            })}
                                         </div>
                                     )}
                                 </div>

@@ -29,6 +29,7 @@ export function POSSheet({ open, onOpenChange }: { open: boolean, onOpenChange: 
     const [cart, setCart] = useState<CartItem[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PaymentMethod.CASH);
+    const [clientName, setClientName] = useState('');
     const searchInputRef = useRef<HTMLInputElement>(null);
 
     // Reset cart when closing
@@ -110,9 +111,10 @@ export function POSSheet({ open, onOpenChange }: { open: boolean, onOpenChange: 
     const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
     const mutation = useMutation({
-        mutationFn: (data: { items: any[], paymentMethod: PaymentMethod }) => inventoryApi.createBulkSale(data),
+        mutationFn: (data: { items: any[], paymentMethod: PaymentMethod; clientName?: string }) => inventoryApi.createBulkSale(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['products'] });
+            queryClient.invalidateQueries({ queryKey: ['transactions'] });
             toast.success("Venta registrada exitosamente");
             onOpenChange(false);
         },
@@ -133,7 +135,7 @@ export function POSSheet({ open, onOpenChange }: { open: boolean, onOpenChange: 
             sellingPrice: item.price
         }));
 
-        mutation.mutate({ items, paymentMethod });
+        mutation.mutate({ items, paymentMethod, clientName: paymentMethod === PaymentMethod.CREDIT ? clientName : undefined });
     };
 
     return (
@@ -308,6 +310,18 @@ export function POSSheet({ open, onOpenChange }: { open: boolean, onOpenChange: 
                             </Button>
                         </div>
                     </div>
+
+                    {paymentMethod === PaymentMethod.CREDIT && (
+                        <div className="space-y-2">
+                            <Label>Nombre del Cliente (Fiado)</Label>
+                            <Input
+                                value={clientName}
+                                onChange={(e) => setClientName(e.target.value)}
+                                placeholder="Nombre de la persona a quien se fía..."
+                                required
+                            />
+                        </div>
+                    )}
 
                     <div className="flex justify-between items-end pt-2">
                         <span className="text-sm text-muted-foreground">Total a Pagar</span>

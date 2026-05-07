@@ -41,6 +41,7 @@ export interface ProductTransaction {
     type: 'PURCHASE' | 'SALE' | 'ADJUSTMENT';
     status: TransactionStatus;
     paymentMethod?: PaymentMethod;
+    clientName?: string;
     quantity: number;
     pricePerUnit: number;
     totalPrice: number;
@@ -98,7 +99,7 @@ export const inventoryApi = {
     createSale: async (data: { productId: string; quantity: number; sellingPrice?: number; paymentMethod?: PaymentMethod }) => {
         return await api.post('/inventory/transactions/sale', data);
     },
-    createBulkSale: async (data: { items: { productId: string; quantity: number; sellingPrice?: number }[]; paymentMethod?: PaymentMethod }) => {
+    createBulkSale: async (data: { items: { productId: string; quantity: number; sellingPrice?: number }[]; paymentMethod?: PaymentMethod; clientName?: string }) => {
         return await api.post('/inventory/transactions/bulk-sale', data);
     },
     createAdjustment: async (data: { productId: string; quantity: number; reason?: string }) => {
