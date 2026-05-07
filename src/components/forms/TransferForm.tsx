@@ -534,21 +534,22 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
         />
       </div>
 
-      {/* Teléfono del remitente - opcional para notificaciones WhatsApp */}
-      <div className="space-y-2">
-        <Label htmlFor="senderPhone" className="hidden md:block text-md md:text-md">
-          Teléfono WhatsApp (opcional)
-        </Label>
-        <Input
-          id="senderPhone"
-          value={senderPhone}
-          onChange={(e) => setSenderPhone(e.target.value)}
-          placeholder="Tu WhatsApp (ej: 3001234567)"
-          className="text-sm md:text-lg h-10 md:h-12 font-medium placeholder:text-muted-foreground md:placeholder:text-transparent"
-          autoComplete="off"
-          inputMode="tel"
-        />
-      </div>
+      {import.meta.env.VITE_SHOW_WHATSAPP_FIELD === 'true' && (
+        <div className="space-y-2">
+          <Label htmlFor="senderPhone" className="hidden md:block text-md md:text-md">
+            Teléfono WhatsApp (opcional)
+          </Label>
+          <Input
+            id="senderPhone"
+            value={senderPhone}
+            onChange={(e) => setSenderPhone(e.target.value)}
+            placeholder="Tu WhatsApp (ej: 3001234567)"
+            className="text-sm md:text-lg h-10 md:h-12 font-medium placeholder:text-muted-foreground md:placeholder:text-transparent"
+            autoComplete="off"
+            inputMode="tel"
+          />
+        </div>
+      )}
 
       {/* Amount & Currency */}
       <div className="grid grid-cols-2 gap-3">

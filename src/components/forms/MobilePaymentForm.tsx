@@ -433,20 +433,22 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
           </div>
         </div>
 
-        <div>
-          <Label htmlFor="senderPhone" className="hidden md:block text-md">
-            Teléfono WhatsApp (opcional)
-          </Label>
-          <div className="relative py-1 md:py-3">
-            <Input
-              id="senderPhone"
-              placeholder="Tu WhatsApp (ej: 3001234567)"
-              value={senderPhone}
-              onChange={(e) => setSenderPhone(e.target.value)}
-              inputMode="tel"
-            />
+        {import.meta.env.VITE_SHOW_WHATSAPP_FIELD === 'true' && (
+          <div>
+            <Label htmlFor="senderPhone" className="hidden md:block text-md">
+              Teléfono WhatsApp (opcional)
+            </Label>
+            <div className="relative py-1 md:py-3">
+              <Input
+                id="senderPhone"
+                placeholder="Tu WhatsApp (ej: 3001234567)"
+                value={senderPhone}
+                onChange={(e) => setSenderPhone(e.target.value)}
+                inputMode="tel"
+              />
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="space-y-1 md:space-y-2 hidden">
           <Label htmlFor="senderName" className="hidden md:block text-md">

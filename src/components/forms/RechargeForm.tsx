@@ -247,18 +247,20 @@ export function RechargeForm({ onSuccess }: RechargeFormProps) {
         />
       </div>
 
-      <div>
-        <Label htmlFor="senderPhone" className="hidden md:block">
-          Teléfono WhatsApp (opcional)
-        </Label>
-        <Input
-          id="senderPhone"
-          placeholder="Tu WhatsApp (ej: 3001234567)"
-          value={senderPhone}
-          onChange={(e) => setSenderPhone(e.target.value)}
-          inputMode="tel"
-        />
-      </div>
+      {import.meta.env.VITE_SHOW_WHATSAPP_FIELD === 'true' && (
+        <div>
+          <Label htmlFor="senderPhone" className="hidden md:block">
+            Teléfono WhatsApp (opcional)
+          </Label>
+          <Input
+            id="senderPhone"
+            placeholder="Tu WhatsApp (ej: 3001234567)"
+            value={senderPhone}
+            onChange={(e) => setSenderPhone(e.target.value)}
+            inputMode="tel"
+          />
+        </div>
+      )}
 
       {/* <div>
         <Label htmlFor="senderName" className="hidden md:block">
