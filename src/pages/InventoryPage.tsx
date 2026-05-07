@@ -529,37 +529,41 @@ function ProductFormSheet({ open, onOpenChange, product }: { open: boolean, onOp
                             )}
                         </div>
 
-                        <div className="space-y-2">
+                        {(import.meta.env.VITE_STORE_ENABLED === 'true') && (
+                          <div className="space-y-2">
                             <Label>Imagen del Producto</Label>
                             <div className="flex items-center gap-3">
-                                {(imagePreview || product?.imageUrl) && (
-                                    <div className="h-16 w-16 rounded-lg overflow-hidden bg-gray-100 shrink-0 border">
-                                        <img
-                                            src={imagePreview || inventoryApi.getImageUrl(product!.id)}
-                                            alt="Preview"
-                                            className="w-full h-full object-cover"
-                                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
-                                        />
-                                    </div>
-                                )}
-                                <label className="flex-1 cursor-pointer">
-                                    <div className="flex items-center gap-2 rounded-lg border-2 border-dashed border-gray-300 hover:border-[#136BBC] transition px-3 py-2 text-sm text-gray-500">
-                                        <Upload className="h-4 w-4" />
-                                        {imageFile ? imageFile.name : product?.imageUrl ? 'Cambiar imagen' : 'Subir imagen'}
-                                    </div>
-                                    <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
-                                </label>
+                              {(imagePreview || product?.imageUrl) && (
+                                <div className="h-16 w-16 rounded-lg overflow-hidden bg-gray-100 shrink-0 border">
+                                  <img
+                                    src={imagePreview || inventoryApi.getImageUrl(product!.id)}
+                                    alt="Preview"
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                                  />
+                                </div>
+                              )}
+                              <label className="flex-1 cursor-pointer">
+                                <div className="flex items-center gap-2 rounded-lg border-2 border-dashed border-gray-300 hover:border-[#136BBC] transition px-3 py-2 text-sm text-gray-500">
+                                  <Upload className="h-4 w-4" />
+                                  {imageFile ? imageFile.name : product?.imageUrl ? 'Cambiar imagen' : 'Subir imagen'}
+                                </div>
+                                <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
+                              </label>
                             </div>
-                        </div>
+                          </div>
+                        )}
 
-                        <div className="flex items-center justify-between rounded-lg border border-gray-200 p-3">
+                        {(import.meta.env.VITE_STORE_ENABLED === 'true') && (
+                          <div className="flex items-center justify-between rounded-lg border border-gray-200 p-3">
                             <div>
-                                <Label className="text-sm font-medium">Mostrar en tienda online</Label>
-                                <p className="text-xs text-muted-foreground mt-0.5">El producto aparecerá en la tienda pública</p>
+                              <Label className="text-sm font-medium">Mostrar en tienda online</Label>
+                              <p className="text-xs text-muted-foreground mt-0.5">El producto aparecerá en la tienda pública</p>
                             </div>
                             <Switch checked={showInStore} onCheckedChange={setShowInStore} />
                             <input type="hidden" name="showInStore" value={showInStore ? 'on' : 'off'} />
-                        </div>
+                          </div>
+                        )}
 
                         <p className="text-xs text-muted-foreground mt-1">El stock mínimo pondrá el badge en amarillo cuando llegue a ese nivel.</p>
                         
