@@ -35,7 +35,7 @@ export default function InventoryPage() {
     const [isReportOpen, setIsReportOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [purchaseOpen, setPurchaseOpen] = useState(false);
-    const [saleOpen, setSaleOpen] = useState(false);
+
     const [adjustmentOpen, setAdjustmentOpen] = useState(false);
     const [transactionProduct, setTransactionProduct] = useState<Product | null>(null);
 
@@ -64,7 +64,6 @@ export default function InventoryPage() {
     const openCreate = () => { setSelectedProduct(null); setIsCreateOpen(true); };
     const openEdit = (product: Product) => { setSelectedProduct(product); setIsCreateOpen(true); };
     const openPurchase = (product: Product) => { setTransactionProduct(product); setPurchaseOpen(true); };
-    const openSale = (product: Product) => { setTransactionProduct(product); setSaleOpen(true); };
     const openAdjustment = (product: Product) => { setTransactionProduct(product); setAdjustmentOpen(true); };
 
     const openArchive = (product: Product) => {
@@ -203,10 +202,7 @@ export default function InventoryPage() {
                                                         <span className="sr-only lg:not-sr-only">Comprar</span>
                                                     </Button>
                                                 )}
-                                                <Button variant="outline" size="sm" className="h-8" onClick={() => openSale(product)}>
-                                                    <ShoppingCart className="h-3.5 w-3.5 mr-1 text-green-600" />
-                                                    <span className="sr-only lg:not-sr-only">Vender</span>
-                                                </Button>
+
                                                 {isPrivileged && (
                                                     <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-500 hover:text-blue-700 hover:bg-blue-50" onClick={() => openAdjustment(product)} title="Ajuste de Inventario">
                                                         <SlidersHorizontal className="h-3.5 w-3.5" />
@@ -313,9 +309,7 @@ export default function InventoryPage() {
                                         <TrendingUp className="h-4 w-4 mr-2 text-blue-600" /> Stock
                                     </Button>
                                 )}
-                                <Button variant="outline" size="sm" className="flex-1" onClick={() => openSale(product)}>
-                                    <ShoppingCart className="h-4 w-4 mr-2 text-green-600" /> Vender
-                                </Button>
+
                             </div>
                         )}
                     </Card>
@@ -344,11 +338,6 @@ export default function InventoryPage() {
                     <PurchaseSheet
                         open={purchaseOpen}
                         onOpenChange={setPurchaseOpen}
-                        product={transactionProduct}
-                    />
-                    <SaleSheet
-                        open={saleOpen}
-                        onOpenChange={setSaleOpen}
                         product={transactionProduct}
                     />
                     <AdjustmentSheet
