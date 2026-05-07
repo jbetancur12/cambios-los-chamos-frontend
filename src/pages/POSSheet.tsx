@@ -23,6 +23,8 @@ export function POSSheet({ open, onOpenChange }: { open: boolean, onOpenChange: 
     const { data: products } = useQuery({ queryKey: ['products'], queryFn: () => inventoryApi.getAllProducts() });
     const { user } = useAuth();
     const isSuperAdmin = user?.role === 'SUPER_ADMIN';
+    const isAdmin = user?.role === 'ADMIN';
+    const isPrivileged = isSuperAdmin || isAdmin;
 
     const [cart, setCart] = useState<CartItem[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
@@ -237,7 +239,7 @@ export function POSSheet({ open, onOpenChange }: { open: boolean, onOpenChange: 
 
                                         <div className="flex flex-col items-end gap-1">
                                             <div className="flex items-center gap-2">
-                                                {isSuperAdmin ? (
+                                                {isPrivileged ? (
                                                     <Input
                                                         type="number"
                                                         className="h-8 w-24 text-right px-2"

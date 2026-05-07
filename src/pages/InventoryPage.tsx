@@ -111,7 +111,7 @@ export default function InventoryPage() {
                                 Revisar Entradas ({pendingPurchases.length})
                             </Button>
                         )}
-                        {isSuperAdmin && (
+                        {isPrivileged && (
                             <Button onClick={openCreate} className="bg-[linear-gradient(to_right,#136BBC,#274565)]">
                                 <Plus className="mr-2 h-4 w-4" /> Nuevo Producto
                             </Button>
