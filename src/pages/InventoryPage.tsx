@@ -689,8 +689,9 @@ function SaleSheet({ open, onOpenChange, product }: { open: boolean, onOpenChang
 
 function AdjustmentSheet({ open, onOpenChange, product }: { open: boolean, onOpenChange: (open: boolean) => void, product: Product }) {
     const queryClient = useQueryClient();
-    const [type, setType] = useState<'add' | 'remove'>('add');
-    const [qty, setQty] = useState(1);
+    const [qty, setQty] = useState<string | number>("");
+    
+    const parsedQty = Number(qty) || 0;
     
     const mutation = useMutation({
         mutationFn: (data: any) => inventoryApi.createAdjustment({ productId: product.id, ...data }),
@@ -698,23 +699,18 @@ function AdjustmentSheet({ open, onOpenChange, product }: { open: boolean, onOpe
             queryClient.invalidateQueries({ queryKey: ['products'] });
             toast.success("Ajuste de inventario registrado");
             onOpenChange(false);
+            setQty(""); // reset on success
         },
         onError: (error: any) => toast.error("Error al registrar ajuste", { description: error.message })
     });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        const formData = new FormData(e.target as HTMLFormElement);
-        const reason = formData.get('reason') as string;
         
-        let finalQty = qty;
-        if (type === 'remove') {
-            finalQty = -qty;
-        }
+        if (parsedQty === 0) return;
 
         mutation.mutate({
-            quantity: finalQty,
-            reason
+            quantity: parsedQty
         });
     };
 
@@ -732,40 +728,24 @@ function AdjustmentSheet({ open, onOpenChange, product }: { open: boolean, onOpe
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="space-y-2">
-                            <Label>Tipo de Ajuste</Label>
-                            <select 
-                                value={type} 
-                                onChange={(e) => setType(e.target.value as 'add' | 'remove')}
-                                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                                <option value="add">Agregar Stock (+)</option>
-                                <option value="remove">Quitar Stock (-)</option>
-                            </select>
-                        </div>
-                        <div className="space-y-2">
-                            <Label>Cantidad</Label>
+                            <Label>Cantidad (+ para sumar, - para restar)</Label>
                             <Input
                                 type="number"
-                                min="1"
-                                max={type === 'remove' ? product.stock : undefined}
+                                step="1"
                                 value={qty}
-                                onChange={(e) => setQty(Number(e.target.value))}
+                                onChange={(e) => setQty(e.target.value)}
                                 required
                                 autoFocus
-                                className={type === 'remove' && qty > product.stock ? "border-red-500 focus-visible:ring-red-500" : ""}
+                                className={parsedQty < 0 && Math.abs(parsedQty) > product.stock ? "border-red-500 focus-visible:ring-red-500" : ""}
                             />
-                            {type === 'remove' && qty > product.stock && (
+                            {parsedQty < 0 && Math.abs(parsedQty) > product.stock && (
                                 <p className="text-sm text-red-500 font-medium">
                                     No hay suficiente stock. Disponible: {product.stock}
                                 </p>
                             )}
                         </div>
-                        <div className="space-y-2">
-                            <Label>Motivo / Observación</Label>
-                            <Input name="reason" placeholder="Ej: Pérdida, Mermas, Conteo inicial..." required={type === 'remove'} />
-                        </div>
 
-                        <Button type="submit" className="w-full bg-[linear-gradient(to_right,#136BBC,#274565)]" disabled={mutation.isPending || (type === 'remove' && qty > product.stock)}>
+                        <Button type="submit" className="w-full bg-[linear-gradient(to_right,#136BBC,#274565)]" disabled={mutation.isPending || (parsedQty < 0 && Math.abs(parsedQty) > product.stock) || parsedQty === 0}>
                             {mutation.isPending ? 'Procesando...' : 'Confirmar Ajuste'}
                         </Button>
                     </form>
