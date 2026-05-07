@@ -4,9 +4,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { inventoryApi, type Product } from '../services/inventoryApi';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetBody } from '@/components/ui/sheet';
 import { Label } from '@/components/ui/label';
-import { Plus, Edit, ShoppingCart, TrendingUp, Search, Archive, Calendar, RotateCcw, Download, SlidersHorizontal } from 'lucide-react';
+import { Plus, Edit, ShoppingCart, TrendingUp, Search, Archive, Calendar, RotateCcw, Download, SlidersHorizontal, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatCurrency } from '@/lib/formatCurrency';
 import { Badge } from '@/components/ui/badge';
@@ -430,6 +431,10 @@ function CurrencyInput({ label, name, defaultValue, required = true }: { label: 
 function ProductFormSheet({ open, onOpenChange, product }: { open: boolean, onOpenChange: (open: boolean) => void, product: Product | null }) {
     const queryClient = useQueryClient();
     const isEdit = !!product;
+    const [imageFile, setImageFile] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [uploading, setUploading] = useState(false);
+    const [showInStore, setShowInStore] = useState(product?.showInStore ?? true);
 
     const mutation = useMutation({
         mutationFn: (data: any) => isEdit ? inventoryApi.updateProduct(product.id, data) : inventoryApi.createProduct(data),
@@ -437,13 +442,25 @@ function ProductFormSheet({ open, onOpenChange, product }: { open: boolean, onOp
             queryClient.invalidateQueries({ queryKey: ['products'] });
             toast.success(isEdit ? "Producto actualizado" : "Producto creado exitosamente");
             onOpenChange(false);
+            setImageFile(null);
+            setImagePreview(null);
         },
         onError: (error: any) => {
             toast.error(error.message || "Error al guardar producto");
         }
     });
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setImageFile(file);
+            const reader = new FileReader();
+            reader.onload = () => setImagePreview(reader.result as string);
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const formData = new FormData(e.target as HTMLFormElement);
         const data: any = {
@@ -452,13 +469,31 @@ function ProductFormSheet({ open, onOpenChange, product }: { open: boolean, onOp
             costPrice: Number(formData.get('costPrice')),
             sellingPrice: Number(formData.get('sellingPrice')),
             minStock: Number(formData.get('minStock')),
+            showInStore: formData.get('showInStore') === 'on',
         };
         
         if (!isEdit) {
             data.stock = Number(formData.get('stock') || 0);
         }
         
-        mutation.mutate(data);
+        // Save product first, then upload image
+        mutation.mutate(data, {
+            onSuccess: async (savedProduct: any) => {
+                if (imageFile) {
+                    setUploading(true);
+                    try {
+                        const productId = isEdit ? product!.id : savedProduct.id;
+                        await inventoryApi.uploadImage(productId, imageFile);
+                        toast.success("Imagen subida exitosamente");
+                        queryClient.invalidateQueries({ queryKey: ['products'] });
+                    } catch (err: any) {
+                        toast.error(err.message || "Error al subir imagen");
+                    } finally {
+                        setUploading(false);
+                    }
+                }
+            }
+        });
     };
 
     return (
@@ -471,11 +506,11 @@ function ProductFormSheet({ open, onOpenChange, product }: { open: boolean, onOp
                     <form onSubmit={handleSubmit} className="space-y-4 py-4">
                         <div className="space-y-2">
                             <Label>Nombre del Producto</Label>
-                            <Input name="name" defaultValue={product?.name} required placeholder="Ej: Acetaminofén 500mg" />
+                            <Input name="name" defaultValue={product?.name} required placeholder="Ej: Harina PAN 1kg" />
                         </div>
                         <div className="space-y-2">
                             <Label>SKU / Código (Opcional)</Label>
-                            <Input name="sku" defaultValue={product?.sku} placeholder="Ej: MED-001" />
+                            <Input name="sku" defaultValue={product?.sku} placeholder="Ej: HP-001" />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <CurrencyInput label="Costo Compra" name="costPrice" defaultValue={product?.costPrice} />
@@ -493,10 +528,43 @@ function ProductFormSheet({ open, onOpenChange, product }: { open: boolean, onOp
                                 </div>
                             )}
                         </div>
+
+                        <div className="space-y-2">
+                            <Label>Imagen del Producto</Label>
+                            <div className="flex items-center gap-3">
+                                {(imagePreview || product?.imageUrl) && (
+                                    <div className="h-16 w-16 rounded-lg overflow-hidden bg-gray-100 shrink-0 border">
+                                        <img
+                                            src={imagePreview || inventoryApi.getImageUrl(product!.id)}
+                                            alt="Preview"
+                                            className="w-full h-full object-cover"
+                                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                                        />
+                                    </div>
+                                )}
+                                <label className="flex-1 cursor-pointer">
+                                    <div className="flex items-center gap-2 rounded-lg border-2 border-dashed border-gray-300 hover:border-[#136BBC] transition px-3 py-2 text-sm text-gray-500">
+                                        <Upload className="h-4 w-4" />
+                                        {imageFile ? imageFile.name : product?.imageUrl ? 'Cambiar imagen' : 'Subir imagen'}
+                                    </div>
+                                    <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
+                                </label>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center justify-between rounded-lg border border-gray-200 p-3">
+                            <div>
+                                <Label className="text-sm font-medium">Mostrar en tienda online</Label>
+                                <p className="text-xs text-muted-foreground mt-0.5">El producto aparecerá en la tienda pública</p>
+                            </div>
+                            <Switch checked={showInStore} onCheckedChange={setShowInStore} />
+                            <input type="hidden" name="showInStore" value={showInStore ? 'on' : 'off'} />
+                        </div>
+
                         <p className="text-xs text-muted-foreground mt-1">El stock mínimo pondrá el badge en amarillo cuando llegue a ese nivel.</p>
                         
-                        <Button type="submit" className="w-full bg-[linear-gradient(to_right,#136BBC,#274565)] mt-4" disabled={mutation.isPending}>
-                            {mutation.isPending ? 'Guardando...' : 'Guardar Producto'}
+                        <Button type="submit" className="w-full bg-[linear-gradient(to_right,#136BBC,#274565)] mt-4" disabled={mutation.isPending || uploading}>
+                            {uploading ? 'Subiendo imagen...' : mutation.isPending ? 'Guardando...' : 'Guardar Producto'}
                         </Button>
                     </form>
                 </SheetBody>

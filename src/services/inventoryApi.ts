@@ -9,6 +9,7 @@ export interface Product {
     sellingPrice: string;
     imageUrl?: string;
     isActive: boolean;
+    showInStore?: boolean;
     createdAt: string;
     updatedAt: string;
 }
@@ -54,7 +55,7 @@ export interface ProductTransaction {
     };
 }
 
-import { api } from '@/lib/api';
+import { api, API_BASE_URL } from '@/lib/api';
 
 export const inventoryApi = {
     // Products
@@ -76,6 +77,23 @@ export const inventoryApi = {
     },
     deleteProduct: async (id: string) => {
         return await api.delete(`/inventory/products/${id}`);
+    },
+    uploadImage: async (id: string, file: File) => {
+        const formData = new FormData();
+        formData.append('image', file);
+        const token = localStorage.getItem('authToken');
+        const apiUrl = (import.meta as any).env?.VITE_API_URL || '';
+        const res = await fetch(`${apiUrl}/inventory/products/${id}/upload-image`, {
+            method: 'POST',
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+            body: formData,
+        });
+        const json = await res.json();
+        if (!json.success) throw new Error(json.error || 'Error al subir imagen');
+        return json.data;
+    },
+    getImageUrl: (id: string) => {
+        return `${API_BASE_URL}/inventory/products/${id}/image`;
     },
 
     // Transactions
