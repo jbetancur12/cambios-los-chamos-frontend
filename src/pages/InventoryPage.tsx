@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { inventoryApi, type Product } from '../services/inventoryApi';
 import { Button } from '@/components/ui/button';
@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetBody } from '@/components/ui/sheet';
 import { Label } from '@/components/ui/label';
-import { Plus, Edit, ShoppingCart, TrendingUp, Search, Archive, Calendar, RotateCcw, Download, SlidersHorizontal, Upload } from 'lucide-react';
+import { Plus, Edit, ShoppingCart, TrendingUp, Search, Archive, Calendar, RotateCcw, Download, SlidersHorizontal, Upload, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatCurrency } from '@/lib/formatCurrency';
 import { Badge } from '@/components/ui/badge';
@@ -167,7 +167,14 @@ export default function InventoryPage() {
                                 <tr key={product.id} className="hover:bg-muted/30 transition-colors">
                                     <td className="px-4 py-3">
                                         <div className="font-semibold">{product.name}</div>
-                                        {product.sku && <div className="text-xs text-muted-foreground font-mono">{product.sku}</div>}
+                                        <div className="flex items-center gap-1.5 flex-wrap">
+                                            {product.sku && <div className="text-xs text-muted-foreground font-mono">{product.sku}</div>}
+                                            {product.presentations && product.presentations.length > 0 && (
+                                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-50 text-blue-600 border border-blue-200 font-medium">
+                                                    {product.presentations.length} present.
+                                                </span>
+                                            )}
+                                        </div>
                                     </td>
                                     <td className="px-4 py-3 text-center">
                                         {!product.isActive ? (
@@ -250,7 +257,14 @@ export default function InventoryPage() {
                         <div className="flex justify-between items-start">
                             <div>
                                 <h3 className="font-semibold">{product.name}</h3>
-                                {product.sku && <p className="text-xs text-muted-foreground">{product.sku}</p>}
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                    {product.sku && <p className="text-xs text-muted-foreground">{product.sku}</p>}
+                                    {product.presentations && product.presentations.length > 0 && (
+                                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-50 text-blue-600 border border-blue-200 font-medium">
+                                            {product.presentations.length} present.
+                                        </span>
+                                    )}
+                                </div>
                             </div>
                             {isPrivileged && product.isActive && (
                                 <div className="flex gap-1 -mt-1 -mr-2">
@@ -435,6 +449,28 @@ function ProductFormSheet({ open, onOpenChange, product }: { open: boolean, onOp
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [uploading, setUploading] = useState(false);
     const [showInStore, setShowInStore] = useState(product?.showInStore ?? true);
+    const [presentations, setPresentations] = useState<{ id?: string; name: string; quantity: number; sellingPrice: number; showInStore: boolean }[]>([]);
+
+    useEffect(() => {
+        setShowInStore(product?.showInStore ?? true)
+        setPresentations(
+            product?.presentations?.map(p => ({ id: p.id, name: p.name, quantity: p.quantity, sellingPrice: Number(p.sellingPrice), showInStore: p.showInStore ?? true })) || []
+        )
+        setImageFile(null)
+        setImagePreview(null)
+    }, [product])
+
+    const addPresentation = () => {
+        setPresentations(prev => [...prev, { name: '', quantity: 1, sellingPrice: 0, showInStore: true }]);
+    };
+
+    const updatePresentation = (index: number, field: string, value: any) => {
+        setPresentations(prev => prev.map((p, i) => i === index ? { ...p, [field]: value } : p));
+    };
+
+    const removePresentation = (index: number) => {
+        setPresentations(prev => prev.filter((_, i) => i !== index));
+    };
 
     const mutation = useMutation({
         mutationFn: (data: any) => isEdit ? inventoryApi.updateProduct(product.id, data) : inventoryApi.createProduct(data),
@@ -470,6 +506,7 @@ function ProductFormSheet({ open, onOpenChange, product }: { open: boolean, onOp
             sellingPrice: Number(formData.get('sellingPrice')),
             minStock: Number(formData.get('minStock')),
             showInStore: formData.get('showInStore') === 'on',
+            presentations: presentations.filter(p => p.name.trim() !== ''),
         };
         
         if (!isEdit) {
@@ -527,6 +564,72 @@ function ProductFormSheet({ open, onOpenChange, product }: { open: boolean, onOp
                                     <Input name="stock" type="number" min="0" defaultValue={0} required placeholder="0" />
                                 </div>
                             )}
+                        </div>
+
+                        {/* Presentaciones */}
+                        <div className="space-y-3 border-t pt-4">
+                            <div className="flex items-center justify-between">
+                                <Label className="text-sm font-medium">Presentaciones (opcional)</Label>
+                                <Button type="button" variant="outline" size="sm" onClick={addPresentation} className="h-7 text-xs">
+                                    <Plus className="h-3 w-3 mr-1" /> Agregar
+                                </Button>
+                            </div>
+                            {presentations.length === 0 && (
+                                <p className="text-xs text-muted-foreground">Sin presentaciones. El producto se venderá por unidad.</p>
+                            )}
+                            {presentations.map((pp, i) => (
+                                <div key={i} className={`flex gap-2 items-start p-3 rounded-lg border ${pp.showInStore ? 'bg-muted/10' : 'bg-gray-50 opacity-70'}`}>
+                                    <div className="flex-1 space-y-2">
+                                        <Input
+                                            placeholder="Nombre (ej: Docena)"
+                                            value={pp.name}
+                                            onChange={(e) => updatePresentation(i, 'name', e.target.value)}
+                                            className="h-8 text-sm"
+                                        />
+                                        <div className="flex gap-2">
+                                            <div className="flex-1">
+                                                <Label className="text-[10px] text-muted-foreground">Cantidad</Label>
+                                                <Input
+                                                    type="number"
+                                                    min="1"
+                                                    value={pp.quantity}
+                                                    onChange={(e) => updatePresentation(i, 'quantity', parseInt(e.target.value) || 1)}
+                                                    className="h-8 text-sm"
+                                                />
+                                            </div>
+                                            <div className="flex-1">
+                                                <Label className="text-[10px] text-muted-foreground">Precio Venta</Label>
+                                                <Input
+                                                    type="number"
+                                                    min="0"
+                                                    value={pp.sellingPrice}
+                                                    onChange={(e) => updatePresentation(i, 'sellingPrice', parseFloat(e.target.value) || 0)}
+                                                    className="h-8 text-sm"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-2 pt-1">
+                                            <Switch
+                                                checked={pp.showInStore}
+                                                onCheckedChange={(v) => updatePresentation(i, 'showInStore', v)}
+                                                id={`pp-show-${i}`}
+                                            />
+                                            <Label htmlFor={`pp-show-${i}`} className="text-[11px] text-muted-foreground cursor-pointer">
+                                                Mostrar en tienda online
+                                            </Label>
+                                        </div>
+                                    </div>
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10 mt-0 shrink-0"
+                                        onClick={() => removePresentation(i)}
+                                    >
+                                        <Trash2 className="h-3.5 w-3.5" />
+                                    </Button>
+                                </div>
+                            ))}
                         </div>
 
                         {(import.meta.env.VITE_STORE_ENABLED === 'true') && (

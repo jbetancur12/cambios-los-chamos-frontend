@@ -1,7 +1,7 @@
 
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { inventoryApi, type Product, PaymentMethod } from '../services/inventoryApi';
+import { inventoryApi, type Product, type ProductPresentation, PaymentMethod } from '../services/inventoryApi';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -14,8 +14,28 @@ import { useAuth } from '@/contexts/AuthContext';
 
 interface CartItem {
     product: Product;
+    presentation?: ProductPresentation;
     quantity: number;
     price: number;
+}
+
+function getCartItemLabel(item: CartItem): string {
+    return item.presentation
+        ? `${item.product.name} — ${item.presentation.name}`
+        : item.product.name;
+}
+
+function getCartItemKey(item: CartItem): string {
+    return item.presentation
+        ? `${item.product.id}-${item.presentation.id}`
+        : item.product.id;
+}
+
+function getEffectiveMax(item: CartItem): number {
+    if (item.presentation) {
+        return Math.floor(item.product.stock / item.presentation.quantity)
+    }
+    return item.product.stock
 }
 
 export function POSSheet({ open, onOpenChange }: { open: boolean, onOpenChange: (open: boolean) => void }) {
@@ -32,7 +52,6 @@ export function POSSheet({ open, onOpenChange }: { open: boolean, onOpenChange: 
     const [clientName, setClientName] = useState('');
     const searchInputRef = useRef<HTMLInputElement>(null);
 
-    // Reset cart when closing
     useEffect(() => {
         if (!open) {
             setCart([]);
@@ -41,70 +60,86 @@ export function POSSheet({ open, onOpenChange }: { open: boolean, onOpenChange: 
         }
     }, [open]);
 
-    // Filter products for search
+    const inCartKeys = new Set(cart.map(getCartItemKey));
+
     const searchResults = useMemo(() => {
         if (!searchTerm || !products) return [];
         const lower = searchTerm.toLowerCase();
-        return products.filter((p: Product) =>
-            (p.name.toLowerCase().includes(lower) || p.sku?.toLowerCase().includes(lower)) &&
-            !cart.some(item => item.product.id === p.id) // Exclude already added
-        ).slice(0, 5);
-    }, [searchTerm, products, cart]);
 
-    const addToCart = (product: Product) => {
-        // Allow adding to cart even if stock is 0, backend will handle validation if logic requires, 
-        // but UI requirement was to disable it. Keeping logic consistent with previous steps.
-        // Wait, previous step said "Allow out-of-stock products in POS search (disabled)".
-        // So I should keep the disable logic in the UI render, but here duplicate check is fine.
-        if (product.stock <= 0) return;
-        setCart(prev => [...prev, { product, quantity: 1, price: Number(product.sellingPrice) }]);
+        const results: { product: Product; presentation?: ProductPresentation }[] = [];
+
+        for (const p of products) {
+            const matches = p.name.toLowerCase().includes(lower) || p.sku?.toLowerCase().includes(lower);
+            if (!matches) continue;
+
+            const presentations = p.presentations ?? [];
+
+            if (presentations.length > 0) {
+                for (const pp of presentations) {
+                    const key = `${p.id}-${pp.id}`;
+                    if (!inCartKeys.has(key)) {
+                        results.push({ product: p, presentation: pp });
+                    }
+                }
+            } else {
+                if (!inCartKeys.has(p.id)) {
+                    results.push({ product: p });
+                }
+            }
+        }
+
+        return results.slice(0, 10);
+    }, [searchTerm, products, cart, inCartKeys]);
+
+    const addToCart = (product: Product, presentation?: ProductPresentation) => {
+        const effectiveStock = presentation
+            ? Math.floor(product.stock / presentation.quantity)
+            : product.stock
+        if (effectiveStock <= 0) return
+        const price = presentation
+            ? Number(presentation.sellingPrice)
+            : Number(product.sellingPrice);
+        setCart(prev => [...prev, { product, presentation, quantity: 1, price }]);
         setSearchTerm('');
         searchInputRef.current?.focus();
     };
 
-    const removeFromCart = (productId: string) => {
-        setCart(prev => prev.filter(item => item.product.id !== productId));
+    const removeFromCart = (key: string) => {
+        setCart(prev => prev.filter(item => getCartItemKey(item) !== key));
     };
 
-    const updateQuantity = (productId: string, delta: number) => {
+    const updateQuantity = (key: string, delta: number) => {
         setCart(prev => prev.map(item => {
-            if (item.product.id === productId) {
-                // If it was temporarily 0 (empty), treat as 0 + delta
-                const currentQty = item.quantity || 0;
-                const newQty = currentQty + delta;
-                if (newQty < 1) return item;
-                if (newQty > item.product.stock) {
-                    toast.error(`Stock insuficiente. Máximo: ${item.product.stock}`);
-                    return item;
-                }
-                return { ...item, quantity: newQty };
+            if (getCartItemKey(item) !== key) return item;
+            const newQty = (item.quantity || 0) + delta;
+            if (newQty < 1) return item;
+            const max = getEffectiveMax(item)
+            if (newQty > max) {
+                toast.error(`Stock insuficiente. Máximo: ${max}`);
+                return item;
             }
-            return item;
+            return { ...item, quantity: newQty };
         }));
     };
 
-    const setExactQuantity = (productId: string, value: string) => {
+    const setExactQuantity = (key: string, value: string) => {
         setCart(prev => prev.map(item => {
-            if (item.product.id === productId) {
-                if (value === '') {
-                    return { ...item, quantity: 0 }; // 0 represents empty string
-                }
-                const newQty = parseInt(value, 10);
-                if (isNaN(newQty) || newQty < 0) return item;
-                
-                if (newQty > item.product.stock) {
-                    toast.error(`Stock insuficiente. Máximo: ${item.product.stock}`);
-                    return { ...item, quantity: item.product.stock };
-                }
-                return { ...item, quantity: newQty };
+            if (getCartItemKey(item) !== key) return item;
+            if (value === '') return { ...item, quantity: 0 };
+            const newQty = parseInt(value, 10);
+            if (isNaN(newQty) || newQty < 0) return item;
+            const max = getEffectiveMax(item)
+            if (newQty > max) {
+                toast.error(`Stock insuficiente. Máximo: ${max}`);
+                return { ...item, quantity: max };
             }
-            return item;
+            return { ...item, quantity: newQty };
         }));
     };
 
-    const updatePrice = (productId: string, newPrice: number) => {
+    const updatePrice = (key: string, newPrice: number) => {
         setCart(prev => prev.map(item =>
-            item.product.id === productId ? { ...item, price: newPrice } : item
+            getCartItemKey(item) === key ? { ...item, price: newPrice } : item
         ));
     };
 
@@ -122,7 +157,6 @@ export function POSSheet({ open, onOpenChange }: { open: boolean, onOpenChange: 
     });
 
     const handleCheckout = () => {
-        // Filter out any items that have 0 quantity (e.g. left empty)
         const validCart = cart.filter(item => item.quantity > 0);
         if (validCart.length === 0) {
             toast.error("El carrito está vacío o las cantidades son inválidas.");
@@ -131,6 +165,7 @@ export function POSSheet({ open, onOpenChange }: { open: boolean, onOpenChange: 
 
         const items = validCart.map(item => ({
             productId: item.product.id,
+            presentationId: item.presentation?.id,
             quantity: item.quantity,
             sellingPrice: item.price
         }));
@@ -166,27 +201,41 @@ export function POSSheet({ open, onOpenChange }: { open: boolean, onOpenChange: 
 
                         {/* Search Results Dropdown */}
                         {searchResults.length > 0 && (
-                            <div className="absolute top-full left-4 right-4 z-50 bg-popover text-popover-foreground rounded-md border shadow-md mt-1 overflow-hidden">
-                                {searchResults.map((product: Product) => {
-                                    const hasStock = product.stock > 0;
+                            <div className="absolute top-full left-4 right-4 z-50 bg-popover text-popover-foreground rounded-md border shadow-md mt-1 overflow-hidden max-h-80 overflow-y-auto">
+                                {searchResults.map((result) => {
+                                    const { product, presentation } = result;
+                                    const effectiveStock = presentation
+                                        ? Math.floor(product.stock / presentation.quantity)
+                                        : product.stock
+                                    const label = presentation
+                                        ? `${product.name} — ${presentation.name}`
+                                        : product.name;
+                                    const price = presentation
+                                        ? Number(presentation.sellingPrice)
+                                        : Number(product.sellingPrice);
                                     return (
                                         <button
-                                            key={product.id}
-                                            onClick={() => addToCart(product)}
-                                            disabled={!hasStock}
-                                            className={`w-full text-left px-4 py-3 flex justify-between items-center transition-colors border-b last:border-0 ${hasStock
+                                            key={getCartItemKey({ product, presentation, quantity: 0, price: 0 } as CartItem)}
+                                            onClick={() => addToCart(product, presentation)}
+                                            disabled={effectiveStock <= 0}
+                                            className={`w-full text-left px-4 py-3 flex justify-between items-center transition-colors border-b last:border-0 ${effectiveStock > 0
                                                 ? 'hover:bg-muted/50 cursor-pointer'
                                                 : 'opacity-50 cursor-not-allowed bg-muted/20'
-                                                }`}
+                                            }`}
                                         >
-                                            <div>
-                                                <div className="font-medium">{product.name}</div>
-                                                <div className="text-xs text-muted-foreground">SKU: {product.sku || '---'}</div>
+                                            <div className="min-w-0 flex-1">
+                                                <div className="font-medium truncate">{label}</div>
+                                                <div className="text-xs text-muted-foreground">
+                                                    {presentation
+                                                        ? `${presentation.quantity} unids — SKU: ${product.sku || '---'}`
+                                                        : `SKU: ${product.sku || '---'}`
+                                                    }
+                                                </div>
                                             </div>
-                                            <div className="text-right">
-                                                <div className="font-bold text-sm">{formatCurrency(Number(product.sellingPrice))}</div>
-                                                {hasStock ? (
-                                                    <Badge variant="outline" className="text-[10px] h-5">Stock: {product.stock}</Badge>
+                                            <div className="text-right ml-3 shrink-0">
+                                                <div className="font-bold text-sm">{formatCurrency(price)}</div>
+                                                {effectiveStock > 0 ? (
+                                                    <Badge variant="outline" className="text-[10px] h-5">Stock: {effectiveStock}</Badge>
                                                 ) : (
                                                     <Badge variant="destructive" className="text-[10px] h-5">Sin Stock</Badge>
                                                 )}
@@ -208,64 +257,67 @@ export function POSSheet({ open, onOpenChange }: { open: boolean, onOpenChange: 
                             </div>
                         ) : (
                             <div className="space-y-4">
-                                {cart.map(item => (
-                                    <div key={item.product.id} className="flex gap-4 items-start p-3 rounded-lg border bg-card animate-in fade-in slide-in-from-bottom-2">
-                                        <div className="flex-1 min-w-0">
-                                            <h4 className="font-medium truncate">{item.product.name}</h4>
-                                            <div className="flex items-center gap-2 mt-2">
-                                                <div className="flex items-center border rounded-md h-8 overflow-hidden focus-within:ring-1 focus-within:ring-ring">
-                                                    <button
-                                                        onClick={() => updateQuantity(item.product.id, -1)}
-                                                        className="px-2 hover:bg-muted h-full flex items-center transition-colors"
-                                                    >
-                                                        <Minus className="h-3 w-3" />
-                                                    </button>
-                                                    <input 
-                                                        type="number"
-                                                        value={item.quantity === 0 ? '' : item.quantity}
-                                                        onChange={(e) => setExactQuantity(item.product.id, e.target.value)}
-                                                        className="w-10 text-center text-sm font-medium border-0 focus:ring-0 p-0 h-full bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                                    />
-                                                    <button
-                                                        onClick={() => updateQuantity(item.product.id, 1)}
-                                                        className="px-2 hover:bg-muted h-full flex items-center transition-colors"
-                                                    >
-                                                        <Plus className="h-3 w-3" />
-                                                    </button>
-                                                </div>
-                                                <div className="text-xs text-muted-foreground">
-                                                    (Max: {item.product.stock})
+                                {cart.map(item => {
+                                    const key = getCartItemKey(item);
+                                    return (
+                                        <div key={key} className="flex gap-4 items-start p-3 rounded-lg border bg-card animate-in fade-in slide-in-from-bottom-2">
+                                            <div className="flex-1 min-w-0">
+                                                <h4 className="font-medium truncate">{getCartItemLabel(item)}</h4>
+                                                <div className="flex items-center gap-2 mt-2">
+                                                    <div className="flex items-center border rounded-md h-8 overflow-hidden focus-within:ring-1 focus-within:ring-ring">
+                                                        <button
+                                                            onClick={() => updateQuantity(key, -1)}
+                                                            className="px-2 hover:bg-muted h-full flex items-center transition-colors"
+                                                        >
+                                                            <Minus className="h-3 w-3" />
+                                                        </button>
+                                                        <input
+                                                            type="number"
+                                                            value={item.quantity === 0 ? '' : item.quantity}
+                                                            onChange={(e) => setExactQuantity(key, e.target.value)}
+                                                            className="w-10 text-center text-sm font-medium border-0 focus:ring-0 p-0 h-full bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                                        />
+                                                        <button
+                                                            onClick={() => updateQuantity(key, 1)}
+                                                            className="px-2 hover:bg-muted h-full flex items-center transition-colors"
+                                                        >
+                                                            <Plus className="h-3 w-3" />
+                                                        </button>
+                                                    </div>
+                                                    <div className="text-xs text-muted-foreground">
+                                                        (Max: {getEffectiveMax(item)})
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
 
-                                        <div className="flex flex-col items-end gap-1">
-                                            <div className="flex items-center gap-2">
-                                                {isPrivileged ? (
-                                                    <Input
-                                                        type="number"
-                                                        className="h-8 w-24 text-right px-2"
-                                                        value={item.price}
-                                                        onChange={(e) => updatePrice(item.product.id, Number(e.target.value))}
-                                                    />
-                                                ) : (
-                                                    <span className="font-semibold">{formatCurrency(item.price)}</span>
-                                                )}
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                                                    onClick={() => removeFromCart(item.product.id)}
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
-                                            </div>
-                                            <div className="text-sm font-bold text-primary">
-                                                {formatCurrency(item.price * item.quantity)}
+                                            <div className="flex flex-col items-end gap-1">
+                                                <div className="flex items-center gap-2">
+                                                    {isPrivileged ? (
+                                                        <Input
+                                                            type="number"
+                                                            className="h-8 w-24 text-right px-2"
+                                                            value={item.price}
+                                                            onChange={(e) => updatePrice(key, Number(e.target.value))}
+                                                        />
+                                                    ) : (
+                                                        <span className="font-semibold">{formatCurrency(item.price)}</span>
+                                                    )}
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                                        onClick={() => removeFromCart(key)}
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                                <div className="text-sm font-bold text-primary">
+                                                    {formatCurrency(item.price * item.quantity)}
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         )}
                     </div>
