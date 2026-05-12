@@ -36,6 +36,7 @@ import { requestNotifyPermission } from './firebase/messaging'
 import { useGiroWebSocket } from '@/hooks/useGiroWebSocket'
 import { setupWebSocketSync } from '@/lib/websocketSync'
 import { UpdatePrompt } from '@/components/UpdatePrompt'
+import { VersionBadge } from '@/components/VersionBadge'
 
 function QueryMonitorInitializer() {
   useQueryMonitor()
@@ -330,6 +331,7 @@ function App() {
 
             <Toaster position="top-center" richColors />
             <UpdatePrompt />
+            <VersionBadge />
           </AuthProvider>
         </BrowserRouter>
       </ThemeProvider>

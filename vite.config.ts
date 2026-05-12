@@ -2,8 +2,26 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import path from 'path'
+import { execSync } from 'child_process'
+
+function getGitInfo() {
+  try {
+    const commitHash = execSync('git rev-parse --short HEAD').toString().trim()
+    const commitDate = execSync('git log -1 --format=%ai').toString().trim()
+    return { commitHash, commitDate }
+  } catch {
+    return { commitHash: 'unknown', commitDate: new Date().toISOString() }
+  }
+}
+
+const { commitHash, commitDate } = getGitInfo()
 
 export default defineConfig({
+  define: {
+    __COMMIT_HASH__: JSON.stringify(commitHash),
+    __COMMIT_DATE__: JSON.stringify(commitDate),
+  },
+
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
