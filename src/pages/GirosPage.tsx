@@ -14,6 +14,7 @@ import { useGirosList, useGirosTotals } from '@/hooks/queries/useGiroQueries'
 import { useMinoristaBalance } from '@/hooks/queries/useMinoristaQueries'
 import { useAllUsers } from '@/hooks/queries/useUserQueries'
 import { toast } from 'sonner'
+import { cn } from '@/lib/utils'
 import { useFacturarGiro, useDownloadFacturaPdf, useDownloadFacturaXml } from '@/hooks/mutations/useGiroMutations'
 import type { Giro, GiroStatus } from '@/types/api'
 import { getTodayString, getStartOfDayISO, getEndOfDayISO } from '@/lib/dateUtils'
@@ -438,21 +439,32 @@ export function GirosPage() {
                 <div className="space-y-2">
                   <p className="text-xs font-semibold text-muted-foreground">Filtrar por Trasferencista</p>
                   <div className="flex flex-wrap gap-2">
-                    {transferencistas.map((t) => (
-                      <Button
-                        key={t.transferencistaId}
-                        variant="outline"
-                        size="sm"
-                        onClick={() => t.transferencistaId && setSelectedTransferencistaId(t.transferencistaId)}
-                        className={
-                          selectedTransferencistaId === t.transferencistaId
-                            ? 'bg-[linear-gradient(to_right,#136BBC,#274565)] text-white hover:bg-[linear-gradient(to_right,#136BBC,#274565)]'
-                            : ''
-                        }
-                      >
-                        {t.fullName}
-                      </Button>
-                    ))}
+                    {transferencistas.map((t) => {
+                      const isNotAvailable = t.available === false
+                      return (
+                        <Button
+                          key={t.transferencistaId}
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            if (!isNotAvailable && t.transferencistaId) {
+                              setSelectedTransferencistaId(t.transferencistaId)
+                            }
+                          }}
+                          disabled={isNotAvailable}
+                          className={
+                            cn(
+                              selectedTransferencistaId === t.transferencistaId
+                                ? 'bg-[linear-gradient(to_right,#136BBC,#274565)] text-white hover:bg-[linear-gradient(to_right,#136BBC,#274565)]'
+                                : '',
+                              isNotAvailable && 'opacity-50 cursor-not-allowed'
+                            )
+                          }
+                        >
+                          {t.fullName}
+                        </Button>
+                      )
+                    })}
                   </div>
                 </div>
               )}

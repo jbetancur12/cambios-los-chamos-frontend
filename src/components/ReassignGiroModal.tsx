@@ -31,10 +31,12 @@ export function ReassignGiroModal({ giro, open, onOpenChange, onSuccess }: Reass
     // Fetch only transferencistas
     const { data: transferencistas = [], isLoading } = useAllUsers('TRANSFERENCISTA')
 
-    // Filter out the current transferencista and ensure valid ID
-    // Filter out the current transferencista and ensure valid ID
+    // Filter out the current transferencista and non-available ones
     const availableTransferencistas = transferencistas.filter(
-        (t) => t.transferencistaId && t.transferencistaId !== giro?.transferencista?.id
+        (t) =>
+            t.transferencistaId &&
+            t.transferencistaId !== giro?.transferencista?.id &&
+            t.available !== false
     )
 
     const hasAvailable = availableTransferencistas.length > 0
