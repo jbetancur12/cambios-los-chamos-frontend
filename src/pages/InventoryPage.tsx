@@ -442,6 +442,49 @@ function CurrencyInput({ label, name, defaultValue, required = true }: { label: 
     );
 }
 
+function PresentationPriceInput({ value, onChange, className }: { value: number | ''; onChange: (v: number | '') => void; className?: string }) {
+    const [display, setDisplay] = React.useState(() => value && value !== 0 ? formatNumberDisplay(String(value)) : '')
+    const isFocused = React.useRef(false)
+
+    React.useEffect(() => {
+        if (!isFocused.current) {
+            setDisplay(value && value !== 0 ? formatNumberDisplay(String(value)) : '')
+        }
+    }, [value])
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        isFocused.current = true
+        const raw = e.target.value.replace(/[^0-9.,]/g, '')
+        setDisplay(raw)
+    }
+
+    const handleBlur = () => {
+        isFocused.current = false
+        if (display) {
+            const num = parseFormattedNumber(display)
+            setDisplay(formatNumberDisplay(display))
+            onChange(num)
+        } else {
+            onChange('')
+        }
+    }
+
+    return (
+        <div className="relative">
+            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground text-xs">$</span>
+            <Input
+                type="text"
+                inputMode="decimal"
+                value={display}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                placeholder="0"
+                className={className ? `pl-5 ${className}` : 'pl-5 h-8 text-sm'}
+            />
+        </div>
+    )
+}
+
 function ProductFormSheet({ open, onOpenChange, product }: { open: boolean, onOpenChange: (open: boolean) => void, product: Product | null }) {
     const queryClient = useQueryClient();
     const isEdit = !!product;
@@ -449,7 +492,7 @@ function ProductFormSheet({ open, onOpenChange, product }: { open: boolean, onOp
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [uploading, setUploading] = useState(false);
     const [showInStore, setShowInStore] = useState(product?.showInStore ?? true);
-    const [presentations, setPresentations] = useState<{ id?: string; name: string; quantity: number; sellingPrice: number; showInStore: boolean }[]>([]);
+    const [presentations, setPresentations] = useState<{ id?: string; name: string; quantity: number | ''; sellingPrice: number | ''; showInStore: boolean }[]>([]);
 
     useEffect(() => {
         setShowInStore(product?.showInStore ?? true)
@@ -506,7 +549,7 @@ function ProductFormSheet({ open, onOpenChange, product }: { open: boolean, onOp
             sellingPrice: Number(formData.get('sellingPrice')),
             minStock: Number(formData.get('minStock')),
             showInStore: formData.get('showInStore') === 'on',
-            presentations: presentations.filter(p => p.name.trim() !== ''),
+            presentations: presentations.filter(p => p.name.trim() !== '').map(p => ({ ...p, quantity: p.quantity || 1, sellingPrice: p.sellingPrice || 0 })),
         };
         
         if (!isEdit) {
@@ -593,17 +636,15 @@ function ProductFormSheet({ open, onOpenChange, product }: { open: boolean, onOp
                                                     type="number"
                                                     min="1"
                                                     value={pp.quantity}
-                                                    onChange={(e) => updatePresentation(i, 'quantity', parseInt(e.target.value) || 1)}
+                                                    onChange={(e) => updatePresentation(i, 'quantity', e.target.value === '' ? '' : parseInt(e.target.value) || 1)}
                                                     className="h-8 text-sm"
                                                 />
                                             </div>
                                             <div className="flex-1">
                                                 <Label className="text-[10px] text-muted-foreground">Precio Venta</Label>
-                                                <Input
-                                                    type="number"
-                                                    min="0"
+                                                <PresentationPriceInput
                                                     value={pp.sellingPrice}
-                                                    onChange={(e) => updatePresentation(i, 'sellingPrice', parseFloat(e.target.value) || 0)}
+                                                    onChange={(v) => updatePresentation(i, 'sellingPrice', v)}
                                                     className="h-8 text-sm"
                                                 />
                                             </div>
