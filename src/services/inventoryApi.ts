@@ -54,6 +54,7 @@ export interface ProductTransaction {
     clientName?: string;
     presentationId?: string;
     presentationName?: string;
+    presentationQuantity?: number;
     quantity: number;
     pricePerUnit: number;
     totalPrice: number;

@@ -1177,8 +1177,8 @@ function SalesReportSheet({ open, onOpenChange }: { open: boolean, onOpenChange:
                                                         </div>
                                                     </div>
                                                     <div className="text-right">
-                                                        {sale.presentationName ? (
-                                                            <div className="text-sm font-semibold">{sale.presentationName}</div>
+                                                        {sale.presentationName && sale.presentationQuantity ? (
+                                                            <div className="text-sm font-semibold">{sale.presentationName} {sale.quantity / sale.presentationQuantity}x{formatCurrency(Number(sale.pricePerUnit) * sale.presentationQuantity)}</div>
                                                         ) : (
                                                             <div className="text-sm font-semibold">{sale.quantity} unds x {formatCurrency(Number(sale.pricePerUnit))}</div>
                                                         )}
