@@ -441,12 +441,13 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
             <div className="relative py-1 md:py-3">
               <Input
                 id="senderPhone"
-                placeholder="Tu WhatsApp (ej: 3001234567)"
+                placeholder="+57 300 123 4567"
                 value={senderPhone}
                 onChange={(e) => setSenderPhone(e.target.value)}
                 inputMode="tel"
               />
             </div>
+            <p className="text-[10px] text-muted-foreground -mt-2">Solo números Colombia</p>
           </div>
         )}
 

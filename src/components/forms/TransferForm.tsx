@@ -543,11 +543,12 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
             id="senderPhone"
             value={senderPhone}
             onChange={(e) => setSenderPhone(e.target.value)}
-            placeholder="Tu WhatsApp (ej: 3001234567)"
+            placeholder="+57 300 123 4567"
             className="text-sm md:text-lg h-10 md:h-12 font-medium placeholder:text-muted-foreground md:placeholder:text-transparent"
             autoComplete="off"
             inputMode="tel"
           />
+          <p className="text-[10px] text-muted-foreground">Solo números Colombia</p>
         </div>
       )}
 

@@ -254,11 +254,12 @@ export function RechargeForm({ onSuccess }: RechargeFormProps) {
           </Label>
           <Input
             id="senderPhone"
-            placeholder="Tu WhatsApp (ej: 3001234567)"
+            placeholder="+57 300 123 4567"
             value={senderPhone}
             onChange={(e) => setSenderPhone(e.target.value)}
             inputMode="tel"
           />
+          <p className="text-[10px] text-muted-foreground">Solo números Colombia</p>
         </div>
       )}
 
