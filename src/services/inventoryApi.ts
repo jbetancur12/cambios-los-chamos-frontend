@@ -52,6 +52,8 @@ export interface ProductTransaction {
     status: TransactionStatus;
     paymentMethod?: PaymentMethod;
     clientName?: string;
+    presentationId?: string;
+    presentationName?: string;
     quantity: number;
     pricePerUnit: number;
     totalPrice: number;

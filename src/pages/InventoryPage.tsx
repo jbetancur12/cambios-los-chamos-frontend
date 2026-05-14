@@ -1177,7 +1177,11 @@ function SalesReportSheet({ open, onOpenChange }: { open: boolean, onOpenChange:
                                                         </div>
                                                     </div>
                                                     <div className="text-right">
-                                                        <div className="text-sm font-semibold">{sale.quantity} unds x {formatCurrency(Number(sale.pricePerUnit))}</div>
+                                                        {sale.presentationName ? (
+                                                            <div className="text-sm font-semibold">{sale.presentationName}</div>
+                                                        ) : (
+                                                            <div className="text-sm font-semibold">{sale.quantity} unds x {formatCurrency(Number(sale.pricePerUnit))}</div>
+                                                        )}
                                                         <div className="font-medium text-xs text-muted-foreground">Total: {formatCurrency(Number(sale.totalPrice))}</div>
                                                         {isSuperAdmin && (
                                                             <div className="text-xs text-green-600">+{formatCurrency(Number(sale.profit || 0))} ganancia</div>
