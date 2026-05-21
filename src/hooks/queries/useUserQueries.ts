@@ -16,6 +16,7 @@ export interface UserData {
   creditLimit?: number
   availableCredit?: number
   creditBalance?: number
+  deletedAt?: string | null
 }
 
 interface AdminResponse {
@@ -240,4 +241,17 @@ async function fetchUsersByRole(role?: UserRole | 'ALL' | null): Promise<UserDat
   })
 
   return [...superAdminsResponse.users, ...adminsResponse.users, ...transferencistasData, ...minoristasData]
+}
+
+export function useArchivedUsers(role: UserRole | null) {
+  return useQuery({
+    queryKey: ['users', 'archived', role],
+    queryFn: async () => {
+      if (!role) return []
+      const response = await api.get<AdminResponse>(`/user/by-role/${role}?includeArchived=true`)
+      return response.users.filter((u) => u.deletedAt).map((u) => ({ ...u, isActive: false })) as UserData[]
+    },
+    enabled: role !== null,
+    staleTime: 1000 * 60,
+  })
 }

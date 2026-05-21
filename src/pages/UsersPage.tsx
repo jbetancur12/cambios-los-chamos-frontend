@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Users as UsersIcon, Search, X, Plus } from 'lucide-react'
+import { Users as UsersIcon, Search, X, Plus, Archive, RotateCcw } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { api } from '@/lib/api'
@@ -10,9 +10,10 @@ import { toast } from 'sonner'
 import { useQueryClient } from '@tanstack/react-query'
 import { CreateUserSheet } from '@/components/CreateUserSheet'
 import { RechargeMinoristaBalanceSheet } from '@/components/RechargeMinoristaBalanceSheet'
-import { useAllUsers } from '@/hooks/queries/useUserQueries'
+import { useAllUsers, useArchivedUsers } from '@/hooks/queries/useUserQueries'
 import type { Minorista } from '@/types/api'
 import { Switch } from '@/components/ui/switch'
+import { DeleteConfirmationModal } from '@/components/ui/DeleteConfirmationModal'
 
 import { useEffect } from 'react'
 import { useGiroWebSocket } from '@/hooks/useGiroWebSocket'
@@ -24,6 +25,11 @@ export function UsersPage() {
   const [rechargeMinoristaSheetOpen, setRechargeMinoristaSheetOpen] = useState(false)
   const [selectedMinorista, setSelectedMinorista] = useState<Minorista | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const [showArchived, setShowArchived] = useState(false)
+  const [archiveTarget, setArchiveTarget] = useState<{ id: string; fullName: string } | null>(null)
+  const [restoreTarget, setRestoreTarget] = useState<{ id: string; fullName: string } | null>(null)
+  const [archiving, setArchiving] = useState(false)
+  const [restoring, setRestoring] = useState(false)
 
   // WebSocket for real-time updates
   const { subscribe } = useGiroWebSocket()
@@ -56,7 +62,9 @@ export function UsersPage() {
 
   // React Query hook for fetching users - always fetch MINORISTA role
   const usersQuery = useAllUsers(isSuperAdmin ? 'MINORISTA' : null)
+  const archivedQuery = useArchivedUsers(showArchived && isSuperAdmin ? 'MINORISTA' : null)
   const users = usersQuery.data || []
+  const archivedUsers = archivedQuery.data || []
   const isLoading = usersQuery.isLoading
 
   const handleUserCreated = () => {
@@ -102,6 +110,38 @@ export function UsersPage() {
     } catch (error) {
       toast.error('Error al cambiar estado del usuario')
       console.error(error)
+    }
+  }
+
+  const handleArchiveConfirm = async () => {
+    if (!archiveTarget) return
+    setArchiving(true)
+    try {
+      await api.put(`/user/${archiveTarget.id}/archive`)
+      queryClient.invalidateQueries({ queryKey: ['users'] })
+      toast.success('Usuario archivado exitosamente')
+      setArchiveTarget(null)
+    } catch (error) {
+      toast.error('Error al archivar el usuario')
+      console.error(error)
+    } finally {
+      setArchiving(false)
+    }
+  }
+
+  const handleRestoreConfirm = async () => {
+    if (!restoreTarget) return
+    setRestoring(true)
+    try {
+      await api.put(`/user/${restoreTarget.id}/restore`)
+      queryClient.invalidateQueries({ queryKey: ['users'] })
+      toast.success('Usuario restaurado exitosamente')
+      setRestoreTarget(null)
+    } catch (error) {
+      toast.error('Error al restaurar el usuario')
+      console.error(error)
+    } finally {
+      setRestoring(false)
     }
   }
 
@@ -198,7 +238,7 @@ export function UsersPage() {
       </div>
 
       {/* Search Bar */}
-      <div className="relative mb-6">
+      <div className="relative mb-2">
         <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Buscar por nombre o email..."
@@ -214,6 +254,19 @@ export function UsersPage() {
             <X className="h-4 w-4" />
           </button>
         )}
+      </div>
+
+      {/* Archivados toggle */}
+      <div className="mb-6 flex justify-end">
+        <Button
+          variant={showArchived ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setShowArchived(!showArchived)}
+          className="gap-2"
+        >
+          <Archive className="h-4 w-4" />
+          {showArchived ? 'Ocultar archivados' : 'Ver archivados'}
+        </Button>
       </div>
 
       {/* Users List */}
@@ -296,6 +349,18 @@ export function UsersPage() {
                         <span className="text-sm text-muted-foreground">
                           {user.isActive ? 'Activo' : 'Desactivado'}
                         </span>
+                      </div>
+                      {/* Botón archivar */}
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setArchiveTarget(user)}
+                          className="h-7 text-xs text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 gap-1"
+                        >
+                          <Archive className="h-3 w-3" />
+                          Archivar
+                        </Button>
                       </div>
                       {/* Switch disponibilidad transferencista */}
                       {user.role === 'TRANSFERENCISTA' && user.transferencistaId && (
@@ -386,6 +451,55 @@ export function UsersPage() {
         </>
       )}
 
+      {/* Archived Users Section */}
+      {showArchived && (
+        <div className="mt-8">
+          <div className="flex items-center gap-2 mb-4">
+            <Archive className="h-5 w-5 text-muted-foreground" />
+            <h2 className="text-lg font-semibold text-foreground">Usuarios Archivados</h2>
+            {archivedQuery.isLoading && <span className="text-sm text-muted-foreground">Cargando...</span>}
+          </div>
+
+          {archivedUsers.length === 0 ? (
+            <Card>
+              <CardContent className="p-8 text-center text-muted-foreground">
+                <Archive className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">No hay usuarios archivados</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-4 grid-cols-2">
+              {archivedUsers.map((user) => (
+                <Card key={user.id} className="py-0 border-dashed border-red-200 bg-red-50/30">
+                  <CardHeader className="px-4 py-2">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <CardTitle className="text-base text-muted-foreground line-through">{user.fullName}</CardTitle>
+                        <p className="text-xs text-muted-foreground">{user.email}</p>
+                      </div>
+                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
+                        Archivado
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 mt-1" onClick={(e) => e.stopPropagation()}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setRestoreTarget({ id: user.id, fullName: user.fullName })}
+                        className="h-7 text-xs gap-1"
+                      >
+                        <RotateCcw className="h-3 w-3" />
+                        Restaurar
+                      </Button>
+                    </div>
+                  </CardHeader>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* FAB Button - Mobile Only */}
       <button
         onClick={() => setSheetOpen(true)}
@@ -408,6 +522,29 @@ export function UsersPage() {
         onOpenChange={setRechargeMinoristaSheetOpen}
         minorista={selectedMinorista}
         onBalanceUpdated={handleMinoristaBalanceUpdated}
+      />
+
+      {/* Archive confirmation modal */}
+      <DeleteConfirmationModal
+        open={!!archiveTarget}
+        onOpenChange={(open) => { if (!open) setArchiveTarget(null) }}
+        onConfirm={handleArchiveConfirm}
+        title="Archivar usuario"
+        description={archiveTarget ? `"${archiveTarget.fullName}" no podrá iniciar sesión y desaparecerá de las listas. El historial de giros se conserva.` : ''}
+        confirmText="Archivar"
+        loading={archiving}
+      />
+
+      {/* Restore confirmation modal */}
+      <DeleteConfirmationModal
+        open={!!restoreTarget}
+        onOpenChange={(open) => { if (!open) setRestoreTarget(null) }}
+        onConfirm={handleRestoreConfirm}
+        title="Restaurar usuario"
+        description={restoreTarget ? `"${restoreTarget.fullName}" volverá a aparecer en las listas y podrá iniciar sesión.` : ''}
+        confirmText="Restaurar"
+        confirmVariant="default"
+        loading={restoring}
       />
     </div>
   )

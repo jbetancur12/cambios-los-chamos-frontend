@@ -9,6 +9,8 @@ interface DeleteConfirmationModalProps {
     onConfirm: () => void
     title?: string
     description?: string
+    confirmText?: string
+    confirmVariant?: 'destructive' | 'default'
     loading?: boolean
 }
 
@@ -18,6 +20,8 @@ export function DeleteConfirmationModal({
     onConfirm,
     title = '¿Estás seguro?',
     description = 'Esta acción no se puede deshacer.',
+    confirmText,
+    confirmVariant = 'destructive',
     loading = false,
 }: DeleteConfirmationModalProps) {
     const [visible, setVisible] = useState(false)
@@ -78,17 +82,17 @@ export function DeleteConfirmationModal({
                     </Button>
                     <Button
                         type="button"
-                        variant="destructive"
+                        variant={confirmVariant}
                         onClick={onConfirm}
                         disabled={loading}
                     >
                         {loading ? (
                             <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Eliminando...
+                                {confirmText ? 'Procesando...' : 'Eliminando...'}
                             </>
                         ) : (
-                            'Eliminar'
+                            confirmText || 'Eliminar'
                         )}
                     </Button>
                 </div>
