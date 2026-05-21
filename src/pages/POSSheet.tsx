@@ -38,6 +38,14 @@ function getEffectiveMax(item: CartItem): number {
     return item.product.stock
 }
 
+const formatPriceInt = (amount: number) =>
+    new Intl.NumberFormat('es-CO', {
+        style: 'currency',
+        currency: 'COP',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+    }).format(amount)
+
 export function POSSheet({ open, onOpenChange }: { open: boolean, onOpenChange: (open: boolean) => void }) {
     const queryClient = useQueryClient();
     const { data: products } = useQuery({ queryKey: ['products'], queryFn: () => inventoryApi.getAllProducts() });
@@ -50,6 +58,7 @@ export function POSSheet({ open, onOpenChange }: { open: boolean, onOpenChange: 
     const [searchTerm, setSearchTerm] = useState('');
     const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PaymentMethod.CASH);
     const [clientName, setClientName] = useState('');
+    const [editingPrice, setEditingPrice] = useState<Record<string, string>>({});
     const searchInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -57,6 +66,7 @@ export function POSSheet({ open, onOpenChange }: { open: boolean, onOpenChange: 
             setCart([]);
             setSearchTerm('');
             setPaymentMethod(PaymentMethod.CASH);
+            setEditingPrice({});
         }
     }, [open]);
 
@@ -294,10 +304,46 @@ export function POSSheet({ open, onOpenChange }: { open: boolean, onOpenChange: 
                                                 <div className="flex items-center gap-2">
                                                     {isPrivileged ? (
                                                         <Input
-                                                            type="number"
-                                                            className="h-8 w-24 text-right px-2"
-                                                            value={item.price}
-                                                            onChange={(e) => updatePrice(key, Number(e.target.value))}
+                                                            type="text"
+                                                            inputMode="numeric"
+                                                            className="h-8 w-32 text-right px-2"
+                                                            value={
+                                                                key in editingPrice
+                                                                    ? (editingPrice[key] === '' ? '' : formatPriceInt(Number(editingPrice[key])))
+                                                                    : formatPriceInt(item.price)
+                                                            }
+                                                            onFocus={() => {
+                                                                if (!(key in editingPrice)) {
+                                                                    setEditingPrice(prev => ({ ...prev, [key]: String(item.price) }))
+                                                                }
+                                                            }}
+                                                            onChange={(e) => {
+                                                                const raw = e.target.value
+                                                                const digits = raw.replace(/\D/g, '')
+                                                                const num = digits === '' ? 0 : Number(digits)
+                                                                const cursorInRaw = raw.slice(0, e.target.selectionStart ?? 0).replace(/\D/g, '').length
+
+                                                                setEditingPrice(prev => ({ ...prev, [key]: digits }))
+                                                                if (digits !== '') updatePrice(key, num)
+
+                                                                const formatted = digits === '' ? '' : formatPriceInt(num)
+                                                                requestAnimationFrame(() => {
+                                                                    let cursorPos = formatted.length
+                                                                    let digitCount = 0
+                                                                    for (let i = 0; i < formatted.length; i++) {
+                                                                        if (/\d/.test(formatted[i])) digitCount++
+                                                                        if (digitCount > cursorInRaw) { cursorPos = i; break }
+                                                                    }
+                                                                    e.target.setSelectionRange(cursorPos, cursorPos)
+                                                                })
+                                                            }}
+                                                            onBlur={() => {
+                                                                setEditingPrice(prev => {
+                                                                    const next = { ...prev }
+                                                                    delete next[key]
+                                                                    return next
+                                                                })
+                                                            }}
                                                         />
                                                     ) : (
                                                         <span className="font-semibold">{formatCurrency(item.price)}</span>
