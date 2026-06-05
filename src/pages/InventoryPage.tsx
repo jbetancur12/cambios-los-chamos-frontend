@@ -1253,11 +1253,19 @@ function SalesReportSheet({ open, onOpenChange }: { open: boolean, onOpenChange:
                                                 <Button variant="outline" size="sm" className="h-8 w-8 p-0" disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>
                                                     ‹
                                                 </Button>
-                                                {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                                                    <Button key={p} variant={p === page ? 'default' : 'outline'} size="sm" className="h-8 w-8 p-0 text-xs" onClick={() => setPage(p)}>
-                                                        {p}
-                                                    </Button>
-                                                ))}
+                                                {(() => {
+                                                    const pages: (number | string)[] = []
+                                                    const start = Math.max(1, page - 2)
+                                                    const end = Math.min(totalPages, page + 2)
+                                                    if (start > 1) { pages.push(1); if (start > 2) pages.push('...') }
+                                                    for (let i = start; i <= end; i++) pages.push(i)
+                                                    if (end < totalPages) { if (end < totalPages - 1) pages.push('...'); pages.push(totalPages) }
+                                                    return pages.map((p, i) =>
+                                                        p === '...'
+                                                            ? <span key={`ellipsis-${i}`} className="text-xs text-muted-foreground px-1">...</span>
+                                                            : <Button key={p} variant={p === page ? 'default' : 'outline'} size="sm" className="h-8 w-8 p-0 text-xs" onClick={() => setPage(p as number)}>{p}</Button>
+                                                    )
+                                                })()}
                                                 <Button variant="outline" size="sm" className="h-8 w-8 p-0" disabled={page >= totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))}>
                                                     ›
                                                 </Button>
