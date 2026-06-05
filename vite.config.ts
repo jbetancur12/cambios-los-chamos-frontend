@@ -4,22 +4,25 @@ import { VitePWA } from 'vite-plugin-pwa'
 import path from 'path'
 import { execSync } from 'child_process'
 
-function getGitInfo() {
+function getGitInfo(dir: string) {
   try {
-    const commitHash = execSync('git rev-parse --short HEAD').toString().trim()
-    const commitDate = execSync('git log -1 --format=%ai').toString().trim()
+    const commitHash = execSync('git rev-parse --short HEAD', { cwd: dir }).toString().trim()
+    const commitDate = execSync('git log -1 --format=%ai', { cwd: dir }).toString().trim()
     return { commitHash, commitDate }
   } catch {
     return { commitHash: 'unknown', commitDate: new Date().toISOString() }
   }
 }
 
-const { commitHash, commitDate } = getGitInfo()
+const frontend = getGitInfo(__dirname)
+const backend = getGitInfo(path.resolve(__dirname, '../backend'))
 
 export default defineConfig({
   define: {
-    __COMMIT_HASH__: JSON.stringify(commitHash),
-    __COMMIT_DATE__: JSON.stringify(commitDate),
+    __COMMIT_HASH__: JSON.stringify(frontend.commitHash),
+    __COMMIT_DATE__: JSON.stringify(frontend.commitDate),
+    __BACKEND_COMMIT_HASH__: JSON.stringify(backend.commitHash),
+    __BACKEND_COMMIT_DATE__: JSON.stringify(backend.commitDate),
   },
 
   resolve: {
