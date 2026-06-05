@@ -944,6 +944,8 @@ function SalesReportSheet({ open, onOpenChange }: { open: boolean, onOpenChange:
     const dateInputRef = React.useRef<HTMLInputElement>(null);
     const [showScrollTop, setShowScrollTop] = React.useState(false);
     const scrollRef = React.useRef<HTMLDivElement>(null);
+    const [page, setPage] = React.useState(1);
+    const PAGE_SIZE = 10;
 
     // Derive actual query dates
     const startDate = filterType === 'CUSTOM' ? customRange.from : singleDate;
@@ -972,6 +974,7 @@ function SalesReportSheet({ open, onOpenChange }: { open: boolean, onOpenChange:
 
     // Calculate Totals
     const sales = transactions?.filter(t => t.type === 'SALE') || [];
+    React.useEffect(() => { setPage(1) }, [sales.length]);
     const totalRevenue = sales.reduce((sum, t) => sum + Number(t.totalPrice), 0);
     const totalProfit = sales.reduce((sum, t) => sum + Number(t.profit || 0), 0);
     const totalItems = sales.reduce((sum, t) => sum + t.quantity, 0);
@@ -983,8 +986,9 @@ function SalesReportSheet({ open, onOpenChange }: { open: boolean, onOpenChange:
         }
 
         // CSV Header
+        const pmLabelsCsv: Record<string, string> = { CASH: 'Efectivo', TRANSFER: 'Transferencia', CARD: 'Tarjeta', CREDIT: 'Fiado' }
         let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
-        csvContent += "Fecha,Hora,Producto,Cantidad,Costo Unitario,Precio de Venta,Total Venta,Ganancia Neta,Metodo Pago,Vendedor\n";
+        csvContent += "Fecha,Hora,Producto,Cantidad,Costo Unitario,Precio de Venta,Total Venta,Ganancia Neta,Metodo Pago,Vendedor,Cliente\n";
 
         sales.forEach(sale => {
             const dateObj = new Date(sale.createdAt);
@@ -992,8 +996,6 @@ function SalesReportSheet({ open, onOpenChange }: { open: boolean, onOpenChange:
             const time = dateObj.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
             
             // Format numbers to avoid excel scientific notation or comma issues
-            // Use replacing . with , for Spanish Excel or vice-versa depending on standard, 
-            // but standard CSV usually expects standard numbers if quoted correctly.
             const cost = sale.product?.costPrice || 0;
             const price = sale.pricePerUnit;
             const total = sale.totalPrice;
@@ -1008,8 +1010,9 @@ function SalesReportSheet({ open, onOpenChange }: { open: boolean, onOpenChange:
                 price,
                 total,
                 profit,
-                `"${sale.paymentMethod || 'CASH'}"`,
-                `"${sale.createdBy?.fullName}"`
+                `"${pmLabelsCsv[sale.paymentMethod || 'CASH'] || sale.paymentMethod || 'Efectivo'}"`,
+                `"${sale.createdBy?.fullName}"`,
+                `"${sale.clientName || ''}"`,
             ].join(",");
 
             csvContent += row + "\n";
@@ -1099,6 +1102,52 @@ function SalesReportSheet({ open, onOpenChange }: { open: boolean, onOpenChange:
                                     </div>
                                 </div>
 
+                                {/* Sales by Payment Method Summary */}
+                                {sales.length > 0 && (() => {
+                                    const pmLabels: Record<string, string> = { CASH: 'Efectivo', TRANSFER: 'Transferencia', CARD: 'Tarjeta', CREDIT: 'Fiado' }
+                                    const pmAgg = sales.reduce((acc, t) => {
+                                        const pm = t.paymentMethod || 'CASH'
+                                        if (!acc[pm]) acc[pm] = { label: pmLabels[pm] || pm, totalSales: 0, totalProfit: 0, totalItems: 0, count: 0 }
+                                        acc[pm].totalSales += Number(t.totalPrice)
+                                        acc[pm].totalProfit += Number(t.profit || 0)
+                                        acc[pm].totalItems += t.quantity
+                                        acc[pm].count += 1
+                                        return acc
+                                    }, {} as Record<string, { label: string; totalSales: number; totalProfit: number; totalItems: number; count: number }>)
+                                    return (
+                                        <div className="space-y-3">
+                                            <h3 className="font-medium border-b pb-2">Ventas por Método de Pago</h3>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                {Object.entries(pmAgg).map(([pm, data]) => (
+                                                    <div key={pm} className={`border rounded-lg p-3 ${pm === 'CREDIT' ? 'bg-orange-50 border-orange-200' : 'bg-gray-50 border-gray-200'}`}>
+                                                        <p className={`text-sm font-semibold mb-1 ${pm === 'CREDIT' ? 'text-orange-700' : ''}`}>{data.label}</p>
+                                                        <div className="text-xs space-y-0.5">
+                                                            <div className="flex justify-between">
+                                                                <span className="text-muted-foreground">Ventas</span>
+                                                                <span className="font-medium">{formatCurrency(data.totalSales)}</span>
+                                                            </div>
+                                                            {isSuperAdmin && (
+                                                                <div className="flex justify-between">
+                                                                    <span className="text-muted-foreground">Ganancia</span>
+                                                                    <span className="font-medium text-green-600">{formatCurrency(data.totalProfit)}</span>
+                                                                </div>
+                                                            )}
+                                                            <div className="flex justify-between">
+                                                                <span className="text-muted-foreground">Items</span>
+                                                                <span className="font-medium">{data.totalItems}</span>
+                                                            </div>
+                                                            <div className="flex justify-between">
+                                                                <span className="text-muted-foreground">Transacciones</span>
+                                                                <span className="font-medium">{data.count}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )
+                                })()}
+
                                 {/* Top Products */}
                                 {sales.length > 0 && (() => {
                                     const byProduct = sales.reduce((acc, t) => {
@@ -1143,8 +1192,15 @@ function SalesReportSheet({ open, onOpenChange }: { open: boolean, onOpenChange:
                                 })()}
 
                                 {/* Transactions List */}
+                                {(() => {
+                                    const totalPages = Math.max(1, Math.ceil(sales.length / PAGE_SIZE))
+                                    const paginatedSales = sales.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+                                    return (
                                 <div className="space-y-4">
-                                    <h3 className="font-medium border-b pb-2">Detalle de Transacciones</h3>
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="font-medium border-b pb-2">Detalle de Transacciones</h3>
+                                        <span className="text-xs text-muted-foreground">{sales.length} ventas</span>
+                                    </div>
                                     {isLoading ? (
                                         <div className="text-center py-8 text-muted-foreground">Cargando reporte...</div>
                                     ) : sales.length === 0 ? (
@@ -1152,8 +1208,9 @@ function SalesReportSheet({ open, onOpenChange }: { open: boolean, onOpenChange:
                                             No hay ventas registradas en este periodo.
                                         </div>
                                     ) : (
+                                        <>
                                         <div className="space-y-3">
-                                            {sales.map((sale) => {
+                                            {paginatedSales.map((sale) => {
                                                 const pmLabels: Record<string, string> = { CASH: 'Efectivo', TRANSFER: 'Transferencia', CARD: 'Tarjeta', CREDIT: 'Fiado' };
                                                 return (
                                                 <div key={sale.id} className="flex justify-between items-start text-sm p-3 hover:bg-muted/50 rounded-md border border-transparent hover:border-border transition-colors">
@@ -1170,7 +1227,7 @@ function SalesReportSheet({ open, onOpenChange }: { open: boolean, onOpenChange:
                                                                 </span>
                                                             )}
                                                             {sale.clientName && (
-                                                                <span className="text-[10px] text-muted-foreground">
+                                                                <span className={`text-[10px] ${sale.paymentMethod === 'CREDIT' ? 'font-semibold text-orange-700' : 'text-muted-foreground'}`}>
                                                                     Cliente: {sale.clientName}
                                                                 </span>
                                                             )}
@@ -1191,8 +1248,26 @@ function SalesReportSheet({ open, onOpenChange }: { open: boolean, onOpenChange:
                                                 );
                                             })}
                                         </div>
+                                        {totalPages > 1 && (
+                                            <div className="flex items-center justify-center gap-1 pt-2">
+                                                <Button variant="outline" size="sm" className="h-8 w-8 p-0" disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>
+                                                    ‹
+                                                </Button>
+                                                {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                                                    <Button key={p} variant={p === page ? 'default' : 'outline'} size="sm" className="h-8 w-8 p-0 text-xs" onClick={() => setPage(p)}>
+                                                        {p}
+                                                    </Button>
+                                                ))}
+                                                <Button variant="outline" size="sm" className="h-8 w-8 p-0" disabled={page >= totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))}>
+                                                    ›
+                                                </Button>
+                                            </div>
+                                        )}
+                                        </>
                                     )}
                                 </div>
+                                    )
+                                })()}
                             </div>
                         </SheetBody>
                     </div>

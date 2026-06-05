@@ -206,12 +206,22 @@ export function useMinoristaGiroTrendReport(dateFrom: string | null, dateTo: str
 }
 
 // Inventory Profit Report Types
+export interface PaymentMethodBreakdown {
+  paymentMethod: string
+  label: string
+  transactionCount: number
+  totalSales: number
+  totalProfit: number
+  totalItems: number
+}
+
 export interface InventoryProfitReport {
   totalSales: number
   totalCost: number
   totalProfit: number
   totalItemsSold: number
   transactionCount: number
+  salesByPaymentMethod: PaymentMethodBreakdown[]
 }
 
 // Query hook for inventory profit report

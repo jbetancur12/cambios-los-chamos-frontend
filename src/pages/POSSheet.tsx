@@ -180,7 +180,11 @@ export function POSSheet({ open, onOpenChange }: { open: boolean, onOpenChange: 
             sellingPrice: item.price
         }));
 
-        mutation.mutate({ items, paymentMethod, clientName: paymentMethod === PaymentMethod.CREDIT ? clientName : undefined });
+        if (paymentMethod === PaymentMethod.CREDIT && !clientName.trim()) {
+            toast.error("Debes ingresar el nombre del cliente para ventas a crédito (Fiado).");
+            return;
+        }
+        mutation.mutate({ items, paymentMethod, clientName: paymentMethod === PaymentMethod.CREDIT ? clientName.trim() : undefined });
     };
 
     return (

@@ -663,33 +663,99 @@ export function ReportsPage() {
 
         {/* Inventory Profit Report */}
         {activeTab === 'inventory' && inventoryReportQuery.data && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-            <StatCard
-              label="Ventas Totales"
-              value={`$${inventoryReportQuery.data.totalSales.toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
-              color="bg-blue-100 dark:bg-blue-900/20"
-            />
-            <StatCard
-              label="Costo Total"
-              value={`$${inventoryReportQuery.data.totalCost.toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
-              color="bg-orange-100 dark:bg-orange-900/20"
-            />
-            <StatCard
-              label="Ganancia Neta"
-              value={`$${inventoryReportQuery.data.totalProfit.toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
-              color="bg-green-100 dark:bg-green-900/20"
-            />
-            <StatCard
-              label="Items Vendidos"
-              value={inventoryReportQuery.data.totalItemsSold.toString()}
-              color="bg-purple-100 dark:bg-purple-900/20"
-            />
-            <StatCard
-              label="Transacciones"
-              value={inventoryReportQuery.data.transactionCount.toString()}
-              color="bg-indigo-100 dark:bg-indigo-900/20"
-            />
-          </div>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+              <StatCard
+                label="Ventas Totales"
+                value={`$${inventoryReportQuery.data.totalSales.toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
+                color="bg-blue-100 dark:bg-blue-900/20"
+              />
+              <StatCard
+                label="Costo Total"
+                value={`$${inventoryReportQuery.data.totalCost.toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
+                color="bg-orange-100 dark:bg-orange-900/20"
+              />
+              <StatCard
+                label="Ganancia Neta"
+                value={`$${inventoryReportQuery.data.totalProfit.toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
+                color="bg-green-100 dark:bg-green-900/20"
+              />
+              <StatCard
+                label="Items Vendidos"
+                value={inventoryReportQuery.data.totalItemsSold.toString()}
+                color="bg-purple-100 dark:bg-purple-900/20"
+              />
+              <StatCard
+                label="Transacciones"
+                value={inventoryReportQuery.data.transactionCount.toString()}
+                color="bg-indigo-100 dark:bg-indigo-900/20"
+              />
+            </div>
+
+            {/* Sales by Payment Method */}
+            {inventoryReportQuery.data.salesByPaymentMethod?.length > 0 && (
+              <Card className="mb-6">
+                <CardHeader>
+                  <CardTitle>Ventas por Método de Pago</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    {inventoryReportQuery.data.salesByPaymentMethod.map((pm) => (
+                      <div key={pm.paymentMethod} className="border rounded-lg p-4 bg-card">
+                        <p className={`text-sm font-semibold mb-2 ${pm.paymentMethod === 'CREDIT' ? 'text-orange-600' : 'text-foreground'}`}>
+                          {pm.label}
+                        </p>
+                        <div className="space-y-1 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Ventas</span>
+                            <span className="font-medium">${pm.totalSales.toLocaleString('es-CO', { maximumFractionDigits: 2 })}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Ganancia</span>
+                            <span className="font-medium text-green-600">${pm.totalProfit.toLocaleString('es-CO', { maximumFractionDigits: 2 })}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Items</span>
+                            <span className="font-medium">{pm.totalItems}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Transacciones</span>
+                            <span className="font-medium">{pm.transactionCount}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  {/* Pie Chart */}
+                  <ResponsiveContainer width="100%" height={250}>
+                    <PieChart>
+                      <Pie
+                        data={inventoryReportQuery.data.salesByPaymentMethod.map((pm) => ({
+                          name: pm.label,
+                          value: pm.totalSales,
+                        }))}
+                        dataKey="value"
+                        label
+                      >
+                        {inventoryReportQuery.data.salesByPaymentMethod.map((_, index) => (
+                          <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        formatter={(value) => `$${Number(value).toLocaleString('es-CO', { maximumFractionDigits: 2 })}`}
+                        contentStyle={{
+                          backgroundColor: 'var(--card)',
+                          borderColor: 'var(--border)',
+                          color: 'var(--foreground)',
+                        }}
+                      />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            )}
+          </>
         )}
 
         {/* Facturacion Report */}
