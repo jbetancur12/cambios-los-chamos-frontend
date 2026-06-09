@@ -154,7 +154,7 @@ export function useCustomerInvoiceData(identification: string) {
     queryKey: ['customerInvoiceData', identification],
     queryFn: async () => {
       if (!identification || identification.trim() === '') return null
-      
+
       try {
         // api.get<T> calls handleResponse which returns body.data as T directly
         const customer = await api.get<CustomerInvoiceDataResponse>(`/invoice-clientes/${identification}`)
@@ -166,7 +166,7 @@ export function useCustomerInvoiceData(identification: string) {
     },
     enabled: !!identification && identification.length >= 5, // Require matching length
     staleTime: 1000 * 60 * 5, // 5 minutos
-    retry: false // No re-intentar si falla el fetch inicial (normalmente 404)
+    retry: false, // No re-intentar si falla el fetch inicial (normalmente 404)
   })
 }
 
@@ -200,10 +200,10 @@ export function useFactusMunicipalities(name: string) {
       // Public endpoint: use plain fetch (no auth headers needed)
       const response = await fetch(url, {
         method: 'GET',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       })
       if (!response.ok) throw new Error('Error al obtener municipios')
-      const json = await response.json() as { success: boolean; data: FactusMunicipality[] }
+      const json = (await response.json()) as { success: boolean; data: FactusMunicipality[] }
       return json.data ?? []
     },
     enabled: name.trim().length >= 3,

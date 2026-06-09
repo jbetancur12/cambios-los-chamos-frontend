@@ -2,30 +2,24 @@ import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useAllCustomerInvoiceData } from '@/hooks/queries/useGiroQueries'
 import { Search, Edit } from 'lucide-react'
 
 export function CustomerManagementPage() {
   const [searchTerm, setSearchTerm] = useState('')
-  
+
   const { data: customers, isLoading } = useAllCustomerInvoiceData()
 
-  const filteredCustomers = customers?.filter((customer) => {
-    const term = searchTerm.toLowerCase()
-    return (
-      customer.identification.toLowerCase().includes(term) ||
-      customer.names.toLowerCase().includes(term) ||
-      customer.email.toLowerCase().includes(term)
-    )
-  }) || []
+  const filteredCustomers =
+    customers?.filter((customer) => {
+      const term = searchTerm.toLowerCase()
+      return (
+        customer.identification.toLowerCase().includes(term) ||
+        customer.names.toLowerCase().includes(term) ||
+        customer.email.toLowerCase().includes(term)
+      )
+    }) || []
 
   return (
     <div className="space-y-6">
@@ -94,11 +88,15 @@ export function CustomerManagementPage() {
                       <TableCell>{customer.email}</TableCell>
                       <TableCell>{customer.phone}</TableCell>
                       <TableCell align="right">
-                        <Button 
-                          variant="ghost" 
+                        <Button
+                          variant="ghost"
                           size="sm"
                           // In the future this could open a Dialog to edit manually, for now we just show it's possible
-                          onClick={() => alert('La edición manual desde este panel estará disponible pronto. Puedes editar re-enviando el formulario público.')}
+                          onClick={() =>
+                            alert(
+                              'La edición manual desde este panel estará disponible pronto. Puedes editar re-enviando el formulario público.'
+                            )
+                          }
                         >
                           <Edit className="h-4 w-4 mr-2" />
                           Editar

@@ -14,13 +14,7 @@ interface FacturarGiroDialogProps {
   isPending: boolean
 }
 
-export function FacturarGiroDialog({
-  giro,
-  isOpen,
-  onClose,
-  onFacturar,
-  isPending,
-}: FacturarGiroDialogProps) {
+export function FacturarGiroDialog({ giro, isOpen, onClose, onFacturar, isPending }: FacturarGiroDialogProps) {
   const [cedula, setCedula] = useState('')
   const [debouncedCedula, setDebouncedCedula] = useState('')
   const [billingType, setBillingType] = useState<'STANDARD' | 'MANDATO'>('MANDATO')
@@ -34,10 +28,7 @@ export function FacturarGiroDialog({
     return () => clearTimeout(timer)
   }, [cedula])
 
-  const {
-    data: customerData,
-    isLoading: isCheckingCustomer,
-  } = useCustomerInvoiceData(debouncedCedula)
+  const { data: customerData, isLoading: isCheckingCustomer } = useCustomerInvoiceData(debouncedCedula)
 
   // Reset state when opened with a new giro
   useEffect(() => {
@@ -53,8 +44,7 @@ export function FacturarGiroDialog({
 
   const showCustomerInfo = !!customerData
   // Only show "not found" if they've typed a reasonable length cedula and we got a 404 (or null result)
-  const showCustomerNotFound =
-    debouncedCedula.length >= 5 && !isCheckingCustomer && !customerData
+  const showCustomerNotFound = debouncedCedula.length >= 5 && !isCheckingCustomer && !customerData
 
   return (
     <div
@@ -66,9 +56,7 @@ export function FacturarGiroDialog({
         onClick={(e) => e.stopPropagation()}
       >
         <div>
-          <h3 className="font-bold text-xl text-slate-900 dark:text-white">
-            Generar Factura Electrónica
-          </h3>
+          <h3 className="font-bold text-xl text-slate-900 dark:text-white">Generar Factura Electrónica</h3>
           <p className="text-sm text-slate-500 mt-1">
             Giro por{' '}
             <span className="font-semibold text-slate-700 dark:text-slate-300">
@@ -82,9 +70,7 @@ export function FacturarGiroDialog({
         </div>
 
         <div className="space-y-3 relative">
-          <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-            Tipo de Facturación
-          </label>
+          <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Tipo de Facturación</label>
           <select
             value={billingType}
             onChange={(e) => setBillingType(e.target.value as 'STANDARD' | 'MANDATO')}
@@ -114,19 +100,14 @@ export function FacturarGiroDialog({
           {!cedula && (
             <p className="text-xs text-slate-500 bg-slate-50 dark:bg-slate-800 p-3 rounded-md border text-center">
               Si dejas este campo vacío, la factura se emitirá a nombre de{' '}
-              <strong className="text-slate-700 dark:text-slate-300">
-                "Consumidor Final"
-              </strong>
-              .
+              <strong className="text-slate-700 dark:text-slate-300">"Consumidor Final"</strong>.
             </p>
           )}
 
           {showCustomerInfo && (
             <Alert className="bg-green-50/50 dark:bg-green-900/10 border-green-200 dark:border-green-800">
               <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-500" />
-              <AlertTitle className="text-green-800 dark:text-green-400 text-sm">
-                Cliente Verificado
-              </AlertTitle>
+              <AlertTitle className="text-green-800 dark:text-green-400 text-sm">Cliente Verificado</AlertTitle>
               <AlertDescription className="text-green-700 dark:text-green-500/80 text-xs mt-1">
                 <div className="font-medium">{customerData.names}</div>
                 <div>{customerData.email}</div>
@@ -136,18 +117,13 @@ export function FacturarGiroDialog({
           )}
 
           {showCustomerNotFound && (
-            <Alert
-              variant="destructive"
-              className="bg-red-50/50 dark:bg-red-900/10"
-            >
+            <Alert variant="destructive" className="bg-red-50/50 dark:bg-red-900/10">
               <AlertCircle className="h-4 w-4" />
               <AlertTitle className="text-sm">Cliente no registrado</AlertTitle>
               <AlertDescription className="text-xs mt-1">
-                La cédula <strong>{debouncedCedula}</strong> no se encuentra en
-                nuestra base de datos.
+                La cédula <strong>{debouncedCedula}</strong> no se encuentra en nuestra base de datos.
                 <br />
-                Si continúas, la factura se emitirá a nombre de "Consumidor
-                Final".
+                Si continúas, la factura se emitirá a nombre de "Consumidor Final".
               </AlertDescription>
             </Alert>
           )}
@@ -170,17 +146,19 @@ export function FacturarGiroDialog({
         </div>
 
         <div className="flex gap-3 pt-2">
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={onClose}
-            disabled={isPending}
-          >
+          <Button variant="outline" className="flex-1" onClick={onClose} disabled={isPending}>
             Cancelar
           </Button>
           <Button
             className="flex-1"
-            onClick={() => onFacturar(giro, debouncedCedula, billingType, billingType === 'MANDATO' ? mandanteIdentification : undefined)}
+            onClick={() =>
+              onFacturar(
+                giro,
+                debouncedCedula,
+                billingType,
+                billingType === 'MANDATO' ? mandanteIdentification : undefined
+              )
+            }
             disabled={isPending || (billingType === 'MANDATO' && !mandanteIdentification.trim())}
           >
             {isPending ? 'Generando...' : 'Confirmar Factura'}

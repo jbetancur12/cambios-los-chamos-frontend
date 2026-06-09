@@ -66,7 +66,7 @@ const getBackendUrl = () => {
   const port = window.location.port
 
   // En desarrollo local (localhost o 127.0.0.1) o LAN (192.168.x.x, etc)
-  // Si estamos corriendo en puertos típicos de Vite (5173, 5174, etc), 
+  // Si estamos corriendo en puertos típicos de Vite (5173, 5174, etc),
   // asumimos que el backend está en el puerto 3000
   if (port === '5173' || port === '5174' || (port && parseInt(port) >= 5170 && parseInt(port) <= 5180)) {
     return `${protocol}//${hostname}:3000`
@@ -111,9 +111,9 @@ export function useGiroWebSocket() {
         }
       })
 
-      socket.on('disconnect', () => { })
+      socket.on('disconnect', () => {})
 
-      socket.on('connect_error', () => { })
+      socket.on('connect_error', () => {})
 
       // Registrar listeners para eventos de giro
       socket.on('giro:created', (event: GiroEvent) => {

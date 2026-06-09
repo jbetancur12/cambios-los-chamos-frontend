@@ -265,9 +265,7 @@ export function useFacturacionReport(dateFrom: string | null, dateTo: string | n
   return useQuery({
     queryKey: ['reports', 'facturacion', { dateFrom, dateTo }],
     queryFn: async () => {
-      const response = await api.get<FacturacionReport>(
-        `/reports/facturacion?dateFrom=${dateFrom}&dateTo=${dateTo}`
-      )
+      const response = await api.get<FacturacionReport>(`/reports/facturacion?dateFrom=${dateFrom}&dateTo=${dateTo}`)
       return response
     },
     ...applyDedupConfig('NORMAL'),

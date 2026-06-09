@@ -241,10 +241,11 @@ export function OperatorAmountsManager() {
                   {operatorAmounts.map((oa) => (
                     <div
                       key={oa.id}
-                      className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all ${oa.isActive
+                      className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all ${
+                        oa.isActive
                           ? 'border-gray-200 bg-white hover:border-green-300 hover:shadow-md'
                           : 'border-gray-200 bg-gray-50 opacity-60'
-                        }`}
+                      }`}
                     >
                       {editingAmountId === oa.id ? (
                         <div className="flex-1 space-y-3">

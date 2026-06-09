@@ -21,7 +21,7 @@ export function CustomerRegistrationPage() {
     address: '',
     municipality_id: '',
   })
-  
+
   const [municipalitySearch, setMunicipalitySearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [debouncedIdentification, setDebouncedIdentification] = useState('')
@@ -51,7 +51,7 @@ export function CustomerRegistrationPage() {
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
-  
+
   const { data: municipalities, isLoading: loadingMunicipalities } = useFactusMunicipalities(debouncedSearch)
   const { data: existingCustomer, isLoading: loadingExistingCustomer } = useCustomerInvoiceData(debouncedIdentification)
 
@@ -85,7 +85,7 @@ export function CustomerRegistrationPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!formData.municipality_id) {
       toast.error('Debe buscar y seleccionar un municipio de la lista.')
       return
@@ -122,7 +122,14 @@ export function CustomerRegistrationPage() {
                 ? 'Tu información de facturación ha sido actualizada correctamente.'
                 : 'Tus datos de facturación han sido guardados. Ya puedes cerrar esta ventana.'}
             </p>
-            <Button className="mt-4" onClick={() => { setSuccess(false); setIsUpdateMode(false) }} variant="outline">
+            <Button
+              className="mt-4"
+              onClick={() => {
+                setSuccess(false)
+                setIsUpdateMode(false)
+              }}
+              variant="outline"
+            >
               Registrar otra persona
             </Button>
           </CardContent>
@@ -153,14 +160,18 @@ export function CustomerRegistrationPage() {
                 <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0 text-amber-600" />
                 <div>
                   <p className="font-semibold">Cédula ya registrada</p>
-                  <p className="text-amber-700">Se han cargado tus datos actuales. Los cambios que realices actualizarán tu información existente.</p>
+                  <p className="text-amber-700">
+                    Se han cargado tus datos actuales. Los cambios que realices actualizarán tu información existente.
+                  </p>
                 </div>
               </div>
             )}
 
             <div className="grid grid-cols-4 gap-4">
               <div className="col-span-3 space-y-2">
-                <Label htmlFor="identification">Cédula / NIT <span className="text-destructive">*</span></Label>
+                <Label htmlFor="identification">
+                  Cédula / NIT <span className="text-destructive">*</span>
+                </Label>
                 <div className="relative">
                   <Input
                     id="identification"
@@ -189,7 +200,9 @@ export function CustomerRegistrationPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="names">Nombre Completo o Razón Social <span className="text-destructive">*</span></Label>
+              <Label htmlFor="names">
+                Nombre Completo o Razón Social <span className="text-destructive">*</span>
+              </Label>
               <Input
                 id="names"
                 name="names"
@@ -201,7 +214,9 @@ export function CustomerRegistrationPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Correo Electrónico <span className="text-destructive">*</span></Label>
+              <Label htmlFor="email">
+                Correo Electrónico <span className="text-destructive">*</span>
+              </Label>
               <Input
                 id="email"
                 name="email"
@@ -215,7 +230,9 @@ export function CustomerRegistrationPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="phone">Teléfono <span className="text-destructive">*</span></Label>
+                <Label htmlFor="phone">
+                  Teléfono <span className="text-destructive">*</span>
+                </Label>
                 <Input
                   id="phone"
                   name="phone"
@@ -226,7 +243,9 @@ export function CustomerRegistrationPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="address">Dirección <span className="text-destructive">*</span></Label>
+                <Label htmlFor="address">
+                  Dirección <span className="text-destructive">*</span>
+                </Label>
                 <Input
                   id="address"
                   name="address"
@@ -237,9 +256,11 @@ export function CustomerRegistrationPage() {
                 />
               </div>
             </div>
-            
+
             <div className="space-y-2 relative" ref={dropdownRef}>
-              <Label htmlFor="municipalitySearch">Municipio <span className="text-destructive">*</span></Label>
+              <Label htmlFor="municipalitySearch">
+                Municipio <span className="text-destructive">*</span>
+              </Label>
               <Input
                 id="municipalitySearch"
                 placeholder="Escribe para buscar... Ej: Bogotá"
@@ -252,7 +273,7 @@ export function CustomerRegistrationPage() {
                 onFocus={() => setIsDropdownOpen(true)}
                 autoComplete="off"
               />
-              
+
               {isDropdownOpen && (
                 <div className="absolute z-50 w-full mt-1 bg-white dark:bg-zinc-950 border rounded-md shadow-md max-h-60 overflow-y-auto">
                   {loadingMunicipalities ? (
@@ -287,7 +308,7 @@ export function CustomerRegistrationPage() {
                 </div>
               )}
             </div>
-            
+
             <p className="text-xs text-muted-foreground mt-4 mb-2">Los campos marcados con (*) son obligatorios.</p>
 
             <Button type="submit" className="w-full font-semibold" disabled={loading} size="lg">

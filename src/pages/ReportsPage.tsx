@@ -47,12 +47,8 @@ export function ReportsPage() {
   const [dateFiltersExpanded, setDateFiltersExpanded] = useState(false)
 
   // Derive dateFrom / dateTo from the active filter
-  const dateFrom = filterType === 'CUSTOM'
-    ? getStartOfDayISO(customDateRange.from)
-    : getStartOfDayISO(singleDate)
-  const dateTo = filterType === 'CUSTOM'
-    ? getEndOfDayISO(customDateRange.to)
-    : getEndOfDayISO(singleDate)
+  const dateFrom = filterType === 'CUSTOM' ? getStartOfDayISO(customDateRange.from) : getStartOfDayISO(singleDate)
+  const dateTo = filterType === 'CUSTOM' ? getEndOfDayISO(customDateRange.to) : getEndOfDayISO(singleDate)
 
   // React Query hooks for each report type
   const systemReportQuery = useSystemProfitReport(dateFrom || null, dateTo || null)
@@ -79,14 +75,14 @@ export function ReportsPage() {
         `"${item.customerIdentification || 'N/A'}"`,
         `"${item.mandanteIdentification || 'N/A'}"`,
         item.plataMia,
-        item.montoTercero
+        item.montoTercero,
       ]
       csvRows.push(row.join(','))
     })
 
     // Create Blob and download
     const csvContent = csvRows.join('\n')
-    const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvContent], { type: 'text/csv;charset=utf-8;' })
+    const blob = new Blob([new Uint8Array([0xef, 0xbb, 0xbf]), csvContent], { type: 'text/csv;charset=utf-8;' })
     const link = document.createElement('a')
     const url = URL.createObjectURL(blob)
     link.setAttribute('href', url)
@@ -179,9 +175,7 @@ export function ReportsPage() {
                   style={filterType === 'CUSTOM' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
                 >
                   <Calendar className="h-3 w-3 mr-1" />
-                  {filterType === 'CUSTOM'
-                    ? `${customDateRange.from} → ${customDateRange.to}`
-                    : 'Personalizado'}
+                  {filterType === 'CUSTOM' ? `${customDateRange.from} → ${customDateRange.to}` : 'Personalizado'}
                 </Button>
               </div>
             </div>
@@ -192,7 +186,9 @@ export function ReportsPage() {
         {customDateModalOpen && (
           <div
             className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
-            onClick={(e) => { if (e.target === e.currentTarget) setCustomDateModalOpen(false) }}
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setCustomDateModalOpen(false)
+            }}
           >
             <Card className="w-full max-w-sm">
               <div className="p-6 space-y-4">
@@ -215,7 +211,10 @@ export function ReportsPage() {
                 </div>
                 <div className="flex gap-2 pt-2">
                   <Button
-                    onClick={() => { setFilterType('CUSTOM'); setCustomDateModalOpen(false) }}
+                    onClick={() => {
+                      setFilterType('CUSTOM')
+                      setCustomDateModalOpen(false)
+                    }}
                     className="flex-1"
                     size="sm"
                     style={{ background: 'linear-gradient(to right, #136BBC, #274565)' }}
@@ -235,32 +234,36 @@ export function ReportsPage() {
         <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
           <button
             onClick={() => handleTabChange('system')}
-            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${activeTab === 'system' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
-              }`}
+            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${
+              activeTab === 'system' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
+            }`}
             style={activeTab === 'system' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             Ganancias del Sistema
           </button>
           <button
             onClick={() => handleTabChange('minoristas')}
-            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${activeTab === 'minoristas' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
-              }`}
+            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${
+              activeTab === 'minoristas' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
+            }`}
             style={activeTab === 'minoristas' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             Top Minoristas
           </button>
           <button
             onClick={() => handleTabChange('bank')}
-            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${activeTab === 'bank' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
-              }`}
+            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${
+              activeTab === 'bank' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
+            }`}
             style={activeTab === 'bank' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             Transacciones Bancarias
           </button>
           <button
             onClick={() => handleTabChange('minoristaTransactions')}
-            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${activeTab === 'minoristaTransactions' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
-              }`}
+            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${
+              activeTab === 'minoristaTransactions' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
+            }`}
             style={
               activeTab === 'minoristaTransactions' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}
             }
@@ -269,21 +272,19 @@ export function ReportsPage() {
           </button>
           <button
             onClick={() => handleTabChange('inventory')}
-            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${activeTab === 'inventory' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
-              }`}
-            style={
-              activeTab === 'inventory' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}
-            }
+            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${
+              activeTab === 'inventory' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
+            }`}
+            style={activeTab === 'inventory' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             Inventario
           </button>
           <button
             onClick={() => handleTabChange('facturacion')}
-            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${activeTab === 'facturacion' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
-              }`}
-            style={
-              activeTab === 'facturacion' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}
-            }
+            className={`px-4 py-2 rounded font-medium whitespace-nowrap transition-colors ${
+              activeTab === 'facturacion' ? 'text-white' : 'bg-card text-foreground hover:bg-accent border'
+            }`}
+            style={activeTab === 'facturacion' ? { background: 'linear-gradient(to right, #136BBC, #274565)' } : {}}
           >
             Facturación
           </button>
@@ -702,17 +703,23 @@ export function ReportsPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     {inventoryReportQuery.data.salesByPaymentMethod.map((pm) => (
                       <div key={pm.paymentMethod} className="border rounded-lg p-4 bg-card">
-                        <p className={`text-sm font-semibold mb-2 ${pm.paymentMethod === 'CREDIT' ? 'text-orange-600' : 'text-foreground'}`}>
+                        <p
+                          className={`text-sm font-semibold mb-2 ${pm.paymentMethod === 'CREDIT' ? 'text-orange-600' : 'text-foreground'}`}
+                        >
                           {pm.label}
                         </p>
                         <div className="space-y-1 text-sm">
                           <div className="flex justify-between">
                             <span className="text-muted-foreground">Ventas</span>
-                            <span className="font-medium">${pm.totalSales.toLocaleString('es-CO', { maximumFractionDigits: 2 })}</span>
+                            <span className="font-medium">
+                              ${pm.totalSales.toLocaleString('es-CO', { maximumFractionDigits: 2 })}
+                            </span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-muted-foreground">Ganancia</span>
-                            <span className="font-medium text-green-600">${pm.totalProfit.toLocaleString('es-CO', { maximumFractionDigits: 2 })}</span>
+                            <span className="font-medium text-green-600">
+                              ${pm.totalProfit.toLocaleString('es-CO', { maximumFractionDigits: 2 })}
+                            </span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-muted-foreground">Items</span>
@@ -787,7 +794,12 @@ export function ReportsPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Historial de Facturas Emitidas</CardTitle>
-                <Button variant="outline" size="sm" onClick={downloadFacturacionCSV} disabled={facturacionReportQuery.data.items.length === 0}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={downloadFacturacionCSV}
+                  disabled={facturacionReportQuery.data.items.length === 0}
+                >
                   <Download className="h-4 w-4 mr-2" />
                   Descargar Excel/CSV
                 </Button>

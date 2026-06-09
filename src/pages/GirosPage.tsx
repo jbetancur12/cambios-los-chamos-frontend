@@ -74,10 +74,20 @@ export function GirosPage() {
   const downloadPdfMutation = useDownloadFacturaPdf()
   const downloadXmlMutation = useDownloadFacturaXml()
 
-  const handleFacturar = (giro: Giro, cedula: string, billingType: 'STANDARD' | 'MANDATO', mandanteIdentification?: string) => {
+  const handleFacturar = (
+    giro: Giro,
+    cedula: string,
+    billingType: 'STANDARD' | 'MANDATO',
+    mandanteIdentification?: string
+  ) => {
     if (!giro) return
     facturarGiroMutation.mutate(
-      { giroId: giro.id, customerIdentification: cedula.trim() ? cedula.trim() : undefined, billingType, mandanteIdentification },
+      {
+        giroId: giro.id,
+        customerIdentification: cedula.trim() ? cedula.trim() : undefined,
+        billingType,
+        mandanteIdentification,
+      },
       {
         onSuccess: () => {
           toast.success('Factura POS generada exitosamente')
@@ -87,33 +97,39 @@ export function GirosPage() {
         onError: (error: any) => {
           const errorMessage = error.response?.data?.error || error.message || 'Error al generar factura'
           toast.error('Error del proveedor DIAN Factus', { description: errorMessage })
-        }
+        },
       }
     )
   }
 
   const handleDownloadPdf = async (giroFacturado: Giro) => {
-    downloadPdfMutation.mutate({ giroId: giroFacturado.id }, {
-      onSuccess: (base64) => {
-        const url = `data:application/pdf;base64,${base64}`
-        const a = document.createElement('a')
-        a.href = url
-        a.download = `factura_${giroFacturado.id}.pdf`
-        a.click()
+    downloadPdfMutation.mutate(
+      { giroId: giroFacturado.id },
+      {
+        onSuccess: (base64) => {
+          const url = `data:application/pdf;base64,${base64}`
+          const a = document.createElement('a')
+          a.href = url
+          a.download = `factura_${giroFacturado.id}.pdf`
+          a.click()
+        },
       }
-    })
+    )
   }
 
   const handleDownloadXml = async (giroFacturado: Giro) => {
-    downloadXmlMutation.mutate({ giroId: giroFacturado.id }, {
-      onSuccess: (base64) => {
-        const url = `data:application/xml;base64,${base64}`
-        const a = document.createElement('a')
-        a.href = url
-        a.download = `factura_${giroFacturado.id}.xml`
-        a.click()
+    downloadXmlMutation.mutate(
+      { giroId: giroFacturado.id },
+      {
+        onSuccess: (base64) => {
+          const url = `data:application/xml;base64,${base64}`
+          const a = document.createElement('a')
+          a.href = url
+          a.download = `factura_${giroFacturado.id}.xml`
+          a.click()
+        },
       }
-    })
+    )
   }
 
   const itemsPerPage = 15
@@ -291,8 +307,6 @@ export function GirosPage() {
   const paginatedGiros = giros // They are already paginated from backend
   const totalPages = pagination?.totalPages || 0
 
-
-
   // Calculate totals - THESE ARE NOW ONLY FOR CURRENT PAGE.
   // If we want GLOBAL totals, we need a separate endpoint or backend to return aggregation.
   // The user didn't explicitly ask for global totals, but usually dashboards need it.
@@ -397,8 +411,9 @@ export function GirosPage() {
           >
             <p className="text-base font-semibold ">Tipo de Usuario</p>
             <ChevronDown
-              className={`h-4 w-4 text-muted-foreground transition-transform ${userFiltersExpanded ? 'rotate-180' : ''
-                }`}
+              className={`h-4 w-4 text-muted-foreground transition-transform ${
+                userFiltersExpanded ? 'rotate-180' : ''
+              }`}
             />
           </button>
 
@@ -452,14 +467,12 @@ export function GirosPage() {
                             }
                           }}
                           disabled={isNotAvailable}
-                          className={
-                            cn(
-                              selectedTransferencistaId === t.transferencistaId
-                                ? 'bg-[linear-gradient(to_right,#136BBC,#274565)] text-white hover:bg-[linear-gradient(to_right,#136BBC,#274565)]'
-                                : '',
-                              isNotAvailable && 'opacity-50 cursor-not-allowed'
-                            )
-                          }
+                          className={cn(
+                            selectedTransferencistaId === t.transferencistaId
+                              ? 'bg-[linear-gradient(to_right,#136BBC,#274565)] text-white hover:bg-[linear-gradient(to_right,#136BBC,#274565)]'
+                              : '',
+                            isNotAvailable && 'opacity-50 cursor-not-allowed'
+                          )}
                         >
                           {t.fullName}
                         </Button>
@@ -746,10 +759,11 @@ export function GirosPage() {
                     return (
                       <tr
                         key={giro.id}
-                        className={`border-b cursor-pointer transition-colors ${giro.status === 'DEVUELTO'
-                          ? 'bg-[linear-gradient(to_right,#510200,#f80000)] text-white hover:opacity-90'
-                          : 'hover:bg-muted/30'
-                          }`}
+                        className={`border-b cursor-pointer transition-colors ${
+                          giro.status === 'DEVUELTO'
+                            ? 'bg-[linear-gradient(to_right,#510200,#f80000)] text-white hover:opacity-90'
+                            : 'hover:bg-muted/30'
+                        }`}
                         onClick={() => handleGiroClick(giro)}
                       >
                         {user?.role !== 'MINORISTA' && (
@@ -767,9 +781,9 @@ export function GirosPage() {
                         <td className="px-3 py-2 text-right whitespace-nowrap font-semibold w-20">
                           {giro.amountBs > 0
                             ? giro.amountBs.toLocaleString('es-VE', {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            })
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })
                             : '—'}
                         </td>
                         <td className="px-3 py-2 truncate w-32">
@@ -810,7 +824,9 @@ export function GirosPage() {
                                 <Printer className="h-4 w-4 text-blue-600" />
                               </button>
                             )}
-                            {(user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN' || user?.role === 'TRANSFERENCISTA') &&
+                            {(user?.role === 'SUPER_ADMIN' ||
+                              user?.role === 'ADMIN' ||
+                              user?.role === 'TRANSFERENCISTA') &&
                               (giro.status === 'ASIGNADO' || giro.status === 'PROCESANDO') && (
                                 <button
                                   onClick={(e) => {
@@ -840,62 +856,128 @@ export function GirosPage() {
                                   </svg>
                                 </button>
                               )}
-                              
+
                             {/* Actions for Electronic Invoicing Factus */}
-                            {(user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN') && giro.status === 'COMPLETADO' && (
-                              <div className="flex gap-1 items-center ml-1">
-                                {!giro.isFacturado ? (
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation()
-                                      setGiroToFacturar(giro)
-                                      setShowFacturaDialog(true)
-                                    }}
-                                    className="p-1 hover:bg-green-100 dark:hover:bg-green-900 rounded transition-colors"
-                                    title="Emitir Factura POS"
-                                    disabled={facturarGiroMutation.isPending && giroToFacturar?.id === giro.id}
-                                  >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-600"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-                                  </button>
-                                ) : (
-                                  <>
+                            {(user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN') &&
+                              giro.status === 'COMPLETADO' && (
+                                <div className="flex gap-1 items-center ml-1">
+                                  {!giro.isFacturado ? (
                                     <button
                                       onClick={(e) => {
                                         e.stopPropagation()
-                                        setSelectedGiroForFacturaPrint(giro.id)
-                                        setShowPrintFacturaModal(true)
+                                        setGiroToFacturar(giro)
+                                        setShowFacturaDialog(true)
                                       }}
                                       className="p-1 hover:bg-green-100 dark:hover:bg-green-900 rounded transition-colors"
-                                      title="Tirilla POS"
+                                      title="Emitir Factura POS"
+                                      disabled={facturarGiroMutation.isPending && giroToFacturar?.id === giro.id}
                                     >
-                                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-600"><path d="M6 14h12V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v8zm8-10v2M10 4v2"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v6a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-6z"/></svg>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="16"
+                                        height="16"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        className="text-green-600"
+                                      >
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                        <polyline points="14 2 14 8 20 8" />
+                                        <line x1="16" y1="13" x2="8" y2="13" />
+                                        <line x1="16" y1="17" x2="8" y2="17" />
+                                        <polyline points="10 9 9 9 8 9" />
+                                      </svg>
                                     </button>
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation()
-                                        handleDownloadPdf(giro)
-                                      }}
-                                      className="p-1 hover:bg-red-100 dark:hover:bg-red-900 rounded transition-colors"
-                                      title="Descargar PDF Factura"
-                                      disabled={downloadPdfMutation.isPending}
-                                    >
-                                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-500"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15h6"/><path d="M12 18v-6"/></svg>
-                                    </button>
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation()
-                                        handleDownloadXml(giro)
-                                      }}
-                                      className="p-1 hover:bg-orange-100 dark:hover:bg-orange-900 rounded transition-colors"
-                                      title="Descargar XML Factura"
-                                      disabled={downloadXmlMutation.isPending}
-                                    >
-                                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-500"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-                                    </button>
-                                  </>
-                                )}
-                              </div>
-                            )}
+                                  ) : (
+                                    <>
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation()
+                                          setSelectedGiroForFacturaPrint(giro.id)
+                                          setShowPrintFacturaModal(true)
+                                        }}
+                                        className="p-1 hover:bg-green-100 dark:hover:bg-green-900 rounded transition-colors"
+                                        title="Tirilla POS"
+                                      >
+                                        <svg
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          width="16"
+                                          height="16"
+                                          viewBox="0 0 24 24"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          strokeWidth="2"
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          className="text-green-600"
+                                        >
+                                          <path d="M6 14h12V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v8zm8-10v2M10 4v2" />
+                                          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                                          <path d="M6 14h12v6a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-6z" />
+                                        </svg>
+                                      </button>
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation()
+                                          handleDownloadPdf(giro)
+                                        }}
+                                        className="p-1 hover:bg-red-100 dark:hover:bg-red-900 rounded transition-colors"
+                                        title="Descargar PDF Factura"
+                                        disabled={downloadPdfMutation.isPending}
+                                      >
+                                        <svg
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          width="16"
+                                          height="16"
+                                          viewBox="0 0 24 24"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          strokeWidth="2"
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          className="text-red-500"
+                                        >
+                                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                          <polyline points="14 2 14 8 20 8" />
+                                          <path d="M9 15h6" />
+                                          <path d="M12 18v-6" />
+                                        </svg>
+                                      </button>
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation()
+                                          handleDownloadXml(giro)
+                                        }}
+                                        className="p-1 hover:bg-orange-100 dark:hover:bg-orange-900 rounded transition-colors"
+                                        title="Descargar XML Factura"
+                                        disabled={downloadXmlMutation.isPending}
+                                      >
+                                        <svg
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          width="16"
+                                          height="16"
+                                          viewBox="0 0 24 24"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          strokeWidth="2"
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          className="text-orange-500"
+                                        >
+                                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                          <polyline points="14 2 14 8 20 8" />
+                                          <line x1="16" y1="13" x2="8" y2="13" />
+                                          <line x1="16" y1="17" x2="8" y2="17" />
+                                          <polyline points="10 9 9 9 8 9" />
+                                        </svg>
+                                      </button>
+                                    </>
+                                  )}
+                                </div>
+                              )}
                           </div>
                         </td>
                       </tr>
@@ -921,10 +1003,11 @@ export function GirosPage() {
               return (
                 <div
                   key={giro.id}
-                  className={`border rounded p-3 cursor-pointer transition-colors ${giro.status === 'DEVUELTO'
-                    ? 'bg-[linear-gradient(to_right,#510200,#f80000)] text-white hover:opacity-90'
-                    : 'bg-card hover:bg-muted/50'
-                    }`}
+                  className={`border rounded p-3 cursor-pointer transition-colors ${
+                    giro.status === 'DEVUELTO'
+                      ? 'bg-[linear-gradient(to_right,#510200,#f80000)] text-white hover:opacity-90'
+                      : 'bg-card hover:bg-muted/50'
+                  }`}
                   onClick={() => handleGiroClick(giro)}
                 >
                   <div className={`grid ${user?.role === 'MINORISTA' ? 'grid-cols-2' : 'grid-cols-2'} gap-2 text-xs`}>
@@ -1021,7 +1104,7 @@ export function GirosPage() {
                           <span className="text-xs font-medium">Reasignar</span>
                         </Button>
                       )}
-                      
+
                     {/* FACTURAR MOBILE ACTIONS  */}
                     {(user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN') && giro.status === 'COMPLETADO' && (
                       <div className="flex gap-2 items-center w-full justify-end">
@@ -1037,7 +1120,24 @@ export function GirosPage() {
                             className="bg-green-600 hover:bg-green-700 text-white h-8 px-3 ml-auto"
                             disabled={facturarGiroMutation.isPending && giroToFacturar?.id === giro.id}
                           >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="14"
+                              height="14"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className="mr-1.5"
+                            >
+                              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                              <polyline points="14 2 14 8 20 8" />
+                              <line x1="16" y1="13" x2="8" y2="13" />
+                              <line x1="16" y1="17" x2="8" y2="17" />
+                              <polyline points="10 9 9 9 8 9" />
+                            </svg>
                             Facturar
                           </Button>
                         ) : (
@@ -1083,7 +1183,6 @@ export function GirosPage() {
                       </div>
                     )}
                   </div>
-
                 </div>
               )
             })}
@@ -1115,72 +1214,72 @@ export function GirosPage() {
             {(((filterStatus === 'COMPLETADO' || filterStatus === 'ALL') &&
               (user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN')) ||
               user?.role === 'MINORISTA') && (
-                <div className="border-t border-white border-opacity-30 px-3 py-2">
-                  {user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN' ? (
-                    // ADMIN & SUPER_ADMIN View
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                      {/* Minorista Profit - Hide if filtering only system traffic (COMPLETADO) */}
-                      {filterStatus === 'ALL' && (
-                        <div className="text-left">
-                          <p className="text-xs opacity-80">Ganancia Minoristas</p>
-                          <p className="font-semibold">{formatGiroCurrency(totals.minoristaProfit, 'COP')}</p>
-                        </div>
-                      )}
-
+              <div className="border-t border-white border-opacity-30 px-3 py-2">
+                {user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN' ? (
+                  // ADMIN & SUPER_ADMIN View
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    {/* Minorista Profit - Hide if filtering only system traffic (COMPLETADO) */}
+                    {filterStatus === 'ALL' && (
                       <div className="text-left">
-                        <p className="text-xs opacity-80">Comisión Banco</p>
-                        <p className="font-semibold">{formatGiroCurrency(totals.bankCommission, 'VES')}</p>
-                      </div>
-
-                      {user?.role === 'SUPER_ADMIN' && (
-                        <div className="text-left">
-                          <p className="text-xs opacity-80">Ganancia del Sitio</p>
-                          <p className="font-semibold">{formatGiroCurrency(totals.systemProfit, 'COP')}</p>
-                        </div>
-                      )}
-
-                      {/* Total Profit - Show if viewing all traffic */}
-                      {filterStatus === 'ALL' && user?.role === 'SUPER_ADMIN' && (
-                        <div className="text-left">
-                          <p className="text-xs opacity-80">Total Ganancias</p>
-                          <p className="font-semibold">
-                            {formatGiroCurrency(totals.minoristaProfit + totals.systemProfit, 'COP')}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  ) : user?.role === 'MINORISTA' && minoristaBalanceData ? (
-                    // MINORISTA: Deuda Actual, Crédito Asignado
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="text-left">
-                        <p className="text-xs opacity-80">Total Ganancia</p>
+                        <p className="text-xs opacity-80">Ganancia Minoristas</p>
                         <p className="font-semibold">{formatGiroCurrency(totals.minoristaProfit, 'COP')}</p>
                       </div>
+                    )}
+
+                    <div className="text-left">
+                      <p className="text-xs opacity-80">Comisión Banco</p>
+                      <p className="font-semibold">{formatGiroCurrency(totals.bankCommission, 'VES')}</p>
+                    </div>
+
+                    {user?.role === 'SUPER_ADMIN' && (
                       <div className="text-left">
-                        <p className="text-xs opacity-80">Deuda Actual</p>
-                        <p className="font-semibold text-red-100">
-                          {formatGiroCurrency(
-                            Math.max(0, minoristaBalanceData.creditLimit - minoristaBalanceData.availableCredit),
-                            'COP'
-                          )}
+                        <p className="text-xs opacity-80">Ganancia del Sitio</p>
+                        <p className="font-semibold">{formatGiroCurrency(totals.systemProfit, 'COP')}</p>
+                      </div>
+                    )}
+
+                    {/* Total Profit - Show if viewing all traffic */}
+                    {filterStatus === 'ALL' && user?.role === 'SUPER_ADMIN' && (
+                      <div className="text-left">
+                        <p className="text-xs opacity-80">Total Ganancias</p>
+                        <p className="font-semibold">
+                          {formatGiroCurrency(totals.minoristaProfit + totals.systemProfit, 'COP')}
                         </p>
                       </div>
-                      <div className="text-left">
-                        <p className="text-xs opacity-80">Crédito Asignado</p>
-                        <p className="font-semibold">{formatGiroCurrency(minoristaBalanceData.creditLimit, 'COP')}</p>
-                      </div>
+                    )}
+                  </div>
+                ) : user?.role === 'MINORISTA' && minoristaBalanceData ? (
+                  // MINORISTA: Deuda Actual, Crédito Asignado
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="text-left">
+                      <p className="text-xs opacity-80">Total Ganancia</p>
+                      <p className="font-semibold">{formatGiroCurrency(totals.minoristaProfit, 'COP')}</p>
                     </div>
-                  ) : (
-                    // Default fallback for Minorista if data not loaded
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                      <div className="text-left">
-                        <p className="text-xs opacity-80">Total Ganancia</p>
-                        <p className="font-semibold">{formatGiroCurrency(totals.minoristaProfit, 'COP')}</p>
-                      </div>
+                    <div className="text-left">
+                      <p className="text-xs opacity-80">Deuda Actual</p>
+                      <p className="font-semibold text-red-100">
+                        {formatGiroCurrency(
+                          Math.max(0, minoristaBalanceData.creditLimit - minoristaBalanceData.availableCredit),
+                          'COP'
+                        )}
+                      </p>
                     </div>
-                  )}
-                </div>
-              )}
+                    <div className="text-left">
+                      <p className="text-xs opacity-80">Crédito Asignado</p>
+                      <p className="font-semibold">{formatGiroCurrency(minoristaBalanceData.creditLimit, 'COP')}</p>
+                    </div>
+                  </div>
+                ) : (
+                  // Default fallback for Minorista if data not loaded
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <div className="text-left">
+                      <p className="text-xs opacity-80">Total Ganancia</p>
+                      <p className="font-semibold">{formatGiroCurrency(totals.minoristaProfit, 'COP')}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Pagination Controls */}
@@ -1208,98 +1307,89 @@ export function GirosPage() {
             </div>
           </div>
         </>
-      )
-      }
+      )}
 
       {/* Custom Date Range Modal */}
-      {
-        customDateModalOpen && (
-          <div
-            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
-            onClick={(e) => {
-              if (e.target === e.currentTarget) {
-                setCustomDateModalOpen(false)
-              }
-            }}
-          >
-            <Card className="w-full max-w-sm">
-              <div className="p-6 space-y-4">
-                <h2 className="text-lg font-semibold">Rango de Fechas Personalizado</h2>
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold">Desde</label>
-                  <Input
-                    type="date"
-                    value={customDateRange.from}
-                    onChange={(e) => setCustomDateRange({ ...customDateRange, from: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold">Hasta</label>
-                  <Input
-                    type="date"
-                    value={customDateRange.to}
-                    onChange={(e) => setCustomDateRange({ ...customDateRange, to: e.target.value })}
-                  />
-                </div>
-                <div className="flex gap-2 pt-4">
-                  <Button
-                    onClick={() => {
-                      setFilterDate('CUSTOM')
-                      setCustomDateModalOpen(false)
-                    }}
-                    className="flex-1"
-                    size="sm"
-                  >
-                    Aplicar
-                  </Button>
-                  <Button onClick={() => setCustomDateModalOpen(false)} variant="outline" className="flex-1" size="sm">
-                    Cancelar
-                  </Button>
-                </div>
+      {customDateModalOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setCustomDateModalOpen(false)
+            }
+          }}
+        >
+          <Card className="w-full max-w-sm">
+            <div className="p-6 space-y-4">
+              <h2 className="text-lg font-semibold">Rango de Fechas Personalizado</h2>
+              <div className="space-y-2">
+                <label className="text-xs font-semibold">Desde</label>
+                <Input
+                  type="date"
+                  value={customDateRange.from}
+                  onChange={(e) => setCustomDateRange({ ...customDateRange, from: e.target.value })}
+                />
               </div>
-            </Card>
-          </div>
-        )
-      }
+              <div className="space-y-2">
+                <label className="text-xs font-semibold">Hasta</label>
+                <Input
+                  type="date"
+                  value={customDateRange.to}
+                  onChange={(e) => setCustomDateRange({ ...customDateRange, to: e.target.value })}
+                />
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button
+                  onClick={() => {
+                    setFilterDate('CUSTOM')
+                    setCustomDateModalOpen(false)
+                  }}
+                  className="flex-1"
+                  size="sm"
+                >
+                  Aplicar
+                </Button>
+                <Button onClick={() => setCustomDateModalOpen(false)} variant="outline" className="flex-1" size="sm">
+                  Cancelar
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
 
       {/* Giro Detail Sheet */}
-      {
-        selectedGiroId && (
-          <GiroDetailSheet
-            open={detailSheetOpen}
-            onOpenChange={setDetailSheetOpen}
-            giroId={selectedGiroId}
-            initialStatus={selectedGiroStatus}
-            onUpdate={() => { }}
-          />
-        )
-      }
+      {selectedGiroId && (
+        <GiroDetailSheet
+          open={detailSheetOpen}
+          onOpenChange={setDetailSheetOpen}
+          giroId={selectedGiroId}
+          initialStatus={selectedGiroStatus}
+          onUpdate={() => {}}
+        />
+      )}
 
       {/* Print Modal */}
-      {
-        selectedGiroForPrint && (
-          <PrintTicketModal
-            giroId={selectedGiroForPrint}
-            open={showPrintModal}
-            onOpenChange={(open) => {
-              setShowPrintModal(open)
-            }}
-          />
-        )
-      }
+      {selectedGiroForPrint && (
+        <PrintTicketModal
+          giroId={selectedGiroForPrint}
+          open={showPrintModal}
+          onOpenChange={(open) => {
+            setShowPrintModal(open)
+          }}
+        />
+      )}
 
       {/* Print Factura POS Modal */}
-      {
-        selectedGiroForFacturaPrint && (
-          <PrintFacturaModal
-            giroId={selectedGiroForFacturaPrint}
-            open={showPrintFacturaModal}
-            onOpenChange={(open) => {
-              setShowPrintFacturaModal(open)
-            }}
-          />
-        )
-      }
+      {selectedGiroForFacturaPrint && (
+        <PrintFacturaModal
+          giroId={selectedGiroForFacturaPrint}
+          open={showPrintFacturaModal}
+          onOpenChange={(open) => {
+            setShowPrintFacturaModal(open)
+          }}
+        />
+      )}
 
       {/* Facturar Modal using dedicated component */}
       {showFacturaDialog && giroToFacturar && (
@@ -1321,6 +1411,6 @@ export function GirosPage() {
           queryClient.invalidateQueries({ queryKey: ['giros', 'totals'] })
         }}
       />
-    </div >
+    </div>
   )
 }

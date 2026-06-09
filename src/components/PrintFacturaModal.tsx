@@ -13,7 +13,7 @@ interface FacturaTicketData {
   companyAddress: string
   companyCity: string
   divider: string
-  
+
   facturaNumber: string
   createdAt: string
   giroId: string
@@ -94,7 +94,9 @@ export function PrintFacturaModal({ giroId, open, onOpenChange }: PrintFacturaMo
   }
 
   const generateThermalHTML = (data: FacturaTicketData): string => {
-    const itemsHtml = data.items.map(item => `
+    const itemsHtml = data.items
+      .map(
+        (item) => `
       <div class="row">
         <span class="value-left">${item.quantity} x ${item.name}</span>
       </div>
@@ -102,7 +104,9 @@ export function PrintFacturaModal({ giroId, open, onOpenChange }: PrintFacturaMo
         <span class="value-left">${item.price}</span>
         <span class="value">${item.total}</span>
       </div>
-    `).join('')
+    `
+      )
+      .join('')
 
     return `
 <!DOCTYPE html>
@@ -182,21 +186,29 @@ export function PrintFacturaModal({ giroId, open, onOpenChange }: PrintFacturaMo
             <div style="margin-bottom: 5px;"><strong>CUFE:</strong></div>
             <div>${data.cufe}</div>
         </div>
-        ${data.qr ? `
+        ${
+          data.qr
+            ? `
         <div class="qr-container">
             <img src="${data.qr}" alt="QR Factura" />
-        </div>` : ''}
+        </div>`
+            : ''
+        }
 
         <!-- FOOTER -->
         <div class="footer">
             <!-- RESOLUTION (IF ANY) -->
-            ${data.resolutionNumber ? `
+            ${
+              data.resolutionNumber
+                ? `
             <div style="line-height: 1.2;">
                 <div>Resolución DIAN: ${data.resolutionNumber}</div>
                 <div>Prefijo ${data.resolutionPrefix} Rango desde ${data.resolutionFrom} hasta ${data.resolutionTo}</div>
                 <div>Vigencia Desde: ${data.resolutionStartDate} Hasta: ${data.resolutionEndDate}</div>
             </div>
-            ` : ''}
+            `
+                : ''
+            }
             
             <div style="line-height: 1.2;">Atendido por: ${data.createdByName}</div>
             <div style="line-height: 1.2;">Impreso: ${data.timestamp}</div>
@@ -285,12 +297,17 @@ export function PrintFacturaModal({ giroId, open, onOpenChange }: PrintFacturaMo
                   <div style={{ textAlign: 'center', margin: '5px 0' }}>================================</div>
                   <div style={{ textAlign: 'center', fontWeight: 'bold' }}>Factura No: {ticketData.facturaNumber}</div>
                   <div style={{ margin: '10px 0', borderTop: '1px dashed #000', paddingTop: '5px' }}>
-                    <strong>Cliente:</strong><br />
-                    {ticketData.clientName}<br />
+                    <strong>Cliente:</strong>
+                    <br />
+                    {ticketData.clientName}
+                    <br />
                     {ticketData.clientNit}
                   </div>
-                  <div style={{ margin: '10px 0', borderTop: '1px dashed #000', paddingTop: '5px', textAlign: 'right' }}>
-                    <strong>TOTAL:</strong><br />
+                  <div
+                    style={{ margin: '10px 0', borderTop: '1px dashed #000', paddingTop: '5px', textAlign: 'right' }}
+                  >
+                    <strong>TOTAL:</strong>
+                    <br />
                     <span style={{ fontSize: '14px', fontWeight: 'bold' }}>{ticketData.total}</span>
                   </div>
                   {ticketData.qr && (

@@ -244,7 +244,7 @@ export function useFacturarGiro() {
       const response = await api.post<{ giro: Giro; message: string }>(`/giro/${giroId}/facturar`, {
         customerIdentification,
         billingType,
-        mandanteIdentification
+        mandanteIdentification,
       })
       return response.giro
     },
@@ -265,7 +265,7 @@ export function useDownloadFacturaPdf() {
     mutationFn: async ({ giroId }: DownloadFacturaInput) => {
       const response = await api.get<{ pdfBase64: string }>(`/giro/${giroId}/factura-pdf`)
       return response.pdfBase64
-    }
+    },
   })
 }
 
@@ -274,6 +274,6 @@ export function useDownloadFacturaXml() {
     mutationFn: async ({ giroId }: DownloadFacturaInput) => {
       const response = await api.get<{ xmlBase64: string }>(`/giro/${giroId}/factura-xml`)
       return response.xmlBase64
-    }
+    },
   })
 }

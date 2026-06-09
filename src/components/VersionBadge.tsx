@@ -16,7 +16,8 @@ export function VersionBadge() {
       </button>
       {showTooltip && (
         <div className="absolute bottom-full right-0 mb-1.5 px-2 py-1 rounded bg-popover border text-[10px] text-muted-foreground whitespace-nowrap shadow-sm">
-          {__COMMIT_HASH__} &middot; {__COMMIT_DATE__}<br />
+          {__COMMIT_HASH__} &middot; {__COMMIT_DATE__}
+          <br />
           {__BACKEND_COMMIT_HASH__} &middot; {__BACKEND_COMMIT_DATE__}
         </div>
       )}

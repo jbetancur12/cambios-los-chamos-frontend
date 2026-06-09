@@ -241,7 +241,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
               phone: editablePhone, // Even if not edited in this form, it's state
               bankId: editableBankId,
               accountNumber: editableAccountNumber,
-              executionType: giro.executionType || 'TRANSFERENCIA'
+              executionType: giro.executionType || 'TRANSFERENCIA',
             })
           }
 
@@ -505,7 +505,6 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
     }
   }
 
-
   const isProcessing =
     executeGiroMutation.isPending ||
     markProcessingMutation.isPending ||
@@ -633,7 +632,6 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
               {/* Editing Form */}
               {isEditing && (
                 <div className="space-y-4 border p-4 rounded-lg bg-muted/20">
-
                   <h3 className="font-semibold text-sm">Editar Datos</h3>
                   <div className="space-y-3">
                     {giro.executionType !== 'PAGO_MOVIL' && (
