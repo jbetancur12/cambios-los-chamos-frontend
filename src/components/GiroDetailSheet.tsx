@@ -943,7 +943,7 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
                         variant="destructive"
                         className="flex-1"
                         onClick={handleReturnGiro}
-                        disabled={!returnReason}
+                        disabled={!returnReason || returnGiroMutation.isPending}
                       >
                         Confirmar
                       </Button>

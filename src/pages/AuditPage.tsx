@@ -19,6 +19,25 @@ interface AuditResult {
     calculatedSurplus: number
     difference: number
     accumulatedDebt: number
+    aggregated?: {
+      totalRecharges: number
+      totalProfits: number
+      totalDiscounts: number
+      totalRefunds: number
+      calculatedTotal: number
+      realTotalStored: number
+    }
+    dailyStats?: {
+      targetDate: string
+      initialBalance: number
+      transactionsCount: number
+      dayTotalRecharges: number
+      dayTotalProfits: number
+      dayTotalDiscounts: number
+      dayTotalRefunds: number
+      dayNetChange: number
+      finalBalance: number
+    }
     firstTransaction?: { amount: number; date: string; type: string }
     lastTransaction?: {
       storedAvailable: number
@@ -65,13 +84,8 @@ export function AuditPage() {
     }
   }
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('es-CO', {
-      style: 'currency',
-      currency: 'COP',
-      minimumFractionDigits: 0,
-    }).format(amount)
-  }
+  const fmt = (amount: number) =>
+    new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(amount)
 
   const renderSingleResult = (res: AuditResult) => (
     <div key={res.userId} className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -104,11 +118,11 @@ export function AuditPage() {
               <div className="space-y-1">
                 <div className="flex justify-between">
                   <span>Disponible:</span>
-                  <span className="font-mono font-bold">{formatCurrency(res.details.storedAvailable)}</span>
+                  <span className="font-mono font-bold">{fmt(res.details.storedAvailable)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>A Favor:</span>
-                  <span className="font-mono font-bold">{formatCurrency(res.details.storedSurplus)}</span>
+                  <span className="font-mono font-bold">{fmt(res.details.storedSurplus)}</span>
                 </div>
               </div>
             </div>
@@ -118,15 +132,11 @@ export function AuditPage() {
               <div className="space-y-1">
                 <div className="flex justify-between">
                   <span>Disponible:</span>
-                  <span className="font-mono font-bold text-blue-700">
-                    {formatCurrency(res.details.calculatedAvailable)}
-                  </span>
+                  <span className="font-mono font-bold text-blue-700">{fmt(res.details.calculatedAvailable)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>A Favor:</span>
-                  <span className="font-mono font-bold text-blue-700">
-                    {formatCurrency(res.details.calculatedSurplus)}
-                  </span>
+                  <span className="font-mono font-bold text-blue-700">{fmt(res.details.calculatedSurplus)}</span>
                 </div>
               </div>
             </div>
@@ -134,46 +144,123 @@ export function AuditPage() {
             <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border">
               <p className="text-sm text-muted-foreground mb-1">Diferencia Total</p>
               <p className={`text-3xl font-bold ${res.details.difference === 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {res.details.difference === 0 ? 'Exacto' : formatCurrency(res.details.difference)}
+                {res.details.difference === 0 ? 'Exacto' : fmt(res.details.difference)}
               </p>
             </div>
+          </div>
 
-            {/* Analysis Column */}
-            <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t">
-              {res.details.firstTransaction && (
-                <div className="p-4 rounded-lg bg-orange-50 border border-orange-100">
-                  <p className="text-sm font-semibold text-orange-800 mb-2">Primera Transacción (Inicio)</p>
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-orange-700">{res.details.firstTransaction.type}</span>
-                    <span className="font-mono font-bold">{formatCurrency(res.details.firstTransaction.amount)}</span>
-                  </div>
-                  <p className="text-xs text-orange-600/70 mt-1">
-                    {new Date(res.details.firstTransaction.date).toLocaleString()}
+          {/* Daily Stats Table (when date is set) */}
+          {res.details.dailyStats && (
+            <div className="mt-6 p-4 bg-slate-50 dark:bg-slate-900 rounded-lg border">
+              <p className="text-sm font-semibold mb-3">Resumen del Día: {res.details.dailyStats.targetDate}</p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Balance Inicial:</span>
+                  <p className="font-mono font-bold">{fmt(res.details.dailyStats.initialBalance)}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Abonos:</span>
+                  <p className="font-mono font-bold text-green-600">+{fmt(res.details.dailyStats.dayTotalRecharges)}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Reembolsos:</span>
+                  <p className="font-mono font-bold text-green-600">+{fmt(res.details.dailyStats.dayTotalRefunds)}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Giros:</span>
+                  <p className="font-mono font-bold text-red-600">-{fmt(res.details.dailyStats.dayTotalDiscounts)}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Ganancias:</span>
+                  <p className="font-mono font-bold text-green-600">+{fmt(res.details.dailyStats.dayTotalProfits)}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Mov. Neto:</span>
+                  <p
+                    className={`font-mono font-bold ${res.details.dailyStats.dayNetChange >= 0 ? 'text-green-600' : 'text-red-600'}`}
+                  >
+                    {res.details.dailyStats.dayNetChange >= 0 ? '+' : ''}
+                    {fmt(res.details.dailyStats.dayNetChange)}
                   </p>
                 </div>
-              )}
-
-              <div className="p-4 rounded-lg bg-purple-50 border border-purple-100">
-                <p className="text-sm font-semibold text-purple-800 mb-2">Estado Final (Última Tx)</p>
-                {res.details.lastTransaction ? (
-                  <div className="space-y-1 text-sm">
-                    <div className="flex justify-between">
-                      <span>Disponible (Tx):</span>
-                      <span className="font-mono font-bold text-purple-700">
-                        {formatCurrency(res.details.lastTransaction.storedAvailable)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Deuda Acumulada Calc:</span>
-                      <span className="font-mono font-bold text-red-600">
-                        {formatCurrency(res.details.accumulatedDebt)}
-                      </span>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">Sin transacciones</p>
-                )}
+                <div>
+                  <span className="text-muted-foreground">Balance Final Calc:</span>
+                  <p className="font-mono font-bold">{fmt(res.details.dailyStats.finalBalance)}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Transacciones:</span>
+                  <p className="font-mono font-bold">{res.details.dailyStats.transactionsCount}</p>
+                </div>
               </div>
+            </div>
+          )}
+
+          {/* Aggregated Stats (full history) */}
+          {res.details.aggregated && !res.details.dailyStats && (
+            <div className="mt-6 p-4 bg-slate-50 dark:bg-slate-900 rounded-lg border">
+              <p className="text-sm font-semibold mb-3">Totales Globales (Histórico Completo)</p>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Abonos:</span>
+                  <p className="font-mono font-bold">{fmt(res.details.aggregated.totalRecharges)}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Reembolsos:</span>
+                  <p className="font-mono font-bold">{fmt(res.details.aggregated.totalRefunds)}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Giros:</span>
+                  <p className="font-mono font-bold text-red-600">{fmt(res.details.aggregated.totalDiscounts)}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Ganancias:</span>
+                  <p className="font-mono font-bold">{fmt(res.details.aggregated.totalProfits)}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Neto Calc:</span>
+                  <p className="font-mono font-bold">{fmt(res.details.aggregated.calculatedTotal)}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Real BD:</span>
+                  <p className="font-mono font-bold">{fmt(res.details.aggregated.realTotalStored)}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Analysis Column */}
+          <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t mt-6">
+            {res.details.firstTransaction && (
+              <div className="p-4 rounded-lg bg-orange-50 border border-orange-100">
+                <p className="text-sm font-semibold text-orange-800 mb-2">Primera Transacción (Inicio)</p>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-orange-700">{res.details.firstTransaction.type}</span>
+                  <span className="font-mono font-bold">{fmt(res.details.firstTransaction.amount)}</span>
+                </div>
+                <p className="text-xs text-orange-600/70 mt-1">
+                  {new Date(res.details.firstTransaction.date).toLocaleString()}
+                </p>
+              </div>
+            )}
+
+            <div className="p-4 rounded-lg bg-purple-50 border border-purple-100">
+              <p className="text-sm font-semibold text-purple-800 mb-2">Estado Final (Última Tx)</p>
+              {res.details.lastTransaction ? (
+                <div className="space-y-1 text-sm">
+                  <div className="flex justify-between">
+                    <span>Disponible (Tx):</span>
+                    <span className="font-mono font-bold text-purple-700">
+                      {fmt(res.details.lastTransaction.storedAvailable)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Deuda Acumulada Calc:</span>
+                    <span className="font-mono font-bold text-red-600">{fmt(res.details.accumulatedDebt)}</span>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">Sin transacciones</p>
+              )}
             </div>
           </div>
         </CardContent>
@@ -182,18 +269,37 @@ export function AuditPage() {
       {/* Trace Log */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Traza de Transacciones (Replay)</CardTitle>
+          <CardTitle className="text-lg">Traza de Transacciones</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="bg-black/90 p-4 rounded-lg overflow-x-auto font-mono text-xs md:text-sm text-green-400 max-h-[500px] overflow-y-auto">
-            {res.trace.map((line, i) => (
-              <div
-                key={i}
-                className="whitespace-nowrap pb-1 border-b border-white/5 last:border-0 hover:bg-white/5 px-2"
-              >
-                {line}
-              </div>
-            ))}
+          <div className="bg-black/90 p-4 rounded-lg overflow-x-auto font-mono text-xs md:text-sm text-green-400 max-h-[600px] overflow-y-auto">
+            {res.trace.map((line, i) => {
+              const isHeader =
+                line.startsWith('===') ||
+                line.startsWith('---') ||
+                line.startsWith('HORA') ||
+                line.startsWith('---------')
+              const isError = line.includes('INCONSISTENTE') || line.includes('❌')
+              const isSuccess = line.includes('CONSISTENTE') && !isError
+              const isSummary = line.startsWith('=== RESUMEN ===')
+
+              let color = 'text-green-400'
+              if (isHeader) color = 'text-cyan-400'
+              if (isError) color = 'text-red-400'
+              if (isSuccess) color = 'text-green-300'
+              if (isSummary) color = 'text-yellow-400 font-bold'
+              if (line.startsWith('Balance inicial')) color = 'text-blue-300'
+              if (line.includes('INICIO DEL DÍA')) color = 'text-blue-400 font-bold'
+
+              return (
+                <div
+                  key={i}
+                  className={`whitespace-pre pb-0.5 border-b border-white/5 last:border-0 hover:bg-white/5 px-2 ${color}`}
+                >
+                  {line}
+                </div>
+              )
+            })}
           </div>
         </CardContent>
       </Card>
@@ -205,11 +311,11 @@ export function AuditPage() {
       <div>
         <h1 className="text-3xl font-bold flex items-center gap-2">
           <AlertTriangle className="h-8 w-8 text-amber-500" />
-          Auditoría de Saldos (Oculta)
+          Auditoría de Saldos
         </h1>
         <p className="text-muted-foreground mt-2">
-          Esta herramienta recalcula el historial completo de transacciones para verificar la integridad matemática de
-          los saldos.
+          Revisa todos los giros del día (incluyendo cancelados y reembolsos) y verifica que el saldo inicial +
+          movimientos = saldo final.
         </p>
       </div>
 
@@ -277,14 +383,14 @@ export function AuditPage() {
                   <p className="font-bold text-red-800">
                     {r.fullName} ({r.email})
                   </p>
-                  <p className="text-sm text-red-600">Diferencia: {formatCurrency(r.details.difference)}</p>
+                  <p className="text-sm text-red-600">Diferencia: {fmt(r.details.difference)}</p>
                 </div>
                 <Button
                   variant="destructive"
                   size="sm"
                   onClick={() => {
                     setEmail(r.email)
-                    setResult(r) // Switch to detail view
+                    setResult(r)
                     window.scrollTo({ top: 0, behavior: 'smooth' })
                   }}
                 >

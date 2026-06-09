@@ -14,6 +14,7 @@ export function MinoristaSimpleTransactionTable({
   typeFilter = 'ALL',
   creditLimit,
 }: MinoristaSimpleTransactionTableProps) {
+  console.log('Transactions received in MinoristaSimpleTransactionTable:', transactions)
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-CO', {
       style: 'currency',
@@ -156,7 +157,7 @@ export function MinoristaSimpleTransactionTable({
 
               // Recalculate isPositive based on displayAmount for color
               const isGreen = displayAmount >= 0 || transaction.type === 'REFUND'
-              const impliedDebt = Math.max(0, creditLimit - transaction.currentBalance)
+              const impliedDebt = transaction.accumulatedDebt ?? Math.max(0, creditLimit - transaction.currentBalance)
               const netBalance = (transaction.currentBalanceInFavor || 0) - impliedDebt
               const isNetPositive = netBalance >= 0
 
@@ -205,7 +206,7 @@ export function MinoristaSimpleTransactionTable({
           }
           const isGreen = displayAmount >= 0
 
-          const impliedDebt = Math.max(0, creditLimit - transaction.currentBalance)
+          const impliedDebt = transaction.accumulatedDebt ?? Math.max(0, creditLimit - transaction.currentBalance)
           const netBalance = (transaction.currentBalanceInFavor || 0) - impliedDebt
           const isNetPositive = netBalance >= 0
 
