@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import path from 'path'
 import { execSync } from 'child_process'
+import fs from 'fs'
 
 function getGitInfo(dir: string) {
   try {
@@ -10,6 +11,14 @@ function getGitInfo(dir: string) {
     const commitDate = execSync('git log -1 --format=%ai', { cwd: dir }).toString().trim()
     return { commitHash, commitDate }
   } catch {
+    try {
+      const hashFile = path.join(dir, '.commithash')
+      if (fs.existsSync(hashFile)) {
+        const content = fs.readFileSync(hashFile, 'utf-8').trim()
+        const parts = content.split('\n')
+        return { commitHash: parts[0] || 'unknown', commitDate: parts[1] || new Date().toISOString() }
+      }
+    } catch {}
     return { commitHash: 'unknown', commitDate: new Date().toISOString() }
   }
 }

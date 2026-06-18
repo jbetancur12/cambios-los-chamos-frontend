@@ -195,9 +195,9 @@ export function POSSheet({ open, onOpenChange }: { open: boolean; onOpenChange: 
           </SheetTitle>
         </SheetHeader>
 
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col">
           {/* Search Section */}
-          <div className="p-4 border-b bg-muted/20 space-y-2 relative">
+          <div className="p-4 border-b bg-muted/20 space-y-2 relative z-50">
             <Label>Buscar Producto</Label>
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -260,7 +260,7 @@ export function POSSheet({ open, onOpenChange }: { open: boolean; onOpenChange: 
           </div>
 
           {/* Cart List */}
-          <div className="flex-1 p-4 overflow-y-auto">
+          <div className="flex-1 p-4 overflow-y-auto min-h-0">
             {cart.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-muted-foreground py-12 opacity-50">
                 <ShoppingCart className="h-12 w-12 mb-4" />
