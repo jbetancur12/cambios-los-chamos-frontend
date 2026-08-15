@@ -13,6 +13,7 @@ import type {
   Paginated,
   Payment,
   PaymentMethod,
+  ClientStatement,
 } from '@/types/cobranzas'
 
 const BASE = '/cobranzas'
@@ -100,7 +101,12 @@ export const listClients = (params?: Record<string, unknown>) =>
 
 export const getClient = (id: string) =>
   api
-    .get<{ client: CobranzaClient; activeCredits: Credit[]; paymentHistory: Payment[] }>(`${BASE}/clients/${id}`)
+    .get<{
+      client: CobranzaClient
+      activeCredits: Credit[]
+      paymentHistory: Payment[]
+      statement: ClientStatement | null
+    }>(`${BASE}/clients/${id}`)
     .then((r) => r)
 
 export const createClient = (data: CobranzaClientInput) =>
@@ -256,6 +262,37 @@ export interface WaitingList {
 
 export const getWaitingList = () =>
   api.get<{ waitingList: WaitingList }>(`${BASE}/credits/waiting-list`).then((r) => r.waitingList)
+
+export interface TodayCollection {
+  creditId: string
+  client: string
+  identification: string
+  dueDate: string
+  amount: number
+  paidAmount: number
+  balance: number
+  daysLate: number
+  frequency: string
+}
+
+export const getTodayCollections = () =>
+  api.get<{ collections: TodayCollection[] }>(`${BASE}/collections/today`).then((r) => r.collections)
+
+export interface FollowUp {
+  id: string
+  note: string
+  createdAt: string
+  createdBy?: { id: string; fullName: string } | null
+}
+
+export const listFollowUps = (creditId: string) =>
+  api.get<{ followUps: FollowUp[] }>(`${BASE}/credits/${creditId}/follow-ups`).then((r) => r.followUps)
+
+export const addFollowUp = (creditId: string, note: string) =>
+  api.post<{ followUp: FollowUp }>(`${BASE}/credits/${creditId}/follow-ups`, { note }).then((r) => r.followUp)
+
+export const removeFollowUp = (creditId: string, followUpId: string) =>
+  api.delete<{ message: string }>(`${BASE}/credits/${creditId}/follow-ups/${followUpId}`)
 
 export const getCreditDetail = (id: string) => api.get<CreditDetail>(`${BASE}/credits/${id}`).then((r) => r)
 

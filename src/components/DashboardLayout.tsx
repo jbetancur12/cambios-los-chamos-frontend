@@ -20,6 +20,7 @@ import {
   Landmark,
   ChevronLeft,
   CalendarClock,
+  HandCoins,
 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/button'
@@ -88,6 +89,7 @@ const sideMenuItems: NavItem[] = [
 // Submenú del módulo Cobranzas (reemplaza el menú principal al navegar ahí)
 const cobranzasSubNav: NavItem[] = [
   { icon: Landmark, label: 'Panel', href: '/cobranzas', roles: ['SUPER_ADMIN'] },
+  { icon: HandCoins, label: 'Cobrar hoy', href: '/cobranzas/cobrar-hoy', roles: ['SUPER_ADMIN'] },
   { icon: Users, label: 'Clientes', href: '/cobranzas/clientes', roles: ['SUPER_ADMIN'] },
   { icon: FileText, label: 'Créditos', href: '/cobranzas/creditos', roles: ['SUPER_ADMIN'] },
   { icon: CalendarClock, label: 'Lista de espera', href: '/cobranzas/lista-espera', roles: ['SUPER_ADMIN'] },

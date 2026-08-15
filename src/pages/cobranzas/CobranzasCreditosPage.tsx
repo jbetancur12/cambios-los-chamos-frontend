@@ -44,12 +44,16 @@ import {
   registerPayment,
   listClients,
   listLoanFrequencies,
+  listFollowUps,
+  addFollowUp,
+  removeFollowUp,
   type CreateCreditInput,
   type RegisterPaymentInput,
 } from '@/services/cobranzasApi'
 import {
   formatMoney,
   formatDate,
+  formatDateTime,
   CREDIT_STATUS_LABELS,
   CREDIT_STATUS_VARIANTS,
   FREQUENCY_LABELS,
@@ -151,6 +155,14 @@ export function CobranzasCreditosPage() {
     enabled: !!detailId,
   })
 
+  const { data: followUps = [] } = useModuleQuery({
+    queryKey: ['cobranza-follow-ups', detailId],
+    queryFn: () => (detailId ? listFollowUps(detailId) : []),
+    enabled: !!detailId,
+  })
+
+  const [followUpNote, setFollowUpNote] = useState('')
+
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ['cobranza-credits'] })
     queryClient.invalidateQueries({ queryKey: ['cobranza-credit'] })
@@ -225,6 +237,26 @@ export function CobranzasCreditosPage() {
       toast.success('Crédito actualizado')
       setEditCredit(null)
       invalidate()
+    },
+    onError: (e) => toast.error((e as Error).message),
+  })
+
+  const followUpMutation = useMutation({
+    mutationFn: ({ id, note }: { id: string; note: string }) => addFollowUp(id, note),
+    onSuccess: () => {
+      toast.success('Seguimiento guardado')
+      setFollowUpNote('')
+      queryClient.invalidateQueries({ queryKey: ['cobranza-follow-ups'] })
+    },
+    onError: (e) => toast.error((e as Error).message),
+  })
+
+  const removeFollowUpMutation = useMutation({
+    mutationFn: ({ creditId, followUpId }: { creditId: string; followUpId: string }) =>
+      removeFollowUp(creditId, followUpId),
+    onSuccess: () => {
+      toast.success('Seguimiento eliminado')
+      queryClient.invalidateQueries({ queryKey: ['cobranza-follow-ups'] })
     },
     onError: (e) => toast.error((e as Error).message),
   })
@@ -702,6 +734,59 @@ export function CobranzasCreditosPage() {
                 <p className="text-red-700">{detail.credit.rejectionReason}</p>
               </div>
             )}
+
+            <div>
+              <h3 className="font-semibold mb-2">Seguimiento de cobro</h3>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  if (detail && followUpNote.trim()) {
+                    followUpMutation.mutate({ id: detail.credit.id, note: followUpNote.trim() })
+                  }
+                }}
+                className="flex gap-2"
+              >
+                <Input
+                  placeholder="Registra una gestión (llamé, prometió pagar...)"
+                  value={followUpNote}
+                  onChange={(e) => setFollowUpNote(e.target.value)}
+                  className="flex-1"
+                />
+                <Button type="submit" size="sm" disabled={followUpMutation.isPending || !followUpNote.trim()}>
+                  <Loader2 className={cn('h-4 w-4 mr-1', !followUpMutation.isPending && 'hidden')} />
+                  Guardar
+                </Button>
+              </form>
+              <div className="mt-2 space-y-1.5">
+                {followUps.map((f) => (
+                  <div
+                    key={f.id}
+                    className="flex items-start justify-between gap-2 rounded-md border px-3 py-2 text-sm"
+                  >
+                    <div className="min-w-0">
+                      <p>{f.note}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatDateTime(f.createdAt)} {f.createdBy ? `· ${f.createdBy.fullName}` : ''}
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-red-500 shrink-0"
+                      onClick={() =>
+                        detail && removeFollowUpMutation.mutate({ creditId: detail.credit.id, followUpId: f.id })
+                      }
+                      title="Eliminar"
+                    >
+                      <XCircle className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+                {followUps.length === 0 && (
+                  <p className="text-sm text-muted-foreground">Sin seguimientos registrados</p>
+                )}
+              </div>
+            </div>
           </SheetBody>
         </SheetContent>
       </Sheet>

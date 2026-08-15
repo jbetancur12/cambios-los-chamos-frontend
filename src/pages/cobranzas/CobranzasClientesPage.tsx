@@ -341,6 +341,38 @@ export function CobranzasClientesPage() {
             </div>
 
             <div>
+              <h3 className="font-semibold mb-2">Estado de cuenta</h3>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="rounded-md border p-2 text-sm">
+                  <p className="text-xs text-muted-foreground">Deuda actual</p>
+                  <p className="font-semibold text-red-600">{formatMoney(detail?.statement?.totalDebt)}</p>
+                </div>
+                <div className="rounded-md border p-2 text-sm">
+                  <p className="text-xs text-muted-foreground">Total pagado</p>
+                  <p className="font-semibold text-green-600">{formatMoney(detail?.statement?.totalPaid)}</p>
+                </div>
+                <div className="rounded-md border p-2 text-sm">
+                  <p className="text-xs text-muted-foreground">Créditos saldados</p>
+                  <p className="font-semibold">{detail?.statement?.paidCreditsCount ?? 0}</p>
+                </div>
+                <div className="rounded-md border p-2 text-sm">
+                  <p className="text-xs text-muted-foreground">Próximas cuotas</p>
+                  <p className="font-semibold">{detail?.statement?.nextPayments.length ?? 0}</p>
+                </div>
+              </div>
+              {(detail?.statement?.nextPayments.length ?? 0) > 0 && (
+                <div className="mt-2 space-y-1.5">
+                  {detail?.statement?.nextPayments.slice(0, 5).map((np, i) => (
+                    <div key={i} className="flex items-center justify-between text-sm rounded-md border px-3 py-1.5">
+                      <span className="text-muted-foreground">Vence {formatDate(np.dueDate)}</span>
+                      <span className="font-medium">{formatMoney(np.amount)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div>
               <h3 className="font-semibold mb-2">Créditos activos</h3>
               <div className="space-y-2">
                 {detail?.activeCredits.map((c) => (

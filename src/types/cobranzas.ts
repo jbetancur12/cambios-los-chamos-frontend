@@ -161,6 +161,14 @@ export interface CreditDetail {
   stats: CreditDetailStats
 }
 
+export interface ClientStatement {
+  totalDebt: number
+  totalFinanced: number
+  totalPaid: number
+  paidCreditsCount: number
+  nextPayments: { creditId: string; dueDate: string; amount: number }[]
+}
+
 export interface Paginated<T> {
   items: T[]
   total: number
