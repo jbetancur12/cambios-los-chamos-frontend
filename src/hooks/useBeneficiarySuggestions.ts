@@ -60,6 +60,7 @@ export function useBeneficiarySuggestions() {
           bankId: beneficiary.bankId,
           accountNumber: beneficiary.accountNumber,
           executionType: beneficiary.executionType,
+          suggestionId: beneficiary.suggestionId,
         })
 
         // Invalidate the query to force refetch of updated suggestions

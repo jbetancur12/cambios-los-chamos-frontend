@@ -17,6 +17,7 @@ export interface CreateGiroInput {
     usd: number
     bcv: number
   }
+  skipBeneficiarySuggestionSave?: boolean
 }
 
 interface ExecuteGiroInput {

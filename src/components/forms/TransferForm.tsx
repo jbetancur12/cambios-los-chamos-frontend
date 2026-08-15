@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -45,20 +45,20 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
       if (success) {
         // Manually update local state to remove the suggestion immediately
         if (showCedulaSuggestions) {
-          setCedulaSuggestions(prev => prev.filter(s => s.suggestionId !== suggestionToDelete))
+          setCedulaSuggestions((prev) => prev.filter((s) => s.suggestionId !== suggestionToDelete))
         }
         // Name suggestions are handled by autocomplete, but we can't easily access its internal state
         // However, if we are filtering from a parent state (if we were), we would update it here.
         // For name search, since we use 'searchSuggestions' on change, we might need to trigger a re-search or just wait for react-query invalidation
-        // But for better UX, we can try to update 'nameSuggestions' if we have it locally? 
+        // But for better UX, we can try to update 'nameSuggestions' if we have it locally?
         // looking at code, 'nameSuggestions' is state.
-        setNameSuggestions(prev => prev.filter(s => s.suggestionId !== suggestionToDelete))
+        setNameSuggestions((prev) => prev.filter((s) => s.suggestionId !== suggestionToDelete))
 
         toast.success('Beneficiario eliminado')
       } else {
         toast.error('No se pudo eliminar el beneficiario')
       }
-    } catch (error) {
+    } catch {
       toast.error('Error al eliminar')
     } finally {
       setIsDeleting(false)
@@ -92,6 +92,33 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
   // Server-side search state for Cedula
   const [cedulaSuggestions, setCedulaSuggestions] = useState<BeneficiaryData[]>([])
   const [showCedulaSuggestions, setShowCedulaSuggestions] = useState(false)
+  const formRef = useRef<HTMLFormElement>(null)
+
+  // Close cedula suggestions dropdown when clicking outside or pressing Escape
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (formRef.current && !formRef.current.contains(event.target as Node)) {
+        setShowCedulaSuggestions(false)
+      }
+    }
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setShowCedulaSuggestions(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [])
+
+  // Selected suggestion + update-vs-new decision
+  const [selectedSuggestion, setSelectedSuggestion] = useState<BeneficiaryData | null>(null)
+  const [updateModalOpen, setUpdateModalOpen] = useState(false)
+  const [pendingUpdateAction, setPendingUpdateAction] = useState<boolean | null>(null)
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(async () => {
@@ -202,6 +229,8 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
     setCurrencyInput('COP')
     setUseCustomRate(false)
     setNameSuggestions([])
+    setSelectedSuggestion(null)
+    setPendingUpdateAction(null)
   }
 
   const handleNameChange = (value: string) => {
@@ -212,11 +241,12 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
   const handleSelectBeneficiaryFromName = (suggestion: BeneficiaryData) => {
     setBeneficiaryName(suggestion.name)
     setBeneficiaryId(suggestion.id)
-    setBeneficiaryId(suggestion.id)
     setBankId(suggestion.bankId)
     setAccountNumber(suggestion.accountNumber)
     if (suggestion.senderPhone) setSenderPhone(suggestion.senderPhone)
     setNameSuggestions([])
+    setSelectedSuggestion(suggestion)
+    setPendingUpdateAction(null)
   }
 
   const handleSelectBeneficiaryFromCedula = (suggestion: BeneficiaryData) => {
@@ -226,7 +256,32 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
     setAccountNumber(suggestion.accountNumber)
     if (suggestion.senderPhone) setSenderPhone(suggestion.senderPhone)
     setShowCedulaSuggestions(false)
+    setSelectedSuggestion(suggestion)
+    setPendingUpdateAction(null)
   }
+
+  const suggestionFieldsDiffer = (s: BeneficiaryData) => beneficiaryName !== s.name || beneficiaryId !== s.id
+
+  const changedFields = useMemo(() => {
+    if (!selectedSuggestion) return []
+    const bankName = (bankIdToFind: string) => banks.find((b) => b.id === bankIdToFind)?.name || bankIdToFind
+    const diffs: { label: string; old: string; new: string }[] = []
+    if (beneficiaryName !== selectedSuggestion.name)
+      diffs.push({ label: 'Nombre', old: selectedSuggestion.name, new: beneficiaryName })
+    if (beneficiaryId !== selectedSuggestion.id)
+      diffs.push({ label: 'Cédula', old: selectedSuggestion.id, new: beneficiaryId })
+    if ((phone || '') !== (selectedSuggestion.phone || ''))
+      diffs.push({ label: 'Teléfono', old: selectedSuggestion.phone || '—', new: phone || '—' })
+    if (bankId !== selectedSuggestion.bankId)
+      diffs.push({
+        label: 'Banco',
+        old: bankName(selectedSuggestion.bankId),
+        new: bankName(bankId),
+      })
+    if (accountNumber !== selectedSuggestion.accountNumber)
+      diffs.push({ label: 'Cuenta', old: selectedSuggestion.accountNumber, new: accountNumber })
+    return diffs
+  }, [selectedSuggestion, beneficiaryName, beneficiaryId, phone, bankId, accountNumber, banks])
 
   const handleCedulaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setBeneficiaryId(e.target.value)
@@ -235,7 +290,16 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    await doSubmit()
+  }
 
+  const handleUpdateModalConfirm = (update: boolean) => {
+    setPendingUpdateAction(update)
+    setUpdateModalOpen(false)
+    void doSubmit()
+  }
+
+  const doSubmit = async () => {
     if (!beneficiaryName || !beneficiaryId || !bankId || !accountNumber || !amountInput) {
       toast.error('Por favor complete todos los campos requeridos')
       return
@@ -244,6 +308,12 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
     const amount = parseFloat(amountInput)
     if (isNaN(amount) || amount <= 0) {
       toast.error('El monto debe ser un número positivo')
+      return
+    }
+
+    // If a suggestion was selected and a field changed, ask how to persist it
+    if (selectedSuggestion && suggestionFieldsDiffer(selectedSuggestion) && pendingUpdateAction === null) {
+      setUpdateModalOpen(true)
       return
     }
 
@@ -259,6 +329,8 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
         accountNumber,
         amountInput: amount,
         currencyInput,
+        // Si se decide actualizar una sugerencia existente, el backend no debe crear otra fila
+        skipBeneficiarySuggestionSave: pendingUpdateAction === true && selectedSuggestion ? true : undefined,
       }
 
       if ((isSuperAdmin || isAdmin) && useCustomRate) {
@@ -279,6 +351,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
       await createGiroMutation.mutateAsync(payload)
 
       // Save beneficiary suggestion for future use
+      const shouldUpdateSuggestion = pendingUpdateAction === true && selectedSuggestion
       addSuggestion({
         name: beneficiaryName,
         id: beneficiaryId,
@@ -287,6 +360,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
         bankId,
         accountNumber,
         executionType: 'TRANSFERENCIA',
+        suggestionId: shouldUpdateSuggestion ? selectedSuggestion?.suggestionId : undefined,
       })
 
       toast.success('Giro creado exitosamente')
@@ -294,7 +368,6 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
       if (isMinorista) {
         fetchMinoristaBalance()
       }
-      onSuccess()
       onSuccess()
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Error al crear giro'
@@ -307,11 +380,11 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
   const effectiveRate =
     useCustomRate && (isSuperAdmin || isAdmin)
       ? {
-        buyRate: parseFloat(customBuyRate) || currentRate?.buyRate || 0,
-        sellRate: parseFloat(customSellRate) || currentRate?.sellRate || 0,
-        bcv: parseFloat(customBcv) || currentRate?.bcv || 0,
-        usd: parseFloat(customUsd) || currentRate?.usd || 0,
-      }
+          buyRate: parseFloat(customBuyRate) || currentRate?.buyRate || 0,
+          sellRate: parseFloat(customSellRate) || currentRate?.sellRate || 0,
+          bcv: parseFloat(customBcv) || currentRate?.bcv || 0,
+          usd: parseFloat(customUsd) || currentRate?.usd || 0,
+        }
       : currentRate
 
   const calculateAmountBs = () => {
@@ -411,7 +484,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
   const amountBcv = effectiveRate && effectiveRate.bcv > 0 ? amountBs / effectiveRate.bcv : 0
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-2 w-full" autoComplete="off">
+    <form ref={formRef} onSubmit={handleSubmit} className="p-4 md:p-6 space-y-2 w-full" autoComplete="off">
       {/* Beneficiary Info */}
       <div className="space-y-2">
         <BeneficiaryAutocomplete
@@ -440,6 +513,10 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
             value={beneficiaryId}
             onChange={handleCedulaChange}
             onFocus={() => beneficiaryId && setShowCedulaSuggestions(true)}
+            onBlur={() => {
+              // Cerrar dropdown al salir del input (delay para permitir click en sugerencia)
+              setTimeout(() => setShowCedulaSuggestions(false), 150)
+            }}
             placeholder="Cédula del Beneficiario"
             required
             className="text-base md:text-md h-10 md:h-12 font-medium placeholder:text-muted-foreground md:placeholder:text-transparent"
@@ -776,6 +853,67 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
           )}
         </Button>
       </div>
+      {updateModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+          onClick={() => setUpdateModalOpen(false)}
+        >
+          <div
+            className="bg-background rounded-lg shadow-xl w-full max-w-md overflow-hidden max-h-[90dvh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-6 py-4 border-b">
+              <h2 className="text-lg font-semibold">Actualizar beneficiario</h2>
+            </div>
+            <div className="px-6 py-4 text-sm text-muted-foreground overflow-y-auto">
+              <p>
+                Modificaste datos de una sugerencia guardada{' '}
+                <span className="font-semibold text-foreground">{selectedSuggestion?.name}</span>. ¿Quieres actualizar
+                la sugerencia existente o guardar estos datos como un nuevo beneficiario?
+              </p>
+              {changedFields.length > 0 && (
+                <div className="mt-3 space-y-2 rounded-lg border p-3 text-xs">
+                  {changedFields.map((d) => (
+                    <div key={d.label} className="flex items-center justify-between gap-2">
+                      <span className="font-medium text-muted-foreground shrink-0">{d.label}</span>
+                      <span className="flex items-center gap-1 min-w-0 text-right">
+                        <span className="line-through text-muted-foreground truncate">{d.old}</span>
+                        <span className="text-muted-foreground shrink-0">→</span>
+                        <span className="font-semibold text-foreground truncate">{d.new}</span>
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="flex flex-col-reverse gap-2 px-6 py-4 border-t bg-muted/10 sm:flex-row sm:items-center sm:justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full sm:w-auto"
+                onClick={() => setUpdateModalOpen(false)}
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full sm:w-auto"
+                onClick={() => handleUpdateModalConfirm(false)}
+              >
+                Guardar como nueva
+              </Button>
+              <Button
+                type="button"
+                className="w-full sm:w-auto bg-[linear-gradient(to_right,#136BBC,#274565)] hover:opacity-90 transition-opacity"
+                onClick={() => handleUpdateModalConfirm(true)}
+              >
+                Actualizar
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
       <DeleteConfirmationModal
         open={deleteModalOpen}
         onOpenChange={setDeleteModalOpen}
