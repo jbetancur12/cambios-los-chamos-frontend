@@ -57,6 +57,29 @@ export const getFinancialSummary = () =>
     }>(`${BASE}/dashboard/financial-summary`)
     .then((r) => r.summary)
 
+export interface PortfolioReport {
+  counts: Record<string, number>
+  totalFinanced: number
+  outstanding: number
+  overdueAmount: number
+  morosos: {
+    creditId: string
+    client: string
+    identification: string
+    amount: number
+    balance: number
+    daysOverdue: number
+    severity: 'none' | 'light' | 'moderate' | 'critical'
+    overdueAmount: number
+    frequency: string
+    startDate: string
+  }[]
+  byFrequency: { frequency: string; count: number; outstanding: number }[]
+}
+
+export const getPortfolioReport = () =>
+  api.get<{ report: PortfolioReport }>(`${BASE}/dashboard/portfolio-report`).then((r) => r.report)
+
 // ------------------ Clientes ------------------
 export interface CobranzaClientInput {
   name: string
@@ -212,6 +235,9 @@ export interface CreateCreditInput {
 export const listCredits = (params?: Record<string, unknown>) =>
   api.get<Paginated<Credit>>(`${BASE}/credits`, { params }).then((r) => r)
 
+export const exportCredits = (params?: Record<string, unknown>) =>
+  api.get<Paginated<Credit>>(`${BASE}/credits`, { params: { ...params, limit: 10000 } }).then((r) => r.items)
+
 export const getCreditCounts = () =>
   api.get<{ counts: Record<CreditStatus, number> }>(`${BASE}/credits/counts`).then((r) => r.counts)
 
@@ -266,6 +292,11 @@ export const getTodayPaymentSummary = () =>
 
 export const registerPayment = (data: RegisterPaymentInput) =>
   api.post<{ payment: Payment }>(`${BASE}/payments`, data).then((r) => r.payment)
+
+export const getPaymentReceipt = (id: string) =>
+  api
+    .get<{ payment: Payment; receiptNumber: string; businessName: string }>(`${BASE}/payments/${id}/receipt`)
+    .then((r) => r)
 
 export const cancelPayment = (id: string) => api.delete<{ message: string }>(`${BASE}/payments/${id}`)
 

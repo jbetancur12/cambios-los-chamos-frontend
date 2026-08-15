@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useModuleQuery } from '@/hooks/useModuleQuery'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -102,7 +103,7 @@ function InterestRatesTab() {
   const [actingId, setActingId] = useState<string | null>(null)
   const [form, setForm] = useState<InterestRateInput>({ name: '', rate: 0 })
 
-  const { data: rates = [], isLoading } = useQuery({
+  const { data: rates = [], isLoading } = useModuleQuery({
     queryKey: ['cobranza-interest-rates'],
     queryFn: () => listInterestRates(),
   })
@@ -292,7 +293,7 @@ function FrequenciesTab() {
   const [actingId, setActingId] = useState<string | null>(null)
   const [form, setForm] = useState<LoanFrequencyInput>({})
 
-  const { data: frequencies = [], isLoading } = useQuery({
+  const { data: frequencies = [], isLoading } = useModuleQuery({
     queryKey: ['cobranza-frequencies'],
     queryFn: () => listLoanFrequencies(false),
   })

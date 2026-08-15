@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useModuleQuery } from '@/hooks/useModuleQuery'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -31,12 +32,12 @@ export function CobranzasRutasPage() {
   const [selectedClients, setSelectedClients] = useState<string[]>([])
   const [form, setForm] = useState<CobranzaRouteInput>({ name: '', description: '', cobradorId: user?.id ?? '' })
 
-  const { data: routes = [], isLoading } = useQuery({
+  const { data: routes = [], isLoading } = useModuleQuery({
     queryKey: ['cobranza-routes'],
     queryFn: listRoutes,
   })
 
-  const { data: availableClients = [] } = useQuery({
+  const { data: availableClients = [] } = useModuleQuery({
     queryKey: ['cobranza-available-clients'],
     queryFn: getAvailableClients,
   })

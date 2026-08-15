@@ -1,28 +1,31 @@
 import { useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useModuleQuery } from '@/hooks/useModuleQuery'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Loader2, Search, Ban } from 'lucide-react'
+import { Loader2, Search, Ban, Printer } from 'lucide-react'
 import { toast } from 'sonner'
 import { DeleteConfirmationModal } from '@/components/ui/DeleteConfirmationModal'
 import { ActionButton } from '@/components/ui/ActionButton'
+import { ReceiptModal } from '@/components/cobranzas/ReceiptModal'
 import { listPayments, getTodayPaymentSummary, cancelPayment } from '@/services/cobranzasApi'
-import { formatMoney, formatDateTime, PAYMENT_METHOD_LABELS } from '@/lib/cobranzasUtils'
+import { formatMoney, formatDateTime, PAYMENT_METHOD_LABELS, PAYMENT_STATUS_LABELS } from '@/lib/cobranzasUtils'
 
 export function CobranzasPagosPage() {
   const queryClient = useQueryClient()
   const [search, setSearch] = useState('')
   const [cancelTarget, setCancelTarget] = useState<string | null>(null)
+  const [receiptPaymentId, setReceiptPaymentId] = useState<string | null>(null)
   const [method, setMethod] = useState<'all' | 'cash' | 'transfer' | 'card' | 'mobile_payment'>('all')
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading } = useModuleQuery({
     queryKey: ['cobranza-payments', search, method],
     queryFn: () => listPayments({ paymentMethod: method === 'all' ? undefined : method, limit: 100 }),
   })
 
-  const { data: todaySummary } = useQuery({
+  const { data: todaySummary } = useModuleQuery({
     queryKey: ['cobranza-today-summary'],
     queryFn: getTodayPaymentSummary,
   })
@@ -34,6 +37,9 @@ export function CobranzasPagosPage() {
       queryClient.invalidateQueries({ queryKey: ['cobranza-payments'] })
       queryClient.invalidateQueries({ queryKey: ['cobranza-today-summary'] })
       queryClient.invalidateQueries({ queryKey: ['cobranza-credit'] })
+      queryClient.invalidateQueries({ queryKey: ['cobranza-stats'] })
+      queryClient.invalidateQueries({ queryKey: ['cobranza-financial'] })
+      queryClient.invalidateQueries({ queryKey: ['cobranzas-portfolio-report'] })
     },
     onError: (e) => toast.error((e as Error).message),
   })
@@ -67,8 +73,8 @@ export function CobranzasPagosPage() {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <Select value={method} onValueChange={(v) => setMethod(v as typeof method)}>
-          <SelectTrigger className="w-[160px]">
+        <Select value={method} onValueChange={(v) => setMethod(v as typeof method)} className="w-[160px]">
+          <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -120,18 +126,21 @@ export function CobranzasPagosPage() {
                                 : 'bg-yellow-100 text-yellow-800'
                           }
                         >
-                          {p.status}
+                          {PAYMENT_STATUS_LABELS[p.status] ?? p.status}
                         </Badge>
                       </td>
                       <td className="py-2 pr-3">
-                        {p.status === 'completed' && (
-                          <ActionButton
-                            icon={Ban}
-                            tone="danger"
-                            onClick={() => setCancelTarget(p.id)}
-                            title="Cancelar pago"
-                          />
-                        )}
+                        <div className="flex items-center gap-0.5">
+                          <ActionButton icon={Printer} onClick={() => setReceiptPaymentId(p.id)} title="Ver recibo" />
+                          {p.status === 'completed' && (
+                            <ActionButton
+                              icon={Ban}
+                              tone="danger"
+                              onClick={() => setCancelTarget(p.id)}
+                              title="Cancelar pago"
+                            />
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -160,6 +169,8 @@ export function CobranzasPagosPage() {
           setCancelTarget(null)
         }}
       />
+
+      <ReceiptModal paymentId={receiptPaymentId} onClose={() => setReceiptPaymentId(null)} />
     </div>
   )
 }

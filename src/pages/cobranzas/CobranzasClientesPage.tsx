@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useModuleQuery } from '@/hooks/useModuleQuery'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -46,17 +47,17 @@ export function CobranzasClientesPage() {
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
   const [form, setForm] = useState<CobranzaClientInput>(emptyForm)
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading } = useModuleQuery({
     queryKey: ['cobranza-clients', search],
     queryFn: () => listClients({ search: search || undefined, limit: 100 }),
   })
 
-  const { data: categories } = useQuery({
+  const { data: categories } = useModuleQuery({
     queryKey: ['cobranza-categories'],
     queryFn: () => listCategories(),
   })
 
-  const { data: detail } = useQuery({
+  const { data: detail } = useModuleQuery({
     queryKey: ['cobranza-client', detailId],
     queryFn: () => (detailId ? getClient(detailId) : null),
     enabled: !!detailId,
@@ -65,6 +66,8 @@ export function CobranzasClientesPage() {
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ['cobranza-clients'] })
     queryClient.invalidateQueries({ queryKey: ['cobranza-client'] })
+    queryClient.invalidateQueries({ queryKey: ['cobranza-credit-clients'] })
+    queryClient.invalidateQueries({ queryKey: ['cobranza-stats'] })
   }
 
   const createMutation = useMutation({

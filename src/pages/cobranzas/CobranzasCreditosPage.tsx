@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useEffect, useMemo, useState } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useModuleQuery } from '@/hooks/useModuleQuery'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -20,14 +21,18 @@ import {
   CalendarDays,
   HandCoins,
   Flag,
+  FileDown,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { CurrencyInput } from '@/components/CurrencyInput'
 import { PromptDialog } from '@/components/ui/PromptDialog'
 import { ActionButton } from '@/components/ui/ActionButton'
+import { ReceiptModal } from '@/components/cobranzas/ReceiptModal'
+import { ClientPicker } from '@/components/cobranzas/ClientPicker'
 import {
   listCredits,
+  exportCredits,
   getCreditDetail,
   createCredit,
   approveCredit,
@@ -49,6 +54,7 @@ import {
   PERIOD_DAYS,
   SCHEDULE_STATUS_LABELS,
   PAYMENT_METHOD_LABELS,
+  downloadCsv,
 } from '@/lib/cobranzasUtils'
 import type { Credit, CreditStatus } from '@/types/cobranzas'
 
@@ -70,15 +76,17 @@ export function CobranzasCreditosPage() {
   const [formOpen, setFormOpen] = useState(false)
   const [detailId, setDetailId] = useState<string | null>(null)
   const [payCredit, setPayCredit] = useState<Credit | null>(null)
+  const [receiptPaymentId, setReceiptPaymentId] = useState<string | null>(null)
   const [form, setForm] = useState<CreateCreditInput>(emptyForm)
   const [submitAttempted, setSubmitAttempted] = useState(false)
+  const [exporting, setExporting] = useState(false)
   const [approveOpen, setApproveOpen] = useState(false)
   const [rejectOpen, setRejectOpen] = useState(false)
   const [rescheduleOpen, setRescheduleOpen] = useState(false)
   const [rescheduleDate, setRescheduleDate] = useState(() => new Date().toISOString().slice(0, 10))
   const [deliverOpen, setDeliverOpen] = useState(false)
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading } = useModuleQuery({
     queryKey: ['cobranza-credits', statusFilter, search],
     queryFn: () =>
       listCredits({
@@ -88,12 +96,24 @@ export function CobranzasCreditosPage() {
       }),
   })
 
-  const { data: clients = [] } = useQuery({
+  // Clientes más frecuentes (los que más créditos tienen en el listado reciente)
+  const frequentClientIds = useMemo(() => {
+    const counts = new Map<string, number>()
+    for (const c of data?.items ?? []) {
+      counts.set(c.client.id, (counts.get(c.client.id) ?? 0) + 1)
+    }
+    return Array.from(counts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([id]) => id)
+  }, [data])
+
+  const { data: clients = [] } = useModuleQuery({
     queryKey: ['cobranza-credit-clients'],
     queryFn: () => listClients({ activeOnly: true, limit: 1000 }).then((r) => r.items),
   })
 
-  const { data: frequencies = [] } = useQuery({
+  const { data: frequencies = [] } = useModuleQuery({
     queryKey: ['cobranza-frequencies'],
     queryFn: () => listLoanFrequencies(),
   })
@@ -122,7 +142,7 @@ export function CobranzasCreditosPage() {
     }))
   }, [form.frequency, form.totalInstallments, form.startDate, selectedFreq?.periodDays])
 
-  const { data: detail } = useQuery({
+  const { data: detail } = useModuleQuery({
     queryKey: ['cobranza-credit', detailId],
     queryFn: () => (detailId ? getCreditDetail(detailId) : null),
     enabled: !!detailId,
@@ -131,9 +151,13 @@ export function CobranzasCreditosPage() {
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ['cobranza-credits'] })
     queryClient.invalidateQueries({ queryKey: ['cobranza-credit'] })
+    queryClient.invalidateQueries({ queryKey: ['cobranza-client'] })
+    queryClient.invalidateQueries({ queryKey: ['cobranza-payments'] })
+    queryClient.invalidateQueries({ queryKey: ['cobranza-today-summary'] })
     queryClient.invalidateQueries({ queryKey: ['cobranza-stats'] })
     queryClient.invalidateQueries({ queryKey: ['cobranza-financial'] })
     queryClient.invalidateQueries({ queryKey: ['cobranza-activity'] })
+    queryClient.invalidateQueries({ queryKey: ['cobranzas-portfolio-report'] })
   }
 
   const createMutation = useMutation({
@@ -183,9 +207,10 @@ export function CobranzasCreditosPage() {
   })
   const paymentMutation = useMutation({
     mutationFn: registerPayment,
-    onSuccess: () => {
+    onSuccess: (payment) => {
       toast.success('Pago registrado')
       setPayCredit(null)
+      setReceiptPaymentId(payment.id)
       invalidate()
     },
     onError: (e) => toast.error((e as Error).message),
@@ -209,6 +234,73 @@ export function CobranzasCreditosPage() {
 
   const set = (key: keyof CreateCreditInput, value: unknown) => setForm((f) => ({ ...f, [key]: value }))
 
+  const handleExport = async () => {
+    setExporting(true)
+    try {
+      const items = await exportCredits({
+        status: statusFilter === 'all' ? undefined : statusFilter,
+        search: search || undefined,
+      })
+
+      const headers = [
+        'Cliente',
+        'Cédula',
+        'Teléfono',
+        'Frecuencia',
+        'Estado',
+        'Monto',
+        'Total con interés',
+        'Interés total',
+        'Cuota',
+        'N° cuotas',
+        'Cuotas pagadas',
+        'Cuotas pendientes',
+        'Total pagado',
+        'Saldo pendiente',
+        'Interés cobrado',
+        'Interés por cobrar',
+      ]
+
+      const rows = items.map((c) => {
+        const financed = Number(c.amount) - Number(c.downPayment ?? 0)
+        const totalAmount = Number(c.totalAmount ?? 0)
+        const totalInterest = Math.max(0, totalAmount - financed)
+        const installments = Number(c.totalInstallments ?? 0)
+        const paid = Number(c.paidInstallmentsCount ?? 0)
+        const ratio = installments > 0 ? paid / installments : 0
+        const interestPaid = totalInterest * ratio
+        const interestPending = totalInterest - interestPaid
+
+        return [
+          c.client.name,
+          c.client.identification,
+          c.client.phone ?? '',
+          FREQUENCY_LABELS[c.frequency] ?? c.frequency,
+          CREDIT_STATUS_LABELS[c.status],
+          Number(c.amount),
+          totalAmount,
+          totalInterest,
+          Number(c.installmentAmount ?? 0),
+          installments,
+          paid,
+          Math.max(0, installments - paid),
+          Number(c.totalPaid ?? 0),
+          Number(c.balance),
+          interestPaid,
+          interestPending,
+        ]
+      })
+
+      const label = statusFilter === 'all' ? 'todos' : CREDIT_STATUS_LABELS[statusFilter]
+      downloadCsv(`creditos-${label}-${new Date().toISOString().slice(0, 10)}.csv`, headers, rows)
+      toast.success(`${items.length} créditos exportados`)
+    } catch (e) {
+      toast.error((e as Error).message || 'Error al exportar')
+    } finally {
+      setExporting(false)
+    }
+  }
+
   return (
     <div className="container mx-auto p-4 space-y-4">
       <div className="flex items-center justify-between">
@@ -216,15 +308,21 @@ export function CobranzasCreditosPage() {
           <h1 className="text-2xl font-bold">Créditos</h1>
           <p className="text-sm text-muted-foreground">Total: {data?.total ?? 0}</p>
         </div>
-        <Button
-          onClick={() => {
-            setForm({ ...emptyForm, startDate: new Date().toISOString().slice(0, 10) })
-            setSubmitAttempted(false)
-            setFormOpen(true)
-          }}
-        >
-          <Plus className="h-4 w-4 mr-1" /> Nuevo crédito
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={handleExport} disabled={exporting}>
+            {exporting ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <FileDown className="h-4 w-4 mr-1" />}
+            Exportar
+          </Button>
+          <Button
+            onClick={() => {
+              setForm({ ...emptyForm, startDate: new Date().toISOString().slice(0, 10) })
+              setSubmitAttempted(false)
+              setFormOpen(true)
+            }}
+          >
+            <Plus className="h-4 w-4 mr-1" /> Nuevo crédito
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-col md:flex-row md:items-center gap-3">
@@ -340,20 +438,13 @@ export function CobranzasCreditosPage() {
             <form onSubmit={handleSubmit} id="credit-form" className="space-y-4">
               <div className="space-y-1.5">
                 <Label>Cliente {submitAttempted && !form.clientId && <span className="text-red-500">*</span>}</Label>
-                <Select value={form.clientId} onValueChange={(v) => set('clientId', v)}>
-                  <SelectTrigger
-                    className={submitAttempted && !form.clientId ? 'border-red-500 focus:ring-red-500' : ''}
-                  >
-                    <SelectValue placeholder="Seleccionar cliente" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {clients.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.name} ({c.identification})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <ClientPicker
+                  clients={clients}
+                  value={form.clientId}
+                  onValueChange={(v) => set('clientId', v)}
+                  error={submitAttempted && !form.clientId}
+                  frequentIds={frequentClientIds}
+                />
                 {submitAttempted && !form.clientId && (
                   <p className="text-xs text-red-500">Debes seleccionar un cliente</p>
                 )}
@@ -605,6 +696,8 @@ export function CobranzasCreditosPage() {
         onSubmit={(input) => paymentMutation.mutate(input)}
         pending={paymentMutation.isPending}
       />
+
+      <ReceiptModal paymentId={receiptPaymentId} onClose={() => setReceiptPaymentId(null)} />
 
       {/* Aprobar crédito */}
       <ApproveModal

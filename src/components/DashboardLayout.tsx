@@ -91,6 +91,7 @@ const cobranzasSubNav: NavItem[] = [
   { icon: FileText, label: 'Créditos', href: '/cobranzas/creditos', roles: ['SUPER_ADMIN'] },
   { icon: DollarSign, label: 'Pagos', href: '/cobranzas/pagos', roles: ['SUPER_ADMIN'] },
   { icon: Users, label: 'Categorías', href: '/cobranzas/categorias', roles: ['SUPER_ADMIN'] },
+  { icon: BarChart3, label: 'Cartera y Mora', href: '/cobranzas/reportes', roles: ['SUPER_ADMIN'] },
   { icon: Settings, label: 'Configuración', href: '/cobranzas/configuracion', roles: ['SUPER_ADMIN'] },
 ]
 

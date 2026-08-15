@@ -38,6 +38,7 @@ import { CobranzasRutasPage } from '@/pages/cobranzas/CobranzasRutasPage'
 import { CobranzasCreditosPage } from '@/pages/cobranzas/CobranzasCreditosPage'
 import { CobranzasPagosPage } from '@/pages/cobranzas/CobranzasPagosPage'
 import { CobranzasCajaPage } from '@/pages/cobranzas/CobranzasCajaPage'
+import { CobranzasReportesPage } from '@/pages/cobranzas/CobranzasReportesPage'
 
 import { useEffect } from 'react'
 import { requestNotifyPermission } from './firebase/messaging'
@@ -428,6 +429,19 @@ function App() {
                       <ErrorBoundary>
                         <DashboardLayout>
                           <CobranzasCajaPage />
+                        </DashboardLayout>
+                      </ErrorBoundary>
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route
+                  path="/cobranzas/reportes"
+                  element={
+                    <ProtectedRoute requiredRole="SUPER_ADMIN">
+                      <ErrorBoundary>
+                        <DashboardLayout>
+                          <CobranzasReportesPage />
                         </DashboardLayout>
                       </ErrorBoundary>
                     </ProtectedRoute>

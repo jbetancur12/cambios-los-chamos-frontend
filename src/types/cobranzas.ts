@@ -107,6 +107,7 @@ export interface Payment {
   status: PaymentStatus
   transactionId?: string | null
   installmentNumber?: number | null
+  receivedBy?: { id: string; fullName: string } | null
   createdAt: string
 }
 

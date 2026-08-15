@@ -22,11 +22,13 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
 Select.displayName = 'Select'
 
 interface SelectTriggerProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
-  onValueChange?: (value: string) => void
+  children?: React.ReactNode
 }
 
-export function SelectTrigger({ onValueChange, ...props }: SelectTriggerProps) {
-  return <Select onValueChange={onValueChange} {...props} />
+export function SelectTrigger(props: SelectTriggerProps) {
+  // Fragment: el <select> real lo renderiza <Select>; solo agrupa el placeholder + opciones.
+  // Las props extra (className, id, etc.) se ignoran para evitar <select> anidado.
+  return <>{props.children}</>
 }
 
 interface SelectContentProps {

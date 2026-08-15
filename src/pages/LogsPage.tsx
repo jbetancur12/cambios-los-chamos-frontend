@@ -52,8 +52,8 @@ export function LogsPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Logs del Sistema</h1>
         <div className="flex items-center gap-2">
-          <Select value={limit} onValueChange={setLimit}>
-            <SelectTrigger className="w-[100px]">
+          <Select value={limit} onValueChange={setLimit} className="w-[100px]">
+            <SelectTrigger>
               <SelectValue placeholder="Limit" />
             </SelectTrigger>
             <SelectContent>
@@ -64,8 +64,8 @@ export function LogsPage() {
             </SelectContent>
           </Select>
 
-          <Select value={filterLevel} onValueChange={setFilterLevel}>
-            <SelectTrigger className="w-[120px]">
+          <Select value={filterLevel} onValueChange={setFilterLevel} className="w-[120px]">
+            <SelectTrigger>
               <SelectValue placeholder="Level" />
             </SelectTrigger>
             <SelectContent>

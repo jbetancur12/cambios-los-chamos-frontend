@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useModuleQuery } from '@/hooks/useModuleQuery'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -27,22 +28,22 @@ export function CobranzasCajaPage() {
   const [detailId, setDetailId] = useState<string | null>(null)
   const [closeOpen, setCloseOpen] = useState(false)
 
-  const { data: current, isLoading: loadingCurrent } = useQuery({
+  const { data: current, isLoading: loadingCurrent } = useModuleQuery({
     queryKey: ['cobranza-current-balance'],
     queryFn: getCurrentCashBalance,
   })
 
-  const { data: balances, isLoading } = useQuery({
+  const { data: balances, isLoading } = useModuleQuery({
     queryKey: ['cobranza-cash-balances'],
     queryFn: () => listCashBalances({ limit: 100 }),
   })
 
-  const { data: pendingClosures } = useQuery({
+  const { data: pendingClosures } = useModuleQuery({
     queryKey: ['cobranza-pending-closures'],
     queryFn: getPendingClosures,
   })
 
-  const { data: detail } = useQuery({
+  const { data: detail } = useModuleQuery({
     queryKey: ['cobranza-balance', detailId],
     queryFn: () => (detailId ? getCashBalanceDetail(detailId) : null),
     enabled: !!detailId,

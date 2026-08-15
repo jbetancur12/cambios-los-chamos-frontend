@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useModuleQuery } from '@/hooks/useModuleQuery'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -11,17 +11,17 @@ export function CobranzasDashboardPage() {
     data: stats,
     isLoading,
     refetch,
-  } = useQuery({
+  } = useModuleQuery({
     queryKey: ['cobranzas-stats'],
     queryFn: getCobranzasStats,
   })
 
-  const { data: activity } = useQuery({
+  const { data: activity } = useModuleQuery({
     queryKey: ['cobranzas-activity'],
     queryFn: getRecentActivity,
   })
 
-  const { data: financial } = useQuery({
+  const { data: financial } = useModuleQuery({
     queryKey: ['cobranzas-financial'],
     queryFn: getFinancialSummary,
   })
