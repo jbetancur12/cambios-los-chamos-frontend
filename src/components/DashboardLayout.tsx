@@ -17,6 +17,8 @@ import {
   Menu,
   X,
   Box,
+  Landmark,
+  ChevronLeft,
 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/button'
@@ -77,6 +79,21 @@ const sideMenuItems: NavItem[] = [
 
   { icon: Box, label: 'Inventario', href: '/inventory', roles: ['SUPER_ADMIN', 'ADMIN'] },
   { icon: Settings, label: 'Config', href: '/configuracion', roles: ['SUPER_ADMIN', 'ADMIN', 'TRANSFERENCISTA'] },
+
+  // Módulo Cobranzas (solo Super Admin) — submenú propio
+  { icon: Landmark, label: 'Cobranzas', href: '/cobranzas', roles: ['SUPER_ADMIN'] },
+]
+
+// Submenú del módulo Cobranzas (reemplaza el menú principal al navegar ahí)
+const cobranzasSubNav: NavItem[] = [
+  { icon: Landmark, label: 'Panel', href: '/cobranzas', roles: ['SUPER_ADMIN'] },
+  { icon: Users, label: 'Clientes', href: '/cobranzas/clientes', roles: ['SUPER_ADMIN'] },
+  { icon: FileText, label: 'Créditos', href: '/cobranzas/creditos', roles: ['SUPER_ADMIN'] },
+  { icon: DollarSign, label: 'Pagos', href: '/cobranzas/pagos', roles: ['SUPER_ADMIN'] },
+  { icon: Wallet, label: 'Caja', href: '/cobranzas/caja', roles: ['SUPER_ADMIN'] },
+  { icon: Building, label: 'Rutas', href: '/cobranzas/rutas', roles: ['SUPER_ADMIN'] },
+  { icon: Users, label: 'Categorías', href: '/cobranzas/categorias', roles: ['SUPER_ADMIN'] },
+  { icon: Settings, label: 'Configuración', href: '/cobranzas/configuracion', roles: ['SUPER_ADMIN'] },
 ]
 
 // All items for desktop sidebar
@@ -119,6 +136,48 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
     setSideMenuOpen(false)
   }, [location.pathname])
 
+  const isInCobranzas = location.pathname.startsWith('/cobranzas')
+
+  // Submenú Cobranzas: reemplaza el menú principal mientras estás en el módulo
+  const renderCobranzasMenu = (onNavigate?: () => void) => (
+    <div className="space-y-1">
+      <button
+        onClick={() => {
+          navigate('/dashboard')
+          onNavigate?.()
+        }}
+        className="w-full flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-md text-blue-100 hover:text-white hover:bg-white/5 dark:text-muted-foreground dark:hover:text-foreground dark:hover:bg-muted/50 transition-all duration-200"
+      >
+        <ChevronLeft className="w-5 h-5" />
+        <span>Volver</span>
+      </button>
+      <div className="flex items-center gap-2 px-3 py-1">
+        <Landmark className="w-5 h-5 text-blue-100 dark:text-muted-foreground" />
+        <span className="text-base font-bold text-white dark:text-foreground">Cobranzas</span>
+      </div>
+      {cobranzasSubNav.map((item) => {
+        const Icon = item.icon
+        const isActive = location.pathname === item.href
+        return (
+          <Link
+            key={item.href}
+            to={item.href}
+            onClick={onNavigate}
+            className={cn(
+              'flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-all duration-200',
+              isActive
+                ? 'text-white bg-white/15 dark:bg-muted dark:text-foreground'
+                : 'text-blue-100 hover:text-white hover:bg-white/5 dark:text-muted-foreground dark:hover:text-foreground dark:hover:bg-muted/50'
+            )}
+          >
+            <Icon className="w-5 h-5" />
+            <span>{item.label}</span>
+          </Link>
+        )
+      })}
+    </div>
+  )
+
   return (
     <div className="min-h-screen bg-background">
       {/* Desktop Sidebar */}
@@ -130,55 +189,57 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-3 py-4 space-y-1">
-            {visibleDesktopItems.map((item) => {
-              const Icon = item.icon
-              const isActive = location.pathname === item.href
-              return (
-                <div key={item.href}>
-                  {item.label === 'Calculadora' ? (
-                    <button
-                      onClick={() => setCalculatorModalOpen(true)}
-                      className={cn(
-                        'w-full flex items-center gap-3 px-3 py-2 text-base font-medium rounded-md transition-all duration-200',
-                        isActive
-                          ? 'text-white bg-white/15 dark:bg-muted dark:text-foreground'
-                          : 'text-blue-100 hover:text-white hover:bg-white/5 dark:text-muted-foreground dark:hover:text-foreground dark:hover:bg-muted/50'
+          <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+            {isInCobranzas
+              ? renderCobranzasMenu()
+              : visibleDesktopItems.map((item) => {
+                  const Icon = item.icon
+                  const isActive = location.pathname === item.href
+                  return (
+                    <div key={item.href}>
+                      {item.label === 'Calculadora' ? (
+                        <button
+                          onClick={() => setCalculatorModalOpen(true)}
+                          className={cn(
+                            'w-full flex items-center gap-3 px-3 py-2 text-base font-medium rounded-md transition-all duration-200',
+                            isActive
+                              ? 'text-white bg-white/15 dark:bg-muted dark:text-foreground'
+                              : 'text-blue-100 hover:text-white hover:bg-white/5 dark:text-muted-foreground dark:hover:text-foreground dark:hover:bg-muted/50'
+                          )}
+                        >
+                          <Icon className="w-6 h-6" />
+                          <span>{item.label}</span>
+                        </button>
+                      ) : item.label === 'Calc. Compra VES' ? (
+                        <button
+                          onClick={() => setVesCalculatorModalOpen(true)}
+                          className={cn(
+                            'w-full flex items-center gap-3 px-3 py-2 text-base font-medium rounded-md transition-all duration-200',
+                            isActive
+                              ? 'text-white bg-white/15 dark:bg-muted dark:text-foreground'
+                              : 'text-blue-100 hover:text-white hover:bg-white/5 dark:text-muted-foreground dark:hover:text-foreground dark:hover:bg-muted/50'
+                          )}
+                        >
+                          <Icon className="w-6 h-6" />
+                          <span>{item.label}</span>
+                        </button>
+                      ) : (
+                        <Link
+                          to={item.href}
+                          className={cn(
+                            'flex items-center gap-3 px-3 py-2 text-base font-medium rounded-md transition-all duration-200',
+                            isActive
+                              ? 'text-white bg-white/15 dark:bg-muted dark:text-foreground'
+                              : 'text-blue-100 hover:text-white hover:bg-white/5 dark:text-muted-foreground dark:hover:text-foreground dark:hover:bg-muted/50'
+                          )}
+                        >
+                          <Icon className="w-6 h-6" />
+                          <span>{item.label}</span>
+                        </Link>
                       )}
-                    >
-                      <Icon className="w-6 h-6" />
-                      <span>{item.label}</span>
-                    </button>
-                  ) : item.label === 'Calc. Compra VES' ? (
-                    <button
-                      onClick={() => setVesCalculatorModalOpen(true)}
-                      className={cn(
-                        'w-full flex items-center gap-3 px-3 py-2 text-base font-medium rounded-md transition-all duration-200',
-                        isActive
-                          ? 'text-white bg-white/15 dark:bg-muted dark:text-foreground'
-                          : 'text-blue-100 hover:text-white hover:bg-white/5 dark:text-muted-foreground dark:hover:text-foreground dark:hover:bg-muted/50'
-                      )}
-                    >
-                      <Icon className="w-6 h-6" />
-                      <span>{item.label}</span>
-                    </button>
-                  ) : (
-                    <Link
-                      to={item.href}
-                      className={cn(
-                        'flex items-center gap-3 px-3 py-2 text-base font-medium rounded-md transition-all duration-200',
-                        isActive
-                          ? 'text-white bg-white/15 dark:bg-muted dark:text-foreground'
-                          : 'text-blue-100 hover:text-white hover:bg-white/5 dark:text-muted-foreground dark:hover:text-foreground dark:hover:bg-muted/50'
-                      )}
-                    >
-                      <Icon className="w-6 h-6" />
-                      <span>{item.label}</span>
-                    </Link>
-                  )}
-                </div>
-              )
-            })}
+                    </div>
+                  )
+                })}
           </nav>
 
           {/* User Info & Logout */}
@@ -228,61 +289,63 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
 
           {/* Navigation */}
           <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-            {visibleDesktopItems.map((item) => {
-              const Icon = item.icon
-              const isActive = location.pathname === item.href
-              return (
-                <div key={item.href}>
-                  {item.label === 'Calculadora' ? (
-                    <button
-                      onClick={() => {
-                        setCalculatorModalOpen(true)
-                        setSideMenuOpen(false)
-                      }}
-                      className={cn(
-                        'w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-all duration-200',
-                        isActive
-                          ? 'text-white bg-white/15 dark:bg-muted dark:text-foreground'
-                          : 'text-blue-100 hover:text-white hover:bg-white/5 dark:text-muted-foreground dark:hover:text-foreground dark:hover:bg-muted/50'
+            {isInCobranzas
+              ? renderCobranzasMenu(() => setSideMenuOpen(false))
+              : visibleDesktopItems.map((item) => {
+                  const Icon = item.icon
+                  const isActive = location.pathname === item.href
+                  return (
+                    <div key={item.href}>
+                      {item.label === 'Calculadora' ? (
+                        <button
+                          onClick={() => {
+                            setCalculatorModalOpen(true)
+                            setSideMenuOpen(false)
+                          }}
+                          className={cn(
+                            'w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-all duration-200',
+                            isActive
+                              ? 'text-white bg-white/15 dark:bg-muted dark:text-foreground'
+                              : 'text-blue-100 hover:text-white hover:bg-white/5 dark:text-muted-foreground dark:hover:text-foreground dark:hover:bg-muted/50'
+                          )}
+                        >
+                          <Icon className="w-5 h-5" />
+                          <span>{item.label}</span>
+                        </button>
+                      ) : item.label === 'Calc. Compra VES' ? (
+                        <button
+                          onClick={() => {
+                            setVesCalculatorModalOpen(true)
+                            setSideMenuOpen(false)
+                          }}
+                          className={cn(
+                            'w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-all duration-200',
+                            isActive
+                              ? 'text-white bg-white/15 dark:bg-muted dark:text-foreground'
+                              : 'text-blue-100 hover:text-white hover:bg-white/5 dark:text-muted-foreground dark:hover:text-foreground dark:hover:bg-muted/50'
+                          )}
+                        >
+                          <Icon className="w-5 h-5" />
+                          <span>{item.label}</span>
+                        </button>
+                      ) : (
+                        <Link
+                          to={item.href}
+                          onClick={() => setSideMenuOpen(false)}
+                          className={cn(
+                            'flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-all duration-200',
+                            isActive
+                              ? 'text-white bg-white/15 dark:bg-muted dark:text-foreground'
+                              : 'text-blue-100 hover:text-white hover:bg-white/5 dark:text-muted-foreground dark:hover:text-foreground dark:hover:bg-muted/50'
+                          )}
+                        >
+                          <Icon className="w-5 h-5" />
+                          <span>{item.label}</span>
+                        </Link>
                       )}
-                    >
-                      <Icon className="w-5 h-5" />
-                      <span>{item.label}</span>
-                    </button>
-                  ) : item.label === 'Calc. Compra VES' ? (
-                    <button
-                      onClick={() => {
-                        setVesCalculatorModalOpen(true)
-                        setSideMenuOpen(false)
-                      }}
-                      className={cn(
-                        'w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-all duration-200',
-                        isActive
-                          ? 'text-white bg-white/15 dark:bg-muted dark:text-foreground'
-                          : 'text-blue-100 hover:text-white hover:bg-white/5 dark:text-muted-foreground dark:hover:text-foreground dark:hover:bg-muted/50'
-                      )}
-                    >
-                      <Icon className="w-5 h-5" />
-                      <span>{item.label}</span>
-                    </button>
-                  ) : (
-                    <Link
-                      to={item.href}
-                      onClick={() => setSideMenuOpen(false)}
-                      className={cn(
-                        'flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-all duration-200',
-                        isActive
-                          ? 'text-white bg-white/15 dark:bg-muted dark:text-foreground'
-                          : 'text-blue-100 hover:text-white hover:bg-white/5 dark:text-muted-foreground dark:hover:text-foreground dark:hover:bg-muted/50'
-                      )}
-                    >
-                      <Icon className="w-5 h-5" />
-                      <span>{item.label}</span>
-                    </Link>
-                  )}
-                </div>
-              )
-            })}
+                    </div>
+                  )
+                })}
           </nav>
 
           {/* User Info & Logout */}
@@ -325,62 +388,124 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         {/* Mobile Bottom Navigation - 5 icons */}
         <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden border-t text-white bg-[linear-gradient(to_right,#136BBC,#274565)] border-white/10 dark:bg-none dark:bg-background dark:border-border pb-[calc(env(safe-area-inset-bottom)+15px)]">
           <div className="flex h-18 items-center justify-around">
-            {/* Solicitudes */}
-            {visibleBottomItems.find((item) => item.href === '/giros') && (
-              <Link
-                to="/giros"
-                className={cn(
-                  'flex flex-col items-center justify-center gap-1 flex-1 h-20 transition-all duration-200',
-                  location.pathname === '/giros' ? 'text-white font-semibold' : 'text-blue-100 hover:text-white'
-                )}
-              >
-                <FileText className="w-6 h-6" />
-                <span className="text-xs">Solicitudes</span>
-              </Link>
-            )}
+            {isInCobranzas ? (
+              <>
+                {/* Panel */}
+                <Link
+                  to="/cobranzas"
+                  className={cn(
+                    'flex flex-col items-center justify-center gap-1 flex-1 h-20 transition-all duration-200',
+                    location.pathname === '/cobranzas' ? 'text-white font-semibold' : 'text-blue-100 hover:text-white'
+                  )}
+                >
+                  <Landmark className="w-6 h-6" />
+                  <span className="text-xs">Panel</span>
+                </Link>
 
-            {/* Cuentas */}
-            {visibleBottomItems.find((item) => item.href === '/cuentas-bancarias') && (
-              <Link
-                to="/cuentas-bancarias"
-                className={cn(
-                  'flex flex-col items-center justify-center gap-1 flex-1 h-20 transition-all duration-200',
-                  location.pathname === '/cuentas-bancarias'
-                    ? 'text-white font-semibold'
-                    : 'text-blue-100 hover:text-white'
-                )}
-              >
-                <Building className="w-6 h-6" />
-                <span className="text-xs">Cuentas</span>
-              </Link>
-            )}
+                {/* Créditos */}
+                <Link
+                  to="/cobranzas/creditos"
+                  className={cn(
+                    'flex flex-col items-center justify-center gap-1 flex-1 h-20 transition-all duration-200',
+                    location.pathname === '/cobranzas/creditos'
+                      ? 'text-white font-semibold'
+                      : 'text-blue-100 hover:text-white'
+                  )}
+                >
+                  <FileText className="w-6 h-6" />
+                  <span className="text-xs">Créditos</span>
+                </Link>
 
-            {/* Enviar Giro */}
-            {visibleBottomItems.find((item) => item.href === '/enviar-giro') && (
-              <Link
-                to="/enviar-giro"
-                className={cn(
-                  'flex flex-col items-center justify-center gap-1 flex-1 h-20 transition-all duration-200',
-                  location.pathname === '/enviar-giro' ? 'text-white font-semibold' : 'text-blue-100 hover:text-white'
-                )}
-              >
-                <Send className="w-6 h-6" />
-                <span className="text-xs">Enviar</span>
-              </Link>
-            )}
+                {/* Clientes */}
+                <Link
+                  to="/cobranzas/clientes"
+                  className={cn(
+                    'flex flex-col items-center justify-center gap-1 flex-1 h-20 transition-all duration-200',
+                    location.pathname === '/cobranzas/clientes'
+                      ? 'text-white font-semibold'
+                      : 'text-blue-100 hover:text-white'
+                  )}
+                >
+                  <Users className="w-6 h-6" />
+                  <span className="text-xs">Clientes</span>
+                </Link>
 
-            {/* Usuarios */}
-            {visibleBottomItems.find((item) => item.href === '/usuarios') && (
-              <Link
-                to="/usuarios"
-                className={cn(
-                  'flex flex-col items-center justify-center gap-1 flex-1 h-20 transition-all duration-200',
-                  location.pathname === '/usuarios' ? 'text-white font-semibold' : 'text-blue-100 hover:text-white'
+                {/* Caja */}
+                <Link
+                  to="/cobranzas/caja"
+                  className={cn(
+                    'flex flex-col items-center justify-center gap-1 flex-1 h-20 transition-all duration-200',
+                    location.pathname === '/cobranzas/caja'
+                      ? 'text-white font-semibold'
+                      : 'text-blue-100 hover:text-white'
+                  )}
+                >
+                  <Wallet className="w-6 h-6" />
+                  <span className="text-xs">Caja</span>
+                </Link>
+              </>
+            ) : (
+              <>
+                {/* Solicitudes */}
+                {visibleBottomItems.find((item) => item.href === '/giros') && (
+                  <Link
+                    to="/giros"
+                    className={cn(
+                      'flex flex-col items-center justify-center gap-1 flex-1 h-20 transition-all duration-200',
+                      location.pathname === '/giros' ? 'text-white font-semibold' : 'text-blue-100 hover:text-white'
+                    )}
+                  >
+                    <FileText className="w-6 h-6" />
+                    <span className="text-xs">Solicitudes</span>
+                  </Link>
                 )}
-              >
-                <Users className="w-6 h-6" />
-                <span className="text-xs">Usuarios</span>
-              </Link>
+
+                {/* Cuentas */}
+                {visibleBottomItems.find((item) => item.href === '/cuentas-bancarias') && (
+                  <Link
+                    to="/cuentas-bancarias"
+                    className={cn(
+                      'flex flex-col items-center justify-center gap-1 flex-1 h-20 transition-all duration-200',
+                      location.pathname === '/cuentas-bancarias'
+                        ? 'text-white font-semibold'
+                        : 'text-blue-100 hover:text-white'
+                    )}
+                  >
+                    <Building className="w-6 h-6" />
+                    <span className="text-xs">Cuentas</span>
+                  </Link>
+                )}
+
+                {/* Enviar Giro */}
+                {visibleBottomItems.find((item) => item.href === '/enviar-giro') && (
+                  <Link
+                    to="/enviar-giro"
+                    className={cn(
+                      'flex flex-col items-center justify-center gap-1 flex-1 h-20 transition-all duration-200',
+                      location.pathname === '/enviar-giro'
+                        ? 'text-white font-semibold'
+                        : 'text-blue-100 hover:text-white'
+                    )}
+                  >
+                    <Send className="w-6 h-6" />
+                    <span className="text-xs">Enviar</span>
+                  </Link>
+                )}
+
+                {/* Usuarios */}
+                {visibleBottomItems.find((item) => item.href === '/usuarios') && (
+                  <Link
+                    to="/usuarios"
+                    className={cn(
+                      'flex flex-col items-center justify-center gap-1 flex-1 h-20 transition-all duration-200',
+                      location.pathname === '/usuarios' ? 'text-white font-semibold' : 'text-blue-100 hover:text-white'
+                    )}
+                  >
+                    <Users className="w-6 h-6" />
+                    <span className="text-xs">Usuarios</span>
+                  </Link>
+                )}
+              </>
             )}
 
             {/* Hamburger Menu */}

@@ -30,6 +30,14 @@ import { ConfigPage } from '@/pages/ConfigPage'
 import { AuditPage } from '@/pages/AuditPage'
 import { LogsPage } from '@/pages/LogsPage'
 import InventoryPage from '@/pages/InventoryPage'
+import { CobranzasDashboardPage } from '@/pages/cobranzas/CobranzasDashboardPage'
+import { CobranzasClientesPage } from '@/pages/cobranzas/CobranzasClientesPage'
+import { CobranzasCategoriasPage } from '@/pages/cobranzas/CobranzasCategoriasPage'
+import { CobranzasConfigPage } from '@/pages/cobranzas/CobranzasConfigPage'
+import { CobranzasRutasPage } from '@/pages/cobranzas/CobranzasRutasPage'
+import { CobranzasCreditosPage } from '@/pages/cobranzas/CobranzasCreditosPage'
+import { CobranzasPagosPage } from '@/pages/cobranzas/CobranzasPagosPage'
+import { CobranzasCajaPage } from '@/pages/cobranzas/CobranzasCajaPage'
 
 import { useEffect } from 'react'
 import { requestNotifyPermission } from './firebase/messaging'
@@ -315,6 +323,111 @@ function App() {
                       <ErrorBoundary>
                         <DashboardLayout>
                           <InventoryPage />
+                        </DashboardLayout>
+                      </ErrorBoundary>
+                    </ProtectedRoute>
+                  }
+                />
+
+                {/* Cobranzas — módulo exclusivo Super Admin */}
+                <Route
+                  path="/cobranzas"
+                  element={
+                    <ProtectedRoute requiredRole="SUPER_ADMIN">
+                      <ErrorBoundary>
+                        <DashboardLayout>
+                          <CobranzasDashboardPage />
+                        </DashboardLayout>
+                      </ErrorBoundary>
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route
+                  path="/cobranzas/clientes"
+                  element={
+                    <ProtectedRoute requiredRole="SUPER_ADMIN">
+                      <ErrorBoundary>
+                        <DashboardLayout>
+                          <CobranzasClientesPage />
+                        </DashboardLayout>
+                      </ErrorBoundary>
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route
+                  path="/cobranzas/categorias"
+                  element={
+                    <ProtectedRoute requiredRole="SUPER_ADMIN">
+                      <ErrorBoundary>
+                        <DashboardLayout>
+                          <CobranzasCategoriasPage />
+                        </DashboardLayout>
+                      </ErrorBoundary>
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route
+                  path="/cobranzas/configuracion"
+                  element={
+                    <ProtectedRoute requiredRole="SUPER_ADMIN">
+                      <ErrorBoundary>
+                        <DashboardLayout>
+                          <CobranzasConfigPage />
+                        </DashboardLayout>
+                      </ErrorBoundary>
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route
+                  path="/cobranzas/rutas"
+                  element={
+                    <ProtectedRoute requiredRole="SUPER_ADMIN">
+                      <ErrorBoundary>
+                        <DashboardLayout>
+                          <CobranzasRutasPage />
+                        </DashboardLayout>
+                      </ErrorBoundary>
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route
+                  path="/cobranzas/creditos"
+                  element={
+                    <ProtectedRoute requiredRole="SUPER_ADMIN">
+                      <ErrorBoundary>
+                        <DashboardLayout>
+                          <CobranzasCreditosPage />
+                        </DashboardLayout>
+                      </ErrorBoundary>
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route
+                  path="/cobranzas/pagos"
+                  element={
+                    <ProtectedRoute requiredRole="SUPER_ADMIN">
+                      <ErrorBoundary>
+                        <DashboardLayout>
+                          <CobranzasPagosPage />
+                        </DashboardLayout>
+                      </ErrorBoundary>
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route
+                  path="/cobranzas/caja"
+                  element={
+                    <ProtectedRoute requiredRole="SUPER_ADMIN">
+                      <ErrorBoundary>
+                        <DashboardLayout>
+                          <CobranzasCajaPage />
                         </DashboardLayout>
                       </ErrorBoundary>
                     </ProtectedRoute>
