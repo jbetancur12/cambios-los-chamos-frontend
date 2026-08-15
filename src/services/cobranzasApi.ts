@@ -241,6 +241,22 @@ export const exportCredits = (params?: Record<string, unknown>) =>
 export const getCreditCounts = () =>
   api.get<{ counts: Record<CreditStatus, number> }>(`${BASE}/credits/counts`).then((r) => r.counts)
 
+export interface WaitingList {
+  pendingApproval: Credit[]
+  waitingDelivery: Credit[]
+  readyToday: Credit[]
+  overdueDelivery: Credit[]
+  counts: {
+    pendingApproval: number
+    waitingDelivery: number
+    readyToday: number
+    overdueDelivery: number
+  }
+}
+
+export const getWaitingList = () =>
+  api.get<{ waitingList: WaitingList }>(`${BASE}/credits/waiting-list`).then((r) => r.waitingList)
+
 export const getCreditDetail = (id: string) => api.get<CreditDetail>(`${BASE}/credits/${id}`).then((r) => r)
 
 export const createCredit = (data: CreateCreditInput) =>

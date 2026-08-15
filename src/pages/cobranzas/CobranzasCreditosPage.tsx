@@ -22,6 +22,7 @@ import {
   HandCoins,
   Flag,
   FileDown,
+  Pencil,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -35,6 +36,7 @@ import {
   exportCredits,
   getCreditDetail,
   createCredit,
+  updateCredit,
   approveCredit,
   rejectCredit,
   deliverCredit,
@@ -56,7 +58,7 @@ import {
   PAYMENT_METHOD_LABELS,
   downloadCsv,
 } from '@/lib/cobranzasUtils'
-import type { Credit, CreditStatus } from '@/types/cobranzas'
+import type { Credit, CreditStatus, LoanFrequency } from '@/types/cobranzas'
 
 const emptyForm: CreateCreditInput = {
   clientId: '',
@@ -77,6 +79,7 @@ export function CobranzasCreditosPage() {
   const [detailId, setDetailId] = useState<string | null>(null)
   const [payCredit, setPayCredit] = useState<Credit | null>(null)
   const [receiptPaymentId, setReceiptPaymentId] = useState<string | null>(null)
+  const [editCredit, setEditCredit] = useState<Credit | null>(null)
   const [form, setForm] = useState<CreateCreditInput>(emptyForm)
   const [submitAttempted, setSubmitAttempted] = useState(false)
   const [exporting, setExporting] = useState(false)
@@ -211,6 +214,16 @@ export function CobranzasCreditosPage() {
       toast.success('Pago registrado')
       setPayCredit(null)
       setReceiptPaymentId(payment.id)
+      invalidate()
+    },
+    onError: (e) => toast.error((e as Error).message),
+  })
+
+  const editMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<CreateCreditInput> }) => updateCredit(id, data),
+    onSuccess: () => {
+      toast.success('Crédito actualizado')
+      setEditCredit(null)
       invalidate()
     },
     onError: (e) => toast.error((e as Error).message),
@@ -589,6 +602,11 @@ export function CobranzasCreditosPage() {
             </div>
 
             <div className="flex flex-wrap gap-2">
+              {(detail?.credit.status === 'pending_approval' || detail?.credit.status === 'waiting_delivery') && (
+                <Button size="sm" variant="outline" onClick={() => detail && setEditCredit(detail.credit)}>
+                  <Pencil className="h-4 w-4 mr-1" /> Editar
+                </Button>
+              )}
               {detail?.credit.status === 'pending_approval' && (
                 <>
                   <Button size="sm" onClick={() => setApproveOpen(true)} disabled={approveMutation.isPending}>
@@ -699,6 +717,18 @@ export function CobranzasCreditosPage() {
 
       <ReceiptModal paymentId={receiptPaymentId} onClose={() => setReceiptPaymentId(null)} />
 
+      {/* Editar crédito */}
+      <EditCreditModal
+        open={!!editCredit}
+        credit={editCredit}
+        frequencies={frequencies}
+        onOpenChange={(o) => !o && setEditCredit(null)}
+        onSubmit={(data) => {
+          if (editCredit) editMutation.mutate({ id: editCredit.id, data })
+        }}
+        pending={editMutation.isPending}
+      />
+
       {/* Aprobar crédito */}
       <ApproveModal
         open={approveOpen}
@@ -774,6 +804,128 @@ function InfoBox({ label, value }: { label: string; value: string }) {
 function computeDate(startDate: string | undefined, addDays: number): string | undefined {
   if (!startDate || !addDays) return startDate
   return new Date(new Date(`${startDate}T00:00:00`).getTime() + addDays * 86400000).toISOString().slice(0, 10)
+}
+
+function EditCreditModal({
+  open,
+  credit,
+  frequencies,
+  onOpenChange,
+  onSubmit,
+  pending,
+}: {
+  open: boolean
+  credit: Credit | null
+  frequencies: LoanFrequency[]
+  onOpenChange: (o: boolean) => void
+  onSubmit: (data: Partial<CreateCreditInput>) => void
+  pending: boolean
+}) {
+  const [form, setForm] = useState<Partial<CreateCreditInput>>({})
+
+  useEffect(() => {
+    if (credit) {
+      setForm({
+        amount: Number(credit.amount),
+        downPayment: credit.downPayment,
+        interestRate: Number(credit.interestRate),
+        totalInstallments: credit.totalInstallments,
+        frequency: credit.frequency,
+        startDate: credit.startDate,
+        description: credit.description ?? '',
+      })
+    }
+  }, [credit])
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!credit) return
+    if (!form.amount || Number(form.amount) <= 0) {
+      toast.error('Monto inválido')
+      return
+    }
+    onSubmit({ ...form, amount: Number(form.amount), interestRate: Number(form.interestRate ?? 0) })
+  }
+
+  const set = (key: keyof CreateCreditInput, value: unknown) => setForm((f) => ({ ...f, [key]: value }))
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="w-full sm:max-w-md overflow-y-auto">
+        <SheetHeader>
+          <SheetTitle>Editar crédito</SheetTitle>
+        </SheetHeader>
+        <SheetBody>
+          <form onSubmit={handleSubmit} id="edit-credit-form" className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>Monto</Label>
+                <CurrencyInput value={form.amount ?? 0} onValueChange={(v) => set('amount', v ?? 0)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Anticipo</Label>
+                <CurrencyInput value={form.downPayment ?? null} onValueChange={(v) => set('downPayment', v)} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>Tasa interés (%)</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={form.interestRate ?? 0}
+                  onChange={(e) => set('interestRate', Number(e.target.value))}
+                  onFocus={(e) => e.target.select()}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>N° cuotas</Label>
+                <Input
+                  type="number"
+                  value={form.totalInstallments ?? ''}
+                  onChange={(e) => set('totalInstallments', e.target.value ? Number(e.target.value) : null)}
+                  onFocus={(e) => e.target.select()}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>Frecuencia</Label>
+                <Select value={form.frequency ?? 'daily'} onValueChange={(v) => set('frequency', v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {frequencies.map((f) => (
+                      <SelectItem key={f.code} value={f.code}>
+                        {f.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Fecha de entrega</Label>
+                <Input type="date" value={form.startDate ?? ''} onChange={(e) => set('startDate', e.target.value)} />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Descripción</Label>
+              <Input value={form.description ?? ''} onChange={(e) => set('description', e.target.value)} />
+            </div>
+          </form>
+        </SheetBody>
+        <SheetFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancelar
+          </Button>
+          <Button type="submit" form="edit-credit-form" disabled={pending}>
+            {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Guardar'}
+          </Button>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
+  )
 }
 
 function ApproveModal({
