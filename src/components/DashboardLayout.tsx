@@ -90,8 +90,6 @@ const cobranzasSubNav: NavItem[] = [
   { icon: Users, label: 'Clientes', href: '/cobranzas/clientes', roles: ['SUPER_ADMIN'] },
   { icon: FileText, label: 'Créditos', href: '/cobranzas/creditos', roles: ['SUPER_ADMIN'] },
   { icon: DollarSign, label: 'Pagos', href: '/cobranzas/pagos', roles: ['SUPER_ADMIN'] },
-  { icon: Wallet, label: 'Caja', href: '/cobranzas/caja', roles: ['SUPER_ADMIN'] },
-  { icon: Building, label: 'Rutas', href: '/cobranzas/rutas', roles: ['SUPER_ADMIN'] },
   { icon: Users, label: 'Categorías', href: '/cobranzas/categorias', roles: ['SUPER_ADMIN'] },
   { icon: Settings, label: 'Configuración', href: '/cobranzas/configuracion', roles: ['SUPER_ADMIN'] },
 ]
@@ -107,8 +105,6 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
   const [sideMenuOpen, setSideMenuOpen] = useState(false)
   const [calculatorModalOpen, setCalculatorModalOpen] = useState(false)
   const [vesCalculatorModalOpen, setVesCalculatorModalOpen] = useState(false)
-
-  console.log(user)
 
   const handleLogout = async () => {
     try {
@@ -430,18 +426,18 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
                   <span className="text-xs">Clientes</span>
                 </Link>
 
-                {/* Caja */}
+                {/* Pagos */}
                 <Link
-                  to="/cobranzas/caja"
+                  to="/cobranzas/pagos"
                   className={cn(
                     'flex flex-col items-center justify-center gap-1 flex-1 h-20 transition-all duration-200',
-                    location.pathname === '/cobranzas/caja'
+                    location.pathname === '/cobranzas/pagos'
                       ? 'text-white font-semibold'
                       : 'text-blue-100 hover:text-white'
                   )}
                 >
-                  <Wallet className="w-6 h-6" />
-                  <span className="text-xs">Caja</span>
+                  <DollarSign className="w-6 h-6" />
+                  <span className="text-xs">Pagos</span>
                 </Link>
               </>
             ) : (
