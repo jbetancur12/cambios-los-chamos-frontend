@@ -447,7 +447,7 @@ export function CobranzasCreditosPage() {
                       <td className="py-2 pr-3">
                         <div className="flex items-center gap-0.5">
                           <ActionButton icon={Eye} onClick={() => setDetailId(c.id)} title="Ver detalle" />
-                          {(c.status === 'active' || c.status === 'waiting_delivery') && (
+                          {(c.status === 'active' || c.status === 'waiting_delivery' || c.status === 'defaulted') && (
                             <ActionButton
                               icon={Banknote}
                               tone="success"
@@ -672,7 +672,9 @@ export function CobranzasCreditosPage() {
                   </Button>
                 </>
               )}
-              {(detail?.credit.status === 'active' || detail?.credit.status === 'waiting_delivery') && (
+              {(detail?.credit.status === 'active' ||
+                detail?.credit.status === 'waiting_delivery' ||
+                detail?.credit.status === 'defaulted') && (
                 <Button
                   size="sm"
                   variant="outline"
