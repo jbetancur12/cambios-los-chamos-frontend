@@ -12,6 +12,7 @@ import { useModuleQuery } from '@/hooks/useModuleQuery'
 import { getTodayCollections, registerPayment, type TodayCollection } from '@/services/cobranzasApi'
 import { CurrencyInput } from '@/components/CurrencyInput'
 import { ReceiptModal } from '@/components/cobranzas/ReceiptModal'
+import { InstallmentCountPicker } from '@/components/cobranzas/InstallmentCountPicker'
 import { formatMoney, formatDate, PAYMENT_METHOD_LABELS, FREQUENCY_LABELS } from '@/lib/cobranzasUtils'
 
 export function CobranzasCobrarHoyPage() {
@@ -180,6 +181,14 @@ export function CobranzasCobrarHoyPage() {
                     >
                       Saldo: {formatMoney(Math.ceil(Number(payTarget.balance)))}
                     </Button>
+                  </div>
+                  <div className="pt-1">
+                    <InstallmentCountPicker
+                      cuota={Math.ceil(Number(payTarget.amount))}
+                      maxCuotas={Math.max(1, Math.floor(Number(payTarget.balance) / Number(payTarget.amount)))}
+                      value={amount}
+                      onValueChange={setAmount}
+                    />
                   </div>
                 </div>
                 <div className="space-y-1.5">

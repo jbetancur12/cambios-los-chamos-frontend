@@ -31,6 +31,7 @@ import { PromptDialog } from '@/components/ui/PromptDialog'
 import { ActionButton } from '@/components/ui/ActionButton'
 import { ReceiptModal } from '@/components/cobranzas/ReceiptModal'
 import { ClientPicker } from '@/components/cobranzas/ClientPicker'
+import { InstallmentCountPicker } from '@/components/cobranzas/InstallmentCountPicker'
 import {
   listCredits,
   exportCredits,
@@ -1206,6 +1207,14 @@ function PayModal({
                   >
                     Saldo: {formatMoney(Math.ceil(Number(credit.balance)))}
                   </Button>
+                </div>
+                <div className="pt-1">
+                  <InstallmentCountPicker
+                    cuota={Math.ceil(Number(credit.installmentAmount ?? 0))}
+                    maxCuotas={Number(credit.totalInstallments ?? 0) - Number(credit.paidInstallmentsCount ?? 0)}
+                    value={amount}
+                    onValueChange={setAmount}
+                  />
                 </div>
               </div>
               <div className="space-y-1.5">
