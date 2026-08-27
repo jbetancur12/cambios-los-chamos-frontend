@@ -23,6 +23,7 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import { ModeToggle } from './ModeToggle'
+import { NotificationBellButton } from './NotificationBellButton'
 
 interface NavItem {
   icon: typeof Home
@@ -199,6 +200,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
                 </Button>
               </div>
               <ModeToggle />
+              <NotificationBellButton className="text-white hover:text-white hover:bg-white/15 dark:text-foreground dark:hover:text-muted-foreground" />
             </div>
           </div>
         </div>
@@ -303,6 +305,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
                 </Button>
               </div>
               <ModeToggle />
+              <NotificationBellButton className="text-white hover:text-white hover:bg-white/15 dark:text-foreground dark:hover:text-muted-foreground" />
             </div>
           </div>
         </div>

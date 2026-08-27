@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { useSearchParams, useLocation } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent } from '@/components/ui/card'
@@ -34,6 +35,8 @@ type DateFilterType =
 export function GirosPage() {
   const { user } = useAuth()
   const queryClient = useQueryClient()
+  const [searchParams] = useSearchParams()
+  const location = useLocation()
 
   // Filter states
   const [filterStatus, setFilterStatus] = useState<GiroStatus | 'ALL'>('ASIGNADO')
@@ -54,6 +57,19 @@ export function GirosPage() {
   const [detailSheetOpen, setDetailSheetOpen] = useState(false)
   const [selectedGiroId, setSelectedGiroId] = useState<string | null>(null)
   const [selectedGiroStatus, setSelectedGiroStatus] = useState<GiroStatus | undefined>(undefined)
+
+  // Abrir detalle si se llegó desde una notificación (?giroId=)
+  useEffect(() => {
+    const giroId = searchParams.get('giroId')
+    if (giroId) {
+      setSelectedGiroId(giroId)
+      setDetailSheetOpen(true)
+      const params = new URLSearchParams(searchParams)
+      params.delete('giroId')
+      window.history.replaceState(null, '', `${location.pathname}?${params.toString()}`)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   const [searchQuery, setSearchQuery] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [page, setPage] = useState(1)

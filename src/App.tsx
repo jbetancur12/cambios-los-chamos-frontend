@@ -1,5 +1,5 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { Toaster } from 'sonner'
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
+import { Toaster, toast } from 'sonner'
 import { QueryClientProvider } from '@tanstack/react-query'
 
 import { queryClient } from '@/lib/queryClient'
@@ -33,6 +33,13 @@ import InventoryPage from '@/pages/InventoryPage'
 
 import { useEffect } from 'react'
 import { requestNotifyPermission } from './firebase/messaging'
+import {
+  listenForegroundMessages,
+  subscribePermissionChanges,
+  getPermissionState,
+  refreshToken,
+  emitPermissionChanged,
+} from '@/services/notificationService'
 import { useGiroWebSocket } from '@/hooks/useGiroWebSocket'
 import { setupWebSocketSync } from '@/lib/websocketSync'
 import { UpdatePrompt } from '@/components/UpdatePrompt'
@@ -60,12 +67,62 @@ function WebSocketSyncInitializer() {
 
 function PushInitializer() {
   const { user } = useAuth()
+  const navigate = useNavigate()
 
+  // Permiso automático al iniciar sesión (mantiene comportamiento actual)
   useEffect(() => {
     if (user) {
-      requestNotifyPermission(user.id)
+      requestNotifyPermission(user.id).then(() => {
+        emitPermissionChanged()
+      })
     }
   }, [user])
+
+  // Mensajes en primer plano (app abierta): toast + navegar al giro.
+  // Se re-configura cuando el permiso cambia (ej: bell button).
+  useEffect(() => {
+    if (!user) return
+
+    let unsubscribe: (() => void) | undefined
+
+    const setup = async () => {
+      if (getPermissionState() !== 'granted') return
+      refreshToken(user.id)
+      unsubscribe = await listenForegroundMessages((payload) => {
+        const giroId = payload.data?.giro_id
+        const tipo = payload.data?.tipo
+
+        toast(payload.title || 'Nueva notificación', {
+          description: payload.body,
+          action: giroId
+            ? {
+                label: 'Ver',
+                onClick: () => navigate(`/giros?giroId=${giroId}`),
+              }
+            : undefined,
+        })
+
+        console.log('[FCM] Mensaje en primer plano:', tipo, giroId)
+      })
+    }
+
+    const teardown = () => {
+      unsubscribe?.()
+      unsubscribe = undefined
+    }
+
+    setup()
+
+    const unsubPermission = subscribePermissionChanges(() => {
+      teardown()
+      setup()
+    })
+
+    return () => {
+      teardown()
+      unsubPermission()
+    }
+  }, [user, navigate])
 
   return null
 }

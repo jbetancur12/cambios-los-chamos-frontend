@@ -1,7 +1,7 @@
 /** Firebase SW - NO usar ES modules */
 
-importScripts("https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js")
-importScripts("https://www.gstatic.com/firebasejs/10.14.0/firebase-messaging-compat.js")
+importScripts("https://www.gstatic.com/firebasejs/12.5.0/firebase-app-compat.js")
+importScripts("https://www.gstatic.com/firebasejs/12.5.0/firebase-messaging-compat.js")
 
 firebase.initializeApp({
   apiKey: "AIzaSyAD5-bN73tC0LMFMQXbEAlMP9-TIA3_ApM",
@@ -19,14 +19,41 @@ console.log("[firebase-messaging-sw.js] Firebase Messaging Service Worker Initia
 messaging.onBackgroundMessage((payload) => {
   console.log("[firebase-messaging-sw.js] Received background message:", payload)
 
-  const notificationTitle = payload.notification.title
+  const notificationTitle = payload.notification?.title || "Nueva notificación"
   const notificationOptions = {
-    body: payload.notification.body,
-    icon: "/icons/icon-192x192.png"
+    body: payload.notification?.body || "",
+    icon: "/icons/icon-192x192.png",
+    badge: "/icons/icon-192x192.png",
+    tag: payload.data?.giro_id || "giro-notification",
+    data: {
+      giro_id: payload.data?.giro_id || "",
+      tipo: payload.data?.tipo || ""
+    }
   }
 
-  self.registration.showNotification(
-    notificationTitle,
-    notificationOptions
+  self.registration.showNotification(notificationTitle, notificationOptions)
+})
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close()
+
+  const giroId = event.notification.data?.giro_id
+  const url = giroId ? `/giros?giroId=${giroId}` : "/giros"
+
+  event.waitUntil(
+    (async () => {
+      const windowClients = await clients.matchAll({ type: "window", includeUncontrolled: true })
+      for (const client of windowClients) {
+        if ("focus" in client) {
+          client.focus()
+          return
+        }
+      }
+      try {
+        await clients.openWindow(url)
+      } catch (error) {
+        console.warn("[firebase-messaging-sw.js] openWindow fuera de scope:", error)
+      }
+    })()
   )
 })
