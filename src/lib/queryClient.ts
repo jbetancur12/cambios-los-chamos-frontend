@@ -27,8 +27,8 @@ export const queryClient = new QueryClient({
       // No refetch al volver a la ventana
       refetchOnWindowFocus: false,
 
-      // No refetch al reconectar
-      refetchOnReconnect: false,
+      // Refetch al reconectar red (socket revive y necesita snapshot fresco)
+      refetchOnReconnect: true,
 
       // Retry con exponential backoff automático
       retry: (failureCount, error: unknown) => {
