@@ -118,7 +118,6 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
   // Selected suggestion + update-vs-new decision
   const [selectedSuggestion, setSelectedSuggestion] = useState<BeneficiaryData | null>(null)
   const [updateModalOpen, setUpdateModalOpen] = useState(false)
-  const [pendingUpdateAction, setPendingUpdateAction] = useState<boolean | null>(null)
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(async () => {
@@ -230,7 +229,6 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
     setUseCustomRate(false)
     setNameSuggestions([])
     setSelectedSuggestion(null)
-    setPendingUpdateAction(null)
   }
 
   const handleNameChange = (value: string) => {
@@ -246,7 +244,6 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
     if (suggestion.senderPhone) setSenderPhone(suggestion.senderPhone)
     setNameSuggestions([])
     setSelectedSuggestion(suggestion)
-    setPendingUpdateAction(null)
   }
 
   const handleSelectBeneficiaryFromCedula = (suggestion: BeneficiaryData) => {
@@ -257,7 +254,6 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
     if (suggestion.senderPhone) setSenderPhone(suggestion.senderPhone)
     setShowCedulaSuggestions(false)
     setSelectedSuggestion(suggestion)
-    setPendingUpdateAction(null)
   }
 
   const suggestionFieldsDiffer = (s: BeneficiaryData) => beneficiaryName !== s.name || beneficiaryId !== s.id
@@ -290,16 +286,15 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    await doSubmit()
+    await doSubmit(null)
   }
 
   const handleUpdateModalConfirm = (update: boolean) => {
-    setPendingUpdateAction(update)
     setUpdateModalOpen(false)
-    void doSubmit()
+    void doSubmit(update)
   }
 
-  const doSubmit = async () => {
+  const doSubmit = async (updateAction: boolean | null) => {
     if (!beneficiaryName || !beneficiaryId || !bankId || !accountNumber || !amountInput) {
       toast.error('Por favor complete todos los campos requeridos')
       return
@@ -312,7 +307,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
     }
 
     // If a suggestion was selected and a field changed, ask how to persist it
-    if (selectedSuggestion && suggestionFieldsDiffer(selectedSuggestion) && pendingUpdateAction === null) {
+    if (selectedSuggestion && suggestionFieldsDiffer(selectedSuggestion) && updateAction === null) {
       setUpdateModalOpen(true)
       return
     }
@@ -330,7 +325,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
         amountInput: amount,
         currencyInput,
         // Si se decide actualizar una sugerencia existente, el backend no debe crear otra fila
-        skipBeneficiarySuggestionSave: pendingUpdateAction === true && selectedSuggestion ? true : undefined,
+        skipBeneficiarySuggestionSave: updateAction === true && selectedSuggestion ? true : undefined,
       }
 
       if ((isSuperAdmin || isAdmin) && useCustomRate) {
@@ -351,7 +346,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
       await createGiroMutation.mutateAsync(payload)
 
       // Save beneficiary suggestion for future use
-      const shouldUpdateSuggestion = pendingUpdateAction === true && selectedSuggestion
+      const shouldUpdateSuggestion = updateAction === true && selectedSuggestion
       addSuggestion({
         name: beneficiaryName,
         id: beneficiaryId,

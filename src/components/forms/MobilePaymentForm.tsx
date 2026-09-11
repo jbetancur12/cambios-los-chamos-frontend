@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -82,12 +82,21 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   // Server-side search state
   const [cedulaSuggestions, setCedulaSuggestions] = useState<BeneficiaryData[]>([])
 
+  // Selected suggestion + phone-update decision
+  const [selectedSuggestion, setSelectedSuggestion] = useState<BeneficiaryData | null>(null)
+  const [updateModalOpen, setUpdateModalOpen] = useState(false)
+
+  const phoneChanged = useMemo(
+    () => !!selectedSuggestion && (phone || '') !== (selectedSuggestion.phone || ''),
+    [selectedSuggestion, phone]
+  )
+
   useEffect(() => {
     const delayDebounceFn = setTimeout(async () => {
       if (cedula && cedula.length >= 3) {
         try {
           // Use server-side search instead of local filtering
-          const results = await searchSuggestions(cedula)
+          const results = await searchSuggestions(cedula, 'PAGO_MOVIL')
           setCedulaSuggestions(results)
         } catch (error) {
           console.error('Error searching suggestions:', error)
@@ -213,9 +222,17 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
 
   const amountBs = effectiveRate && amountCop ? (Number(amountCop) / effectiveRate.sellRate).toFixed(2) : '0.00'
 
+  const handleUpdateModalConfirm = (update: boolean) => {
+    setUpdateModalOpen(false)
+    void submitPayment(update)
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    await submitPayment(null)
+  }
 
+  const submitPayment = async (updateAction: boolean | null) => {
     if (!cedula?.trim() || !selectedBank || !phone?.trim() || !amountCop) {
       toast.error('Por favor completa todos los campos')
       return
@@ -224,6 +241,12 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
     const amount = parseFloat(amountCop as string)
     if (isNaN(amount) || amount <= 0) {
       toast.error('El monto debe ser un número positivo')
+      return
+    }
+
+    // If a saved suggestion was selected and the phone changed, ask how to persist it
+    if (phoneChanged && updateAction === null) {
+      setUpdateModalOpen(true)
       return
     }
 
@@ -271,6 +294,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
       // Always save/update suggestion
       const bankObj = banks.find((b) => b.id === selectedBank)
       if (bankObj) {
+        const shouldUpdateSuggestion = updateAction === true && selectedSuggestion
         await addSuggestion({
           name: senderName || phone, // Use nickname/senderName or fallback to phone
           id: cedula,
@@ -279,6 +303,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
           bankId: selectedBank,
           accountNumber: '', // Not used for mobile payment but required by type
           executionType: 'PAGO_MOVIL',
+          suggestionId: shouldUpdateSuggestion ? selectedSuggestion?.suggestionId : undefined,
         })
       }
 
@@ -305,6 +330,8 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
     setAmountCop('')
     setShowCedulaSuggestions(false)
     setUseCustomRate(false)
+    setSelectedSuggestion(null)
+    setUpdateModalOpen(false)
   }
 
   const handleSelectBeneficiary = (beneficiary: BeneficiaryData) => {
@@ -316,6 +343,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
       setSelectedBank(beneficiary.bankId)
     }
     setShowCedulaSuggestions(false)
+    setSelectedSuggestion(beneficiary)
   }
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -657,6 +685,67 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
           )}
         </Button>
       </div>
+      {updateModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+          onClick={() => setUpdateModalOpen(false)}
+        >
+          <div
+            className="bg-background rounded-lg shadow-xl w-full max-w-md overflow-hidden max-h-[90dvh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-6 py-4 border-b">
+              <h2 className="text-lg font-semibold">Actualizar beneficiario</h2>
+            </div>
+            <div className="px-6 py-4 text-sm text-muted-foreground overflow-y-auto">
+              <p>
+                Modificaste el teléfono de una sugerencia guardada{' '}
+                <span className="font-semibold text-foreground">{selectedSuggestion?.name}</span>. ¿Quieres actualizar
+                la sugerencia existente o guardar estos datos como un nuevo beneficiario?
+              </p>
+              {selectedSuggestion && (
+                <div className="mt-3 space-y-2 rounded-lg border p-3 text-xs">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-medium text-muted-foreground shrink-0">Teléfono</span>
+                    <span className="flex items-center gap-1 min-w-0 text-right">
+                      <span className="line-through text-muted-foreground truncate">
+                        {selectedSuggestion.phone || '—'}
+                      </span>
+                      <span className="text-muted-foreground shrink-0">→</span>
+                      <span className="font-semibold text-foreground truncate">{phone || '—'}</span>
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="flex flex-col-reverse gap-2 px-6 py-4 border-t bg-muted/10 sm:flex-row sm:items-center sm:justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full sm:w-auto"
+                onClick={() => setUpdateModalOpen(false)}
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full sm:w-auto"
+                onClick={() => handleUpdateModalConfirm(false)}
+              >
+                Guardar como nueva
+              </Button>
+              <Button
+                type="button"
+                className="w-full sm:w-auto bg-[linear-gradient(to_right,#136BBC,#274565)] hover:opacity-90 transition-opacity"
+                onClick={() => handleUpdateModalConfirm(true)}
+              >
+                Actualizar
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
       <DeleteConfirmationModal
         open={deleteModalOpen}
         onOpenChange={setDeleteModalOpen}
