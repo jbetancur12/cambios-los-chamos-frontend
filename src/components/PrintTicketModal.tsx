@@ -8,6 +8,7 @@ import { usePrinterConfig } from '@/hooks/usePrinterConfig'
 
 interface ThermalTicketData {
   companyName: string
+  companyNit: string
   companyPhone: string
   companyAddress: string
   companyCity: string
@@ -147,6 +148,11 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
             margin-bottom: 5px;
         }
 
+        .company-nit {
+            font-size: 11px;
+            margin-bottom: 1px;
+        }
+
         .divider {
             font-size: 11px;
             text-align: center;
@@ -249,6 +255,7 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
         <!-- ENCABEZADO -->
         <div class="header">
             <div class="company-name">${data.companyName}</div>
+            <div class="company-nit">${data.companyNit}</div>
             <div class="company-address">${data.companyAddress}</div>
             <div class="company-city">${data.companyCity}</div>
             <div class="company-phone">${data.companyPhone}</div>
@@ -301,10 +308,6 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
                 <span class="label">Entrada:</span>
                 <span class="value">${data.amountInput}</span>
             </div>
-            <div class="row">
-                <span class="label">TRM/BCV:</span>
-                <span class="value">${data.bcvApplied}</span>
-            </div>
             <div class="amount-highlight">
                 Bs. ${data.amountBs}
             </div>
@@ -314,19 +317,9 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
         <!-- EJECUCIÓN -->
         <div class="section">
             <div class="row">
-                <span class="label">Tipo:</span>
-                <span class="value">${data.executionType}</span>
+                <span class="label">Tasa del día:</span>
+                <span class="value">${data.bcvApplied}</span>
             </div>
-            ${
-              data.executedByName
-                ? `
-            <div class="row">
-                <span class="label">Ejecutado por:</span>
-                <span class="value-1">${data.executedByName}</span>
-            </div>
-            `
-                : ''
-            }
         </div>
 
         <div class="status-completed">✓ GIRO COMPLETADO</div>
@@ -425,6 +418,9 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
                   <div style={{ textAlign: 'center', fontWeight: 'bold', marginBottom: '5px' }}>
                     {ticketData.companyName}
                   </div>
+                  <div style={{ textAlign: 'center', fontSize: '10px', marginBottom: '2px' }}>
+                    {ticketData.companyNit}
+                  </div>
                   <div style={{ textAlign: 'center', fontSize: '10px', marginBottom: '10px' }}>
                     {ticketData.companyPhone}
                   </div>
@@ -447,12 +443,14 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
                     <div style={{ textAlign: 'center', fontWeight: 'bold', margin: '5px 0' }}>
                       Bs. {ticketData.amountBs}
                     </div>
-                    <div>TRM: {ticketData.bcvApplied}</div>
                   </div>
 
                   <div style={{ marginBottom: '10px', borderTop: '1px dashed #000', paddingTop: '5px' }}>
-                    <div>Tipo: {ticketData.executionType}</div>
-                    {ticketData.executedByName && <div>Ejecutado por: {ticketData.executedByName}</div>}
+                    <div>Tasa del día: {ticketData.bcvApplied}</div>
+                  </div>
+
+                  <div style={{ marginBottom: '10px', borderTop: '1px dashed #000', paddingTop: '5px' }}>
+                    <div>Tasa del día: {ticketData.bcvApplied}</div>
                   </div>
 
                   <div style={{ textAlign: 'center', marginTop: '10px', fontSize: '10px' }}>
