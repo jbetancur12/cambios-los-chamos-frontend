@@ -197,7 +197,8 @@ export function useCreateMobilePayment() {
     mutationFn: async (data: CreateMobilePaymentInput) => {
       // Note: The backend endpoint is /giro/mobile-payment/create.
       // We assume the caller constructs the payload correctly.
-      await api.post('/giro/mobile-payment/create', data)
+      const response = await api.post<{ giro: Giro; message: string }>('/giro/mobile-payment/create', data)
+      return response.giro
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['giros'], exact: false, refetchType: 'all' })
@@ -220,7 +221,8 @@ export function useCreateRecharge() {
 
   return useMutation({
     mutationFn: async (data: CreateRechargeInput) => {
-      await api.post('/giro/recharge/create', data)
+      const response = await api.post<{ giro: Giro; message: string }>('/giro/recharge/create', data)
+      return response.giro
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['giros'], exact: false, refetchType: 'all' })

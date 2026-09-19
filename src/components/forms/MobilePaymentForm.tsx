@@ -12,6 +12,7 @@ import type { ExchangeRate, Minorista } from '@/types/api'
 import { BalanceInfo } from '@/components/BalanceInfo'
 import { NumericFormat } from 'react-number-format'
 import { DeleteConfirmationModal } from '@/components/ui/DeleteConfirmationModal'
+import { PrintTicketModal } from '@/components/PrintTicketModal'
 
 interface Bank {
   id: string
@@ -47,6 +48,8 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [suggestionToDelete, setSuggestionToDelete] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [ticketGiroId, setTicketGiroId] = useState<string | null>(null)
+  const [showTicketModal, setShowTicketModal] = useState(false)
 
   const confirmDelete = (suggestionId: string) => {
     setSuggestionToDelete(suggestionId)
@@ -289,7 +292,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
         payload.customRate = { buyRate, sellRate, usd, bcv }
       }
 
-      await createMobilePaymentMutation.mutateAsync(payload)
+      const createdGiro = await createMobilePaymentMutation.mutateAsync(payload)
 
       // Always save/update suggestion
       const bankObj = banks.find((b) => b.id === selectedBank)
@@ -313,6 +316,10 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
         fetchMinoristaBalance()
       }
       onSuccess()
+      if ((isSuperAdmin || isAdmin) && createdGiro?.id) {
+        setTicketGiroId(createdGiro.id)
+        setShowTicketModal(true)
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Error al procesar el pago móvil'
       toast.error(message)
@@ -359,6 +366,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   }
 
   return (
+    <>
     <form ref={formRef} onSubmit={handleSubmit} className="p-4 md:p-6 space-y-2" autoComplete="off">
       {/* Información del Beneficiario */}
       <div className="bg-blue-50 p-3 rounded mb-2 md:mb-4 border border-blue-200">
@@ -755,5 +763,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
         description="¿Estás seguro de que quieres eliminar este beneficiario guardado? Esta acción no se puede deshacer."
       />
     </form>
+    <PrintTicketModal giroId={ticketGiroId ?? ''} open={showTicketModal} onOpenChange={setShowTicketModal} />
+    </>
   )
 }

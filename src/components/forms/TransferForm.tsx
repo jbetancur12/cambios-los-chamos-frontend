@@ -13,6 +13,7 @@ import { BalanceInfo } from '@/components/BalanceInfo'
 import { BeneficiaryAutocomplete } from '@/components/BeneficiaryAutocomplete'
 import { useBeneficiarySuggestions, type BeneficiaryData } from '@/hooks/useBeneficiarySuggestions'
 import { useCreateGiro, type CreateGiroInput } from '@/hooks/mutations/useGiroMutations'
+import { PrintTicketModal } from '@/components/PrintTicketModal'
 
 interface TransferFormProps {
   onSuccess: () => void
@@ -30,6 +31,8 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [suggestionToDelete, setSuggestionToDelete] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [ticketGiroId, setTicketGiroId] = useState<string | null>(null)
+  const [showTicketModal, setShowTicketModal] = useState(false)
 
   const confirmDelete = (suggestionId: string) => {
     setSuggestionToDelete(suggestionId)
@@ -343,7 +346,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
         payload.customRate = { buyRate, sellRate, usd, bcv }
       }
 
-      await createGiroMutation.mutateAsync(payload)
+      const createdGiro = await createGiroMutation.mutateAsync(payload)
 
       // Save beneficiary suggestion for future use
       const shouldUpdateSuggestion = updateAction === true && selectedSuggestion
@@ -364,6 +367,10 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
         fetchMinoristaBalance()
       }
       onSuccess()
+      if ((isSuperAdmin || isAdmin) && createdGiro?.id) {
+        setTicketGiroId(createdGiro.id)
+        setShowTicketModal(true)
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Error al crear giro'
       toast.error(message)
@@ -479,6 +486,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
   const amountBcv = effectiveRate && effectiveRate.bcv > 0 ? amountBs / effectiveRate.bcv : 0
 
   return (
+    <>
     <form ref={formRef} onSubmit={handleSubmit} className="p-4 md:p-6 space-y-2 w-full" autoComplete="off">
       {/* Beneficiary Info */}
       <div className="space-y-2">
@@ -918,5 +926,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
         description="¿Estás seguro de que quieres eliminar este beneficiario guardado? Esta acción no se puede deshacer."
       />
     </form>
+    <PrintTicketModal giroId={ticketGiroId ?? ''} open={showTicketModal} onOpenChange={setShowTicketModal} />
+    </>
   )
 }

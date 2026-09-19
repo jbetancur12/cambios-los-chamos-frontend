@@ -16,6 +16,7 @@ interface ThermalTicketData {
   giroId: string
   createdAt: string
   completedAt?: string
+  status: string
   beneficiaryName: string
   beneficiaryId: string
   bankName: string
@@ -41,6 +42,25 @@ interface PrintTicketModalProps {
   onOpenChange: (open: boolean) => void
 }
 
+const getStatusLabel = (status?: string): string => {
+  switch (status) {
+    case 'PENDIENTE':
+      return '• GIRO REGISTRADO'
+    case 'ASIGNADO':
+      return '• GIRO ASIGNADO'
+    case 'PROCESANDO':
+      return '• GIRO EN PROCESO'
+    case 'COMPLETADO':
+      return '✓ GIRO COMPLETADO'
+    case 'CANCELADO':
+      return '✗ GIRO CANCELADO'
+    case 'DEVUELTO':
+      return '↩ GIRO DEVUELTO'
+    default:
+      return '• GIRO REGISTRADO'
+  }
+}
+
 /**
  * Componente para imprimir tiquete térmico (80mm) desde navegador
  * Optimizado para impresoras térmicas de rollo
@@ -57,7 +77,7 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
   // Cargar datos del tiquete y configuración cuando se abre el modal
   useEffect(() => {
     if (open) {
-      if (!ticketData) {
+      if (!ticketData || ticketData.giroId !== giroId) {
         fetchTicketData()
       }
       const config = getPrinterConfig()
@@ -66,7 +86,7 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
         setAutoSavePrinter(true)
       }
     }
-  }, [open])
+  }, [open, giroId])
 
   const fetchTicketData = async () => {
     setLoading(true)
@@ -322,7 +342,7 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
             </div>
         </div>
 
-        <div class="status-completed">✓ GIRO COMPLETADO</div>
+        <div class="status-completed">${getStatusLabel(data.status)}</div>
 
         <!-- FOOTER -->
         <div class="footer">
@@ -449,8 +469,8 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
                     <div>Tasa del día: {ticketData.bcvApplied}</div>
                   </div>
 
-                  <div style={{ marginBottom: '10px', borderTop: '1px dashed #000', paddingTop: '5px' }}>
-                    <div>Tasa del día: {ticketData.bcvApplied}</div>
+                  <div style={{ textAlign: 'center', fontWeight: 'bold', marginBottom: '8px' }}>
+                    {getStatusLabel(ticketData.status)}
                   </div>
 
                   <div style={{ textAlign: 'center', marginTop: '10px', fontSize: '10px' }}>

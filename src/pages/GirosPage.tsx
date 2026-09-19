@@ -827,7 +827,9 @@ export function GirosPage() {
                         </td> */}
                         <td className="px-3 py-2 w-16">
                           <div className="flex justify-center">
-                            {giro.status === 'COMPLETADO' && (
+                            {(giro.status === 'COMPLETADO' ||
+                              user?.role === 'SUPER_ADMIN' ||
+                              user?.role === 'ADMIN') && (
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation()
