@@ -11,7 +11,6 @@ import { useCreateRecharge } from '@/hooks/mutations/useGiroMutations'
 import type { ExchangeRate, Minorista } from '@/types/api'
 import { BalanceInfo } from '@/components/BalanceInfo'
 import { formatCurrency } from '@/lib/formatCurrency'
-import { PrintTicketModal } from '@/components/PrintTicketModal'
 
 interface RechargeOperator {
   id: string
@@ -50,12 +49,8 @@ export function RechargeForm({ onSuccess }: RechargeFormProps) {
   const [minoristaBalance, setMinoristaBalance] = useState<number | null>(null)
   const [minoristaBalanceInFavor, setMinoristaBalanceInFavor] = useState<number | null>(null)
   const [loadingBalance, setLoadingBalance] = useState(false)
-  const [ticketGiroId, setTicketGiroId] = useState<string | null>(null)
-  const [showTicketModal, setShowTicketModal] = useState(false)
 
   const isMinorista = user?.role === 'MINORISTA'
-  const isSuperAdmin = user?.role === 'SUPER_ADMIN'
-  const isAdmin = user?.role === 'ADMIN'
 
   useEffect(() => {
     loadOperators()
@@ -170,7 +165,7 @@ export function RechargeForm({ onSuccess }: RechargeFormProps) {
 
     setLoading(true)
     try {
-      const createdGiro = await createRechargeMutation.mutateAsync({
+      await createRechargeMutation.mutateAsync({
         operatorId: selectedOperator,
         amountBsId: selectedAmount,
         phone,
@@ -184,10 +179,6 @@ export function RechargeForm({ onSuccess }: RechargeFormProps) {
       }
       onSuccess()
       onSuccess()
-      if ((isSuperAdmin || isAdmin) && createdGiro?.id) {
-        setTicketGiroId(createdGiro.id)
-        setShowTicketModal(true)
-      }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Error al procesar la recarga'
       toast.error(message)
@@ -205,7 +196,6 @@ export function RechargeForm({ onSuccess }: RechargeFormProps) {
   }
 
   return (
-    <>
     <form onSubmit={handleSubmit} className="p-6 space-y-4" autoComplete="off">
       <div>
         <Label htmlFor="operator" className="hidden md:block">
@@ -327,7 +317,5 @@ export function RechargeForm({ onSuccess }: RechargeFormProps) {
         </Button>
       </div>
     </form>
-    <PrintTicketModal giroId={ticketGiroId ?? ''} open={showTicketModal} onOpenChange={setShowTicketModal} />
-    </>
   )
 }
