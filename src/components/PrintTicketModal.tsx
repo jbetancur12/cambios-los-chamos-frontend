@@ -157,6 +157,13 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
             margin-bottom: 10px;
         }
 
+        .company-logo {
+            display: block;
+            height: 120px;
+            width: auto;
+            margin: -28px auto -28px auto;
+        }
+
         .company-name {
             font-weight: bold;
             font-size: 14px;
@@ -274,6 +281,7 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
     <div class="ticket">
         <!-- ENCABEZADO -->
         <div class="header">
+            <img class="company-logo" src="${window.location.origin}/LogoLosChamos.avif" alt="Logo" />
             <div class="company-name">${data.companyName}</div>
             <div class="company-nit">${data.companyNit}</div>
             <div class="company-address">${data.companyAddress}</div>
@@ -435,6 +443,11 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
                     wordWrap: 'break-word',
                   }}
                 >
+                  <img
+                    src="/LogoLosChamos.avif"
+                    alt="Logo"
+                    style={{ display: 'block', height: '100px', width: 'auto', margin: '-24px auto -24px auto' }}
+                  />
                   <div style={{ textAlign: 'center', fontWeight: 'bold', marginBottom: '5px' }}>
                     {ticketData.companyName}
                   </div>
