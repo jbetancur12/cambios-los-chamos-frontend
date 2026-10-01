@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
-import { api } from '@/lib/api'
+import { api, ApiError } from '@/lib/api'
 
 export function CustomerRegistrationPage() {
   const [loading, setLoading] = useState(false)
@@ -101,8 +101,10 @@ export function CustomerRegistrationPage() {
       await api.post('/invoice-clientes/register', payload)
       setSuccess(true)
       toast.success(isUpdateMode ? 'Datos actualizados exitosamente.' : 'Datos registrados exitosamente.')
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Error al guardar los datos. Por favor, intente nuevamente.')
+    } catch (error) {
+      toast.error(
+        error instanceof ApiError ? error.message : 'Error al guardar los datos. Por favor, intente nuevamente.'
+      )
     } finally {
       setLoading(false)
     }

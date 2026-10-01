@@ -63,7 +63,7 @@ export function RechargeMinoristaBalanceSheet({
     try {
       // Fetch only pending/assigned/processing giros for this minorista
       const response = await api.get<{
-        giros: any[]
+        giros: { amountInput?: number }[]
       }>(`/giro/list?minoristaId=${localMinorista.id}&status=PENDIENTE,ASIGNADO,PROCESANDO&limit=1000`)
 
       const giros = response.giros || []

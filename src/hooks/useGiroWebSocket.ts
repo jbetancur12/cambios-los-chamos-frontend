@@ -52,7 +52,53 @@ export interface GiroEvent {
   reason?: string
 }
 
-type GiroEventListener = (event: GiroEvent) => void
+export interface MinoristaBalanceEvent {
+  minoristaId: string
+  availableCredit: number
+  creditBalance: number
+  timestamp: string
+}
+
+export interface MinoristaTransactionPayload {
+  id: string
+  amount: number
+  type: string
+  status: string
+  previousBalance: number
+  currentBalance: number
+  previousBalanceInFavor: number
+  currentBalanceInFavor: number
+  balanceInFavorUsed?: number
+  creditUsed?: number
+  externalDebt?: number
+  profitEarned?: number
+  createdBy?: { id: string; fullName: string; email: string }
+  minorista?: { id: string }
+  createdAt: string
+}
+
+export interface MinoristaTransactionEvent {
+  transaction: MinoristaTransactionPayload
+  timestamp: string
+}
+
+// Every event the hook can deliver, with the payload its listeners receive
+interface RealtimeEventMap {
+  'realtime:connected': GiroEvent
+  'giro:created': GiroEvent
+  'giro:updated': GiroEvent
+  'giro:processing': GiroEvent
+  'giro:executed': GiroEvent
+  'giro:returned': GiroEvent
+  'giro:deleted': GiroEvent
+  'giro:assigned': GiroEvent
+  'minorista:balance_updated': MinoristaBalanceEvent
+  'minorista:transaction_updated': MinoristaTransactionEvent
+}
+
+type RealtimeEventType = keyof RealtimeEventMap
+type RealtimeEvent = RealtimeEventMap[RealtimeEventType]
+type RealtimeListener = (event: RealtimeEvent) => void
 
 // Obtener URL del backend usando la misma lógica que el cliente API
 const getBackendUrl = () => {
@@ -80,10 +126,10 @@ const getBackendUrl = () => {
 
 export function useGiroWebSocket() {
   const socketRef = useRef<Socket | null>(null)
-  const listenersRef = useRef<Map<string, Set<GiroEventListener>>>(new Map())
+  const listenersRef = useRef<Map<RealtimeEventType, Set<RealtimeListener>>>(new Map())
 
   // Función para emitir eventos locales
-  const emitEvent = useCallback((eventType: string, event: GiroEvent) => {
+  const emitEvent = useCallback(<K extends RealtimeEventType>(eventType: K, event: RealtimeEventMap[K]) => {
     const listeners = listenersRef.current.get(eventType)
     if (listeners) {
       listeners.forEach((listener) => listener(event))
@@ -169,11 +215,11 @@ export function useGiroWebSocket() {
       })
 
       // Eventos de Minorista
-      socket.on('minorista:balance_updated', (payload: any) => {
+      socket.on('minorista:balance_updated', (payload: MinoristaBalanceEvent) => {
         emitEvent('minorista:balance_updated', { ...payload, timestamp: new Date().toISOString() })
       })
 
-      socket.on('minorista:transaction_updated', (payload: any) => {
+      socket.on('minorista:transaction_updated', (payload: MinoristaTransactionEvent) => {
         emitEvent('minorista:transaction_updated', { ...payload, timestamp: new Date().toISOString() })
       })
 
@@ -242,20 +288,25 @@ export function useGiroWebSocket() {
   }, [user])
 
   // Suscribirse a eventos
-  const subscribe = useCallback((eventType: string, listener: GiroEventListener) => {
-    if (!listenersRef.current.has(eventType)) {
-      listenersRef.current.set(eventType, new Set())
-    }
-    listenersRef.current.get(eventType)!.add(listener)
-
-    // Retornar función para desuscribirse
-    return () => {
-      const listeners = listenersRef.current.get(eventType)
-      if (listeners) {
-        listeners.delete(listener)
+  const subscribe = useCallback(
+    <K extends RealtimeEventType>(eventType: K, listener: (event: RealtimeEventMap[K]) => void) => {
+      // The map is keyed by event type, so each set only ever receives its own payload type
+      const typedListener = listener as unknown as RealtimeListener
+      if (!listenersRef.current.has(eventType)) {
+        listenersRef.current.set(eventType, new Set())
       }
-    }
-  }, [])
+      listenersRef.current.get(eventType)!.add(typedListener)
+
+      // Retornar función para desuscribirse
+      return () => {
+        const listeners = listenersRef.current.get(eventType)
+        if (listeners) {
+          listeners.delete(typedListener)
+        }
+      }
+    },
+    []
+  )
 
   return {
     subscribe,

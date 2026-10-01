@@ -110,8 +110,8 @@ export function GirosPage() {
           setShowFacturaDialog(false)
           setGiroToFacturar(null)
         },
-        onError: (error: any) => {
-          const errorMessage = error.response?.data?.error || error.message || 'Error al generar factura'
+        onError: (error: Error) => {
+          const errorMessage = error.message || 'Error al generar factura'
           toast.error('Error del proveedor DIAN Factus', { description: errorMessage })
         },
       }
