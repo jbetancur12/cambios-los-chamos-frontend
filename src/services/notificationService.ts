@@ -40,7 +40,6 @@ async function registerFcmServiceWorker(): Promise<ServiceWorkerRegistration> {
 async function saveTokenToBackend(userId: string, token: string): Promise<void> {
   try {
     await api.post('/notifications/save-token', { userId, token })
-    console.log(`[FCM] Token guardado en la DB para usuario: ${userId}`)
   } catch (error) {
     console.error('[FCM] Error en saveTokenToBackend:', error)
   }
@@ -57,7 +56,6 @@ export async function requestPermission(userId: string): Promise<'granted' | 'de
   }
 
   try {
-    console.log('[FCM] Solicitando permiso de notificaciones...')
     const instance = await getMessagingInstance()
     const registration = await registerFcmServiceWorker()
 
@@ -67,14 +65,12 @@ export async function requestPermission(userId: string): Promise<'granted' | 'de
       return 'denied'
     }
 
-    console.log('[FCM] Permiso concedido. Obteniendo token...')
     const token = await getToken(instance, {
       vapidKey: VAPID_KEY,
       serviceWorkerRegistration: registration,
     })
 
     if (token) {
-      console.log('[FCM] Token FCM obtenido')
       await saveTokenToBackend(userId, token)
     } else {
       console.warn('[FCM] No se pudo obtener el token.')

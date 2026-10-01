@@ -59,7 +59,6 @@ export function MinoristaTransactionsPage() {
   const totalPages = transactionsResponse?.pagination.totalPages || 1
   const isLoading = transactionsQuery.isLoading
 
-  console.log('Transactions Response:', transactionsResponse)
 
   // Handle Update Logic
   const handleSingleDateChange = (date: string) => {

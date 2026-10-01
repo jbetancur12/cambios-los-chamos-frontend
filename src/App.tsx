@@ -85,7 +85,6 @@ function PushInitializer() {
       refreshToken(user.id)
       unsubscribe = await listenForegroundMessages((payload) => {
         const giroId = payload.data?.giro_id
-        const tipo = payload.data?.tipo
 
         toast(payload.title || 'Nueva notificación', {
           description: payload.body,
@@ -96,8 +95,6 @@ function PushInitializer() {
               }
             : undefined,
         })
-
-        console.log('[FCM] Mensaje en primer plano:', tipo, giroId)
       })
     }
 

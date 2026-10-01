@@ -21,7 +21,9 @@ createRoot(document.getElementById('root')!).render(
   </StrictMode>
 )
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-reportWebVitals((metric: any) => {
-  console.log({ ...metric, path: window.location.pathname })
+reportWebVitals((metric) => {
+  // Only log in development: in production this just fills the users' console
+  if (import.meta.env.DEV) {
+    console.log({ ...metric, path: window.location.pathname })
+  }
 })
