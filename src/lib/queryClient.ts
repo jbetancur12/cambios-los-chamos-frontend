@@ -1,11 +1,17 @@
 import { QueryClient } from '@tanstack/react-query'
+import { ApiError } from '@/lib/api'
 
-interface AxiosErrorResponse {
-  response?: {
-    status: number
-    data?: { message?: string }
+/**
+ * Queries are retried only for transient failures: the request never got a response
+ * (network error, unparseable body) or the server answered 5xx / 429. Other 4xx errors
+ * (401, 403, 404, 422...) will not change by retrying, so they fail immediately.
+ */
+const shouldRetryQuery = (failureCount: number, error: unknown): boolean => {
+  if (failureCount >= 2) return false
+  if (error instanceof ApiError && error.status !== undefined) {
+    return error.status >= 500 || error.status === 429
   }
-  message: string
+  return true
 }
 
 /**
@@ -30,42 +36,17 @@ export const queryClient = new QueryClient({
       // Refetch al reconectar red (socket revive y necesita snapshot fresco)
       refetchOnReconnect: true,
 
-      // Retry con exponential backoff automático
-      retry: (failureCount, error: unknown) => {
-        if (error && typeof error === 'object' && 'response' in error) {
-          const axiosError = error as AxiosErrorResponse
-          const status = axiosError.response?.status ?? 0
-          // No reintentar en errores 4xx excepto 429 (rate limit)
-          if (status >= 400 && status < 500 && status !== 429) {
-            return false
-          }
-        }
-
-        // Reintentar máximo 3 veces
-        return failureCount < 3
-      },
+      // Solo reintenta fallos transitorios (red, 5xx, 429), máximo 2 veces
+      retry: shouldRetryQuery,
 
       // Delay entre reintentos: 1s, 2s, 4s
       retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     },
 
     mutations: {
-      // Retry con exponential backoff para mutations
-      retry: (failureCount, error: unknown) => {
-        if (error && typeof error === 'object' && 'response' in error) {
-          const axiosError = error as AxiosErrorResponse
-          const status = axiosError.response?.status ?? 0
-          // No reintentar en errores 4xx excepto 429
-          if (status >= 400 && status < 500 && status !== 429) {
-            return false
-          }
-        }
-
-        // Reintentar máximo 2 veces para mutations
-        return failureCount < 2
-      },
-
-      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+      // Never retry mutations automatically: a POST that reached the server but failed on the way
+      // back would be sent twice and could duplicate giros or recharges.
+      retry: false,
     },
   },
 })

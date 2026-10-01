@@ -37,12 +37,14 @@ const getAuthHeaders = (): Record<string, string> => {
 export class ApiError extends Error {
   public code?: string
   public details?: unknown
+  public status?: number // HTTP status; undefined when the request never got a response
 
-  constructor(message: string, code?: string, details?: unknown) {
+  constructor(message: string, code?: string, details?: unknown, status?: number) {
     super(message)
     this.name = 'ApiError'
     this.code = code
     this.details = details
+    this.status = status
   }
 }
 
@@ -50,7 +52,12 @@ async function handleResponse<T>(response: Response): Promise<T> {
   const data: ApiResponse<T> = await response.json()
 
   if (!data.success || !response.ok) {
-    throw new ApiError(data.error?.message || 'Error en la petición', data.error?.code, data.error?.details)
+    throw new ApiError(
+      data.error?.message || 'Error en la petición',
+      data.error?.code,
+      data.error?.details,
+      response.status
+    )
   }
 
   return data.data as T

@@ -216,7 +216,7 @@ function App() {
                 <Route
                   path="/enviar-giro"
                   element={
-                    <ProtectedRoute>
+                    <ProtectedRoute requiredRole={['SUPER_ADMIN', 'ADMIN', 'MINORISTA']}>
                       <ErrorBoundary>
                         <DashboardLayout>
                           <SendGiroPage />
@@ -229,7 +229,7 @@ function App() {
                 <Route
                   path="/usuarios"
                   element={
-                    <ProtectedRoute>
+                    <ProtectedRoute requiredRole={['SUPER_ADMIN', 'ADMIN']}>
                       <ErrorBoundary>
                         <DashboardLayout>
                           <UsersPage />
@@ -256,7 +256,7 @@ function App() {
                 <Route
                   path="/transacciones-minorista"
                   element={
-                    <ProtectedRoute>
+                    <ProtectedRoute requiredRole="MINORISTA">
                       <ErrorBoundary>
                         <DashboardLayout>
                           <MinoristaTransactionsPage />
@@ -298,7 +298,7 @@ function App() {
                 <Route
                   path="/cuentas-bancarias"
                   element={
-                    <ProtectedRoute>
+                    <ProtectedRoute requiredRole={['SUPER_ADMIN', 'ADMIN']}>
                       <ErrorBoundary>
                         <DashboardLayout>
                           <BankAccountsPage />
@@ -326,7 +326,7 @@ function App() {
                 <Route
                   path="/reportes"
                   element={
-                    <ProtectedRoute>
+                    <ProtectedRoute requiredRole="SUPER_ADMIN">
                       <ErrorBoundary>
                         <DashboardLayout>
                           <ReportsPage />
