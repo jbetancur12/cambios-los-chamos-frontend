@@ -23,6 +23,15 @@ interface MobilePaymentFormProps {
   onSuccess: () => void
 }
 
+// Mobile payments have no beneficiary name; this label is used whenever there is no real contact name
+const DEFAULT_CONTACT_NAME = 'Pago Móvil'
+
+// Older suggestions stored 'Sistema', 'NA' or the phone as the name: treat them as the default label
+const contactNameOf = (name: string | undefined, phone?: string) => {
+  const value = (name || '').trim()
+  return !value || value === 'Sistema' || value === 'NA' || value === phone ? DEFAULT_CONTACT_NAME : value
+}
+
 export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   const { user } = useAuth()
   const createMobilePaymentMutation = useCreateMobilePayment()
@@ -31,7 +40,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   const [selectedBank, setSelectedBank] = useState('')
   const [phone, setPhone] = useState('')
   const [senderPhone, setSenderPhone] = useState('')
-  const [senderName, setSenderName] = useState('Sistema')
+  const [senderName, setSenderName] = useState(DEFAULT_CONTACT_NAME)
   const [amountCop, setAmountCop] = useState('')
   const [banks, setBanks] = useState<Bank[]>([])
   const [exchangeRate, setExchangeRate] = useState<ExchangeRate | null>(null)
@@ -90,8 +99,8 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
     if (!selectedSuggestion) return []
     const bankName = (bankIdToFind: string) => banks.find((b) => b.id === bankIdToFind)?.name || bankIdToFind
     const diffs: { label: string; old: string; new: string }[] = []
-    const savedName = selectedSuggestion.name || selectedSuggestion.phone
-    if (senderName !== savedName) diffs.push({ label: 'Nombre', old: savedName || '—', new: senderName || '—' })
+    const savedName = contactNameOf(selectedSuggestion.name, selectedSuggestion.phone)
+    if (senderName !== savedName) diffs.push({ label: 'Nombre', old: savedName, new: senderName || '—' })
     if (cedula !== selectedSuggestion.id) diffs.push({ label: 'Cédula', old: selectedSuggestion.id, new: cedula })
     if ((phone || '') !== (selectedSuggestion.phone || ''))
       diffs.push({ label: 'Teléfono', old: selectedSuggestion.phone || '—', new: phone || '—' })
@@ -284,7 +293,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
         bankId: selectedBank,
         phone,
         senderPhone: senderPhone || undefined,
-        contactoEnvia: senderName || '', // Send empty if not used
+        contactoEnvia: senderName || DEFAULT_CONTACT_NAME,
         amountCop: Number(amountCop),
         // "Actualizar" apunta a la sugerencia elegida; "Guardar como nueva" o sin selección la deja crear o reutilizar
         suggestionId: updateAction === true ? selectedSuggestion?.suggestionId : undefined,
@@ -326,7 +335,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
     setSelectedBank('')
     setPhone('')
     setSenderPhone('')
-    setSenderName('')
+    setSenderName(DEFAULT_CONTACT_NAME)
     setAmountCop('')
     setShowCedulaSuggestions(false)
     setUseCustomRate(false)
@@ -338,7 +347,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
     setPhone(beneficiary.phone)
     if (beneficiary.senderPhone) setSenderPhone(beneficiary.senderPhone)
     setCedula(beneficiary.id)
-    setSenderName(beneficiary.name || beneficiary.phone)
+    setSenderName(contactNameOf(beneficiary.name, beneficiary.phone))
     if (beneficiary.bankId && banks.length > 0) {
       setSelectedBank(beneficiary.bankId)
     }
