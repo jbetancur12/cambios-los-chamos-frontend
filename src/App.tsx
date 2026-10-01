@@ -5,6 +5,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from '@/lib/queryClient'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
+import { ACCESS } from '@/lib/permissions'
 import { DashboardLayout } from '@/components/DashboardLayout'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { LoginPage } from '@/pages/LoginPage'
@@ -139,7 +140,7 @@ function App() {
                 <Route
                   path="/auditoria-oculta"
                   element={
-                    <ProtectedRoute requiredRole={['SUPER_ADMIN', 'ADMIN']}>
+                    <ProtectedRoute requiredRole={ACCESS.auditoriaOculta}>
                       <DashboardLayout>
                         <AuditPage />
                       </DashboardLayout>
@@ -150,7 +151,7 @@ function App() {
                 <Route
                   path="/auditoria-beneficiarios"
                   element={
-                    <ProtectedRoute requiredRole="SUPER_ADMIN">
+                    <ProtectedRoute requiredRole={ACCESS.auditoriaBeneficiarios}>
                       <DashboardLayout>
                         <BeneficiaryAuditPage />
                       </DashboardLayout>
@@ -161,7 +162,7 @@ function App() {
                 <Route
                   path="/clientes-facturacion"
                   element={
-                    <ProtectedRoute requiredRole={['SUPER_ADMIN', 'ADMIN']}>
+                    <ProtectedRoute requiredRole={ACCESS.clientesFacturacion}>
                       <DashboardLayout>
                         <CustomerManagementPage />
                       </DashboardLayout>
@@ -206,7 +207,7 @@ function App() {
                 <Route
                   path="/enviar-giro"
                   element={
-                    <ProtectedRoute requiredRole={['SUPER_ADMIN', 'ADMIN', 'MINORISTA']}>
+                    <ProtectedRoute requiredRole={ACCESS.enviarGiro}>
                       <ErrorBoundary>
                         <DashboardLayout>
                           <SendGiroPage />
@@ -219,7 +220,7 @@ function App() {
                 <Route
                   path="/usuarios"
                   element={
-                    <ProtectedRoute requiredRole={['SUPER_ADMIN', 'ADMIN']}>
+                    <ProtectedRoute requiredRole={ACCESS.usuarios}>
                       <ErrorBoundary>
                         <DashboardLayout>
                           <UsersPage />
@@ -246,7 +247,7 @@ function App() {
                 <Route
                   path="/transacciones-minorista"
                   element={
-                    <ProtectedRoute requiredRole="MINORISTA">
+                    <ProtectedRoute requiredRole={ACCESS.transaccionesMinorista}>
                       <ErrorBoundary>
                         <DashboardLayout>
                           <MinoristaTransactionsPage />
@@ -274,7 +275,7 @@ function App() {
                 <Route
                   path="/calculadora-ves-compra"
                   element={
-                    <ProtectedRoute requiredRole={['SUPER_ADMIN', 'ADMIN']}>
+                    <ProtectedRoute requiredRole={ACCESS.calculadoraVesCompra}>
                       <ErrorBoundary>
                         <DashboardLayout>
                           <CalculadoraVesCompraPage />
@@ -288,7 +289,7 @@ function App() {
                 <Route
                   path="/cuentas-bancarias"
                   element={
-                    <ProtectedRoute requiredRole={['SUPER_ADMIN', 'ADMIN']}>
+                    <ProtectedRoute requiredRole={ACCESS.cuentasBancarias}>
                       <ErrorBoundary>
                         <DashboardLayout>
                           <BankAccountsPage />
@@ -316,7 +317,7 @@ function App() {
                 <Route
                   path="/reportes"
                   element={
-                    <ProtectedRoute requiredRole="SUPER_ADMIN">
+                    <ProtectedRoute requiredRole={ACCESS.reportes}>
                       <ErrorBoundary>
                         <DashboardLayout>
                           <ReportsPage />
@@ -330,7 +331,7 @@ function App() {
                 <Route
                   path="/mis-reportes"
                   element={
-                    <ProtectedRoute requiredRole="MINORISTA">
+                    <ProtectedRoute requiredRole={ACCESS.misReportes}>
                       <ErrorBoundary>
                         <DashboardLayout>
                           <MinoristaReportsPage />
@@ -343,7 +344,7 @@ function App() {
                 <Route
                   path="/configuracion"
                   element={
-                    <ProtectedRoute requiredRole={['SUPER_ADMIN', 'ADMIN', 'TRANSFERENCISTA']}>
+                    <ProtectedRoute requiredRole={ACCESS.configuracion}>
                       <ErrorBoundary>
                         <DashboardLayout>
                           <ConfigPage />
@@ -356,7 +357,7 @@ function App() {
                 <Route
                   path="/logs"
                   element={
-                    <ProtectedRoute requiredRole={['SUPER_ADMIN', 'ADMIN']}>
+                    <ProtectedRoute requiredRole={ACCESS.logs}>
                       <ErrorBoundary>
                         <DashboardLayout>
                           <LogsPage />
@@ -370,7 +371,7 @@ function App() {
                 <Route
                   path="/inventory"
                   element={
-                    <ProtectedRoute requiredRole={['SUPER_ADMIN', 'ADMIN']}>
+                    <ProtectedRoute requiredRole={ACCESS.inventario}>
                       <ErrorBoundary>
                         <DashboardLayout>
                           <InventoryPage />

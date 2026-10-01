@@ -20,6 +20,8 @@ import {
   History,
 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
+import { ACCESS } from '@/lib/permissions'
+import type { UserRole } from '@/types/api'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
@@ -30,56 +32,56 @@ interface NavItem {
   icon: typeof Home
   label: string
   href: string
-  roles?: ('SUPER_ADMIN' | 'ADMIN' | 'TRANSFERENCISTA' | 'MINORISTA')[]
+  roles?: UserRole[]
 }
 
 // Main items for bottom navigation (5 total including hamburger)
 const bottomNavItems: NavItem[] = [
-  { icon: Home, label: 'Inicio', href: '/dashboard', roles: ['SUPER_ADMIN', 'ADMIN', 'TRANSFERENCISTA', 'MINORISTA'] },
+  { icon: Home, label: 'Inicio', href: '/dashboard', roles: ACCESS.dashboard },
   {
     icon: Send,
     label: 'Enviar giro',
     href: '/enviar-giro',
-    roles: ['SUPER_ADMIN', 'ADMIN', 'MINORISTA'],
+    roles: ACCESS.enviarGiro,
   },
   {
     icon: FileText,
     label: 'Solicitudes',
     href: '/giros',
-    roles: ['SUPER_ADMIN', 'ADMIN', 'TRANSFERENCISTA', 'MINORISTA'],
+    roles: ACCESS.giros,
   },
-  { icon: Users, label: 'Usuarios', href: '/usuarios', roles: ['SUPER_ADMIN', 'ADMIN'] },
-  { icon: Building, label: 'Cuentas', href: '/cuentas-bancarias', roles: ['SUPER_ADMIN', 'ADMIN'] },
+  { icon: Users, label: 'Usuarios', href: '/usuarios', roles: ACCESS.usuarios },
+  { icon: Building, label: 'Cuentas', href: '/cuentas-bancarias', roles: ACCESS.cuentasBancarias },
 ]
 
 // Additional items for side menu
 const sideMenuItems: NavItem[] = [
-  { icon: DollarSign, label: 'Tasas', href: '/tasas', roles: ['SUPER_ADMIN', 'ADMIN', 'MINORISTA'] },
+  { icon: DollarSign, label: 'Tasas', href: '/tasas', roles: ACCESS.tasas },
   {
     icon: Calculator,
     label: 'Calculadora',
     href: '/calculadora',
-    roles: ['SUPER_ADMIN', 'ADMIN', 'MINORISTA'],
+    roles: ACCESS.calculadora,
   },
   {
     icon: Users,
     label: 'Clientes Facturación',
     href: '/clientes-facturacion',
-    roles: ['SUPER_ADMIN', 'ADMIN'],
+    roles: ACCESS.clientesFacturacion,
   },
   {
     icon: Calculator,
     label: 'Calc. Compra VES',
     href: '/calculadora-ves-compra',
-    roles: ['SUPER_ADMIN', 'ADMIN'],
+    roles: ACCESS.calculadoraVesCompra,
   },
-  { icon: BarChart3, label: 'Reportes', href: '/reportes', roles: ['SUPER_ADMIN'] },
-  { icon: History, label: 'Aud. Beneficiarios', href: '/auditoria-beneficiarios', roles: ['SUPER_ADMIN'] },
-  { icon: BarChart3, label: 'Mis Reportes', href: '/mis-reportes', roles: ['MINORISTA'] },
-  { icon: Wallet, label: 'Transacciones', href: '/transacciones-minorista', roles: ['MINORISTA'] },
+  { icon: BarChart3, label: 'Reportes', href: '/reportes', roles: ACCESS.reportes },
+  { icon: History, label: 'Aud. Beneficiarios', href: '/auditoria-beneficiarios', roles: ACCESS.auditoriaBeneficiarios },
+  { icon: BarChart3, label: 'Mis Reportes', href: '/mis-reportes', roles: ACCESS.misReportes },
+  { icon: Wallet, label: 'Transacciones', href: '/transacciones-minorista', roles: ACCESS.transaccionesMinorista },
 
-  { icon: Box, label: 'Inventario', href: '/inventory', roles: ['SUPER_ADMIN', 'ADMIN'] },
-  { icon: Settings, label: 'Config', href: '/configuracion', roles: ['SUPER_ADMIN', 'ADMIN', 'TRANSFERENCISTA'] },
+  { icon: Box, label: 'Inventario', href: '/inventory', roles: ACCESS.inventario },
+  { icon: Settings, label: 'Config', href: '/configuracion', roles: ACCESS.configuracion },
 ]
 
 // All items for desktop sidebar
