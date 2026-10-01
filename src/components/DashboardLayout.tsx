@@ -94,8 +94,6 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
   const [calculatorModalOpen, setCalculatorModalOpen] = useState(false)
   const [vesCalculatorModalOpen, setVesCalculatorModalOpen] = useState(false)
 
-  console.log(user)
-
   const handleLogout = async () => {
     try {
       await logout()
