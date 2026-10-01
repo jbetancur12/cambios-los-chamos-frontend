@@ -28,6 +28,7 @@ import { ResetPasswordPage } from '@/pages/ResetPasswordPage'
 import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage'
 import { ConfigPage } from '@/pages/ConfigPage'
 import { AuditPage } from '@/pages/AuditPage'
+import { BeneficiaryAuditPage } from '@/pages/BeneficiaryAuditPage'
 import { LogsPage } from '@/pages/LogsPage'
 import InventoryPage from '@/pages/InventoryPage'
 
@@ -151,6 +152,17 @@ function App() {
                     <ProtectedRoute requiredRole={['SUPER_ADMIN', 'ADMIN']}>
                       <DashboardLayout>
                         <AuditPage />
+                      </DashboardLayout>
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route
+                  path="/auditoria-beneficiarios"
+                  element={
+                    <ProtectedRoute requiredRole="SUPER_ADMIN">
+                      <DashboardLayout>
+                        <BeneficiaryAuditPage />
                       </DashboardLayout>
                     </ProtectedRoute>
                   }

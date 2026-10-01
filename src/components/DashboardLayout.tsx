@@ -17,6 +17,7 @@ import {
   Menu,
   X,
   Box,
+  History,
 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/button'
@@ -73,6 +74,7 @@ const sideMenuItems: NavItem[] = [
     roles: ['SUPER_ADMIN', 'ADMIN'],
   },
   { icon: BarChart3, label: 'Reportes', href: '/reportes', roles: ['SUPER_ADMIN'] },
+  { icon: History, label: 'Aud. Beneficiarios', href: '/auditoria-beneficiarios', roles: ['SUPER_ADMIN'] },
   { icon: BarChart3, label: 'Mis Reportes', href: '/mis-reportes', roles: ['MINORISTA'] },
   { icon: Wallet, label: 'Transacciones', href: '/transacciones-minorista', roles: ['MINORISTA'] },
 

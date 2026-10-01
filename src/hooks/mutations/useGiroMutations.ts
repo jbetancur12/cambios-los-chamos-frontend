@@ -11,13 +11,13 @@ export interface CreateGiroInput {
   accountNumber: string
   amountInput: number
   currencyInput: Currency
+  suggestionId?: string // Sugerencia a actualizar; sin ella el backend crea o reutiliza por destino
   customRate?: {
     buyRate: number
     sellRate: number
     usd: number
     bcv: number
   }
-  skipBeneficiarySuggestionSave?: boolean
 }
 
 interface ExecuteGiroInput {
@@ -71,6 +71,7 @@ export function useCreateGiro() {
       queryClient.invalidateQueries({ queryKey: ['dashboard'], exact: false, refetchType: 'all' })
       queryClient.invalidateQueries({ queryKey: ['minorista'], exact: false, refetchType: 'all' })
       queryClient.invalidateQueries({ queryKey: ['bankAccounts'], exact: false, refetchType: 'active' })
+      queryClient.invalidateQueries({ queryKey: ['beneficiary-suggestions'] })
     },
   })
 }
@@ -182,6 +183,7 @@ interface CreateMobilePaymentInput {
   senderPhone?: string
   contactoEnvia: string
   amountCop: number
+  suggestionId?: string // Sugerencia a actualizar; sin ella el backend crea o reutiliza por destino
   customRate?: {
     buyRate: number
     sellRate: number
@@ -200,6 +202,7 @@ export function useCreateMobilePayment() {
       await api.post('/giro/mobile-payment/create', data)
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['beneficiary-suggestions'] })
       queryClient.invalidateQueries({ queryKey: ['giros'], exact: false, refetchType: 'all' })
       queryClient.invalidateQueries({ queryKey: ['dashboard'], exact: false, refetchType: 'all' })
       queryClient.invalidateQueries({ queryKey: ['minorista'], exact: false, refetchType: 'all' })

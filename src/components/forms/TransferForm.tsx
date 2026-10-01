@@ -24,7 +24,7 @@ import { DeleteConfirmationModal } from '@/components/ui/DeleteConfirmationModal
 
 export function TransferForm({ onSuccess }: TransferFormProps) {
   const { user } = useAuth()
-  const { addSuggestion, searchSuggestions, deleteSuggestion } = useBeneficiarySuggestions()
+  const { searchSuggestions, deleteSuggestion } = useBeneficiarySuggestions()
 
   // Modal state
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
@@ -256,8 +256,6 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
     setSelectedSuggestion(suggestion)
   }
 
-  const suggestionFieldsDiffer = (s: BeneficiaryData) => beneficiaryName !== s.name || beneficiaryId !== s.id
-
   const changedFields = useMemo(() => {
     if (!selectedSuggestion) return []
     const bankName = (bankIdToFind: string) => banks.find((b) => b.id === bankIdToFind)?.name || bankIdToFind
@@ -266,8 +264,6 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
       diffs.push({ label: 'Nombre', old: selectedSuggestion.name, new: beneficiaryName })
     if (beneficiaryId !== selectedSuggestion.id)
       diffs.push({ label: 'Cédula', old: selectedSuggestion.id, new: beneficiaryId })
-    if ((phone || '') !== (selectedSuggestion.phone || ''))
-      diffs.push({ label: 'Teléfono', old: selectedSuggestion.phone || '—', new: phone || '—' })
     if (bankId !== selectedSuggestion.bankId)
       diffs.push({
         label: 'Banco',
@@ -277,7 +273,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
     if (accountNumber !== selectedSuggestion.accountNumber)
       diffs.push({ label: 'Cuenta', old: selectedSuggestion.accountNumber, new: accountNumber })
     return diffs
-  }, [selectedSuggestion, beneficiaryName, beneficiaryId, phone, bankId, accountNumber, banks])
+  }, [selectedSuggestion, beneficiaryName, beneficiaryId, bankId, accountNumber, banks])
 
   const handleCedulaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setBeneficiaryId(e.target.value)
@@ -307,7 +303,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
     }
 
     // If a suggestion was selected and a field changed, ask how to persist it
-    if (selectedSuggestion && suggestionFieldsDiffer(selectedSuggestion) && updateAction === null) {
+    if (selectedSuggestion && changedFields.length > 0 && updateAction === null) {
       setUpdateModalOpen(true)
       return
     }
@@ -324,8 +320,8 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
         accountNumber,
         amountInput: amount,
         currencyInput,
-        // Si se decide actualizar una sugerencia existente, el backend no debe crear otra fila
-        skipBeneficiarySuggestionSave: updateAction === true && selectedSuggestion ? true : undefined,
+        // "Actualizar" apunta a la sugerencia elegida; "Guardar como nueva" o sin selección la deja crear o reutilizar
+        suggestionId: updateAction === true ? selectedSuggestion?.suggestionId : undefined,
       }
 
       if ((isSuperAdmin || isAdmin) && useCustomRate) {
@@ -344,19 +340,6 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
       }
 
       await createGiroMutation.mutateAsync(payload)
-
-      // Save beneficiary suggestion for future use
-      const shouldUpdateSuggestion = updateAction === true && selectedSuggestion
-      addSuggestion({
-        name: beneficiaryName,
-        id: beneficiaryId,
-        phone,
-        senderPhone: senderPhone || undefined,
-        bankId,
-        accountNumber,
-        executionType: 'TRANSFERENCIA',
-        suggestionId: shouldUpdateSuggestion ? selectedSuggestion?.suggestionId : undefined,
-      })
 
       toast.success('Giro creado exitosamente')
       resetForm()

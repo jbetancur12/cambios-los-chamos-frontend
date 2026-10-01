@@ -41,7 +41,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   const [minoristaBalanceInFavor, setMinoristaBalanceInFavor] = useState<number | null>(null)
   const [creditLimit, setCreditLimit] = useState<number | undefined>(undefined)
   const [loadingBalance, setLoadingBalance] = useState(false)
-  const { addSuggestion, searchSuggestions, deleteSuggestion } = useBeneficiarySuggestions()
+  const { searchSuggestions, deleteSuggestion } = useBeneficiarySuggestions()
 
   // Modal state
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
@@ -86,10 +86,23 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   const [selectedSuggestion, setSelectedSuggestion] = useState<BeneficiaryData | null>(null)
   const [updateModalOpen, setUpdateModalOpen] = useState(false)
 
-  const phoneChanged = useMemo(
-    () => !!selectedSuggestion && (phone || '') !== (selectedSuggestion.phone || ''),
-    [selectedSuggestion, phone]
-  )
+  const changedFields = useMemo(() => {
+    if (!selectedSuggestion) return []
+    const bankName = (bankIdToFind: string) => banks.find((b) => b.id === bankIdToFind)?.name || bankIdToFind
+    const diffs: { label: string; old: string; new: string }[] = []
+    const savedName = selectedSuggestion.name || selectedSuggestion.phone
+    if (senderName !== savedName) diffs.push({ label: 'Nombre', old: savedName || '—', new: senderName || '—' })
+    if (cedula !== selectedSuggestion.id) diffs.push({ label: 'Cédula', old: selectedSuggestion.id, new: cedula })
+    if ((phone || '') !== (selectedSuggestion.phone || ''))
+      diffs.push({ label: 'Teléfono', old: selectedSuggestion.phone || '—', new: phone || '—' })
+    if (selectedSuggestion.bankId && selectedBank !== selectedSuggestion.bankId)
+      diffs.push({
+        label: 'Banco',
+        old: bankName(selectedSuggestion.bankId),
+        new: bankName(selectedBank),
+      })
+    return diffs
+  }, [selectedSuggestion, senderName, cedula, phone, selectedBank, banks])
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(async () => {
@@ -244,8 +257,8 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
       return
     }
 
-    // If a saved suggestion was selected and the phone changed, ask how to persist it
-    if (phoneChanged && updateAction === null) {
+    // If a saved suggestion was selected and any field changed, ask how to persist it
+    if (selectedSuggestion && changedFields.length > 0 && updateAction === null) {
       setUpdateModalOpen(true)
       return
     }
@@ -259,6 +272,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
         senderPhone?: string
         contactoEnvia: string
         amountCop: number
+        suggestionId?: string
         customRate?: {
           buyRate: number
           sellRate: number
@@ -272,6 +286,8 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
         senderPhone: senderPhone || undefined,
         contactoEnvia: senderName || '', // Send empty if not used
         amountCop: Number(amountCop),
+        // "Actualizar" apunta a la sugerencia elegida; "Guardar como nueva" o sin selección la deja crear o reutilizar
+        suggestionId: updateAction === true ? selectedSuggestion?.suggestionId : undefined,
       }
 
       if ((isSuperAdmin || isAdmin) && useCustomRate) {
@@ -290,22 +306,6 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
       }
 
       await createMobilePaymentMutation.mutateAsync(payload)
-
-      // Always save/update suggestion
-      const bankObj = banks.find((b) => b.id === selectedBank)
-      if (bankObj) {
-        const shouldUpdateSuggestion = updateAction === true && selectedSuggestion
-        await addSuggestion({
-          name: senderName || phone, // Use nickname/senderName or fallback to phone
-          id: cedula,
-          phone: phone,
-          senderPhone: senderPhone || undefined,
-          bankId: selectedBank,
-          accountNumber: '', // Not used for mobile payment but required by type
-          executionType: 'PAGO_MOVIL',
-          suggestionId: shouldUpdateSuggestion ? selectedSuggestion?.suggestionId : undefined,
-        })
-      }
 
       toast.success('Pago móvil registrado exitosamente')
       resetForm()
@@ -699,22 +699,22 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
             </div>
             <div className="px-6 py-4 text-sm text-muted-foreground overflow-y-auto">
               <p>
-                Modificaste el teléfono de una sugerencia guardada{' '}
+                Modificaste datos de una sugerencia guardada{' '}
                 <span className="font-semibold text-foreground">{selectedSuggestion?.name}</span>. ¿Quieres actualizar
                 la sugerencia existente o guardar estos datos como un nuevo beneficiario?
               </p>
-              {selectedSuggestion && (
+              {changedFields.length > 0 && (
                 <div className="mt-3 space-y-2 rounded-lg border p-3 text-xs">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-medium text-muted-foreground shrink-0">Teléfono</span>
-                    <span className="flex items-center gap-1 min-w-0 text-right">
-                      <span className="line-through text-muted-foreground truncate">
-                        {selectedSuggestion.phone || '—'}
+                  {changedFields.map((d) => (
+                    <div key={d.label} className="flex items-center justify-between gap-2">
+                      <span className="font-medium text-muted-foreground shrink-0">{d.label}</span>
+                      <span className="flex items-center gap-1 min-w-0 text-right">
+                        <span className="line-through text-muted-foreground truncate">{d.old}</span>
+                        <span className="text-muted-foreground shrink-0">→</span>
+                        <span className="font-semibold text-foreground truncate">{d.new}</span>
                       </span>
-                      <span className="text-muted-foreground shrink-0">→</span>
-                      <span className="font-semibold text-foreground truncate">{phone || '—'}</span>
-                    </span>
-                  </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
