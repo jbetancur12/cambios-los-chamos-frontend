@@ -7,7 +7,6 @@ import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { DashboardLayout } from '@/components/DashboardLayout'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
-import { useQueryMonitor } from '@/hooks/useQueryMonitor'
 import { LoginPage } from '@/pages/LoginPage'
 import { DashboardPage } from '@/pages/DashboardPage'
 import { UsersPage } from '@/pages/UsersPage'
@@ -45,11 +44,6 @@ import { useGiroWebSocket } from '@/hooks/useGiroWebSocket'
 import { setupWebSocketSync } from '@/lib/websocketSync'
 import { UpdatePrompt } from '@/components/UpdatePrompt'
 import { VersionBadge } from '@/components/VersionBadge'
-
-function QueryMonitorInitializer() {
-  useQueryMonitor()
-  return null
-}
 
 function WebSocketSyncInitializer() {
   const { subscribe } = useGiroWebSocket()
@@ -134,7 +128,6 @@ import { PostHogIdentifier } from '@/components/PostHogIdentifier'
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <QueryMonitorInitializer />
       <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
         <BrowserRouter>
           <AuthProvider>
