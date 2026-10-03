@@ -19,7 +19,6 @@ import {
   Box,
   Landmark,
   ChevronLeft,
-  CalendarClock,
   HandCoins,
 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
@@ -88,15 +87,9 @@ const sideMenuItems: NavItem[] = [
 
 // Submenú del módulo Cobranzas (reemplaza el menú principal al navegar ahí)
 const cobranzasSubNav: NavItem[] = [
-  { icon: Landmark, label: 'Panel', href: '/cobranzas', roles: ['SUPER_ADMIN'] },
-  { icon: HandCoins, label: 'Cobrar hoy', href: '/cobranzas/cobrar-hoy', roles: ['SUPER_ADMIN'] },
+  { icon: HandCoins, label: 'Por cobrar', href: '/cobranzas', roles: ['SUPER_ADMIN'] },
+  { icon: Landmark, label: 'Préstamos', href: '/cobranzas/prestamos', roles: ['SUPER_ADMIN'] },
   { icon: Users, label: 'Clientes', href: '/cobranzas/clientes', roles: ['SUPER_ADMIN'] },
-  { icon: FileText, label: 'Créditos', href: '/cobranzas/creditos', roles: ['SUPER_ADMIN'] },
-  { icon: CalendarClock, label: 'Lista de espera', href: '/cobranzas/lista-espera', roles: ['SUPER_ADMIN'] },
-  { icon: DollarSign, label: 'Pagos', href: '/cobranzas/pagos', roles: ['SUPER_ADMIN'] },
-  { icon: Users, label: 'Categorías', href: '/cobranzas/categorias', roles: ['SUPER_ADMIN'] },
-  { icon: BarChart3, label: 'Cartera y Mora', href: '/cobranzas/reportes', roles: ['SUPER_ADMIN'] },
-  { icon: Settings, label: 'Configuración', href: '/cobranzas/configuracion', roles: ['SUPER_ADMIN'] },
 ]
 
 // All items for desktop sidebar
@@ -391,7 +384,6 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
           <div className="flex h-18 items-center justify-around">
             {isInCobranzas ? (
               <>
-                {/* Panel */}
                 <Link
                   to="/cobranzas"
                   className={cn(
@@ -399,25 +391,23 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
                     location.pathname === '/cobranzas' ? 'text-white font-semibold' : 'text-blue-100 hover:text-white'
                   )}
                 >
-                  <Landmark className="w-6 h-6" />
-                  <span className="text-xs">Panel</span>
+                  <HandCoins className="w-6 h-6" />
+                  <span className="text-xs">Por cobrar</span>
                 </Link>
 
-                {/* Créditos */}
                 <Link
-                  to="/cobranzas/creditos"
+                  to="/cobranzas/prestamos"
                   className={cn(
                     'flex flex-col items-center justify-center gap-1 flex-1 h-20 transition-all duration-200',
-                    location.pathname === '/cobranzas/creditos'
+                    location.pathname === '/cobranzas/prestamos'
                       ? 'text-white font-semibold'
                       : 'text-blue-100 hover:text-white'
                   )}
                 >
-                  <FileText className="w-6 h-6" />
-                  <span className="text-xs">Créditos</span>
+                  <Landmark className="w-6 h-6" />
+                  <span className="text-xs">Préstamos</span>
                 </Link>
 
-                {/* Clientes */}
                 <Link
                   to="/cobranzas/clientes"
                   className={cn(
@@ -429,20 +419,6 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
                 >
                   <Users className="w-6 h-6" />
                   <span className="text-xs">Clientes</span>
-                </Link>
-
-                {/* Pagos */}
-                <Link
-                  to="/cobranzas/pagos"
-                  className={cn(
-                    'flex flex-col items-center justify-center gap-1 flex-1 h-20 transition-all duration-200',
-                    location.pathname === '/cobranzas/pagos'
-                      ? 'text-white font-semibold'
-                      : 'text-blue-100 hover:text-white'
-                  )}
-                >
-                  <DollarSign className="w-6 h-6" />
-                  <span className="text-xs">Pagos</span>
                 </Link>
               </>
             ) : (

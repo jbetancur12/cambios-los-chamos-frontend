@@ -1,12 +1,8 @@
 import { useCallback } from 'react'
-import type { Payment } from '@/types/cobranzas'
-import { formatMoney, formatDateTime, PAYMENT_METHOD_LABELS, PAYMENT_TYPE_LABELS } from '@/lib/cobranzasUtils'
+import type { PaymentReceipt } from '@/types/cobranzas'
+import { formatMoney, formatDateTime, PAYMENT_METHOD_LABELS } from '@/lib/cobranzasUtils'
 
-interface ReceiptData {
-  payment: Payment
-  receiptNumber: string
-  businessName: string
-}
+type ReceiptData = PaymentReceipt
 
 function dashedLine(ctx: CanvasRenderingContext2D, x1: number, y: number, x2: number) {
   ctx.setLineDash([6, 5])
@@ -29,8 +25,6 @@ export function useReceiptImage() {
       ['Cliente', payment.client.name],
       ['Cédula', payment.client.identification],
       ['Método', PAYMENT_METHOD_LABELS[payment.paymentMethod] ?? payment.paymentMethod],
-      ['Tipo', PAYMENT_TYPE_LABELS[payment.paymentType] ?? payment.paymentType],
-      ...(payment.installmentNumber ? [['Cuota', String(payment.installmentNumber)] as [string, string]] : []),
     ]
 
     const lineH = 34
@@ -39,7 +33,7 @@ export function useReceiptImage() {
     const amountH = 70
     const footerH = 80
 
-    const H = headerH + dividerGap + rows.length * lineH + dividerGap + amountH + dividerGap + lineH * 2 + footerH
+    const H = headerH + dividerGap + rows.length * lineH + dividerGap + amountH + dividerGap + lineH + footerH
 
     const canvas = document.createElement('canvas')
     canvas.width = W
@@ -89,10 +83,7 @@ export function useReceiptImage() {
     y += dividerGap
 
     ctx.font = '18px monospace'
-    const footerRows: [string, string][] = [
-      ['Saldo del crédito', formatMoney(payment.credit?.balance)],
-      ['Recibido por', payment.receivedBy?.fullName ?? ''],
-    ]
+    const footerRows: [string, string][] = [['Saldo del crédito', formatMoney(payment.credit?.balance)]]
     for (const [k, v] of footerRows) {
       ctx.textAlign = 'left'
       ctx.fillStyle = '#6b7280'

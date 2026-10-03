@@ -95,12 +95,6 @@ export function ReceiptModal({ paymentId, onClose }: { paymentId: string | null;
                 <span className="text-muted-foreground">Método</span>
                 <span>{PAYMENT_METHOD_LABELS[data.payment.paymentMethod] ?? data.payment.paymentMethod}</span>
               </div>
-              {data.payment.installmentNumber && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Cuota</span>
-                  <span>{data.payment.installmentNumber}</span>
-                </div>
-              )}
               <div className="border-t border-dashed my-2" />
               <p className="text-center text-lg font-bold">{formatMoney(data.payment.amount)}</p>
               <div className="border-t border-dashed my-2" />

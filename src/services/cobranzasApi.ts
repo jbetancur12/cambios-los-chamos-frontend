@@ -1,113 +1,38 @@
 import { api } from '@/lib/api'
 import type {
-  CashBalance,
-  ClientCategory,
+  ClientDetail,
   CobranzaClient,
-  CobranzaRoute,
-  Credit,
-  CreditDetail,
+  CobranzaClientListItem,
+  Collections,
   CreditFrequency,
   CreditStatus,
-  InterestRate,
-  LoanFrequency,
+  CreditView,
+  FollowUp,
   Paginated,
   Payment,
   PaymentMethod,
-  ClientStatement,
+  PaymentReceipt,
+  ScheduleItem,
 } from '@/types/cobranzas'
 
 const BASE = '/cobranzas'
 
-// ------------------ Dashboard ------------------
-export interface CobranzasStats {
-  credits: Record<string, number>
-  totalClients: number
-  activeClients: number
-  totalPortfolio: number
-  totalCollectedToday: number
-  paymentsToday: number
-  overdueAmount: number
-  requiringAttention: number
-  openCashBalance: number
-  pendingClosures: number
-}
-
-export const getCobranzasStats = () =>
-  api.get<{ stats: CobranzasStats }>(`${BASE}/dashboard/stats`).then((r) => r.stats)
-
-export const getRecentActivity = () =>
-  api
-    .get<{
-      activity: {
-        payments: { id: string; clientName: string; amount: number; paymentDate: string; paymentMethod: string }[]
-        newCredits: { id: string; clientName: string; amount: number; createdAt: string; status: string }[]
-      }
-    }>(`${BASE}/dashboard/recent-activity`)
-    .then((r) => r.activity)
-
-export const getFinancialSummary = () =>
-  api
-    .get<{
-      summary: {
-        totalFinanced: number
-        totalCollected: number
-        outstanding: number
-        defaultedAmount: number
-        monthlyCollected: { month: string; total: number }[]
-      }
-    }>(`${BASE}/dashboard/financial-summary`)
-    .then((r) => r.summary)
-
-export interface PortfolioReport {
-  counts: Record<string, number>
-  totalFinanced: number
-  outstanding: number
-  overdueAmount: number
-  morosos: {
-    creditId: string
-    client: string
-    identification: string
-    amount: number
-    balance: number
-    daysOverdue: number
-    severity: 'none' | 'light' | 'moderate' | 'critical'
-    overdueAmount: number
-    frequency: string
-    startDate: string
-  }[]
-  byFrequency: { frequency: string; count: number; outstanding: number }[]
-}
-
-export const getPortfolioReport = () =>
-  api.get<{ report: PortfolioReport }>(`${BASE}/dashboard/portfolio-report`).then((r) => r.report)
+// ------------------ Por cobrar ------------------
+export const getCollections = () => api.get<Collections>(`${BASE}/collections`)
 
 // ------------------ Clientes ------------------
 export interface CobranzaClientInput {
   name: string
   identification: string
   phone?: string
-  email?: string
   address?: string
-  categoryId?: string | null
-  creditLimitOverride?: number | null
-  maxCreditsOverride?: number | null
-  latitude?: number | null
-  longitude?: number | null
   notes?: string
 }
 
-export const listClients = (params?: Record<string, unknown>) =>
-  api.get<Paginated<CobranzaClient>>(`${BASE}/clients`, { params }).then((r) => r)
+export const listClients = (params?: { search?: string; page?: number; limit?: number }) =>
+  api.get<Paginated<CobranzaClientListItem>>(`${BASE}/clients`, { params })
 
-export const getClient = (id: string) =>
-  api
-    .get<{
-      client: CobranzaClient
-      activeCredits: Credit[]
-      paymentHistory: Payment[]
-      statement: ClientStatement | null
-    }>(`${BASE}/clients/${id}`)
-    .then((r) => r)
+export const getClient = (id: string) => api.get<ClientDetail>(`${BASE}/clients/${id}`)
 
 export const createClient = (data: CobranzaClientInput) =>
   api.post<{ client: CobranzaClient }>(`${BASE}/clients`, data).then((r) => r.client)
@@ -115,277 +40,71 @@ export const createClient = (data: CobranzaClientInput) =>
 export const updateClient = (id: string, data: Partial<CobranzaClientInput>) =>
   api.patch<{ client: CobranzaClient }>(`${BASE}/clients/${id}`, data).then((r) => r.client)
 
-export const toggleClientActive = (id: string) =>
-  api.patch<{ client: CobranzaClient }>(`${BASE}/clients/${id}/toggle-active`).then((r) => r.client)
+export const deleteClient = (id: string) => api.delete<unknown>(`${BASE}/clients/${id}`)
 
-export const deleteClient = (id: string) => api.delete<{ message: string }>(`${BASE}/clients/${id}`)
-
-// ------------------ Categorías ------------------
-export interface ClientCategoryInput {
-  code: string
-  name: string
-  description?: string
-  isActive?: boolean
-  minOverdueCount?: number | null
-  maxOverdueCount?: number | null
-  maxAmount?: number | null
-  minAmount?: number
-  maxCredits?: number | null
-}
-
-export const listCategories = (activeOnly = false) =>
-  api.get<{ categories: ClientCategory[] }>(`${BASE}/categories`, { params: { activeOnly } }).then((r) => r.categories)
-
-export const createCategory = (data: ClientCategoryInput) =>
-  api.post<{ category: ClientCategory }>(`${BASE}/categories`, data).then((r) => r.category)
-
-export const updateCategory = (id: string, data: Partial<ClientCategoryInput>) =>
-  api.patch<{ category: ClientCategory }>(`${BASE}/categories/${id}`, data).then((r) => r.category)
-
-export const toggleCategoryActive = (id: string) =>
-  api.patch<{ category: ClientCategory }>(`${BASE}/categories/${id}/toggle-active`).then((r) => r.category)
-
-export const deleteCategory = (id: string) => api.delete<{ message: string }>(`${BASE}/categories/${id}`)
-
-// ------------------ Tasas de interés ------------------
-export interface InterestRateInput {
-  name?: string
-  rate: number
-  isActive?: boolean
-}
-
-export const listInterestRates = (activeOnly = false) =>
-  api.get<{ rates: InterestRate[] }>(`${BASE}/interest-rates`, { params: { activeOnly } }).then((r) => r.rates)
-
-export const createInterestRate = (data: InterestRateInput) =>
-  api.post<{ rate: InterestRate }>(`${BASE}/interest-rates`, data).then((r) => r.rate)
-
-export const updateInterestRate = (id: string, data: Partial<InterestRateInput>) =>
-  api.patch<{ rate: InterestRate }>(`${BASE}/interest-rates/${id}`, data).then((r) => r.rate)
-
-export const toggleInterestRateActive = (id: string) =>
-  api.patch<{ rate: InterestRate }>(`${BASE}/interest-rates/${id}/toggle-active`).then((r) => r.rate)
-
-export const deleteInterestRate = (id: string) => api.delete<{ message: string }>(`${BASE}/interest-rates/${id}`)
-
-// ------------------ Frecuencias ------------------
-export const listLoanFrequencies = (enabledOnly = true) =>
-  api
-    .get<{ frequencies: LoanFrequency[] }>(`${BASE}/loan-frequencies`, { params: { enabledOnly } })
-    .then((r) => r.frequencies)
-
-export interface LoanFrequencyInput {
-  name?: string
-  description?: string
-  isEnabled?: boolean
-  isFixedDuration?: boolean
-  fixedInstallments?: number | null
-  fixedDurationDays?: number | null
-  periodDays?: number
-  defaultInstallments?: number | null
-  minInstallments?: number | null
-  maxInstallments?: number | null
-  interestRate?: number | null
-}
-
-export const updateLoanFrequency = (id: string, data: LoanFrequencyInput) =>
-  api.patch<{ frequency: LoanFrequency }>(`${BASE}/loan-frequencies/${id}`, data).then((r) => r.frequency)
-
-// ------------------ Rutas ------------------
-export interface CobranzaRouteInput {
-  name: string
-  description?: string
-  cobradorId: string
-  clientIds?: string[]
-}
-
-export const listRoutes = () => api.get<{ routes: CobranzaRoute[] }>(`${BASE}/routes`).then((r) => r.routes)
-
-export const getRoute = (id: string) => api.get<{ route: CobranzaRoute }>(`${BASE}/routes/${id}`).then((r) => r.route)
-
-export const getAvailableClients = () =>
-  api.get<{ clients: CobranzaClient[] }>(`${BASE}/routes/available-clients`).then((r) => r.clients)
-
-export const createRoute = (data: CobranzaRouteInput) =>
-  api.post<{ route: CobranzaRoute }>(`${BASE}/routes`, data).then((r) => r.route)
-
-export const updateRoute = (id: string, data: Partial<CobranzaRouteInput>) =>
-  api.patch<{ route: CobranzaRoute }>(`${BASE}/routes/${id}`, data).then((r) => r.route)
-
-export const assignClientsToRoute = (id: string, clientIds: string[]) =>
-  api.post<{ route: CobranzaRoute }>(`${BASE}/routes/${id}/clients`, { clientIds }).then((r) => r.route)
-
-export const removeClientFromRoute = (routeId: string, clientId: string) =>
-  api.delete<{ route: CobranzaRoute }>(`${BASE}/routes/${routeId}/clients/${clientId}`).then((r) => r.route)
-
-export const deleteRoute = (id: string) => api.delete<{ message: string }>(`${BASE}/routes/${id}`)
-
-// ------------------ Créditos ------------------
-export interface CreateCreditInput {
+// ------------------ Préstamos ------------------
+export interface CreditInput {
   clientId: string
   amount: number
+  interestRate: number
+  totalInstallments: number
   frequency: CreditFrequency
-  startDate: string
-  endDate?: string
-  scheduledDeliveryDate?: string | null
-  immediateDeliveryRequested?: boolean
-  interestRate?: number
-  totalInstallments?: number | null
+  loanDate?: string
   description?: string
-  downPayment?: number | null
-  isCustomCredit?: boolean
-  calcOnRemainingAmount?: boolean
-  isLegacyCredit?: boolean
 }
 
-export const listCredits = (params?: Record<string, unknown>) =>
-  api.get<Paginated<Credit>>(`${BASE}/credits`, { params }).then((r) => r)
-
-export const exportCredits = (params?: Record<string, unknown>) =>
-  api.get<Paginated<Credit>>(`${BASE}/credits`, { params: { ...params, limit: 10000 } }).then((r) => r.items)
-
-export const getCreditCounts = () =>
-  api.get<{ counts: Record<CreditStatus, number> }>(`${BASE}/credits/counts`).then((r) => r.counts)
-
-export interface WaitingList {
-  pendingApproval: Credit[]
-  waitingDelivery: Credit[]
-  readyToday: Credit[]
-  overdueDelivery: Credit[]
-  counts: {
-    pendingApproval: number
-    waitingDelivery: number
-    readyToday: number
-    overdueDelivery: number
-  }
+export interface CreditListParams {
+  status?: CreditStatus
+  clientId?: string
+  search?: string
+  overdueOnly?: boolean
+  page?: number
+  limit?: number
 }
 
-export const getWaitingList = () =>
-  api.get<{ waitingList: WaitingList }>(`${BASE}/credits/waiting-list`).then((r) => r.waitingList)
+export const listCredits = (params?: CreditListParams) =>
+  api.get<Paginated<CreditView>>(`${BASE}/credits`, { params: params as Record<string, unknown> })
 
-export interface TodayCollection {
-  creditId: string
-  client: string
-  identification: string
-  dueDate: string
-  amount: number
-  paidAmount: number
-  balance: number
-  daysLate: number
-  frequency: string
+export interface CreditDetail {
+  credit: CreditView
+  schedule: ScheduleItem[]
+  payments: Payment[]
+  followUps: FollowUp[]
 }
 
-export const getTodayCollections = () =>
-  api.get<{ collections: TodayCollection[] }>(`${BASE}/collections/today`).then((r) => r.collections)
+export const getCredit = (id: string) => api.get<CreditDetail>(`${BASE}/credits/${id}`)
 
-export interface FollowUp {
-  id: string
-  note: string
-  createdAt: string
-  createdBy?: { id: string; fullName: string } | null
-}
+export const createCredit = (data: CreditInput) =>
+  api.post<{ credit: CreditView }>(`${BASE}/credits`, data).then((r) => r.credit)
 
-export const listFollowUps = (creditId: string) =>
-  api.get<{ followUps: FollowUp[] }>(`${BASE}/credits/${creditId}/follow-ups`).then((r) => r.followUps)
+export const updateCredit = (id: string, data: Partial<CreditInput>) =>
+  api.patch<{ credit: CreditView }>(`${BASE}/credits/${id}`, data).then((r) => r.credit)
+
+export const cancelCredit = (id: string) =>
+  api.post<{ credit: CreditView }>(`${BASE}/credits/${id}/cancel`).then((r) => r.credit)
 
 export const addFollowUp = (creditId: string, note: string) =>
   api.post<{ followUp: FollowUp }>(`${BASE}/credits/${creditId}/follow-ups`, { note }).then((r) => r.followUp)
 
-export const removeFollowUp = (creditId: string, followUpId: string) =>
-  api.delete<{ message: string }>(`${BASE}/credits/${creditId}/follow-ups/${followUpId}`)
-
-export const getCreditDetail = (id: string) => api.get<CreditDetail>(`${BASE}/credits/${id}`).then((r) => r)
-
-export const createCredit = (data: CreateCreditInput) =>
-  api.post<{ credit: Credit }>(`${BASE}/credits`, data).then((r) => r.credit)
-
-export const updateCredit = (id: string, data: Partial<CreateCreditInput>) =>
-  api.patch<{ credit: Credit }>(`${BASE}/credits/${id}`, data).then((r) => r.credit)
-
-export const approveCredit = (id: string, scheduledDeliveryDate: string, notes?: string) =>
-  api.post<{ credit: Credit }>(`${BASE}/credits/${id}/approve`, { scheduledDeliveryDate, notes }).then((r) => r.credit)
-
-export const rejectCredit = (id: string, reason: string) =>
-  api.post<{ credit: Credit }>(`${BASE}/credits/${id}/reject`, { reason }).then((r) => r.credit)
-
-export const deliverCredit = (id: string, notes?: string, firstPaymentToday = false) =>
-  api.post<{ credit: Credit }>(`${BASE}/credits/${id}/deliver`, { notes, firstPaymentToday }).then((r) => r.credit)
-
-export const rescheduleCredit = (id: string, scheduledDeliveryDate: string, reason?: string) =>
-  api
-    .post<{ credit: Credit }>(`${BASE}/credits/${id}/reschedule`, { scheduledDeliveryDate, reason })
-    .then((r) => r.credit)
+export const deleteFollowUp = (creditId: string, followUpId: string) =>
+  api.delete<unknown>(`${BASE}/credits/${creditId}/follow-ups/${followUpId}`)
 
 // ------------------ Pagos ------------------
-export interface RegisterPaymentInput {
+export interface PaymentInput {
   creditId: string
   amount: number
   paymentMethod: PaymentMethod
   paymentDate?: string
-  transactionId?: string
-  cashBalanceId?: string | null
 }
 
-export const listPayments = (params?: Record<string, unknown>) =>
-  api.get<Paginated<Payment>>(`${BASE}/payments`, { params }).then((r) => r)
+export interface PaymentResult {
+  payment: Payment
+  credit: CreditView
+  coverage: { installmentsCovered: number; remainingBalance: number }
+}
 
-export const getRecentPayments = (limit = 20) =>
-  api.get<{ payments: Payment[] }>(`${BASE}/payments/recent`, { params: { limit } }).then((r) => r.payments)
+export const registerPayment = (data: PaymentInput) => api.post<PaymentResult>(`${BASE}/payments`, data)
 
-export const getTodayPaymentSummary = () =>
-  api
-    .get<{
-      summary: {
-        totalCollected: number
-        paymentCount: number
-        byMethod: { method: string; total: number; count: number }[]
-      }
-    }>(`${BASE}/payments/today-summary`)
-    .then((r) => r.summary)
+export const cancelPayment = (id: string) => api.delete<unknown>(`${BASE}/payments/${id}`)
 
-export const registerPayment = (data: RegisterPaymentInput) =>
-  api.post<{ payment: Payment }>(`${BASE}/payments`, data).then((r) => r.payment)
-
-export const getPaymentReceipt = (id: string) =>
-  api
-    .get<{ payment: Payment; receiptNumber: string; businessName: string }>(`${BASE}/payments/${id}/receipt`)
-    .then((r) => r)
-
-export const cancelPayment = (id: string) => api.delete<{ message: string }>(`${BASE}/payments/${id}`)
-
-// ------------------ Caja ------------------
-export const listCashBalances = (params?: Record<string, unknown>) =>
-  api.get<Paginated<CashBalance>>(`${BASE}/cash-balances`, { params }).then((r) => r)
-
-export const getCurrentCashBalance = () =>
-  api.get<{ balance: CashBalance | null }>(`${BASE}/cash-balances/current-status`).then((r) => r.balance)
-
-export const getPendingClosures = () =>
-  api.get<{ balances: CashBalance[] }>(`${BASE}/cash-balances/pending-closures`).then((r) => r.balances)
-
-export const openCashBalance = (data: { initialAmount?: number; date?: string; notes?: string }) =>
-  api.post<{ balance: CashBalance }>(`${BASE}/cash-balances/open`, data).then((r) => r.balance)
-
-export const autoCalculateCashBalance = (id: string) =>
-  api.post<{ balance: CashBalance }>(`${BASE}/cash-balances/${id}/auto-calculate`).then((r) => r.balance)
-
-export const closeCashBalance = (
-  id: string,
-  data: { lentAmount?: number; notes?: string; requiresReconciliation?: boolean }
-) => api.post<{ balance: CashBalance }>(`${BASE}/cash-balances/${id}/close`, data).then((r) => r.balance)
-
-export const getCashBalanceDetail = (id: string) =>
-  api
-    .get<{
-      balance: CashBalance
-      payments: {
-        id: string
-        clientName: string
-        amount: number
-        paymentDate: string
-        paymentMethod: string
-        creditId: string
-      }[]
-      openCreditsCount: number
-    }>(`${BASE}/cash-balances/${id}/detailed`)
-    .then((r) => r)
+export const getPaymentReceipt = (id: string) => api.get<PaymentReceipt>(`${BASE}/payments/${id}/receipt`)

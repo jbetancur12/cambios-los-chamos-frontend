@@ -15,13 +15,17 @@ const formatNum = (n: number | null | undefined): string => {
 
 export function CurrencyInput({ value, onValueChange, ...props }: CurrencyInputProps) {
   const [text, setText] = useState<string>(() => formatNum(value))
-  const [focused, setFocused] = useState(false)
 
+  // Sincroniza el texto cuando el valor cambia desde fuera (aunque el campo tenga el foco);
+  // mientras se escribe, el valor ya coincide con el texto y no se toca.
   useEffect(() => {
-    if (!focused) {
+    const parsed = parseInt(text.replace(/\D/g, ''), 10)
+    const current = isNaN(parsed) ? null : parsed
+    if ((value ?? null) !== current) {
       setText(formatNum(value))
     }
-  }, [value, focused])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value
@@ -39,7 +43,6 @@ export function CurrencyInput({ value, onValueChange, ...props }: CurrencyInputP
   }
 
   const handleBlur = () => {
-    setFocused(false)
     const parsed = parseInt(text.replace(/\D/g, ''), 10)
     setText(formatNum(isNaN(parsed) ? value : parsed))
   }
@@ -52,7 +55,6 @@ export function CurrencyInput({ value, onValueChange, ...props }: CurrencyInputP
       value={text}
       onChange={handleChange}
       onFocus={(e) => {
-        setFocused(true)
         e.target.select()
       }}
       onBlur={handleBlur}
