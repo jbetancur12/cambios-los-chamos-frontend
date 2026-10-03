@@ -14,7 +14,6 @@ export function MinoristaSimpleTransactionTable({
   typeFilter = 'ALL',
   creditLimit,
 }: MinoristaSimpleTransactionTableProps) {
-  console.log('Transactions received in MinoristaSimpleTransactionTable:', transactions)
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-CO', {
       style: 'currency',

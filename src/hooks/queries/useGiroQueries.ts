@@ -147,6 +147,8 @@ export interface CustomerInvoiceDataResponse {
   municipality_id: number
   municipality_name?: string
   tribute_id: number
+  identification_document_id?: string
+  legal_organization_id?: string
 }
 
 export function useCustomerInvoiceData(identification: string) {

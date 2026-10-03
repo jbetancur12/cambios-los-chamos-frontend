@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { inventoryApi, type Product } from '../services/inventoryApi'
+import { inventoryApi, type Product, type ProductInput } from '../services/inventoryApi'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
@@ -592,7 +592,7 @@ function ProductFormSheet({
     setPresentations((prev) => [...prev, { name: '', quantity: 1, sellingPrice: 0, showInStore: true }])
   }
 
-  const updatePresentation = (index: number, field: string, value: any) => {
+  const updatePresentation = (index: number, field: string, value: string | number | boolean) => {
     setPresentations((prev) => prev.map((p, i) => (i === index ? { ...p, [field]: value } : p)))
   }
 
@@ -601,7 +601,7 @@ function ProductFormSheet({
   }
 
   const mutation = useMutation({
-    mutationFn: (data: any) =>
+    mutationFn: (data: ProductInput) =>
       isEdit ? inventoryApi.updateProduct(product.id, data) : inventoryApi.createProduct(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] })
@@ -610,7 +610,7 @@ function ProductFormSheet({
       setImageFile(null)
       setImagePreview(null)
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Error al guardar producto')
     },
   })
@@ -628,16 +628,16 @@ function ProductFormSheet({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const formData = new FormData(e.target as HTMLFormElement)
-    const data: any = {
-      name: formData.get('name'),
-      sku: formData.get('sku'),
+    const data: ProductInput = {
+      name: String(formData.get('name') ?? ''),
+      sku: String(formData.get('sku') ?? ''),
       costPrice: Number(formData.get('costPrice')),
       sellingPrice: Number(formData.get('sellingPrice')),
       minStock: Number(formData.get('minStock')),
       showInStore: formData.get('showInStore') === 'on',
       presentations: presentations
         .filter((p) => p.name.trim() !== '')
-        .map((p) => ({ ...p, quantity: p.quantity || 1, sellingPrice: p.sellingPrice || 0 })),
+        .map((p) => ({ ...p, quantity: Number(p.quantity) || 1, sellingPrice: Number(p.sellingPrice) || 0 })),
     }
 
     if (!isEdit) {
@@ -646,7 +646,7 @@ function ProductFormSheet({
 
     // Save product first, then upload image
     mutation.mutate(data, {
-      onSuccess: async (savedProduct: any) => {
+      onSuccess: async (savedProduct) => {
         if (imageFile) {
           setUploading(true)
           try {
@@ -654,8 +654,8 @@ function ProductFormSheet({
             await inventoryApi.uploadImage(productId, imageFile)
             toast.success('Imagen subida exitosamente')
             queryClient.invalidateQueries({ queryKey: ['products'] })
-          } catch (err: any) {
-            toast.error(err.message || 'Error al subir imagen')
+          } catch (err) {
+            toast.error(err instanceof Error ? err.message : 'Error al subir imagen')
           } finally {
             setUploading(false)
           }
@@ -847,13 +847,14 @@ function PurchaseSheet({
   const queryClient = useQueryClient()
 
   const mutation = useMutation({
-    mutationFn: (data: any) => inventoryApi.createPurchase({ productId: product.id, ...data }),
+    mutationFn: (data: { quantity: number; costPrice?: number }) =>
+      inventoryApi.createPurchase({ productId: product.id, ...data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] })
       toast.success('Entrada registrada', { description: 'El stock ha sido actualizado.' })
       onOpenChange(false)
     },
-    onError: (error: any) => toast.error('Error al registrar entrada', { description: error.message }),
+    onError: (error: Error) => toast.error('Error al registrar entrada', { description: error.message }),
   })
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -861,7 +862,7 @@ function PurchaseSheet({
     const formData = new FormData(e.target as HTMLFormElement)
 
     const costPriceVal = formData.get('costPrice')
-    const data: any = { quantity: Number(formData.get('quantity')) }
+    const data: { quantity: number; costPrice?: number } = { quantity: Number(formData.get('quantity')) }
 
     if (costPriceVal !== null) {
       data.costPrice = Number(costPriceVal)
@@ -922,14 +923,15 @@ function AdjustmentSheet({
   const parsedQty = Number(qty) || 0
 
   const mutation = useMutation({
-    mutationFn: (data: any) => inventoryApi.createAdjustment({ productId: product.id, ...data }),
+    mutationFn: (data: { quantity: number; reason?: string }) =>
+      inventoryApi.createAdjustment({ productId: product.id, ...data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] })
       toast.success('Ajuste de inventario registrado')
       onOpenChange(false)
       setQty('') // reset on success
     },
-    onError: (error: any) => toast.error('Error al registrar ajuste', { description: error.message }),
+    onError: (error: Error) => toast.error('Error al registrar ajuste', { description: error.message }),
   })
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -1006,7 +1008,7 @@ function PendingPurchasesSheet({ open, onOpenChange }: { open: boolean; onOpenCh
       queryClient.invalidateQueries({ queryKey: ['products'] })
       toast.success('Costo actualizado y entrada aprobada')
     },
-    onError: (error: any) => toast.error('Error al aprobar entrada', { description: error.message }),
+    onError: (error: Error) => toast.error('Error al aprobar entrada', { description: error.message }),
   })
 
   const handleResolve = (e: React.FormEvent, id: string) => {

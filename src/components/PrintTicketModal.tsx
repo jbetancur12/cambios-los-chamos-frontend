@@ -8,6 +8,7 @@ import { usePrinterConfig } from '@/hooks/usePrinterConfig'
 
 interface ThermalTicketData {
   companyName: string
+  companyNit: string
   companyPhone: string
   companyAddress: string
   companyCity: string
@@ -15,6 +16,7 @@ interface ThermalTicketData {
   giroId: string
   createdAt: string
   completedAt?: string
+  status: string
   beneficiaryName: string
   beneficiaryId: string
   bankName: string
@@ -40,6 +42,25 @@ interface PrintTicketModalProps {
   onOpenChange: (open: boolean) => void
 }
 
+const getStatusLabel = (status?: string): string => {
+  switch (status) {
+    case 'PENDIENTE':
+      return '• GIRO REGISTRADO'
+    case 'ASIGNADO':
+      return '• GIRO ASIGNADO'
+    case 'PROCESANDO':
+      return '• GIRO EN PROCESO'
+    case 'COMPLETADO':
+      return '✓ GIRO COMPLETADO'
+    case 'CANCELADO':
+      return '✗ GIRO CANCELADO'
+    case 'DEVUELTO':
+      return '↩ GIRO DEVUELTO'
+    default:
+      return '• GIRO REGISTRADO'
+  }
+}
+
 /**
  * Componente para imprimir tiquete térmico (80mm) desde navegador
  * Optimizado para impresoras térmicas de rollo
@@ -56,7 +77,7 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
   // Cargar datos del tiquete y configuración cuando se abre el modal
   useEffect(() => {
     if (open) {
-      if (!ticketData) {
+      if (!ticketData || ticketData.giroId !== giroId) {
         fetchTicketData()
       }
       const config = getPrinterConfig()
@@ -65,7 +86,7 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
         setAutoSavePrinter(true)
       }
     }
-  }, [open])
+  }, [open, giroId])
 
   const fetchTicketData = async () => {
     setLoading(true)
@@ -136,6 +157,13 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
             margin-bottom: 10px;
         }
 
+        .company-logo {
+            display: block;
+            height: 120px;
+            width: auto;
+            margin: -28px auto -28px auto;
+        }
+
         .company-name {
             font-weight: bold;
             font-size: 14px;
@@ -145,6 +173,11 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
         .company-phone {
             font-size: 11px;
             margin-bottom: 5px;
+        }
+
+        .company-nit {
+            font-size: 11px;
+            margin-bottom: 1px;
         }
 
         .divider {
@@ -248,7 +281,9 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
     <div class="ticket">
         <!-- ENCABEZADO -->
         <div class="header">
+            <img class="company-logo" src="${window.location.origin}/LogoLosChamos.avif" alt="Logo" />
             <div class="company-name">${data.companyName}</div>
+            <div class="company-nit">${data.companyNit}</div>
             <div class="company-address">${data.companyAddress}</div>
             <div class="company-city">${data.companyCity}</div>
             <div class="company-phone">${data.companyPhone}</div>
@@ -301,10 +336,6 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
                 <span class="label">Entrada:</span>
                 <span class="value">${data.amountInput}</span>
             </div>
-            <div class="row">
-                <span class="label">TRM/BCV:</span>
-                <span class="value">${data.bcvApplied}</span>
-            </div>
             <div class="amount-highlight">
                 Bs. ${data.amountBs}
             </div>
@@ -314,22 +345,12 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
         <!-- EJECUCIÓN -->
         <div class="section">
             <div class="row">
-                <span class="label">Tipo:</span>
-                <span class="value">${data.executionType}</span>
+                <span class="label">Tasa del día:</span>
+                <span class="value">${data.bcvApplied}</span>
             </div>
-            ${
-              data.executedByName
-                ? `
-            <div class="row">
-                <span class="label">Ejecutado por:</span>
-                <span class="value-1">${data.executedByName}</span>
-            </div>
-            `
-                : ''
-            }
         </div>
 
-        <div class="status-completed">✓ GIRO COMPLETADO</div>
+        <div class="status-completed">${getStatusLabel(data.status)}</div>
 
         <!-- FOOTER -->
         <div class="footer">
@@ -422,8 +443,16 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
                     wordWrap: 'break-word',
                   }}
                 >
+                  <img
+                    src="/LogoLosChamos.avif"
+                    alt="Logo"
+                    style={{ display: 'block', height: '100px', width: 'auto', margin: '-24px auto -24px auto' }}
+                  />
                   <div style={{ textAlign: 'center', fontWeight: 'bold', marginBottom: '5px' }}>
                     {ticketData.companyName}
+                  </div>
+                  <div style={{ textAlign: 'center', fontSize: '10px', marginBottom: '2px' }}>
+                    {ticketData.companyNit}
                   </div>
                   <div style={{ textAlign: 'center', fontSize: '10px', marginBottom: '10px' }}>
                     {ticketData.companyPhone}
@@ -447,12 +476,14 @@ export function PrintTicketModal({ giroId, open, onOpenChange }: PrintTicketModa
                     <div style={{ textAlign: 'center', fontWeight: 'bold', margin: '5px 0' }}>
                       Bs. {ticketData.amountBs}
                     </div>
-                    <div>TRM: {ticketData.bcvApplied}</div>
                   </div>
 
                   <div style={{ marginBottom: '10px', borderTop: '1px dashed #000', paddingTop: '5px' }}>
-                    <div>Tipo: {ticketData.executionType}</div>
-                    {ticketData.executedByName && <div>Ejecutado por: {ticketData.executedByName}</div>}
+                    <div>Tasa del día: {ticketData.bcvApplied}</div>
+                  </div>
+
+                  <div style={{ textAlign: 'center', fontWeight: 'bold', marginBottom: '8px' }}>
+                    {getStatusLabel(ticketData.status)}
                   </div>
 
                   <div style={{ textAlign: 'center', marginTop: '10px', fontSize: '10px' }}>

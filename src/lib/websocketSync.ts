@@ -10,6 +10,16 @@ export function setupWebSocketSync(queryClient: QueryClient) {
   // Para evitar problemas de hooks, lo exportamos como configurador
   return {
     setupGiroSync: (subscribe: ReturnType<typeof useGiroWebSocket>['subscribe']) => {
+      // Escuchar (re)conexión del socket: refresca snapshot para cubrir
+      // giros que llegaron mientras la app estuvo en background/desconectada
+      const unsubConnected = subscribe('realtime:connected', () => {
+        queryClient.invalidateQueries({ queryKey: ['giros'], exact: false })
+        queryClient.invalidateQueries({ queryKey: ['dashboard'], exact: false })
+        queryClient.invalidateQueries({ queryKey: ['minorista'], exact: false })
+        queryClient.invalidateQueries({ queryKey: ['bankAccounts'], exact: false })
+        queryClient.invalidateQueries({ queryKey: ['totals'], exact: false })
+      })
+
       // Escuchar creación de giros
       const unsubCreated = subscribe('giro:created', () => {
         queryClient.invalidateQueries({ queryKey: ['giros'], exact: false })
@@ -79,6 +89,7 @@ export function setupWebSocketSync(queryClient: QueryClient) {
 
       // Retornar función para desuscribirse
       return () => {
+        unsubConnected()
         unsubCreated()
         unsubUpdated()
         unsubProcessing()

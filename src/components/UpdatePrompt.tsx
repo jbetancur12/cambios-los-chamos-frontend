@@ -11,9 +11,7 @@ export function UpdatePrompt() {
     needRefresh: [needRefresh],
     updateServiceWorker,
   } = useRegisterSW({
-    onRegisteredSW(swUrl, registration) {
-      console.log('Service Worker registrado:', swUrl)
-
+    onRegisteredSW(_swUrl, registration) {
       // Check for updates every hour
       if (registration) {
         setInterval(

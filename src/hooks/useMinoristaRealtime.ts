@@ -8,7 +8,7 @@ export function useMinoristaRealtime(minoristaId?: string) {
 
   useEffect(() => {
     // Escuchar actualizaciones de balance
-    const unsubscribeBalance = subscribe('minorista:balance_updated', (event: any) => {
+    const unsubscribeBalance = subscribe('minorista:balance_updated', (event) => {
       // Verificar si el evento es para este minorista (si se especifica ID)
       if (minoristaId && event.minoristaId && event.minoristaId !== minoristaId) return
 
@@ -20,10 +20,10 @@ export function useMinoristaRealtime(minoristaId?: string) {
     })
 
     // Escuchar actualizaciones de transacciones
-    const unsubscribeTransactions = subscribe('minorista:transaction_updated', (event: any) => {
+    const unsubscribeTransactions = subscribe('minorista:transaction_updated', (event) => {
       // Verificar ID si es necesario
-      const t = event.transaction || event
-      if (minoristaId && t.minorista && t.minorista.id !== minoristaId) return
+      const t = event.transaction
+      if (minoristaId && t?.minorista && t.minorista.id !== minoristaId) return
 
       // Invalidar lista de transacciones
       queryClient.invalidateQueries({ queryKey: ['minoristaTransactions'] })

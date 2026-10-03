@@ -109,7 +109,6 @@ export function MobilePaymentSheet({ open, onOpenChange }: MobilePaymentSheetPro
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    console.log({ cedula, selectedBank, phone, senderName, amountCop })
     if (!cedula?.trim() || !selectedBank || !phone?.trim() || !senderName?.trim() || !amountCop) {
       toast.error('Por favor completa todos los campos')
       return

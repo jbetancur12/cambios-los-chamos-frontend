@@ -7,7 +7,7 @@ import { Loader2 } from 'lucide-react'
 import type { Giro } from '@/types/api'
 // import { useAuth } from '@/contexts/AuthContext'
 import { toast } from 'sonner'
-import { api } from '@/lib/api'
+import { api, ApiError } from '@/lib/api'
 
 interface ReassignGiroModalProps {
   giro: Giro | null
@@ -45,7 +45,8 @@ export function ReassignGiroModal({ giro, open, onOpenChange, onSuccess }: Reass
       setSelectedTransferencistaId('')
     } catch (error) {
       console.error(error)
-      toast.error('Error al reasignar el giro')
+      // The server explains why (not your giro, transferencista not available...)
+      toast.error(error instanceof ApiError ? error.message : 'Error al reasignar el giro')
     } finally {
       setIsSubmitting(false)
     }

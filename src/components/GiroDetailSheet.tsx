@@ -209,7 +209,14 @@ export function GiroDetailSheet({ open, onOpenChange, giroId, initialStatus, onU
       return
     }
 
-    const updatePayload: any = {
+    const updatePayload: {
+      beneficiaryName: string
+      beneficiaryId: string
+      phone: string
+      bankId: string
+      accountNumber: string
+      status?: string
+    } = {
       beneficiaryName: editableBeneficiaryName,
       beneficiaryId: editableBeneficiaryId,
       phone: editablePhone,

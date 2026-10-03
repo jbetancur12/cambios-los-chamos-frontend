@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -23,6 +23,15 @@ interface MobilePaymentFormProps {
   onSuccess: () => void
 }
 
+// Mobile payments have no beneficiary name; this label is used whenever there is no real contact name
+const DEFAULT_CONTACT_NAME = 'Pago Móvil'
+
+// Older suggestions stored 'Sistema', 'NA' or the phone as the name: treat them as the default label
+const contactNameOf = (name: string | undefined, phone?: string) => {
+  const value = (name || '').trim()
+  return !value || value === 'Sistema' || value === 'NA' || value === phone ? DEFAULT_CONTACT_NAME : value
+}
+
 export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   const { user } = useAuth()
   const createMobilePaymentMutation = useCreateMobilePayment()
@@ -31,7 +40,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   const [selectedBank, setSelectedBank] = useState('')
   const [phone, setPhone] = useState('')
   const [senderPhone, setSenderPhone] = useState('')
-  const [senderName, setSenderName] = useState('Sistema')
+  const [senderName, setSenderName] = useState(DEFAULT_CONTACT_NAME)
   const [amountCop, setAmountCop] = useState('')
   const [banks, setBanks] = useState<Bank[]>([])
   const [exchangeRate, setExchangeRate] = useState<ExchangeRate | null>(null)
@@ -41,7 +50,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   const [minoristaBalanceInFavor, setMinoristaBalanceInFavor] = useState<number | null>(null)
   const [creditLimit, setCreditLimit] = useState<number | undefined>(undefined)
   const [loadingBalance, setLoadingBalance] = useState(false)
-  const { addSuggestion, searchSuggestions, deleteSuggestion } = useBeneficiarySuggestions()
+  const { searchSuggestions, deleteSuggestion } = useBeneficiarySuggestions()
 
   // Modal state
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
@@ -82,12 +91,34 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
   // Server-side search state
   const [cedulaSuggestions, setCedulaSuggestions] = useState<BeneficiaryData[]>([])
 
+  // Selected suggestion + phone-update decision
+  const [selectedSuggestion, setSelectedSuggestion] = useState<BeneficiaryData | null>(null)
+  const [updateModalOpen, setUpdateModalOpen] = useState(false)
+
+  const changedFields = useMemo(() => {
+    if (!selectedSuggestion) return []
+    const bankName = (bankIdToFind: string) => banks.find((b) => b.id === bankIdToFind)?.name || bankIdToFind
+    const diffs: { label: string; old: string; new: string }[] = []
+    const savedName = contactNameOf(selectedSuggestion.name, selectedSuggestion.phone)
+    if (senderName !== savedName) diffs.push({ label: 'Nombre', old: savedName, new: senderName || '—' })
+    if (cedula !== selectedSuggestion.id) diffs.push({ label: 'Cédula', old: selectedSuggestion.id, new: cedula })
+    if ((phone || '') !== (selectedSuggestion.phone || ''))
+      diffs.push({ label: 'Teléfono', old: selectedSuggestion.phone || '—', new: phone || '—' })
+    if (selectedSuggestion.bankId && selectedBank !== selectedSuggestion.bankId)
+      diffs.push({
+        label: 'Banco',
+        old: bankName(selectedSuggestion.bankId),
+        new: bankName(selectedBank),
+      })
+    return diffs
+  }, [selectedSuggestion, senderName, cedula, phone, selectedBank, banks])
+
   useEffect(() => {
     const delayDebounceFn = setTimeout(async () => {
       if (cedula && cedula.length >= 3) {
         try {
           // Use server-side search instead of local filtering
-          const results = await searchSuggestions(cedula)
+          const results = await searchSuggestions(cedula, 'PAGO_MOVIL')
           setCedulaSuggestions(results)
         } catch (error) {
           console.error('Error searching suggestions:', error)
@@ -213,9 +244,17 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
 
   const amountBs = effectiveRate && amountCop ? (Number(amountCop) / effectiveRate.sellRate).toFixed(2) : '0.00'
 
+  const handleUpdateModalConfirm = (update: boolean) => {
+    setUpdateModalOpen(false)
+    void submitPayment(update)
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    await submitPayment(null)
+  }
 
+  const submitPayment = async (updateAction: boolean | null) => {
     if (!cedula?.trim() || !selectedBank || !phone?.trim() || !amountCop) {
       toast.error('Por favor completa todos los campos')
       return
@@ -224,6 +263,12 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
     const amount = parseFloat(amountCop as string)
     if (isNaN(amount) || amount <= 0) {
       toast.error('El monto debe ser un número positivo')
+      return
+    }
+
+    // If a saved suggestion was selected and any field changed, ask how to persist it
+    if (selectedSuggestion && changedFields.length > 0 && updateAction === null) {
+      setUpdateModalOpen(true)
       return
     }
 
@@ -236,6 +281,7 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
         senderPhone?: string
         contactoEnvia: string
         amountCop: number
+        suggestionId?: string
         customRate?: {
           buyRate: number
           sellRate: number
@@ -247,8 +293,10 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
         bankId: selectedBank,
         phone,
         senderPhone: senderPhone || undefined,
-        contactoEnvia: senderName || '', // Send empty if not used
+        contactoEnvia: senderName || DEFAULT_CONTACT_NAME,
         amountCop: Number(amountCop),
+        // "Actualizar" apunta a la sugerencia elegida; "Guardar como nueva" o sin selección la deja crear o reutilizar
+        suggestionId: updateAction === true ? selectedSuggestion?.suggestionId : undefined,
       }
 
       if ((isSuperAdmin || isAdmin) && useCustomRate) {
@@ -267,20 +315,6 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
       }
 
       await createMobilePaymentMutation.mutateAsync(payload)
-
-      // Always save/update suggestion
-      const bankObj = banks.find((b) => b.id === selectedBank)
-      if (bankObj) {
-        await addSuggestion({
-          name: senderName || phone, // Use nickname/senderName or fallback to phone
-          id: cedula,
-          phone: phone,
-          senderPhone: senderPhone || undefined,
-          bankId: selectedBank,
-          accountNumber: '', // Not used for mobile payment but required by type
-          executionType: 'PAGO_MOVIL',
-        })
-      }
 
       toast.success('Pago móvil registrado exitosamente')
       resetForm()
@@ -301,21 +335,24 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
     setSelectedBank('')
     setPhone('')
     setSenderPhone('')
-    setSenderName('')
+    setSenderName(DEFAULT_CONTACT_NAME)
     setAmountCop('')
     setShowCedulaSuggestions(false)
     setUseCustomRate(false)
+    setSelectedSuggestion(null)
+    setUpdateModalOpen(false)
   }
 
   const handleSelectBeneficiary = (beneficiary: BeneficiaryData) => {
     setPhone(beneficiary.phone)
     if (beneficiary.senderPhone) setSenderPhone(beneficiary.senderPhone)
     setCedula(beneficiary.id)
-    setSenderName(beneficiary.name || beneficiary.phone)
+    setSenderName(contactNameOf(beneficiary.name, beneficiary.phone))
     if (beneficiary.bankId && banks.length > 0) {
       setSelectedBank(beneficiary.bankId)
     }
     setShowCedulaSuggestions(false)
+    setSelectedSuggestion(beneficiary)
   }
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -657,6 +694,67 @@ export function MobilePaymentForm({ onSuccess }: MobilePaymentFormProps) {
           )}
         </Button>
       </div>
+      {updateModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+          onClick={() => setUpdateModalOpen(false)}
+        >
+          <div
+            className="bg-background rounded-lg shadow-xl w-full max-w-md overflow-hidden max-h-[90dvh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-6 py-4 border-b">
+              <h2 className="text-lg font-semibold">Actualizar beneficiario</h2>
+            </div>
+            <div className="px-6 py-4 text-sm text-muted-foreground overflow-y-auto">
+              <p>
+                Modificaste datos de una sugerencia guardada{' '}
+                <span className="font-semibold text-foreground">{selectedSuggestion?.name}</span>. ¿Quieres actualizar
+                la sugerencia existente o guardar estos datos como un nuevo beneficiario?
+              </p>
+              {changedFields.length > 0 && (
+                <div className="mt-3 space-y-2 rounded-lg border p-3 text-xs">
+                  {changedFields.map((d) => (
+                    <div key={d.label} className="flex items-center justify-between gap-2">
+                      <span className="font-medium text-muted-foreground shrink-0">{d.label}</span>
+                      <span className="flex items-center gap-1 min-w-0 text-right">
+                        <span className="line-through text-muted-foreground truncate">{d.old}</span>
+                        <span className="text-muted-foreground shrink-0">→</span>
+                        <span className="font-semibold text-foreground truncate">{d.new}</span>
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="flex flex-col-reverse gap-2 px-6 py-4 border-t bg-muted/10 sm:flex-row sm:items-center sm:justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full sm:w-auto"
+                onClick={() => setUpdateModalOpen(false)}
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full sm:w-auto"
+                onClick={() => handleUpdateModalConfirm(false)}
+              >
+                Guardar como nueva
+              </Button>
+              <Button
+                type="button"
+                className="w-full sm:w-auto bg-[linear-gradient(to_right,#136BBC,#274565)] hover:opacity-90 transition-opacity"
+                onClick={() => handleUpdateModalConfirm(true)}
+              >
+                Actualizar
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
       <DeleteConfirmationModal
         open={deleteModalOpen}
         onOpenChange={setDeleteModalOpen}

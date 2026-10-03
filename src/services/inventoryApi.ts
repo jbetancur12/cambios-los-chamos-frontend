@@ -6,6 +6,18 @@ export interface ProductPresentation {
   showInStore?: boolean
 }
 
+// What the product form sends (numbers), as opposed to Product, which the API returns with prices as strings
+export interface ProductInput {
+  name: string
+  sku: string
+  costPrice: number
+  sellingPrice: number
+  minStock: number
+  showInStore: boolean
+  presentations: { id?: string; name: string; quantity: number; sellingPrice: number; showInStore: boolean }[]
+  stock?: number
+}
+
 export interface Product {
   id: string
   name: string
@@ -81,10 +93,10 @@ export const inventoryApi = {
   reactivateProduct: async (id: string) => {
     return await api.put<Product>(`/inventory/products/${id}`, { isActive: true })
   },
-  createProduct: async (data: Partial<Product> & { stock?: number }) => {
+  createProduct: async (data: ProductInput) => {
     return await api.post<Product>('/inventory/products', data)
   },
-  updateProduct: async (id: string, data: Partial<Product>) => {
+  updateProduct: async (id: string, data: ProductInput) => {
     return await api.put<Product>(`/inventory/products/${id}`, data)
   },
   deleteProduct: async (id: string) => {
@@ -94,7 +106,7 @@ export const inventoryApi = {
     const formData = new FormData()
     formData.append('image', file)
     const token = localStorage.getItem('authToken')
-    const apiUrl = (import.meta as any).env?.VITE_API_URL || ''
+    const apiUrl = import.meta.env.VITE_API_URL || ''
     const res = await fetch(`${apiUrl}/inventory/products/${id}/upload-image`, {
       method: 'POST',
       headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -110,7 +122,7 @@ export const inventoryApi = {
 
   // Transactions
   getTransactions: async (params?: { productId?: string; startDate?: Date; endDate?: Date }) => {
-    const queryParams: any = {}
+    const queryParams: Record<string, string> = {}
     if (params?.productId) queryParams.productId = params.productId
     if (params?.startDate) queryParams.startDate = params.startDate.toISOString()
     if (params?.endDate) queryParams.endDate = params.endDate.toISOString()

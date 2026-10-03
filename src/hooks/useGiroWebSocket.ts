@@ -52,7 +52,53 @@ export interface GiroEvent {
   reason?: string
 }
 
-type GiroEventListener = (event: GiroEvent) => void
+export interface MinoristaBalanceEvent {
+  minoristaId: string
+  availableCredit: number
+  creditBalance: number
+  timestamp: string
+}
+
+export interface MinoristaTransactionPayload {
+  id: string
+  amount: number
+  type: string
+  status: string
+  previousBalance: number
+  currentBalance: number
+  previousBalanceInFavor: number
+  currentBalanceInFavor: number
+  balanceInFavorUsed?: number
+  creditUsed?: number
+  externalDebt?: number
+  profitEarned?: number
+  createdBy?: { id: string; fullName: string; email: string }
+  minorista?: { id: string }
+  createdAt: string
+}
+
+export interface MinoristaTransactionEvent {
+  transaction: MinoristaTransactionPayload
+  timestamp: string
+}
+
+// Every event the hook can deliver, with the payload its listeners receive
+interface RealtimeEventMap {
+  'realtime:connected': GiroEvent
+  'giro:created': GiroEvent
+  'giro:updated': GiroEvent
+  'giro:processing': GiroEvent
+  'giro:executed': GiroEvent
+  'giro:returned': GiroEvent
+  'giro:deleted': GiroEvent
+  'giro:assigned': GiroEvent
+  'minorista:balance_updated': MinoristaBalanceEvent
+  'minorista:transaction_updated': MinoristaTransactionEvent
+}
+
+type RealtimeEventType = keyof RealtimeEventMap
+type RealtimeEvent = RealtimeEventMap[RealtimeEventType]
+type RealtimeListener = (event: RealtimeEvent) => void
 
 // Obtener URL del backend usando la misma lógica que el cliente API
 const getBackendUrl = () => {
@@ -80,7 +126,15 @@ const getBackendUrl = () => {
 
 export function useGiroWebSocket() {
   const socketRef = useRef<Socket | null>(null)
-  const listenersRef = useRef<Map<string, Set<GiroEventListener>>>(new Map())
+  const listenersRef = useRef<Map<RealtimeEventType, Set<RealtimeListener>>>(new Map())
+
+  // Función para emitir eventos locales
+  const emitEvent = useCallback(<K extends RealtimeEventType>(eventType: K, event: RealtimeEventMap[K]) => {
+    const listeners = listenersRef.current.get(eventType)
+    if (listeners) {
+      listeners.forEach((listener) => listener(event))
+    }
+  }, [])
 
   // Inicializar la conexión al WebSocket
   useEffect(() => {
@@ -92,7 +146,7 @@ export function useGiroWebSocket() {
         reconnection: true,
         reconnectionDelay: 1000,
         reconnectionDelayMax: 5000,
-        reconnectionAttempts: 5,
+        reconnectionAttempts: Infinity,
       })
 
       socket.on('connect', () => {
@@ -109,11 +163,24 @@ export function useGiroWebSocket() {
           }
           socket.emit('user:connected', payload)
         }
+
+        // Avisar a la capa de sync para refrescar estado al conectar/reconectar
+        // (cubre giros que llegaron mientras la app estuvo en background)
+        emitEvent('realtime:connected', {
+          giro: {} as GiroUpdate,
+          timestamp: new Date().toISOString(),
+        })
       })
 
-      socket.on('disconnect', () => {})
+      socket.on('disconnect', (reason) => {
+        if (reason !== 'io client disconnect') {
+          console.warn('[WS] Socket desconectado:', reason)
+        }
+      })
 
-      socket.on('connect_error', () => {})
+      socket.on('connect_error', (error) => {
+        console.warn('[WS] Error de conexión del socket:', error.message)
+      })
 
       // Registrar listeners para eventos de giro
       socket.on('giro:created', (event: GiroEvent) => {
@@ -148,11 +215,11 @@ export function useGiroWebSocket() {
       })
 
       // Eventos de Minorista
-      socket.on('minorista:balance_updated', (payload: any) => {
+      socket.on('minorista:balance_updated', (payload: MinoristaBalanceEvent) => {
         emitEvent('minorista:balance_updated', { ...payload, timestamp: new Date().toISOString() })
       })
 
-      socket.on('minorista:transaction_updated', (payload: any) => {
+      socket.on('minorista:transaction_updated', (payload: MinoristaTransactionEvent) => {
         emitEvent('minorista:transaction_updated', { ...payload, timestamp: new Date().toISOString() })
       })
 
@@ -163,6 +230,45 @@ export function useGiroWebSocket() {
       }
     } catch (error) {
       console.error('[WS] ❌ Error crítico al inicializar socket.io:', error)
+    }
+  }, [emitEvent])
+
+  // Efecto para re-conectar cuando la app vuelve de background o recobra el foco
+  // (el SO móvil suspende timers y el socket queda muerto al regresar)
+  useEffect(() => {
+    const tryReconnect = () => {
+      const socket = socketRef.current
+      if (!socket || socket.connected || socket.active) return
+      console.warn('[WS] Reconectando socket tras volver a la app...')
+      socket.connect()
+    }
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        tryReconnect()
+      }
+    }
+
+    const onPageShow = (event: PageTransitionEvent) => {
+      // Restauración desde bfcache: la página no se remonta, hay que revivir el socket
+      if (event.persisted) {
+        tryReconnect()
+      }
+    }
+
+    const onOnline = () => tryReconnect()
+    const onFocus = () => tryReconnect()
+
+    document.addEventListener('visibilitychange', onVisibilityChange)
+    window.addEventListener('pageshow', onPageShow)
+    window.addEventListener('online', onOnline)
+    window.addEventListener('focus', onFocus)
+
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibilityChange)
+      window.removeEventListener('pageshow', onPageShow)
+      window.removeEventListener('online', onOnline)
+      window.removeEventListener('focus', onFocus)
     }
   }, [])
 
@@ -181,29 +287,26 @@ export function useGiroWebSocket() {
     }
   }, [user])
 
-  // Función para emitir eventos locales
-  const emitEvent = useCallback((eventType: string, event: GiroEvent) => {
-    const listeners = listenersRef.current.get(eventType)
-    if (listeners) {
-      listeners.forEach((listener) => listener(event))
-    }
-  }, [])
-
   // Suscribirse a eventos
-  const subscribe = useCallback((eventType: string, listener: GiroEventListener) => {
-    if (!listenersRef.current.has(eventType)) {
-      listenersRef.current.set(eventType, new Set())
-    }
-    listenersRef.current.get(eventType)!.add(listener)
-
-    // Retornar función para desuscribirse
-    return () => {
-      const listeners = listenersRef.current.get(eventType)
-      if (listeners) {
-        listeners.delete(listener)
+  const subscribe = useCallback(
+    <K extends RealtimeEventType>(eventType: K, listener: (event: RealtimeEventMap[K]) => void) => {
+      // The map is keyed by event type, so each set only ever receives its own payload type
+      const typedListener = listener as unknown as RealtimeListener
+      if (!listenersRef.current.has(eventType)) {
+        listenersRef.current.set(eventType, new Set())
       }
-    }
-  }, [])
+      listenersRef.current.get(eventType)!.add(typedListener)
+
+      // Retornar función para desuscribirse
+      return () => {
+        const listeners = listenersRef.current.get(eventType)
+        if (listeners) {
+          listeners.delete(typedListener)
+        }
+      }
+    },
+    []
+  )
 
   return {
     subscribe,

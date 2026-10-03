@@ -149,7 +149,7 @@ export function POSSheet({ open, onOpenChange }: { open: boolean; onOpenChange: 
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
   const mutation = useMutation({
-    mutationFn: (data: { items: any[]; paymentMethod: PaymentMethod; clientName?: string }) =>
+    mutationFn: (data: Parameters<typeof inventoryApi.createBulkSale>[0]) =>
       inventoryApi.createBulkSale(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] })
@@ -157,7 +157,7 @@ export function POSSheet({ open, onOpenChange }: { open: boolean; onOpenChange: 
       toast.success('Venta registrada exitosamente')
       onOpenChange(false)
     },
-    onError: (error: any) => toast.error('Error al registrar venta', { description: error.message }),
+    onError: (error: Error) => toast.error('Error al registrar venta', { description: error.message }),
   })
 
   const handleCheckout = () => {
