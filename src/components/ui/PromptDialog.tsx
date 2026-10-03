@@ -1,33 +1,40 @@
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Loader2, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
 
-interface DeleteConfirmationModalProps {
+interface PromptDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onConfirm: () => void
-  title?: string
+  title: string
   description?: string
+  placeholder?: string
+  defaultValue?: string
+  inputType?: 'text' | 'date'
   confirmText?: string
-  confirmVariant?: 'destructive' | 'default'
+  onConfirm: (value: string) => void
   loading?: boolean
 }
 
-export function DeleteConfirmationModal({
+export function PromptDialog({
   open,
   onOpenChange,
+  title,
+  description,
+  placeholder,
+  defaultValue = '',
+  inputType = 'text',
+  confirmText = 'Confirmar',
   onConfirm,
-  title = '¿Estás seguro?',
-  description = 'Esta acción no se puede deshacer.',
-  confirmText,
-  confirmVariant = 'destructive',
   loading = false,
-}: DeleteConfirmationModalProps) {
+}: PromptDialogProps) {
+  const [value, setValue] = useState(defaultValue)
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
     if (open) {
+      setValue(defaultValue)
       setVisible(true)
       document.body.style.overflow = 'hidden'
     } else {
@@ -38,9 +45,14 @@ export function DeleteConfirmationModal({
     return () => {
       document.body.style.overflow = 'unset'
     }
-  }, [open])
+  }, [open, defaultValue])
 
   if (!visible && !open) return null
+
+  const handleConfirm = () => {
+    if (!value.trim()) return
+    onConfirm(value.trim())
+  }
 
   return (
     <div
@@ -48,7 +60,7 @@ export function DeleteConfirmationModal({
         'fixed inset-0 z-[80] flex items-center justify-center p-4 bg-black/50 transition-opacity duration-200',
         open ? 'opacity-100' : 'opacity-0'
       )}
-      onClick={() => onOpenChange(false)}
+      onClick={() => !loading && onOpenChange(false)}
     >
       <div
         className={cn(
@@ -67,21 +79,24 @@ export function DeleteConfirmationModal({
           </button>
         </div>
 
-        <div className="px-6 py-6 text-sm text-balance text-muted-foreground">{description}</div>
+        <div className="px-6 py-5 space-y-3">
+          {description && <p className="text-sm text-muted-foreground">{description}</p>}
+          <Input
+            type={inputType}
+            value={value}
+            placeholder={placeholder}
+            onChange={(e) => setValue(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleConfirm()}
+            autoFocus
+          />
+        </div>
 
         <div className="flex items-center justify-end gap-2 px-6 py-4 border-t bg-muted/10">
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
             Cancelar
           </Button>
-          <Button type="button" variant={confirmVariant} onClick={onConfirm} disabled={loading}>
-            {loading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {confirmText ? 'Procesando...' : 'Eliminando...'}
-              </>
-            ) : (
-              confirmText || 'Eliminar'
-            )}
+          <Button type="button" onClick={handleConfirm} disabled={loading || !value.trim()}>
+            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : confirmText}
           </Button>
         </div>
       </div>

@@ -31,6 +31,7 @@ export const ACCESS = {
   inventario: ADMINS,
   configuracion: ADMINS_AND_TRANSFERENCISTA,
   logs: ADMINS,
+  cobranzas: ['SUPER_ADMIN'] as UserRole[],
 } satisfies Record<string, UserRole[]>
 
 export const hasRole = (role: UserRole | undefined, allowed: UserRole[]): boolean =>

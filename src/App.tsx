@@ -31,6 +31,9 @@ import { AuditPage } from '@/pages/AuditPage'
 import { BeneficiaryAuditPage } from '@/pages/BeneficiaryAuditPage'
 import { LogsPage } from '@/pages/LogsPage'
 import InventoryPage from '@/pages/InventoryPage'
+import { CobranzasPorCobrarPage } from '@/pages/cobranzas/CobranzasPorCobrarPage'
+import { CobranzasPrestamosPage } from '@/pages/cobranzas/CobranzasPrestamosPage'
+import { CobranzasClientesPage } from '@/pages/cobranzas/CobranzasClientesPage'
 
 import { useEffect } from 'react'
 import { requestNotifyPermission } from './firebase/messaging'
@@ -375,6 +378,46 @@ function App() {
                       <ErrorBoundary>
                         <DashboardLayout>
                           <InventoryPage />
+                        </DashboardLayout>
+                      </ErrorBoundary>
+                    </ProtectedRoute>
+                  }
+                />
+
+                {/* Cobranzas — módulo exclusivo Super Admin */}
+                <Route
+                  path="/cobranzas"
+                  element={
+                    <ProtectedRoute requiredRole={ACCESS.cobranzas}>
+                      <ErrorBoundary>
+                        <DashboardLayout>
+                          <CobranzasPorCobrarPage />
+                        </DashboardLayout>
+                      </ErrorBoundary>
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route
+                  path="/cobranzas/prestamos"
+                  element={
+                    <ProtectedRoute requiredRole={ACCESS.cobranzas}>
+                      <ErrorBoundary>
+                        <DashboardLayout>
+                          <CobranzasPrestamosPage />
+                        </DashboardLayout>
+                      </ErrorBoundary>
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route
+                  path="/cobranzas/clientes"
+                  element={
+                    <ProtectedRoute requiredRole={ACCESS.cobranzas}>
+                      <ErrorBoundary>
+                        <DashboardLayout>
+                          <CobranzasClientesPage />
                         </DashboardLayout>
                       </ErrorBoundary>
                     </ProtectedRoute>

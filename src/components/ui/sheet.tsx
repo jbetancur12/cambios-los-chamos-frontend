@@ -92,3 +92,13 @@ import { cn } from '@/lib/utils'
 export function SheetBody({ children, className }: { children: React.ReactNode; className?: string }) {
   return <div className={cn('px-6 py-4', className)}>{children}</div>
 }
+
+export function SheetFooter({ children, className }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div
+      className={cn('sticky bottom-0 bg-background border-t px-6 py-4 flex items-center justify-end gap-2', className)}
+    >
+      {children}
+    </div>
+  )
+}
