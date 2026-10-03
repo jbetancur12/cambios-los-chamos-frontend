@@ -13,6 +13,7 @@ import { ContactLinks } from '@/components/cobranzas/ContactLinks'
 import { CreditDetailSheet } from '@/components/cobranzas/CreditDetailSheet'
 import { CreditFormSheet } from '@/components/cobranzas/CreditFormSheet'
 import { CreditStatusBadge } from '@/components/cobranzas/CreditStatusBadge'
+import { PaginationBar } from '@/components/cobranzas/PaginationBar'
 import { useModuleQuery } from '@/hooks/useModuleQuery'
 import { useCobranzasInvalidate } from '@/hooks/useCobranzasInvalidate'
 import { deleteClient, getClient, listClients } from '@/services/cobranzasApi'
@@ -20,7 +21,7 @@ import { formatDateTime, formatMoney, FREQUENCY_LABELS, PAYMENT_METHOD_LABELS } 
 import type { CobranzaClient } from '@/types/cobranzas'
 import { cn } from '@/lib/utils'
 
-const PAGE_SIZE = 20
+const PAGE_SIZE = 15
 
 function ClientSheet({ clientId, onClose }: { clientId: string | null; onClose: () => void }) {
   const invalidate = useCobranzasInvalidate()
@@ -215,7 +216,7 @@ export function CobranzasClientesPage() {
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
   return (
-    <div className="container mx-auto max-w-3xl space-y-4 p-4 pb-28">
+    <div className="container mx-auto max-w-3xl space-y-4 p-4 pb-28 md:max-w-6xl">
       <div className="flex items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold">Clientes</h1>
@@ -238,11 +239,18 @@ export function CobranzasClientesPage() {
       </div>
 
       {isLoading ? (
-        <div className="space-y-3">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-16" />
-          ))}
-        </div>
+        <>
+          <div className="hidden space-y-1.5 md:block">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <Skeleton key={i} className="h-10" />
+            ))}
+          </div>
+          <div className="space-y-2 md:hidden">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-14" />
+            ))}
+          </div>
+        </>
       ) : items.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center gap-2 py-12 text-center">
@@ -260,48 +268,98 @@ export function CobranzasClientesPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className={cn('space-y-2', isFetching && 'opacity-70 transition-opacity')}>
-          {items.map((c) => (
-            <Card key={c.id} className="cursor-pointer" onClick={() => setSelectedId(c.id)}>
-              <CardContent className="flex items-center gap-3 p-3">
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-semibold">{c.name}</p>
-                  <p className="truncate text-xs text-muted-foreground">
-                    {c.identification}
-                    {c.phone ? ` · ${c.phone}` : ''}
-                  </p>
-                </div>
-                <div className="text-right">
-                  {c.totalDebt > 0 ? (
-                    <>
-                      <p className="font-bold tabular-nums">{formatMoney(c.totalDebt)}</p>
-                      {c.overdueAmount > 0 ? (
-                        <p className="text-xs font-semibold text-red-600">Mora {formatMoney(c.overdueAmount)}</p>
-                      ) : (
-                        <p className="text-xs text-muted-foreground">Al día</p>
+        <div className={cn('space-y-3', isFetching && 'opacity-70 transition-opacity')}>
+          {/* Desktop: tabla compacta */}
+          <div className="hidden max-h-[calc(100vh-22rem)] min-h-[200px] overflow-auto rounded-lg border bg-card md:block">
+            <table className="w-full text-sm">
+              <thead className="sticky top-0 z-10 bg-muted">
+                <tr className="border-b">
+                  <th className="px-3 py-2 text-left font-semibold">Nombre</th>
+                  <th className="px-3 py-2 text-left font-semibold">Cédula</th>
+                  <th className="px-3 py-2 text-left font-semibold">Teléfono</th>
+                  <th className="px-3 py-2 text-center font-semibold">Préstamos activos</th>
+                  <th className="px-3 py-2 text-right font-semibold">Deuda</th>
+                  <th className="px-3 py-2 text-right font-semibold">En mora</th>
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((c) => (
+                  <tr
+                    key={c.id}
+                    tabIndex={0}
+                    role="button"
+                    aria-label={`Ver ficha de ${c.name}`}
+                    onClick={() => setSelectedId(c.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') setSelectedId(c.id)
+                    }}
+                    className={cn(
+                      'cursor-pointer border-b border-l-2 border-l-transparent transition-colors last:border-b-0 hover:bg-muted/40 focus-visible:bg-muted/40 focus-visible:outline-none',
+                      c.overdueAmount > 0 && 'border-l-red-500 bg-red-500/5'
+                    )}
+                  >
+                    <td className="max-w-[16rem] truncate px-3 py-2 font-medium">{c.name}</td>
+                    <td className="px-3 py-2 text-muted-foreground">{c.identification}</td>
+                    <td className="px-3 py-2 text-muted-foreground">{c.phone || '—'}</td>
+                    <td className="px-3 py-2 text-center tabular-nums">{c.activeCredits}</td>
+                    <td className="px-3 py-2 text-right font-semibold tabular-nums">
+                      {c.totalDebt > 0 ? formatMoney(c.totalDebt) : '—'}
+                    </td>
+                    <td
+                      className={cn(
+                        'px-3 py-2 text-right tabular-nums',
+                        c.overdueAmount > 0 ? 'font-semibold text-red-600' : 'text-muted-foreground'
                       )}
-                    </>
-                  ) : (
-                    <p className="text-xs text-muted-foreground">Sin deuda</p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                    >
+                      {c.overdueAmount > 0 ? formatMoney(c.overdueAmount) : '—'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-          {pages > 1 && (
-            <div className="flex items-center justify-between pt-2">
-              <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
-                Anterior
-              </Button>
-              <span className="text-sm text-muted-foreground">
-                Página {page} de {pages}
-              </span>
-              <Button variant="outline" size="sm" disabled={page >= pages} onClick={() => setPage((p) => p + 1)}>
-                Siguiente
-              </Button>
-            </div>
-          )}
+          {/* Móvil: tarjetas compactas */}
+          <div className="space-y-2 md:hidden">
+            {items.map((c) => (
+              <Card
+                key={c.id}
+                tabIndex={0}
+                role="button"
+                className="cursor-pointer"
+                onClick={() => setSelectedId(c.id)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') setSelectedId(c.id)
+                }}
+              >
+                <CardContent className="flex items-center gap-3 px-3 py-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold">{c.name}</p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {c.identification}
+                      {c.phone ? ` · ${c.phone}` : ''}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    {c.totalDebt > 0 ? (
+                      <>
+                        <p className="text-sm font-bold tabular-nums">{formatMoney(c.totalDebt)}</p>
+                        {c.overdueAmount > 0 ? (
+                          <p className="text-xs font-semibold text-red-600">Mora {formatMoney(c.overdueAmount)}</p>
+                        ) : (
+                          <p className="text-xs text-muted-foreground">Al día</p>
+                        )}
+                      </>
+                    ) : (
+                      <p className="text-xs text-muted-foreground">Sin deuda</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <PaginationBar page={page} pages={pages} total={total} onPageChange={setPage} disabled={isFetching} />
         </div>
       )}
 
