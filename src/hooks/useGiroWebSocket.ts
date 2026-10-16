@@ -127,6 +127,9 @@ const getBackendUrl = () => {
 export function useGiroWebSocket() {
   const socketRef = useRef<Socket | null>(null)
   const listenersRef = useRef<Map<RealtimeEventType, Set<RealtimeListener>>>(new Map())
+  const { user } = useAuth()
+  // Solo cambia al entrar o salir de una sesión: es lo que obliga a reconectar con el token correcto
+  const userId = user?.id
 
   // Función para emitir eventos locales
   const emitEvent = useCallback(<K extends RealtimeEventType>(eventType: K, event: RealtimeEventMap[K]) => {
@@ -136,8 +139,10 @@ export function useGiroWebSocket() {
     }
   }, [])
 
-  // Inicializar la conexión al WebSocket
+  // Inicializar la conexión al WebSocket. Solo con sesión: el servidor verifica el token y decide a qué salas
+  // entra el usuario (admins, su minorista o su transferencista), así que ya no se manda la identidad.
   useEffect(() => {
+    if (!userId) return
     try {
       const backendUrl = getBackendUrl()
 
@@ -147,23 +152,12 @@ export function useGiroWebSocket() {
         reconnectionDelay: 1000,
         reconnectionDelayMax: 5000,
         reconnectionAttempts: Infinity,
+        withCredentials: true,
+        // Se evalúa en cada (re)conexión, así toma el token vigente aunque el login ocurra después
+        auth: (cb) => cb({ token: localStorage.getItem('authToken') ?? undefined }),
       })
 
       socket.on('connect', () => {
-        // Notificar al servidor que el usuario se conectó
-        // Usamos el usuario del contexto si está disponible, o localStorage como fallback
-        // PERO lo crucial es re-emitir cuando el usuario cambia (ver efecto abajo)
-        const storedUser = JSON.parse(localStorage.getItem('user') || '{}')
-        if (storedUser.id) {
-          const payload = {
-            userId: storedUser.id,
-            role: storedUser.role,
-            minoristaId: storedUser.minoristaId, // Ahora guardado en localStorage
-            transferencistaId: storedUser.transferencistaId,
-          }
-          socket.emit('user:connected', payload)
-        }
-
         // Avisar a la capa de sync para refrescar estado al conectar/reconectar
         // (cubre giros que llegaron mientras la app estuvo en background)
         emitEvent('realtime:connected', {
@@ -227,11 +221,12 @@ export function useGiroWebSocket() {
 
       return () => {
         socket.disconnect()
+        socketRef.current = null
       }
     } catch (error) {
       console.error('[WS] ❌ Error crítico al inicializar socket.io:', error)
     }
-  }, [emitEvent])
+  }, [emitEvent, userId])
 
   // Efecto para re-conectar cuando la app vuelve de background o recobra el foco
   // (el SO móvil suspende timers y el socket queda muerto al regresar)
@@ -271,21 +266,6 @@ export function useGiroWebSocket() {
       window.removeEventListener('focus', onFocus)
     }
   }, [])
-
-  // Efecto para actualizar la identidad del socket cuando el usuario carga/cambia
-  const { user } = useAuth()
-  useEffect(() => {
-    if (socketRef.current && user) {
-      const payload = {
-        userId: user.id,
-        role: user.role,
-        minoristaId: user.minoristaId,
-        transferencistaId: user.transferencistaId,
-      }
-      // Re-emitir identidad para unirse a las rooms correctas
-      socketRef.current.emit('user:connected', payload)
-    }
-  }, [user])
 
   // Suscribirse a eventos
   const subscribe = useCallback(
