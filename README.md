@@ -65,3 +65,4 @@ Copiar `.env.example` a `.env`.
 | `VITE_PUBLIC_POSTHOG_HOST` | Host de PostHog |
 | `VITE_SHOW_WHATSAPP_FIELD` | Muestra el campo de WhatsApp (`true`/`false`) |
 | `VITE_STORE_ENABLED` | Habilita subida de imagen y toggle de tienda (`true`/`false`) |
+| `VITE_SHOW_COBRANZAS_MENU` | Muestra "Cobranzas" en el menú (`true`/`false`). Apagado por defecto: el módulo solo se abre por la URL `/cobranzas` y solo para SUPER_ADMIN |

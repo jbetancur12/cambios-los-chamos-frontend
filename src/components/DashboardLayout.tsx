@@ -57,6 +57,8 @@ const bottomNavItems: NavItem[] = [
   { icon: Building, label: 'Cuentas', href: '/cuentas-bancarias', roles: ACCESS.cuentasBancarias },
 ]
 
+const SHOW_COBRANZAS_MENU = import.meta.env.VITE_SHOW_COBRANZAS_MENU === 'true'
+
 // Additional items for side menu
 const sideMenuItems: NavItem[] = [
   { icon: DollarSign, label: 'Tasas', href: '/tasas', roles: ACCESS.tasas },
@@ -86,8 +88,12 @@ const sideMenuItems: NavItem[] = [
   { icon: Box, label: 'Inventario', href: '/inventory', roles: ACCESS.inventario },
   { icon: Settings, label: 'Config', href: '/configuracion', roles: ACCESS.configuracion },
 
-  // Módulo Cobranzas (solo Super Admin) — submenú propio
-  { icon: Landmark, label: 'Cobranzas', href: '/cobranzas', roles: ACCESS.cobranzas },
+  // Módulo Cobranzas (solo Super Admin) — submenú propio.
+  // Por ahora NO aparece en el menú: se entra solo escribiendo la URL (/cobranzas). La ruta sigue
+  // protegida (ACCESS.cobranzas). Para mostrarlo, compilar con VITE_SHOW_COBRANZAS_MENU=true.
+  ...(SHOW_COBRANZAS_MENU
+    ? [{ icon: Landmark, label: 'Cobranzas', href: '/cobranzas', roles: ACCESS.cobranzas } satisfies NavItem]
+    : []),
 ]
 
 // Submenú del módulo Cobranzas (reemplaza el menú principal al navegar ahí)
